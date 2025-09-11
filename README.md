@@ -65,7 +65,27 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
 
   ## Quick start
 
-  Open `index.html` in a browser (mobile or desktop). The app uses Tailwind via CDN and vanilla JS. No build step required.
+  Open `index.html` in a browser (mobile or desktop) for quick prototyping. For production-like builds, the project now uses a built Tailwind CSS file (`dist/styles.css`) instead of the CDN. This keeps CSS deterministic and avoids loading Tailwind via CDN in production.
+
+  To build the CSS locally (requires Node.js and npm):
+
+  1. Install dependencies:
+
+  ```powershell
+  npm install
+  ```
+
+  2. Build styles (one-shot):
+
+  ```powershell
+  npm run build:css
+  ```
+
+  3. For development with automatic rebuilds while editing:
+
+  ```powershell
+  npm run watch:css
+  ```
 
   Files of interest:
   - `index.html` — UI scaffolding and screens.
