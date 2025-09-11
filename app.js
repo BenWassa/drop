@@ -6,7 +6,7 @@ let DEV_MODE = true; // <<< Toggle developer mode here
 const state = {
     path: null,
     commitments: {
-        sleep: 'balanced', fitnessMode: 'maintain', fitnessBaseline: 5,
+        sleep: 'balanced', fitnessMode: 'maintain', fitnessBaseline: 5, fitnessUnit: 'km',
         reading: 'perspicacity', writing: 'journal', meditation: 'awareness'
     },
     weeklyTargets: { fitness: 5 },
@@ -19,6 +19,7 @@ function saveState() { localStorage.setItem('oceanDropState_v2', JSON.stringify(
 function loadState() {
     const savedState = localStorage.getItem('oceanDropState_v2');
     if (savedState) Object.assign(state, JSON.parse(savedState));
+    state.commitments.fitnessUnit = state.commitments.fitnessUnit || 'km';
 }
 
 // --- UTILITY FUNCTIONS ---
@@ -50,12 +51,32 @@ function getWeekDates(date = new Date()) {
 }
 
 function showScreen(screenId) {
-    document.querySelectorAll('.app-screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById(screenId)?.classList.remove('hidden');
+    const current = document.querySelector('.app-screen:not(.hidden)');
+    const next = document.getElementById(screenId);
+
+    if (current && current !== next) {
+        current.classList.add('fade-out');
+        setTimeout(() => {
+            current.classList.add('hidden');
+            current.classList.remove('fade-out', 'active-screen');
+        }, 200);
+    }
+
+    next?.classList.remove('hidden');
+    next?.classList.add('active-screen', 'fade-in');
+    setTimeout(() => next?.classList.remove('fade-in'), 200);
+
     document.querySelectorAll('.nav-button').forEach(btn => {
         btn.classList.remove('active');
         if (btn.getAttribute('onclick')?.includes(screenId)) btn.classList.add('active');
     });
+
+    if (screenId === 'confirmation-screen') {
+        const card = document.querySelector('#confirmation-screen .floating-card');
+        card?.classList.add('animate-pop');
+        setTimeout(() => card?.classList.remove('animate-pop'), 300);
+    }
+
     debugLog('showScreen ->', screenId);
     // Dynamically render screens that need fresh data
     if (screenId === 'presence-screen') setupPresenceScreen();
@@ -84,6 +105,7 @@ window.confirmCommitments = function() {
     state.commitments.sleep = document.getElementById('commit-sleep').value;
     state.commitments.fitnessMode = document.getElementById('commit-fitness-mode').value;
     state.commitments.fitnessBaseline = parseFloat(document.getElementById('commit-fitness-baseline').value) || 0;
+    state.commitments.fitnessUnit = document.getElementById('commit-fitness-unit').value.trim();
     state.commitments.reading = document.getElementById('commit-reading').value;
     state.commitments.writing = document.getElementById('commit-writing').value;
     state.commitments.meditation = document.getElementById('commit-meditation').value;
@@ -95,7 +117,7 @@ function renderConfirmationScreen() {
     const { commitments } = state; const { sleep, fitness, mind } = CONFIG;
     document.getElementById('path-summary-v2').innerHTML = `
         <p>${sleep[commitments.sleep].icon} <strong>Sleep:</strong> ${sleep[commitments.sleep].name}</p>
-        <p>${fitness[commitments.fitnessMode].icon} <strong>Fitness:</strong> ${fitness[commitments.fitnessMode].name} (${commitments.fitnessBaseline} units)</p>
+        <p>${fitness[commitments.fitnessMode].icon} <strong>Fitness:</strong> ${fitness[commitments.fitnessMode].name} (${commitments.fitnessBaseline} ${commitments.fitnessUnit})</p>
         <p>${mind.reading[commitments.reading].icon} <strong>Reading:</strong> ${mind.reading[commitments.reading].name}</p>
         <p>${mind.writing[commitments.writing].icon} <strong>Writing:</strong> ${mind.writing[commitments.writing].name}</p>
     `;
@@ -151,10 +173,10 @@ function renderFitnessCard() {
     const content = `
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-light">${fitnessMode.icon} ${fitnessMode.name}</h3>
-            <span class="text-sm font-light text-gradient">Target: ${state.weeklyTargets.fitness} units</span>
+            <span class="text-sm font-light text-gradient">Target: ${state.weeklyTargets.fitness} ${state.commitments.fitnessUnit}</span>
         </div>
         <div class="flex items-center space-x-4">
-            <input type="number" id="fitness-log-input" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" 
+            <input type="number" id="fitness-log-input" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"
                    value="${todayLog.fitnessLogged || ''}" placeholder="Log units...">
             <button onclick="logFitness()" class="glass-button px-6 py-3 rounded-xl text-lg font-light ripple">Log</button>
         </div>
@@ -258,19 +280,32 @@ function setupGratitudeScreen() {
             }).join('')}
         </div>`;
 
-    document.getElementById('gratitude-content').innerHTML = `
+    const container = document.getElementById('gratitude-content');
+    container.innerHTML = `
         <div class="glass-card rounded-3xl p-6">
             <h3 class="text-lg font-light mb-4 text-gradient">This Week's Mind Practice</h3>
             <div class="mb-4">
                 <div class="flex justify-between items-center text-sm mb-2 text-gray-300 font-light"><span>Reading</span><span>${readingCount}/${readingTarget}</span></div>
-                <div class="streak-bar"><div class="streak-fill" style="width: ${readingPercent}%; --ring-color: var(--mind-color);"></div></div>
+                <div class="streak-bar"><div class="streak-fill" data-target="${readingPercent}" style="width:0%; --ring-color: var(--mind-color);"></div></div>
             </div>
             <div>
                 <div class="flex justify-between items-center text-sm mb-2 text-gray-300 font-light"><span>Writing</span><span>${writingCount}/${writingTarget}</span></div>
-                <div class="streak-bar"><div class="streak-fill" style="width: ${writingPercent}%; --ring-color: var(--mind-color);"></div></div>
+                <div class="streak-bar"><div class="streak-fill" data-target="${writingPercent}" style="width:0%; --ring-color: var(--mind-color);"></div></div>
             </div>
         </div>
         <div class="glass-card rounded-3xl p-6">${burnoutHTML}</div>`;
+
+    if (readingCount === 0 && writingCount === 0) {
+        container.innerHTML += `<p class="text-center text-gray-400 font-light">Log your daily actions to see your weekly reflection here.</p>`;
+    }
+
+    requestAnimationFrame(() => {
+        container.querySelectorAll('.streak-fill').forEach(el => {
+            const target = el.getAttribute('data-target');
+            el.style.width = `${target}%`;
+        });
+    });
+
     debugLog('setupGratitudeScreen -> counts', { readingCount, writingCount, weekDates });
 }
 
@@ -288,6 +323,7 @@ function setupQuarterlyReviewScreen() {
             <div class="space-y-4">
                 <button onclick="showScreen('vision-screen')" class="glass-button w-full py-4 rounded-2xl text-lg font-light ripple border-yellow-500/30">Adjust Journey</button>
             </div>
+            <p class="text-xs text-gray-400 text-center">A new quarter is a great time to <strong>export your data</strong> for backup.</p>
         </div>`;
     debugLog('setupQuarterlyReviewScreen -> embodimentPercent', embodimentPercent);
 }
