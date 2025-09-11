@@ -102,10 +102,18 @@ window.confirmCommitments = function() {
     state.commitments.reading = document.getElementById('commit-reading').value;
     state.commitments.writing = document.getElementById('commit-writing').value;
     state.commitments.meditation = document.getElementById('commit-meditation').value;
-    if (state.commitments.reading === 'erudition' && state.commitments.writing === 'treatise') {
-        const ok = confirm('This is an ambitious Mind commitment for the quarter! Are you sure you want to proceed?');
-        if (!ok) return;
+    const { reading, writing, fitnessMode } = state.commitments;
+    const isMaxMind = reading === 'erudition' && writing === 'treatise';
+    const isMaxFitness = fitnessMode === 'growth';
+    let warning = null;
+    if (isMaxMind && isMaxFitness) {
+        warning = 'Growth fitness with Erudition reading and Treatise writing is extremely ambitious. Consider Maintain fitness or Editorial writing for balance. Continue?';
+    } else if (isMaxMind) {
+        warning = 'Erudition reading with Treatise writing is a demanding combination. Consider Editorial writing for a balanced quarter. Continue?';
+    } else if (isMaxFitness && reading === 'erudition') {
+        warning = 'Growth fitness alongside Erudition reading may be overwhelming. Consider Maintain fitness for balance. Continue?';
     }
+    if (warning && !confirm(warning)) return;
     debugLog('confirmCommitments ->', JSON.stringify(state.commitments));
     renderConfirmationScreen();
     showScreen('confirmation-screen');

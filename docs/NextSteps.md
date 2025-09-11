@@ -88,10 +88,10 @@
   - Fitness target optimization
 
 #### 2.3 **Advanced Features**
-- [ ] **Over-Allocation Warnings**
-  - Detect ambitious combinations (e.g., max reading + max writing)
-  - Show confirmation dialogs for challenging commitments
-  - Suggest more balanced alternatives
+- [x] **Over-Allocation Warnings**
+  - [x] Detect ambitious combinations (e.g., max reading + max writing)
+  - [x] Show confirmation dialogs for challenging commitments
+  - [x] Suggest more balanced alternatives
 
 - [ ] **Settings Screen**
   - Mid-quarter commitment adjustments
