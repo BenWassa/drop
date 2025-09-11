@@ -311,8 +311,14 @@ function setupQuarterlyReviewScreen() {
     document.getElementById('review-quarter-progress').innerText = `Week ${q.week} of 13`;
 
     const totalDays = Object.keys(state.logs).length;
+    if (totalDays === 0) {
+        document.getElementById('review-content').innerHTML = `<p class="text-center text-gray-400 font-light">Log your daily actions to see your quarter review here.</p>`;
+        debugLog('setupQuarterlyReviewScreen -> no data');
+        return;
+    }
+
     const embodiedDays = Object.values(state.logs).filter(log => log.embodiedSleep).length;
-    const embodimentPercent = totalDays > 0 ? Math.round((embodiedDays / totalDays) * 100) : 0;
+    const embodimentPercent = Math.round((embodiedDays / totalDays) * 100);
 
     document.getElementById('review-content').innerHTML = `
         <div class="space-y-6">
