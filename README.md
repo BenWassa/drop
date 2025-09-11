@@ -197,6 +197,10 @@ This project now follows a better folder architecture:
 - **tests/**: Contains test files.
 - **config/**: Contains configuration files.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ## AI Agent Instructions
 
 - Follow the coding conventions outlined in the `README.md`.

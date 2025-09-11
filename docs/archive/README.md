@@ -31,3 +31,10 @@ All files are dated with the format `YYYY-MM-DD_filename.md` to preserve chronol
 Active documentation remains in the parent `docs/` folder:
 - `CONTRIBUTING.md` - Active contribution guidelines
 - `README.md` - Main project documentation (in repository root)
+- `TechStack.md` - Current technology stack and setup
+- `AI_Instructions.md` - Current AI agent guidelines
+- `NextSteps.md` - Current development roadmap
+
+## License Changes
+
+**September 11, 2025**: Consolidated from dual-license (MIT + CC BY-NC-ND) to single MIT license for simplicity. Removed `LICENSE-CONTENT.txt` as all content now falls under MIT licensing.

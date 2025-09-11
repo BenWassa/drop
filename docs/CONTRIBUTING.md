@@ -20,10 +20,7 @@ Thank you for your interest in contributing to this project! Please follow these
 
 ## Licensing
 
-This project uses a dual-licensing approach. The full legal texts are provided in top-level files:
+This project is licensed under the MIT License. See the `LICENSE` file for full details.
 
-- `LICENSE` — MIT License (applies to code: HTML, CSS, JS, build scripts, tooling)
-- `LICENSE-CONTENT.txt` — CC BY-NC-ND 4.0 (applies to creative content: documentation, research notes, images, etc.)
-
-When contributing, please ensure any new files include an appropriate header or a note clarifying which license applies if the file mixes code and creative content.
+The MIT License applies to all code (HTML, CSS, JavaScript) and documentation in this repository.
 
