@@ -430,45 +430,55 @@ try {
 
 // Attach listeners to elements using data-action attributes.
 function setupDOMListeners() {
+    console.log('[drop] setupDOMListeners: attaching delegated click handler');
     document.body.addEventListener('click', function (e) {
-        const btn = e.target.closest && e.target.closest('[data-action]');
-        if (!btn) return;
-        const action = btn.getAttribute('data-action');
-        if (!action) return;
+        try {
+            // Find closest element with a data-action attribute
+            const btn = e.target && e.target.closest && e.target.closest('[data-action]');
+            if (!btn) return;
 
-        switch (action) {
-            case 'select-path':
-                selectPath(btn.getAttribute('data-path'));
-                break;
-            case 'confirm-targets':
-                confirmTargets();
-                break;
-            case 'select-archetype':
-                selectArchetype(btn.getAttribute('data-name'));
-                break;
-            case 'confirm-archetype-targets':
-                confirmArchetypeTargets();
-                break;
-            case 'confirm-path':
-                confirmPath();
-                break;
-            case 'nav':
-                showScreen(btn.getAttribute('data-target'));
-                break;
-            case 'reaffirm-path':
-                reaffirmPath();
-                break;
-            case 'adjust-journey':
-                showAdjustWarning();
-                break;
-            case 'export-data':
-                exportData();
-                break;
-            case 'open-import':
-                document.getElementById('import-file').click();
-                break;
-            default:
-                console.warn('Unhandled action', action);
+            const action = btn.getAttribute('data-action');
+            console.log('[drop] click -> action=', action, ' element=', btn);
+            if (!action) return;
+
+            switch (action) {
+                case 'select-path':
+                    selectPath(btn.getAttribute('data-path'));
+                    break;
+                case 'confirm-targets':
+                    confirmTargets();
+                    break;
+                case 'select-archetype':
+                    selectArchetype(btn.getAttribute('data-name'));
+                    break;
+                case 'confirm-archetype-targets':
+                    confirmArchetypeTargets();
+                    break;
+                case 'confirm-path':
+                    confirmPath();
+                    break;
+                case 'nav':
+                    showScreen(btn.getAttribute('data-target'));
+                    break;
+                case 'reaffirm-path':
+                    reaffirmPath();
+                    break;
+                case 'adjust-journey':
+                    showAdjustWarning();
+                    break;
+                case 'export-data':
+                    exportData();
+                    break;
+                case 'open-import':
+                    document.getElementById('import-file').click();
+                    break;
+                default:
+                    console.warn('[drop] Unhandled action', action);
+            }
+        } catch (err) {
+            console.error('[drop] Error handling delegated click', err);
+            // Surface the error visibly in the page for debugging
+            try { document.body.insertAdjacentHTML('afterbegin', `<pre style="color: #fff; background:#800; padding:12px;">Delegated click handler error:\n${err && err.stack ? err.stack : String(err)}</pre>`); } catch (e) { /* ignore */ }
         }
     });
 }
