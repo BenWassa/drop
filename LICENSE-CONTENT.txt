@@ -1,0 +1,24 @@
+Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
+
+All original creative content in this repository (for example: research briefs, site copy, podcast scripts, documentation text, and generated images) is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0).
+
+You may:
+
+- Share — copy and redistribute the material in any medium or format for non-commercial purposes.
+- Use the material for personal, educational, or research purposes without fee.
+
+You may NOT:
+
+- Use the material for commercial purposes (that is, you may not primarily intend to obtain commercial advantage or monetary compensation).
+- Distribute adapted, remixed, transformed, or built-upon versions of the material (No Derivatives).
+- Apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+Attribution requirement (plain-language):
+
+Please credit: Benjamin P. Haddon (GitHub: BenWassa)
+
+If you share the material in a place that allows for a description, include a short notice such as:
+
+"Licensed CC BY-NC-ND 4.0 — please credit: Benjamin P. Haddon (GitHub: BenWassa)"
+
+For the full legal text, see: https://creativecommons.org/licenses/by-nc-nd/4.0/

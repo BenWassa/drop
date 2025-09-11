@@ -169,3 +169,19 @@ If you'd like, I can scaffold a `package.json`, move JS into `src/`, and add a c
   ```
 
   The tests cover the `getQuarterInfo` logic (start of quarter, week calculation) so you can be confident the date math aligns with the UI.
+
+# Updated Project Structure
+
+This project now follows a better folder architecture:
+
+- **src/**: Contains all source code.
+- **assets/**: Contains static files like images and styles.
+- **docs/**: Contains documentation files.
+- **tests/**: Contains test files.
+- **config/**: Contains configuration files.
+
+## AI Agent Instructions
+
+- Follow the coding conventions outlined in the `README.md`.
+- Refer to the `TechStack.md` for understanding the technologies used.
+- Ensure to document any new features or changes in the respective markdown files.

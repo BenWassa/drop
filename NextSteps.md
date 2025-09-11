@@ -59,3 +59,11 @@ These steps are only necessary if you want to make the app more robust for long-
 2.  **Introduce a Backend Service (The "Integration" Step, optional just document a md file for considerations):**
     *   If you ever wanted to sync data between devices (e.g., your phone and a tablet) or have other people use the app with their own accounts, you would need a backend.
     *   Services like **Supabase** or **Firebase** are perfect for this. You would replace the `saveState()` and `loadState()` functions with calls to the database. This is the biggest architectural leap, turning your prototype into a scalable web application.
+
+---
+
+# AI Agent Instructions
+
+- Understand the project structure and where to find specific files.
+- Follow the guidelines in the `TechStack.md` for technology usage.
+- Document any changes or new features in this file.
