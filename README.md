@@ -145,3 +145,27 @@ This project will grow. For now, keep things simple and single-user focused. Sug
 If you'd like, I can scaffold a `package.json`, move JS into `src/`, and add a couple tests for the quarter-week calculation as a next step.
 
   If you'd like, I can implement any of the next steps (recommend starting with the growth-mode algorithm and a basic unit test for quarter calculation).
+
+  ## Running quick tests locally (no Node required)
+
+  If you can't install Node on this machine you can still validate important logic using Python + pytest. A small test suite is included to validate the quarter/week calculation.
+
+  1. Create and activate a Python virtual environment (optional but recommended):
+
+  ```powershell
+  python -m venv .venv; .\.venv\Scripts\Activate
+  ```
+
+  2. Install test dependencies:
+
+  ```powershell
+  pip install -r requirements.txt
+  ```
+
+  3. Run the tests:
+
+  ```powershell
+  pytest -q
+  ```
+
+  The tests cover the `getQuarterInfo` logic (start of quarter, week calculation) so you can be confident the date math aligns with the UI.
