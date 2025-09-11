@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean in a Drop</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Your Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-gray-100 min-h-screen overflow-x-hidden">
+
+    <!-- Screen Container -->
+    <div id="app-container">
+        <!-- Vision Screen -->
+        <div id="vision-screen" class="app-screen min-h-screen flex flex-col justify-center items-center p-6">
+            <div class="text-center mb-16"><h1 class="text-4xl font-light mb-4 text-gradient glow-text">Ocean in a Drop</h1><p class="text-gray-400 font-light">Choose your path</p></div>
+            <div class="space-y-6 w-full max-w-sm">
+                <button onclick="selectPath('direct')" class="glass-button w-full py-8 rounded-2xl text-xl font-light ripple">Direct Control</button>
+                <button onclick="selectPath('archetypes')" class="glass-button w-full py-8 rounded-2xl text-xl font-light ripple">Archetypes</button>
+                <button onclick="selectPath('growth')" class="glass-button w-full py-8 rounded-2xl text-xl font-light ripple">Growth Mode</button>
+            </div>
+        </div>
+
+        <!-- Onboarding: Commitments -->
+        <div id="commitments-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6">
+            <div class="text-center mb-12"><h2 class="text-3xl font-light mb-4 text-gradient">Set Commitments</h2><p class="text-gray-400 font-light">Define your quarter</p></div>
+            <div class="w-full max-w-sm space-y-6">
+                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">💤 Sleep Identity</label><select id="commit-sleep" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
+                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">💪 Fitness Allocation</label><select id="commit-fitness-mode" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 mb-4"></select><input type="number" id="commit-fitness-baseline" value="5" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="Weekly baseline (e.g., 5 km)"></div>
+                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">🧠 Mind Archetypes</label><select id="commit-reading" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 mb-4"></select><select id="commit-writing" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
+                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">🧘 Spirit Practice</label><select id="commit-meditation" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
+                <button onclick="confirmCommitments()" class="glass-button w-full py-4 rounded-2xl text-lg font-light ripple">Continue</button>
+            </div>
+        </div>
+
+        <!-- Confirmation Screen -->
+        <div id="confirmation-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6">
+             <div class="floating-card rounded-3xl p-10 w-full max-w-sm text-center">
+                <h2 class="text-2xl font-light mb-8 text-gradient">Your Quarter</h2>
+                <div id="path-summary-v2" class="mb-8 text-gray-300 space-y-2 text-left"></div>
+                <div id="quarter-info-v2" class="mb-8 text-sm text-gray-400"></div>
+                <button onclick="startJourney()" class="glass-button w-full py-5 rounded-2xl text-lg font-light ripple">Begin Journey</button>
+            </div>
+        </div>
+        
+        <!-- Daily Presence Screen -->
+        <div id="presence-screen" class="app-screen hidden">
+            <!-- This will be built next -->
+            <div class="min-h-screen flex flex-col justify-center items-center p-6">
+                <h1 class="text-2xl text-gradient">Presence Screen</h1>
+                <p class="text-gray-400">Coming in the next step!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Scripts (Config first, then App) -->
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
