@@ -193,6 +193,7 @@ This project now follows a better folder architecture:
 - **assets/**: Contains static files like images and styles.
 - **docs/**: Contains documentation files.
   - **docs/archive/**: Contains dated, completed markdown files (see `docs/archive/README.md` for details).
+  - **docs/NextSteps.md**: Current development roadmap and priorities.
 - **tests/**: Contains test files.
 - **config/**: Contains configuration files.
 
@@ -201,4 +202,5 @@ This project now follows a better folder architecture:
 - Follow the coding conventions outlined in the `README.md`.
 - Refer to the `docs/TechStack.md` for understanding the technologies and development setup.
 - Refer to the `docs/AI_Instructions.md` for project-specific guidelines and workflow.
+- Check `docs/NextSteps.md` for current development priorities and roadmap.
 - Ensure to document any new features or changes in the respective markdown files.

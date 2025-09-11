@@ -1,6 +1,6 @@
 // --- DEVELOPER TOGGLE ---
 // Set to true to enable the in-app dev toolbar and verbose logging
-let DEV_MODE = true; // <<< Toggle developer mode here
+let DEV_MODE = false; // <<< Toggle developer mode here
 
 // --- STATE MANAGEMENT ---
 const state = {
