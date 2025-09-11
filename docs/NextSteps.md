@@ -41,9 +41,10 @@
   - Animate weekly progress bars on Gratitude screen
 
 - [ ] **Empty State Messages**
-  - Add helpful messages when no data exists
-  - "Log your daily actions to see your weekly reflection here"
-  - Guide users through initial setup process
+  - [x] Add helpful messages when no data exists
+    - "Log your daily actions to see your weekly reflection here"
+    - "Log your daily actions to see your quarter review here"
+  - [ ] Guide users through initial setup process
 
 - [ ] **Visual Feedback Improvements**
   - Loading states for data operations
