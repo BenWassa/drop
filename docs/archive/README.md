@@ -10,11 +10,11 @@ This folder contains completed and archived markdown documentation files from th
 - **2025-09-11_UI_Flow.md** - User interface flow and screen design specifications
 
 ### Technical Documentation
-- **2025-09-11_TechStack.md** - Technology stack and setup documentation template
+- **2025-09-11_TechStack.md** - Technology stack and setup documentation template *(RESTORED: Active version now at `docs/TechStack.md`)*
 - **2025-09-11_BackendIntegration.md** - Backend integration planning and architecture considerations
 
 ### Development Tools
-- **2025-09-11_AI_Instructions.md** - Instructions for AI agents working with the codebase
+- **2025-09-11_AI_Instructions.md** - Instructions for AI agents working with the codebase *(RESTORED: Active version now at `docs/AI_Instructions.md`)*
 
 ## Archive Policy
 

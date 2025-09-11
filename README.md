@@ -199,5 +199,6 @@ This project now follows a better folder architecture:
 ## AI Agent Instructions
 
 - Follow the coding conventions outlined in the `README.md`.
-- Refer to the `TechStack.md` for understanding the technologies used.
+- Refer to the `docs/TechStack.md` for understanding the technologies and development setup.
+- Refer to the `docs/AI_Instructions.md` for project-specific guidelines and workflow.
 - Ensure to document any new features or changes in the respective markdown files.
