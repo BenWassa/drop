@@ -402,6 +402,8 @@ async function initializeApp() {
     loadState();
     ensureStateDefaults();
     state.quarter = getQuarterInfo();
+    // Attach DOM event listeners (best-practice instead of inline onclick)
+    try { setupDOMListeners(); } catch (e) { console.warn('setupDOMListeners error', e); }
     if (!state.onboardingComplete) showScreen('vision-screen');
     else showScreen('presence-screen');
 }
@@ -424,4 +426,49 @@ try {
     window.showAdjustWarning = showAdjustWarning;
 } catch (e) {
     console.warn('Unable to attach globals', e);
+}
+
+// Attach listeners to elements using data-action attributes.
+function setupDOMListeners() {
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest && e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        if (!action) return;
+
+        switch (action) {
+            case 'select-path':
+                selectPath(btn.getAttribute('data-path'));
+                break;
+            case 'confirm-targets':
+                confirmTargets();
+                break;
+            case 'select-archetype':
+                selectArchetype(btn.getAttribute('data-name'));
+                break;
+            case 'confirm-archetype-targets':
+                confirmArchetypeTargets();
+                break;
+            case 'confirm-path':
+                confirmPath();
+                break;
+            case 'nav':
+                showScreen(btn.getAttribute('data-target'));
+                break;
+            case 'reaffirm-path':
+                reaffirmPath();
+                break;
+            case 'adjust-journey':
+                showAdjustWarning();
+                break;
+            case 'export-data':
+                exportData();
+                break;
+            case 'open-import':
+                document.getElementById('import-file').click();
+                break;
+            default:
+                console.warn('Unhandled action', action);
+        }
+    });
 }
