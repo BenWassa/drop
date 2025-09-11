@@ -1,0 +1,15 @@
+# Node
+node_modules/
+
+# Build outputs
+dist/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
