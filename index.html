@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ocean in a Drop</title>
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Your Custom Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="text-gray-100 min-h-screen overflow-x-hidden">
 
-    <!-- Screen Container -->
     <div id="app-container">
         <!-- Vision Screen -->
         <div id="vision-screen" class="app-screen min-h-screen flex flex-col justify-center items-center p-6">
@@ -46,18 +43,60 @@
         </div>
         
         <!-- Daily Presence Screen -->
-        <div id="presence-screen" class="app-screen hidden">
-            <!-- This will be built next -->
-            <div class="min-h-screen flex flex-col justify-center items-center p-6">
-                <h1 class="text-2xl text-gradient">Presence Screen</h1>
-                <p class="text-gray-400">Coming in the next step!</p>
+        <div id="presence-screen" class="app-screen hidden min-h-screen flex flex-col">
+            <div class="glass p-6 text-center border-b border-white/10">
+                <div id="presence-date" class="text-xl font-light text-gradient"></div>
+                <div id="presence-quarter" class="text-xs text-gray-500 mt-1"></div>
             </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-6">
+                <!-- Sleep -->
+                <div class="glass-card domain-sleep rounded-3xl p-6">
+                    <div id="sleep-card-content"></div>
+                </div>
+                <!-- Fitness -->
+                <div class="glass-card domain-fitness rounded-3xl p-6">
+                    <div id="fitness-card-content"></div>
+                </div>
+                <!-- Mind -->
+                <div class="glass-card domain-mind rounded-3xl p-6">
+                    <div id="mind-card-content"></div>
+                </div>
+                <!-- Spirit -->
+                <div class="glass-card domain-spirit rounded-3xl p-6">
+                    <div id="spirit-card-content"></div>
+                </div>
+            </div>
+            <nav class="glass flex border-t border-white/10">
+                <button onclick="showScreen('presence-screen')" class="nav-button active flex-1 py-4 text-center font-light">🎭</button>
+                <button onclick="showScreen('gratitude-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🙏</button>
+                <button onclick="showScreen('quarterly-review-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">📊</button>
+            </nav>
+        </div>
+
+        <!-- Gratitude Screen -->
+        <div id="gratitude-screen" class="app-screen hidden min-h-screen flex flex-col">
+            <div class="glass p-6 text-center border-b border-white/10"><h2 class="text-2xl font-light text-gradient">Gratitude</h2><p class="text-sm text-gray-400 mt-2 font-light">Weekly Reflection</p></div>
+            <div class="flex-1 p-6 overflow-y-auto"><div id="gratitude-content" class="space-y-6"></div></div>
+            <nav class="glass flex border-t border-white/10">
+                <button onclick="showScreen('presence-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🎭</button>
+                <button onclick="showScreen('gratitude-screen')" class="nav-button active flex-1 py-4 text-center font-light">🙏</button>
+                <button onclick="showScreen('quarterly-review-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">📊</button>
+            </nav>
+        </div>
+
+        <!-- Quarterly Review Screen -->
+        <div id="quarterly-review-screen" class="app-screen hidden min-h-screen flex flex-col">
+            <div class="glass p-6 text-center border-b border-white/10"><h2 class="text-2xl font-light text-gradient">Quarter Review</h2><p id="review-quarter-progress" class="text-sm text-gray-400 mt-2 font-light"></p></div>
+            <div class="flex-1 p-6 overflow-y-auto" id="review-content"></div>
+             <nav class="glass flex border-t border-white/10">
+                <button onclick="showScreen('presence-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🎭</button>
+                <button onclick="showScreen('gratitude-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🙏</button>
+                <button onclick="showScreen('quarterly-review-screen')" class="nav-button active flex-1 py-4 text-center font-light">📊</button>
+            </nav>
         </div>
     </div>
 
-    <!-- Load Scripts (Config first, then App) -->
     <script src="config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
-
