@@ -6,6 +6,20 @@ function getArchetype(name) {
     return config.archetypes[name] || null;
 }
 
+// Global error handlers to surface errors into the page for debugging in locked environments
+window.addEventListener('error', function (ev) {
+    console.error('Uncaught error', ev.error || ev.message, ev);
+    try {
+        document.body.innerHTML = `<pre style="color: white; padding: 20px; background: #111; white-space: pre-wrap;">Uncaught error:\n${(ev.error && ev.error.stack) || ev.message}</pre>`;
+    } catch (e) { /* ignore */ }
+});
+window.addEventListener('unhandledrejection', function (ev) {
+    console.error('Unhandled rejection', ev.reason);
+    try {
+        document.body.innerHTML = `<pre style="color: white; padding: 20px; background: #111; white-space: pre-wrap;">Unhandled rejection:\n${ev.reason && ev.reason.stack ? ev.reason.stack : String(ev.reason)}</pre>`;
+    } catch (e) { /* ignore */ }
+});
+
 const state = {
     path: null, // 'direct', 'archetypes', 'growth'
     
@@ -154,8 +168,10 @@ function selectArchetype(archetypeName) {
     showScreen('archetype-targets-screen');
 }
 function renderArchetypeTargetsScreen() {
-    const archetype = archetypesConfig[state.archetype];
-    document.getElementById('archetype-title').innerText = `${archetype.icon} ${archetype.name} Path`;
+    const archetype = getArchetype(state.archetype);
+    const icon = archetype ? archetype.icon : '✨';
+    const name = archetype ? archetype.name : (state.archetype || 'Archetype');
+    document.getElementById('archetype-title').innerText = `${icon} ${name} Path`;
     document.getElementById('archetype-targets-content').innerHTML = `
         <div class="flex items-center justify-between mb-4"><span>📚 Reading</span><input type="number" id="arch-reading-target" min="1" max="7" value="${state.targets.reading}" class="w-16 h-12 bg-transparent border-2 border-white/20 rounded-lg text-center text-lg font-light focus:outline-none focus:border-blue-400"></div>
         <div class="flex items-center justify-between mb-4"><span>💪 Exercise</span><input type="number" id="arch-exercise-target" min="1" max="7" value="${state.targets.exercise}" class="w-16 h-12 bg-transparent border-2 border-white/20 rounded-lg text-center text-lg font-light focus:outline-none focus:border-blue-400"></div>
@@ -384,8 +400,28 @@ async function initializeApp() {
         return;
     }
     loadState();
+    ensureStateDefaults();
     state.quarter = getQuarterInfo();
     if (!state.onboardingComplete) showScreen('vision-screen');
     else showScreen('presence-screen');
 }
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+// Expose commonly-used functions to the global window object so
+// inline `onclick` attributes in `index.html` can find them reliably.
+// This helps when environments isolate scripts or when debugging.
+try {
+    window.selectPath = selectPath;
+    window.selectArchetype = selectArchetype;
+    window.confirmTargets = confirmTargets;
+    window.confirmArchetypeTargets = confirmArchetypeTargets;
+    window.confirmPath = confirmPath;
+    window.showScreen = showScreen;
+    window.exportData = exportData;
+    window.importData = importData;
+    window.reaffirmPath = reaffirmPath;
+    window.resetJourney = resetJourney;
+    window.showAdjustWarning = showAdjustWarning;
+} catch (e) {
+    console.warn('Unable to attach globals', e);
+}
