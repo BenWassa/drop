@@ -1,4 +1,4 @@
-# 🌊 Ocean in a Drop — Habit App README (Refined with Target Assignment)
+# 🌊 Project drop — Habit App README (Refined with Target Assignment)
 
 ## 1. Vision
 

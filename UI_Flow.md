@@ -1,31 +1,25 @@
-# UI Flow for "Ocean in a Drop" App 
+# 🌊 Project drop — UI Flow (Updated)
 
-**low-fi UI flow** draft for your app, now that we’ve locked in:
-
-* **Quarterly archetype commitments**
-* **Target assignment styles tied to user type** (Direct = Manual, Archetypes = Semi-auto, Growth = Auto)
-* **Minimal words per screen**
+This flow integrates the latest specs from the Commissioning Doc and README.
 
 ---
-
-# 🌊 Ocean in a Drop — UI Flow
 
 ## 1. Onboarding / Quarterly Reset (Vision)
 
 **Screen 1**
 
-* Prompt: *“Choose your path.”*
+* Prompt: *“Who do you want to be this quarter?”*
 * Options:
 
-  1. Direct Control
-  2. Archetypes
-  3. Growth Mode
+  1. Direct Control (manual targets)
+  2. Archetypes (semi-auto)
+  3. Growth Mode (auto)
 
-**Screen 2 (varies by choice)**
+**Screen 2 (path-dependent)**
 
-* **Direct Control** → manual target entry per domain (Sleep, Fitness, Mind, Spirit).
-* **Archetypes** → pick identity cards (Earlybird, Perspicacity, etc.), system suggests semi-auto targets → confirm or adjust.
-* **Growth Mode** → pick domains you want to attend to; system sets automatic targets.
+* **Direct Control** → user manually sets allocations for all domains.
+* **Archetypes** → user picks identity cards (e.g. Earlybird, Perspicacity); system proposes allocations → confirm/adjust.
+* **Growth Mode** → user selects domains; system sets automatic allocations from trends.
 
 **Screen 3 (confirmation ritual)**
 
@@ -38,24 +32,25 @@
 
 **Top Card**
 
-* Date, Archetype reminder (e.g. *“Quarterly Mode: Earlybird”*).
+* Date + quarterly archetype reminder (e.g. *“Quarterly Mode: Earlybird”*).
 
 **Domain Cards (swipe-scrollable)**
 
-* **Sleep:** log wake/rest times.
-* **Fitness:** tap for strength, slider/bar for duration/intensity.
-* **Mind:** reading/writing toggles (short, medium, deep).
-* **Spirit:** burnout quick scale (1–5), meditation yes/no.
+* **Sleep (Identity)** → shows chosen wake/sleep archetype (e.g. 6:30 / 10:30). No daily toggle; it’s a quarterly identity.
+* **Fitness (Allocation)** → shows weekly allocation + mode (Maintain, Deload, Growth). Daily logging via slider/vibe.
+* **Reading & Writing (Tiered)** → shows chosen archetypes + sessions/week target. Tap to log sessions.
+* **Meditation (Instances)** → tap to log each meditation instance. Archetype (Awareness, Introspection, Transcendence) shown.
+* **Burnout (State)** → slider 1–5 for daily state check-in.
 
-**Logging interactions**
+**Interactions**
 
-* Tap = Yes/No.
-* Swipe/drag = vibe/duration.
-* Press & hold = fill bar for intensity.
+* Tap = add instance / yes.
+* Swipe/drag = vibe or duration.
+* Press & hold = intensity fill.
 
 **Daily Footer Card**
 
-* Summary: *“4/6 today.”*
+* Visual summary: e.g. *“4/6 today”* with subtle animation.
 
 ---
 
@@ -63,30 +58,31 @@
 
 **Weekly View**
 
-* Visuals vary by user type:
-
-  * Direct = bar charts, streak lines.
-  * Archetypes = completion rings.
-  * Growth = “ocean fill” animation.
+* Direct = bar charts, streak lines.
+* Archetypes = completion / resonance rings.
+* Growth = ocean fill animation.
+* Burnout = line graph or heatmap overlay.
 
 **Monthly View**
 
-* Deeper arcs: trends, cumulative patterns.
+* Cumulative arcs and trend patterns.
 
 **Quarterly View**
 
 * Archetype resonance: % embodied.
-* Prompt to reaffirm or adjust.
+* Reflection ritual: reaffirm or adjust.
 
 **Reflection Prompt**
 
-* One-liner: *“What deepened this week?”* (journaling offline).
+* One-liner, offline: *“What deepened this week?”*
 
 ---
 
 ## 4. Rules for All Screens
 
 * **≤15 words per screen.**
-* **Distinct colors per domain:** Sleep blue, Fitness red, Mind yellow, Spirit green.
+* **Colors per domain:** Sleep = blue, Fitness = red, Mind = yellow, Spirit = green.
+* **Graphics-first UI:** bars, rings, waves, fills.
 * **One action per card:** tap, swipe, or hold.
-* **Feedback is visual:** glow, fill, ripple — no text walls.
+* **Feedback:** glow, ripple, wave animations (no heavy text).
+* **Mobile-first, dark mode, large tap targets.**
