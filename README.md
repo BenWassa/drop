@@ -192,6 +192,7 @@ This project now follows a better folder architecture:
 - **src/**: Contains all source code.
 - **assets/**: Contains static files like images and styles.
 - **docs/**: Contains documentation files.
+  - **docs/archive/**: Contains dated, completed markdown files (see `docs/archive/README.md` for details).
 - **tests/**: Contains test files.
 - **config/**: Contains configuration files.
 
