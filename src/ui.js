@@ -4,12 +4,16 @@ function setupSettingsScreen() {
 }
 
 window.saveSettings = function() {
+    const btn = document.querySelector('#settings-screen button[onclick="saveSettings()"]');
+    if (btn) { btn.classList.add('btn-loading'); btn.disabled = true; }
     state.commitments.fitnessBaseline = parseFloat(document.getElementById('settings-fitness-baseline').value) || 0;
     state.commitments.fitnessUnit = document.getElementById('settings-fitness-unit').value.trim();
     calculateWeeklyFitnessTarget();
     saveState();
     renderAllDomainCards();
     debugLog('saveSettings ->', state.commitments.fitnessBaseline, state.commitments.fitnessUnit);
+    if (btn) { setTimeout(() => { btn.classList.remove('btn-loading'); btn.disabled = false; }, 450); }
+    showToast('Settings saved');
     showScreen('presence-screen');
 };
 
@@ -238,6 +242,7 @@ function logPresence(key, value) {
     debugLog('logPresence ->', today, key, '=>', value);
     saveState();
     renderAllDomainCards(); // Re-render to update UI state
+    try { showToast(value ? 'Logged' : 'Updated'); } catch {}
 }
 
 function calculateWeeklyFitnessTarget() {
@@ -410,3 +415,40 @@ function ensureDevToolbar() {
         debugLog('DEV toggle onboarding ->', state.onboardingComplete);
     });
 }
+
+// --- LIGHTWEIGHT UI FEEDBACK & SETTINGS HELPERS ---
+window.showToast = function(message = 'Saved') {
+    const toast = document.getElementById('app-toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('toast-show');
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('toast-show');
+        toast.classList.add('hidden');
+    }, 1600);
+};
+
+window.showBanner = function(message, type = 'info') {
+    const banner = document.getElementById('app-banner');
+    if (!banner) return;
+    banner.textContent = message;
+    banner.setAttribute('data-type', type);
+    banner.classList.remove('hidden');
+};
+
+window.resetData = function() {
+    try { localStorage.removeItem('oceanDropState_v2'); } catch {}
+    state.logs = {};
+    state.onboardingComplete = false;
+    state.meta = { storageOk: true, lastError: null };
+    showToast('Data reset');
+    initializeApp();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (state?.meta && state.meta.storageOk === false) {
+        showBanner('Storage unavailable. Changes may not persist.', 'warning');
+    }
+});
