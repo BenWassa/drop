@@ -1,6 +1,11 @@
 let archetypesConfig = {};
 let config = {};
 
+function getArchetype(name) {
+    if (!config || !config.archetypes) return null;
+    return config.archetypes[name] || null;
+}
+
 const state = {
     path: null, // 'direct', 'archetypes', 'growth'
     
@@ -17,6 +22,13 @@ const state = {
     // Weekly calculated targets, especially for fitness
     weeklyTargets: {
         fitness: 5 // This will be dynamically calculated
+    },
+
+    // User-visible targets (reading/exercise/meditation)
+    targets: {
+        reading: 3,
+        exercise: 4,
+        meditation: 3
     },
 
     // Daily logs remain, but structure is slightly cleaner
@@ -41,18 +53,25 @@ function loadState() {
     const savedState = localStorage.getItem('oceanDropState');
     if (savedState) Object.assign(state, JSON.parse(savedState));
 }
+
+// Ensure minimal defaults exist after load
+function ensureStateDefaults() {
+    if (!state.targets) state.targets = { reading: 3, exercise: 4, meditation: 3 };
+    if (!state.logs) state.logs = {};
+}
 function getQuarterInfo(date = new Date()) {
     const year = date.getFullYear();
     const month = date.getMonth();
     let quarter, startDate, endDate, week;
+    // Calculate quarter number and week-in-quarter (1..13)
     const startOfYear = new Date(year, 0, 1);
     const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
-    week = Math.ceil(days / 7);
+    const dayOfYear = days + 1;
 
-    if (month < 3) { quarter = 1; startDate = new Date(year, 0, 1); endDate = new Date(year, 2, 31); }
-    else if (month < 6) { quarter = 2; startDate = new Date(year, 3, 1); endDate = new Date(year, 5, 30); week -= 13; }
-    else if (month < 9) { quarter = 3; startDate = new Date(year, 6, 1); endDate = new Date(year, 8, 30); week -= 26; }
-    else { quarter = 4; startDate = new Date(year, 9, 1); endDate = new Date(year, 11, 31); week -= 39; }
+    if (month < 3) { quarter = 1; startDate = new Date(year, 0, 1); endDate = new Date(year, 2, 31); week = Math.ceil(dayOfYear / 7); }
+    else if (month < 6) { quarter = 2; startDate = new Date(year, 3, 1); endDate = new Date(year, 5, 30); week = Math.ceil((dayOfYear - 90) / 7); }
+    else if (month < 9) { quarter = 3; startDate = new Date(year, 6, 1); endDate = new Date(year, 8, 30); week = Math.ceil((dayOfYear - 181) / 7); }
+    else { quarter = 4; startDate = new Date(year, 9, 1); endDate = new Date(year, 11, 31); week = Math.ceil((dayOfYear - 273) / 7); }
 
     const options = { month: 'short', day: 'numeric' };
     return { quarter, year, week, startDate: startDate.toLocaleDateString(undefined, options), endDate: endDate.toLocaleDateString(undefined, options) };
@@ -127,7 +146,9 @@ function confirmTargets() {
 }
 function selectArchetype(archetypeName) {
     state.archetype = archetypeName;
-    state.targets = { ...archetypesConfig[archetypeName].targets };
+    const arch = getArchetype(archetypeName);
+    if (arch && arch.targets) state.targets = { ...arch.targets };
+    else state.targets = { reading: 3, exercise: 4, meditation: 3 };
     saveState();
     renderArchetypeTargetsScreen();
     showScreen('archetype-targets-screen');
@@ -153,8 +174,10 @@ function renderConfirmationScreen() {
     let summaryHtml = '';
     if (state.path === 'direct') summaryHtml = `<p class="font-light mb-2">Path: <span class="font-normal text-white">Direct Control</span></p><p>Reading: <span class="font-normal text-white">${state.targets.reading}x</span>/wk</p><p>Exercise: <span class="font-normal text-white">${state.targets.exercise}x</span>/wk</p><p>Meditation: <span class="font-normal text-white">${state.targets.meditation}x</span>/wk</p>`;
     else if (state.path === 'archetypes') {
-        const archetype = archetypesConfig[state.archetype];
-        summaryHtml = `<p class="font-light mb-4">You have chosen the</p><p class="text-3xl mb-2">${archetype.icon}</p><p class="text-2xl font-normal text-white mb-4">${archetype.name}</p><p class="text-sm">R:${state.targets.reading}x, E:${state.targets.exercise}x, M:${state.targets.meditation}x</p>`;
+        const archetype = getArchetype(state.archetype);
+        const icon = archetype ? archetype.icon : '✨';
+        const name = archetype ? archetype.name : (state.archetype || 'Archetype');
+        summaryHtml = `<p class="font-light mb-4">You have chosen the</p><p class="text-3xl mb-2">${icon}</p><p class="text-2xl font-normal text-white mb-4">${name}</p><p class="text-sm">R:${state.targets.reading}x, E:${state.targets.exercise}x, M:${state.targets.meditation}x</p>`;
     } else summaryHtml = `<p class="font-light mb-2">Path: <span class="font-normal text-white">Growth Mode</span></p><p class="text-sm">The system will guide your focus.</p>`;
     document.getElementById('path-summary').innerHTML = summaryHtml;
     const quarterInfo = getQuarterInfo();
@@ -168,10 +191,10 @@ function setupPresenceScreen() {
     if (!state.logs[today]) state.logs[today] = { wake: false, rest: false, exercise: false, intensity: 5, reading: false, writing: false, burnout: 1, meditation: false };
     document.getElementById('current-date').innerText = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
     document.getElementById('quarter-display').innerText = `Q${state.quarter.quarter} ${state.quarter.year} - Week ${state.quarter.week}`;
-    if (state.path === 'archetypes' && state.archetype) {
+    if (state.path === 'archetypes' && state.archetype && archetypesConfig && archetypesConfig[state.archetype]) {
         const archetype = archetypesConfig[state.archetype];
         document.getElementById('archetype-reminder').innerText = `Embodying: ${archetype.icon} ${archetype.name}`;
-    } else document.getElementById('archetype-reminder').innerText = `Path: ${state.path.charAt(0).toUpperCase() + state.path.slice(1)}`;
+    } else document.getElementById('archetype-reminder').innerText = `Path: ${state.path ? state.path.charAt(0).toUpperCase() + state.path.slice(1) : '—'}`;
     setupInteractions();
     updateAllDomainsUI();
 }
@@ -270,12 +293,13 @@ function setupGratitudeScreen() {
             return `<div class="mb-4"><div class="flex justify-between items-center text-sm mb-2 text-gray-300 font-light"><span>${metric.charAt(0).toUpperCase() + metric.slice(1)}</span><span>${completed}/${target}</span></div><div class="streak-bar"><div class="streak-fill" style="width: ${percent}%; --ring-color: ${colorVar};"></div></div></div>`;
         }).join('');
     } else if (state.path === 'archetypes') {
-        const archetype = archetypesConfig[state.archetype];
-        const primaryMetric = archetype.primary_metric;
+        const archetype = getArchetype(state.archetype);
+        const primaryMetric = archetype && archetype.primary_metric ? archetype.primary_metric : 'exercise';
         const completed = weeklyTotals[primaryMetric];
-        const target = state.targets[primaryMetric];
+        const target = state.targets[primaryMetric] || 0;
         const percent = target > 0 ? Math.min(100, (completed / target) * 100) : 0;
-        content += `<div class="text-center"><p class="mb-4 font-light text-gray-400">Embodied ${archetype.name}</p><div class="completion-ring domain-${primaryMetric === 'reading' ? 'mind' : primaryMetric === 'exercise' ? 'fitness' : 'spirit'}" style="width: 120px; height: 120px; margin: 0 auto; background: conic-gradient(var(--ring-color) ${percent * 3.6}deg, transparent 0deg);" data-progress="${Math.round(percent)}%"></div><p class="mt-4 text-gray-300">${completed}/${target} days</p></div>`;
+        const name = archetype ? archetype.name : (state.archetype || 'Archetype');
+        content += `<div class="text-center"><p class="mb-4 font-light text-gray-400">Embodied ${name}</p><div class="completion-ring domain-${primaryMetric === 'reading' ? 'mind' : primaryMetric === 'exercise' ? 'fitness' : 'spirit'}" style="width: 120px; height: 120px; margin: 0 auto; background: conic-gradient(var(--ring-color) ${percent * 3.6}deg, transparent 0deg);" data-progress="${Math.round(percent)}%"></div><p class="mt-4 text-gray-300">${completed}/${target} days</p></div>`;
     } else { // Growth
         const totalPossible = 28;
         const percent = totalPossible > 0 ? Math.min(100, (weeklyTotals.total / totalPossible) * 100) : 0;
@@ -293,8 +317,9 @@ function setupQuarterlyReviewScreen() {
 
     let primaryMetric, title;
     if (state.path === 'archetypes' && state.archetype) {
-        primaryMetric = archetypesConfig[state.archetype].primary_metric;
-        title = `You embodied ${archetypesConfig[state.archetype].name}`;
+        const archetype = getArchetype(state.archetype);
+        primaryMetric = archetype && archetype.primary_metric ? archetype.primary_metric : 'exercise';
+        title = archetype && archetype.name ? `You embodied ${archetype.name}` : `You embodied ${state.archetype}`;
     } else { primaryMetric = 'exercise'; title = 'Quarterly Consistency'; }
     
     const embodiedDays = quarterLogs.filter(log => log[primaryMetric]).length;

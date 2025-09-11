@@ -53,57 +53,75 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
   * Fitness (strength toggle, run slider or vibe fill)
   * Mind (reading/writing toggles)
   * Spirit (burnout 1–5, meditation yes/no)
-* Logging modes:
+  # 🌊 Ocean in a Drop — Project Overview
 
-  1. Number (km, pages).
-  2. Vibe (color intensity, slider fill).
-  3. Duration (press & hold to fill bar).
-* Daily feedback: “4/6 habits today” + subtle animation.
+  This repository contains a mobile-first prototype (HTML/CSS/JS) for "Ocean in a Drop": a quarterly-focused habit/presence app that treats small daily actions as identity practices.
 
-### **Weekly & Monthly (Gratitude)**
+  Core ideas:
+  - Commit to an archetype or control style for a quarter (≈13 weeks).
+  - Log daily presence with minimal friction (tap, hold, or slider).
+  - Reflect weekly/monthly/quarterly with adaptive visuals (bars, rings, ocean-fill).
+  - Store data locally (localStorage), no backend required for the prototype.
 
-* Visuals adapt by style:
+  ## Quick start
 
-  * Direct → charts, streak lines.
-  * Archetypes → identity resonance rings.
-  * Growth → cumulative “ocean fill.”
-* Reflection prompt (optional, offline): “What deepened this week/month?”
+  Open `index.html` in a browser (mobile or desktop). The app uses Tailwind via CDN and vanilla JS. No build step required.
 
-### **Quarterly Review**
+  Files of interest:
+  - `index.html` — UI scaffolding and screens.
+  - `style.css` — design tokens and UI styles.
+  - `app.js` — application state, onboarding flow, logging, and export/import.
+  - `config.json` — domain definitions and fitness modes. (Archetype definitions are intentionally not required in config for the pilot.)
 
-* Ritual: show archetype summary, adherence, reflections.
-* Prompt to reaffirm or adjust commitments.
+  ## Vision & UX
 
----
+  The app exposes three entry paths during the Quarterly Reset:
 
-## 4. Design Rules
+  1. Direct Control — user sets weekly targets manually.
+  2. Archetypes — user picks a persona; the system proposes targets which can be adjusted.
+  3. Growth Mode — system-driven targets derived from past logs/trends.
 
-* **Words:** ≤15 per screen.
-* **Colors:** Sleep = blue, Fitness = red, Mind = yellow, Spirit = green.
-* **Interactions:** one tap/swipe logs; no heavy typing.
-* **Graphics-first:** waves, rings, streak bars, fills.
+  Daily Presence is the default screen. Domains are represented as cards: Sleep (identity), Fitness (allocation & mode), Mind (reading & writing), Spirit (meditation & burnout). Interactions are intentionally simple: tap to log, hold to record duration, and sliders for intensity.
 
----
+  Weekly/Monthly/Quarterly gratitude and review screens visualize progress using different metaphors depending on the chosen entry path.
 
-## 5. Development Priorities
+  Design rules:
+  - ≤15 words per screen.
+  - Colors: Sleep = blue, Fitness = red, Mind = yellow, Spirit = green.
+  - Graphics-first: rings, waves, fills, bars.
+  - One action per card; large targets; dark mode support.
 
-1. Prototype HTML/CSS/JS (mobile-first, local storage).
-2. Build core loop: Quarterly → Daily → Weekly → Quarterly.
-3. Add adaptive visuals by entry path (Direct/Archetypes/Growth).
-4. Stretch: OCEAN personality-based UX.
+  ## Technical notes
 
----
+  - Stack: HTML5, CSS (Tailwind + custom styles), vanilla JS.
+  - Persistence: localStorage key `oceanDropState` stores `state` (targets, logs, commitments, onboarding flag).
+  - Configuration: `config.json` includes `sleep`, `fitness`, `mind`, and `spirit`. Archetypes are a UX concept (optionally defined in config) but not required for the single-user pilot.
 
-## 6. Next Steps
+  ## What's been updated
 
-* Draft **UI flow diagrams** for quarter → day → week/month → quarter loop.
-* Write **commissioning doc** for Claude with colors, components, interactions.
-* Prototype and test for friction + adherence.
+  - Added a minimal `archetypes` section to `config.json` so archetype selection has defaults.
+  - `app.js` now ensures `state.targets` and `state.logs` exist after loading, and guards against missing archetype entries.
+  - Improved quarter/week calculation logic and defensive UI updates to avoid runtime errors when configuration is missing.
 
----
+  ## Next steps / Suggested improvements
 
-⚖️ With this structure, each entry path is tightly linked to a target assignment rule:
+  1. Improve growth-mode algorithm: average recent logs and compute suggested weekly allocations.
+  2. Add unit tests for date/quarter logic and import/export validators.
+  3. Add accessibility checks (contrast, focus states) and keyboard navigation.
+  4. Wire a small settings screen to change archetype sleep anchors and fitness baseline.
+  5. Add an onboarding animation for the confirmation ritual.
 
-* Direct = Manual
-* Archetypes = Semi-auto
-* Growth = Auto
+## Repo structure & best-practices (pilot-first)
+
+This project will grow. For now, keep things simple and single-user focused. Suggested structure and practices as you iterate:
+
+- Keep UI and logic separate: `index.html` + `style.css` + `app.js` is fine for the prototype. When adding complexity, split `app.js` into `state.js`, `ui.js`, `storage.js`.
+- Add a `src/` folder and migrate JS there when you introduce build tooling.
+- Add `tests/` and a tiny test runner (Node + Jest or Vitest) for date/quarter logic and import/export validation.
+- Use a minimal `package.json` to record dev tools (linters, test runner). This helps later CI integration.
+- Keep data model stable: `state` shape is central (targets, logs, commitments, onboardingComplete). Prefer migration helpers when evolving the model.
+- Maintain a simple changelog (CHANGELOG.md) for commissions and versioned experiments.
+
+If you'd like, I can scaffold a `package.json`, move JS into `src/`, and add a couple tests for the quarter-week calculation as a next step.
+
+  If you'd like, I can implement any of the next steps (recommend starting with the growth-mode algorithm and a basic unit test for quarter calculation).
