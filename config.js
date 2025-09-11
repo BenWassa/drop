@@ -30,3 +30,30 @@ const CONFIG = {
   }
 };
 
+const ARCHETYPES = {
+  scholar: {
+    name: "Scholar",
+    commitments: {
+      sleep: "Earlybird",
+      fitnessMode: "maintain",
+      fitnessBaseline: 5,
+      fitnessUnit: "km",
+      reading: "erudition",
+      writing: "treatise",
+      meditation: "awareness"
+    }
+  },
+  athlete: {
+    name: "Athlete",
+    commitments: {
+      sleep: "Dawnchaser",
+      fitnessMode: "growth",
+      fitnessBaseline: 8,
+      fitnessUnit: "km",
+      reading: "leisure",
+      writing: "journal",
+      meditation: "awareness"
+    }
+  }
+};
+

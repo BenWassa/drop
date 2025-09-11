@@ -24,6 +24,10 @@
         <div id="commitments-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6">
             <div class="text-center mb-12"><h2 class="text-3xl font-light mb-4 text-gradient">Set Commitments</h2><p class="text-gray-400 font-light">Define your quarter</p></div>
             <div class="w-full max-w-sm space-y-6">
+                <div id="archetype-select" class="glass-card rounded-2xl p-6 hidden">
+                    <label class="text-lg font-light block mb-4">🌟 Archetype</label>
+                    <select id="archetype-choice" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select>
+                </div>
                 <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">💤 Sleep Identity</label><select id="commit-sleep" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
                 <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">💪 Fitness Allocation</label><select id="commit-fitness-mode" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 mb-4"></select><div class="flex space-x-2"><input type="number" id="commit-fitness-baseline" value="5" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="Weekly baseline"><input type="text" id="commit-fitness-unit" value="km" class="w-24 bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="km"></div></div>
                 <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">🧠 Mind Archetypes</label><select id="commit-reading" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 mb-4"></select><select id="commit-writing" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
@@ -70,6 +74,7 @@
                 <button onclick="showScreen('presence-screen')" class="nav-button active flex-1 py-4 text-center font-light">🎭</button>
                 <button onclick="showScreen('gratitude-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🙏</button>
                 <button onclick="showScreen('quarterly-review-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">📊</button>
+                <button onclick="showScreen('settings-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">⚙️</button>
             </nav>
         </div>
 
@@ -81,6 +86,7 @@
                 <button onclick="showScreen('presence-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🎭</button>
                 <button onclick="showScreen('gratitude-screen')" class="nav-button active flex-1 py-4 text-center font-light">🙏</button>
                 <button onclick="showScreen('quarterly-review-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">📊</button>
+                <button onclick="showScreen('settings-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">⚙️</button>
             </nav>
         </div>
 
@@ -88,10 +94,32 @@
         <div id="quarterly-review-screen" class="app-screen hidden min-h-screen flex flex-col">
             <div class="glass p-6 text-center border-b border-white/10"><h2 class="text-2xl font-light text-gradient">Quarter Review</h2><p id="review-quarter-progress" class="text-sm text-gray-400 mt-2 font-light"></p></div>
             <div class="flex-1 p-6 overflow-y-auto" id="review-content"></div>
-             <nav class="glass flex border-t border-white/10">
+            <nav class="glass flex border-t border-white/10">
                 <button onclick="showScreen('presence-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🎭</button>
                 <button onclick="showScreen('gratitude-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🙏</button>
                 <button onclick="showScreen('quarterly-review-screen')" class="nav-button active flex-1 py-4 text-center font-light">📊</button>
+                <button onclick="showScreen('settings-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">⚙️</button>
+            </nav>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="app-screen hidden min-h-screen flex flex-col">
+            <div class="glass p-6 text-center border-b border-white/10"><h2 class="text-2xl font-light text-gradient">Settings</h2></div>
+            <div class="flex-1 p-6 overflow-y-auto">
+                <div class="glass-card rounded-3xl p-6 space-y-4">
+                    <label class="text-lg font-light block">Adjust Fitness Baseline</label>
+                    <div class="flex space-x-2">
+                        <input type="number" id="settings-fitness-baseline" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="Baseline">
+                        <input type="text" id="settings-fitness-unit" class="w-24 bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="km">
+                    </div>
+                    <button onclick="saveSettings()" class="glass-button w-full py-3 rounded-xl text-lg font-light ripple">Save</button>
+                </div>
+            </div>
+            <nav class="glass flex border-t border-white/10">
+                <button onclick="showScreen('presence-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🎭</button>
+                <button onclick="showScreen('gratitude-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">🙏</button>
+                <button onclick="showScreen('quarterly-review-screen')" class="nav-button flex-1 py-4 text-center text-gray-400 font-light">📊</button>
+                <button onclick="showScreen('settings-screen')" class="nav-button active flex-1 py-4 text-center font-light">⚙️</button>
             </nav>
         </div>
     </div>

@@ -5,6 +5,7 @@ let DEV_MODE = true; // <<< Toggle developer mode here
 // --- STATE MANAGEMENT ---
 const state = {
     path: null,
+    selectedArchetype: null,
     commitments: {
         sleep: 'balanced', fitnessMode: 'maintain', fitnessBaseline: 5, fitnessUnit: 'km',
         reading: 'perspicacity', writing: 'journal', meditation: 'awareness'
@@ -20,6 +21,7 @@ function loadState() {
     const savedState = localStorage.getItem('oceanDropState_v2');
     if (savedState) Object.assign(state, JSON.parse(savedState));
     state.commitments.fitnessUnit = state.commitments.fitnessUnit || 'km';
+    state.selectedArchetype = state.selectedArchetype || null;
 }
 
 // --- UTILITY FUNCTIONS ---
@@ -49,6 +51,47 @@ function getWeekDates(date = new Date()) {
     }
     return week;
 }
+
+function applyArchetype(key) {
+    const arch = ARCHETYPES[key];
+    if (!arch) return;
+    Object.assign(state.commitments, arch.commitments);
+}
+
+function applyGrowthSuggestions() {
+    let readingCount = 0, writingCount = 0;
+    const today = new Date();
+    for (let i = 1; i <= 91; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const log = state.logs[dateStr];
+        if (log?.reading) readingCount++;
+        if (log?.writing) writingCount++;
+    }
+    const readingAvg = readingCount / 13;
+    const writingAvg = writingCount / 13;
+    state.commitments.sleep = state.commitments.sleep || 'Earlybird';
+    state.commitments.fitnessMode = state.commitments.fitnessMode || 'maintain';
+    state.commitments.reading = readingAvg >= CONFIG.mind.reading.perspicacity.target ? 'erudition' : 'perspicacity';
+    state.commitments.writing = writingAvg >= CONFIG.mind.writing.editorial.target ? 'treatise'
+        : writingAvg >= CONFIG.mind.writing.journal.target ? 'editorial' : 'journal';
+}
+
+function setupSettingsScreen() {
+    document.getElementById('settings-fitness-baseline').value = state.commitments.fitnessBaseline;
+    document.getElementById('settings-fitness-unit').value = state.commitments.fitnessUnit;
+}
+
+window.saveSettings = function() {
+    state.commitments.fitnessBaseline = parseFloat(document.getElementById('settings-fitness-baseline').value) || 0;
+    state.commitments.fitnessUnit = document.getElementById('settings-fitness-unit').value.trim();
+    calculateWeeklyFitnessTarget();
+    saveState();
+    renderAllDomainCards();
+    debugLog('saveSettings ->', state.commitments.fitnessBaseline, state.commitments.fitnessUnit);
+    showScreen('presence-screen');
+};
 
 function showScreen(screenId) {
     const current = document.querySelector('.app-screen:not(.hidden)');
@@ -84,12 +127,21 @@ function showScreen(screenId) {
     if (screenId === 'quarterly-review-screen') setupQuarterlyReviewScreen();
     if (screenId === 'commitments-screen') populateCommitmentsScreen();
     if (screenId === 'confirmation-screen') renderConfirmationScreen();
+    if (screenId === 'settings-screen') setupSettingsScreen();
 }
 
 // --- ONBOARDING LOGIC ---
 window.selectPath = function(path) {
     state.path = path;
     debugLog('selectPath ->', path);
+    if (path === 'archetypes') {
+        state.selectedArchetype = Object.keys(ARCHETYPES)[0];
+    } else {
+        state.selectedArchetype = null;
+    }
+    if (path === 'growth') {
+        applyGrowthSuggestions();
+    }
     populateCommitmentsScreen();
     showScreen('commitments-screen');
 }
@@ -100,6 +152,27 @@ function populateCommitmentsScreen() {
     document.getElementById('commit-reading').innerHTML = Object.entries(mind.reading).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name} Reading (${v.target}x/wk)</option>`).join('');
     document.getElementById('commit-writing').innerHTML = Object.entries(mind.writing).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name} Writing (${v.target}x/wk)</option>`).join('');
     document.getElementById('commit-meditation').innerHTML = Object.entries(spirit.meditation).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name}</option>`).join('');
+
+    const archDiv = document.getElementById('archetype-select');
+    if (state.path === 'archetypes') {
+        archDiv.classList.remove('hidden');
+        const select = document.getElementById('archetype-choice');
+        select.innerHTML = Object.entries(ARCHETYPES).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('');
+        if (!state.selectedArchetype) state.selectedArchetype = Object.keys(ARCHETYPES)[0];
+        select.value = state.selectedArchetype;
+        select.onchange = (e) => { state.selectedArchetype = e.target.value; applyArchetype(state.selectedArchetype); populateCommitmentsScreen(); };
+        applyArchetype(state.selectedArchetype);
+    } else {
+        archDiv.classList.add('hidden');
+    }
+
+    document.getElementById('commit-sleep').value = state.commitments.sleep;
+    document.getElementById('commit-fitness-mode').value = state.commitments.fitnessMode;
+    document.getElementById('commit-fitness-baseline').value = state.commitments.fitnessBaseline;
+    document.getElementById('commit-fitness-unit').value = state.commitments.fitnessUnit;
+    document.getElementById('commit-reading').value = state.commitments.reading;
+    document.getElementById('commit-writing').value = state.commitments.writing;
+    document.getElementById('commit-meditation').value = state.commitments.meditation;
 }
 window.confirmCommitments = function() {
     state.commitments.sleep = document.getElementById('commit-sleep').value;
@@ -109,6 +182,10 @@ window.confirmCommitments = function() {
     state.commitments.reading = document.getElementById('commit-reading').value;
     state.commitments.writing = document.getElementById('commit-writing').value;
     state.commitments.meditation = document.getElementById('commit-meditation').value;
+    if (state.commitments.reading === 'erudition' && state.commitments.writing === 'treatise') {
+        const ok = confirm('This is an ambitious Mind commitment for the quarter! Are you sure you want to proceed?');
+        if (!ok) return;
+    }
     debugLog('confirmCommitments ->', JSON.stringify(state.commitments));
     renderConfirmationScreen();
     showScreen('confirmation-screen');
