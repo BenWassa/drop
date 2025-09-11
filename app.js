@@ -1,3 +1,7 @@
+// --- DEVELOPER TOGGLE ---
+// Set to true to enable the in-app dev toolbar and verbose logging
+let DEV_MODE = false; // <<< Toggle developer mode here
+
 // --- STATE MANAGEMENT ---
 const state = {
     path: null,
@@ -52,15 +56,19 @@ function showScreen(screenId) {
         btn.classList.remove('active');
         if (btn.getAttribute('onclick')?.includes(screenId)) btn.classList.add('active');
     });
+    debugLog('showScreen ->', screenId);
     // Dynamically render screens that need fresh data
     if (screenId === 'presence-screen') setupPresenceScreen();
     if (screenId === 'gratitude-screen') setupGratitudeScreen();
     if (screenId === 'quarterly-review-screen') setupQuarterlyReviewScreen();
+    if (screenId === 'commitments-screen') populateCommitmentsScreen();
+    if (screenId === 'confirmation-screen') renderConfirmationScreen();
 }
 
 // --- ONBOARDING LOGIC ---
 window.selectPath = function(path) {
     state.path = path;
+    debugLog('selectPath ->', path);
     populateCommitmentsScreen();
     showScreen('commitments-screen');
 }
@@ -79,6 +87,7 @@ window.confirmCommitments = function() {
     state.commitments.reading = document.getElementById('commit-reading').value;
     state.commitments.writing = document.getElementById('commit-writing').value;
     state.commitments.meditation = document.getElementById('commit-meditation').value;
+    debugLog('confirmCommitments ->', JSON.stringify(state.commitments));
     renderConfirmationScreen();
     showScreen('confirmation-screen');
 }
@@ -95,6 +104,7 @@ function renderConfirmationScreen() {
 }
 window.startJourney = function() {
     state.onboardingComplete = true;
+    debugLog('startJourney -> onboardingComplete = true');
     calculateWeeklyFitnessTarget(); // Calculate initial target
     saveState();
     initializeApp();
@@ -105,6 +115,7 @@ function setupPresenceScreen() {
     const today = getTodaysDateString();
     if (!state.logs[today]) {
         state.logs[today] = { embodiedSleep: false, fitnessLogged: null, reading: false, writing: false, meditation: false, burnout: 3 };
+        debugLog('setupPresenceScreen -> seeded log for', today);
     }
     document.getElementById('presence-date').innerText = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
     document.getElementById('presence-quarter').innerText = `Q${state.quarter.quarter} ${state.quarter.year} - Week ${state.quarter.week}`;
@@ -197,6 +208,7 @@ function renderSpiritCard() {
 function logPresence(key, value) {
     const today = getTodaysDateString();
     state.logs[today][key] = value;
+    debugLog('logPresence ->', today, key, '=>', value);
     saveState();
     renderAllDomainCards(); // Re-render to update UI state
 }
@@ -212,6 +224,7 @@ function calculateWeeklyFitnessTarget() {
     const multiplier = CONFIG.fitness[state.commitments.fitnessMode].multiplier;
     const newTarget = lastWeekPerformance * multiplier;
     state.weeklyTargets.fitness = Math.round(newTarget * 10) / 10;
+    debugLog('calculateWeeklyFitnessTarget -> avg:', lastWeekPerformance, 'mode*:', multiplier, 'target:', state.weeklyTargets.fitness);
 }
 
 
@@ -258,6 +271,7 @@ function setupGratitudeScreen() {
             </div>
         </div>
         <div class="glass-card rounded-3xl p-6">${burnoutHTML}</div>`;
+    debugLog('setupGratitudeScreen -> counts', { readingCount, writingCount, weekDates });
 }
 
 function setupQuarterlyReviewScreen() {
@@ -275,12 +289,16 @@ function setupQuarterlyReviewScreen() {
                 <button onclick="showScreen('vision-screen')" class="glass-button w-full py-4 rounded-2xl text-lg font-light ripple border-yellow-500/30">Adjust Journey</button>
             </div>
         </div>`;
+    debugLog('setupQuarterlyReviewScreen -> embodimentPercent', embodimentPercent);
 }
 
 // --- INITIALIZATION ---
 function initializeApp() {
     loadState();
     state.quarter = getQuarterInfo();
+    debugLog('initializeApp -> quarter', state.quarter);
+
+    if (DEV_MODE) ensureDevToolbar();
 
     if (state.onboardingComplete) {
         calculateWeeklyFitnessTarget();
@@ -291,3 +309,75 @@ function initializeApp() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+// --- DEV TOOLING ---
+function debugLog(...args) {
+    if (!DEV_MODE) return;
+    try { console.log('[DEV]', ...args); } catch (e) {}
+    const panel = document.getElementById('debug-messages');
+    if (panel) {
+        const line = document.createElement('div');
+        line.className = 'text-xs text-gray-300';
+        line.textContent = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+        panel.appendChild(line);
+        panel.scrollTop = panel.scrollHeight;
+    }
+}
+
+function ensureDevToolbar() {
+    if (document.getElementById('dev-toolbar')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'dev-toolbar';
+    wrap.className = 'fixed top-2 left-2 z-50 glass-card rounded-xl p-3 shadow-lg w-[min(92vw,720px)]';
+    wrap.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+            <div class="text-sm font-light text-gradient">DEV</div>
+            <div class="flex items-center space-x-2">
+                <label class="text-xs text-gray-300 font-light">onboarding:</label>
+                <button id="dev-toggle-onboard" class="glass-button px-2 py-1 rounded text-xs font-light">${state.onboardingComplete ? 'Complete' : 'Incomplete'}</button>
+                <button id="dev-reset" class="glass-button px-2 py-1 rounded text-xs font-light">Reset</button>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-2">
+            <button data-screen="vision-screen" class="glass-button px-2 py-1 rounded text-xs font-light">Vision</button>
+            <button data-screen="commitments-screen" class="glass-button px-2 py-1 rounded text-xs font-light">Commitments</button>
+            <button data-screen="confirmation-screen" class="glass-button px-2 py-1 rounded text-xs font-light">Confirm</button>
+            <button data-screen="presence-screen" class="glass-button px-2 py-1 rounded text-xs font-light">Presence</button>
+            <button data-screen="gratitude-screen" class="glass-button px-2 py-1 rounded text-xs font-light">Gratitude</button>
+            <button data-screen="quarterly-review-screen" class="glass-button px-2 py-1 rounded text-xs font-light">Review</button>
+            <button id="dev-recalc" class="glass-button px-2 py-1 rounded text-xs font-light">Recalc Target</button>
+        </div>
+        <div id="debug-messages" class="max-h-40 overflow-auto bg-slate-900/40 rounded p-2 border border-white/10"></div>
+    `;
+    document.body.appendChild(wrap);
+
+    wrap.querySelectorAll('[data-screen]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-screen');
+            if (id === 'commitments-screen') populateCommitmentsScreen();
+            if (id === 'confirmation-screen') renderConfirmationScreen();
+            if (id === 'presence-screen') setupPresenceScreen();
+            if (id === 'gratitude-screen') setupGratitudeScreen();
+            if (id === 'quarterly-review-screen') setupQuarterlyReviewScreen();
+            showScreen(id);
+        });
+    });
+
+    document.getElementById('dev-reset').addEventListener('click', () => {
+        localStorage.removeItem('oceanDropState_v2');
+        debugLog('DEV reset -> localStorage cleared');
+        location.reload();
+    });
+    document.getElementById('dev-recalc').addEventListener('click', () => {
+        calculateWeeklyFitnessTarget();
+        saveState();
+        renderAllDomainCards();
+        debugLog('DEV recalc -> new target', state.weeklyTargets.fitness);
+    });
+    document.getElementById('dev-toggle-onboard').addEventListener('click', (e) => {
+        state.onboardingComplete = !state.onboardingComplete;
+        e.currentTarget.textContent = state.onboardingComplete ? 'Complete' : 'Incomplete';
+        saveState();
+        debugLog('DEV toggle onboarding ->', state.onboardingComplete);
+    });
+}
