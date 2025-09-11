@@ -117,6 +117,21 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
   - Persistence: localStorage key `oceanDropState` stores `state` (targets, logs, commitments, onboarding flag).
   - Configuration: `config.json` includes `sleep`, `fitness`, `mind`, and `spirit`. Archetypes are a UX concept (optionally defined in config) but not required for the single-user pilot.
 
+  ## Development vs Deployment Setup
+
+  **Development Structure:**
+  - JavaScript files are organized in `src/` folder for better code organization
+  - HTML script tags point to `src/config.js`, `src/state.js`, etc.
+  - This allows for modular development and better file management
+
+  **GitHub Pages Deployment:**
+  - GitHub Pages serves files from the repository root
+  - Script tags in `index.html` are configured to load from `src/` paths
+  - All necessary files (HTML, CSS, JS) remain in root for deployment
+  - Static assets can be served from `assets/` folder
+
+  This setup allows for clean development organization while maintaining deployment compatibility.
+
   ## What's been updated
 
   - Added a minimal `archetypes` section to `config.json` so archetype selection has defaults.
