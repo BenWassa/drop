@@ -10,13 +10,15 @@ function getArchetype(name) {
 window.addEventListener('error', function (ev) {
     console.error('Uncaught error', ev.error || ev.message, ev);
     try {
-        document.body.innerHTML = `<pre style="color: white; padding: 20px; background: #111; white-space: pre-wrap;">Uncaught error:\n${(ev.error && ev.error.stack) || ev.message}</pre>`;
+        // Insert a visible error block without wiping the existing DOM so we can debug interactively
+        document.body.insertAdjacentHTML('afterbegin', `<pre style="color: white; padding: 20px; background: #111; white-space: pre-wrap;">Uncaught error:\n${(ev.error && ev.error.stack) || ev.message}</pre>`);
     } catch (e) { /* ignore */ }
 });
 window.addEventListener('unhandledrejection', function (ev) {
     console.error('Unhandled rejection', ev.reason);
     try {
-        document.body.innerHTML = `<pre style="color: white; padding: 20px; background: #111; white-space: pre-wrap;">Unhandled rejection:\n${ev.reason && ev.reason.stack ? ev.reason.stack : String(ev.reason)}</pre>`;
+        // Insert a visible rejection block without wiping the existing DOM
+        document.body.insertAdjacentHTML('afterbegin', `<pre style="color: white; padding: 20px; background: #111; white-space: pre-wrap;">Unhandled rejection:\n${ev.reason && ev.reason.stack ? ev.reason.stack : String(ev.reason)}</pre>`);
     } catch (e) { /* ignore */ }
 });
 
@@ -60,6 +62,31 @@ const state = {
     onboardingComplete: false,
     quarter: {}
 };
+
+// Small on-page debug panel (only for development in locked environments)
+function renderDebugPanel(info = {}) {
+    try {
+        let panel = document.getElementById('debug-panel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'debug-panel';
+            panel.style.position = 'fixed';
+            panel.style.right = '12px';
+            panel.style.bottom = '12px';
+            panel.style.zIndex = '99999';
+            panel.style.background = 'rgba(0,0,0,0.5)';
+            panel.style.color = 'white';
+            panel.style.padding = '8px 10px';
+            panel.style.borderRadius = '8px';
+            panel.style.fontSize = '12px';
+            panel.style.maxWidth = '320px';
+            panel.style.pointerEvents = 'none';
+            document.body.appendChild(panel);
+        }
+        const visible = Array.from(document.querySelectorAll('.min-h-screen')).filter(s => !s.classList.contains('hidden')).map(s => s.id).join(', ') || '<none>';
+        panel.innerHTML = `<div style="opacity:0.9">App debug<br/><strong>visible:</strong> ${visible}<br/><strong>config:</strong> ${info.configLoaded ? 'ok' : 'missing'}<br/><strong>onboarding:</strong> ${state.onboardingComplete}</div>`;
+    } catch (e) { console.warn('renderDebugPanel failed', e); }
+}
 
 // --- UTILITY FUNCTIONS ---
 function saveState() { localStorage.setItem('oceanDropState', JSON.stringify(state)); }
@@ -111,18 +138,29 @@ function getWeekDateStrings(date = new Date()) {
     return week;
 }
 function showScreen(screenId) {
+    console.log('[drop] showScreen requested ->', screenId);
+    // Hide any currently visible full-screen containers
+    const visibleScreens = Array.from(document.querySelectorAll('.min-h-screen')).filter(s => !s.classList.contains('hidden'));
+    console.log('[drop] currently visible screens before change:', visibleScreens.map(s => s.id));
     document.querySelectorAll('.min-h-screen:not(.hidden)').forEach(screen => screen.classList.add('hidden'));
     const screenToShow = document.getElementById(screenId);
-    if (screenToShow) screenToShow.classList.remove('hidden');
+    if (screenToShow) {
+        screenToShow.classList.remove('hidden');
+        console.log('[drop] showScreen: displayed ->', screenId);
+    } else {
+        console.warn('[drop] showScreen: no element found with id', screenId);
+    }
 
     if (screenId === 'gratitude-screen') setupGratitudeScreen();
     if (screenId === 'quarterly-review-screen') setupQuarterlyReviewScreen();
     if (screenId === 'presence-screen') setupPresenceScreen(); 
 
-    document.querySelectorAll('.nav-button').forEach(btn => {
+    const navButtons = document.querySelectorAll('.nav-button');
+    navButtons.forEach(btn => {
         btn.classList.remove('active');
-        if (btn.getAttribute('onclick')?.includes(screenId)) btn.classList.add('active');
+        if (btn.getAttribute('onclick')?.includes(screenId) || btn.getAttribute('data-target') === screenId) btn.classList.add('active');
     });
+    console.log('[drop] visible screens after change:', Array.from(document.querySelectorAll('.min-h-screen')).filter(s => !s.classList.contains('hidden')).map(s => s.id));
 }
 
 function calculateWeeklyFitnessTarget() {
@@ -394,18 +432,23 @@ async function initializeApp() {
         const response = await fetch('config.json');
         config = await response.json();
         archetypesConfig = config.archetypes;
+        console.log('[drop] initializeApp: config.json loaded');
     } catch (error) {
         console.error("Fatal: Failed to load config.json.", error);
-        document.body.innerHTML = `<div style="color: white; text-align: center; padding: 50px;">Could not load app configuration. Make sure config.json is in the same folder.</div>`;
+        // Show an informative message but keep DOM reachable for diagnostics
+        document.body.insertAdjacentHTML('afterbegin', `<div style="color: white; text-align: center; padding: 20px; background:#800;">Could not load app configuration. Make sure config.json is in the same folder.</div>`);
+        renderDebugPanel({ configLoaded: false });
         return;
     }
     loadState();
     ensureStateDefaults();
     state.quarter = getQuarterInfo();
+    console.log('[drop] initializeApp: state loaded, onboardingComplete=', state.onboardingComplete);
     // Attach DOM event listeners (best-practice instead of inline onclick)
     try { setupDOMListeners(); } catch (e) { console.warn('setupDOMListeners error', e); }
     if (!state.onboardingComplete) showScreen('vision-screen');
     else showScreen('presence-screen');
+    renderDebugPanel({ configLoaded: true });
 }
 document.addEventListener('DOMContentLoaded', initializeApp);
 
