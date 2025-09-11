@@ -1,8 +1,8 @@
 const CONFIG = {
   sleep: {
-    earlybird: { name: "Early Bird", icon: "🌅", wake: "5:30", sleep: "21:30" },
-    balanced: { name: "Balanced Rise", icon: "☀️", wake: "6:30", sleep: "22:30" },
-    nightowl: { name: "Night Owl", icon: "🦉", wake: "7:30", sleep: "23:30" }
+    Dawnchaser: { name: "Early Bird", icon: "🌅", wake: "5:30", sleep: "21:30" },
+    Earlybird: { name: "Balanced Rise", icon: "☀️", wake: "6:30", sleep: "22:30" },
+    Nightowl: { name: "Night Owl", icon: "🦉", wake: "7:30", sleep: "23:30" }
   },
   fitness: {
     maintain: { name: "Maintain", icon: "〰️", multiplier: 1.0 },
