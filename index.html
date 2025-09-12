@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta cha                <button onclick="selectPath('growth')" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <div>
+                            <div class="text-lg font-medium text-white">Simple Tracking</div>
+                            <div class="text-sm text-gray-400">Track progress without goals</div>
+                        </div>
+                    </div>
+                </button>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>drop</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,14 +52,14 @@
                     </div>
                 </button>
 
-                <button onclick="selectPath('archetypes')" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                <button onclick="selectPath('identities')" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
                     <div class="flex items-center space-x-4">
                         <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
                             <span class="text-2xl">🌟</span>
                         </div>
                         <div>
-                            <div class="text-lg font-medium text-white">Archetypes</div>
-                            <div class="text-sm text-gray-400">Start from a template, then customize</div>
+                            <div class="text-lg font-medium text-white">Domain Identities</div>
+                            <div class="text-sm text-gray-400">Choose identities for each area</div>
                         </div>
                     </div>
                 </button>
@@ -72,115 +82,171 @@
                 <div class="space-y-2 text-xs">
                     <div class="flex items-start space-x-2">
                         <span class="text-blue-400 mt-0.5">•</span>
-                        <span><strong>Direct Control:</strong> Full customization for experienced users</span>
+                        <span><strong>Direct Control:</strong> Manual setup for each domain</span>
                     </div>
                     <div class="flex items-start space-x-2">
                         <span class="text-purple-400 mt-0.5">•</span>
-                        <span><strong>Archetypes:</strong> Pre-built templates like "Scholar" or "Athlete"</span>
+                        <span><strong>Domain Identities:</strong> Choose identities like "Dawn Chaser"</span>
                     </div>
                     <div class="flex items-start space-x-2">
                         <span class="text-green-400 mt-0.5">•</span>
-                        <span><strong>Growth Mode:</strong> Smart suggestions based on your patterns</span>
+                        <span><strong>Simple Tracking:</strong> Just track, no pressure</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Onboarding: Commitments -->
-        <div id="commitments-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
+        <div id="commitments-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-4 relative overflow-hidden">
             <!-- Background decorative elements -->
             <div class="absolute inset-0 opacity-20">
                 <div class="absolute top-16 right-12 w-24 h-24 bg-blue-500/15 rounded-full blur-lg"></div>
                 <div class="absolute bottom-16 left-12 w-32 h-32 bg-red-500/15 rounded-full blur-lg"></div>
             </div>
 
-            <div class="text-center mb-12 relative z-10">
-                <h2 class="text-4xl font-light mb-4 text-gradient">Set Commitments</h2>
-                <p class="text-lg text-gray-300 font-light">Define your quarter's focus areas</p>
+            <div class="text-center mb-6 relative z-10">
+                <h2 class="text-3xl font-light mb-2 text-gradient">Set Your Commitments</h2>
+                <p class="text-base text-gray-300 font-light">Choose your identity for each area</p>
             </div>
 
-            <div class="w-full max-w-lg space-y-8 relative z-10 commitments-form">
-                <!-- Archetype Selection (when applicable) -->
-                <div id="archetype-select" class="glass-card rounded-2xl p-6 hidden">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <span class="text-2xl">🌟</span>
-                        <div>
-                            <label class="text-lg font-light block text-white">Choose Archetype</label>
-                            <p class="text-sm text-gray-400">Start with a pre-built template</p>
-                        </div>
-                    </div>
-                    <select id="archetype-choice" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-blue-400 focus:bg-slate-800/80 transition-colors"></select>
-                </div>
-
+            <div class="w-full max-w-sm space-y-4 relative z-10 commitments-form">
                 <!-- Sleep Section -->
-                <div class="glass-card rounded-2xl p-6 onboarding-section domain-sleep-section">
-                    <div class="flex items-center space-x-3 mb-4">
+                <div class="glass-card rounded-2xl p-4 onboarding-section domain-sleep-section">
+                    <div class="flex items-center space-x-3 mb-3">
                         <span class="text-2xl">💤</span>
-                        <div>
-                            <label class="text-lg font-light block text-white">Sleep Identity</label>
-                            <p class="text-sm text-gray-400">Your natural rhythm</p>
+                        <div class="flex-1">
+                            <label class="text-base font-light block text-white">Sleep Identity</label>
+                            <p class="text-xs text-gray-400">When do you want to wake up?</p>
                         </div>
                     </div>
-                    <select id="commit-sleep" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-blue-400 focus:bg-slate-800/80 transition-colors"></select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectSleepIdentity('dawnchaser')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🌅</div>
+                            <div class="font-medium">Dawn Chaser</div>
+                            <div class="text-xs opacity-75">5:30 AM</div>
+                        </button>
+                        <button onclick="selectSleepIdentity('earlybird')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">☀️</div>
+                            <div class="font-medium">Early Bird</div>
+                            <div class="text-xs opacity-75">6:30 AM</div>
+                        </button>
+                        <button onclick="selectSleepIdentity('nightowl')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🦉</div>
+                            <div class="font-medium">Night Owl</div>
+                            <div class="text-xs opacity-75">7:30 AM</div>
+                        </button>
+                        <button onclick="selectSleepIdentity('custom')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">⏰</div>
+                            <div class="font-medium">Custom</div>
+                            <div class="text-xs opacity-75">Set time</div>
+                        </button>
+                    </div>
+                    <div id="custom-sleep-input" class="hidden mt-3">
+                        <input type="time" id="custom-wake-time" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 focus:bg-slate-800/80 transition-colors">
+                    </div>
                 </div>
 
                 <!-- Fitness Section -->
-                <div class="glass-card rounded-2xl p-6 onboarding-section domain-fitness-section">
-                    <div class="flex items-center space-x-3 mb-4">
+                <div class="glass-card rounded-2xl p-4 onboarding-section domain-fitness-section">
+                    <div class="flex items-center space-x-3 mb-3">
                         <span class="text-2xl">💪</span>
-                        <div>
-                            <label class="text-lg font-light block text-white">Fitness Allocation</label>
-                            <p class="text-sm text-gray-400">Movement and strength goals</p>
+                        <div class="flex-1">
+                            <label class="text-base font-light block text-white">Fitness Identity</label>
+                            <p class="text-xs text-gray-400">How do you want to move?</p>
                         </div>
                     </div>
-                    <select id="commit-fitness-mode" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-red-400 focus:bg-slate-800/80 transition-colors mb-4"></select>
-                    <div class="flex space-x-3">
-                        <div class="flex-1">
-                            <label class="text-sm text-gray-400 block mb-2">Weekly Baseline</label>
-                            <input type="number" id="commit-fitness-baseline" value="5" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-red-400 focus:bg-slate-800/80 transition-colors" placeholder="5">
-                        </div>
-                        <div class="w-24">
-                            <label class="text-sm text-gray-400 block mb-2">Unit</label>
-                            <input type="text" id="commit-fitness-unit" value="km" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-red-400 focus:bg-slate-800/80 transition-colors" placeholder="km">
-                        </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectFitnessIdentity('endurance')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🏃</div>
+                            <div class="font-medium">Endurance</div>
+                            <div class="text-xs opacity-75">Long-distance</div>
+                        </button>
+                        <button onclick="selectFitnessIdentity('strength')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">💪</div>
+                            <div class="font-medium">Strength</div>
+                            <div class="text-xs opacity-75">Power training</div>
+                        </button>
+                        <button onclick="selectFitnessIdentity('mobility')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🧘</div>
+                            <div class="font-medium">Mobility</div>
+                            <div class="text-xs opacity-75">Flexibility</div>
+                        </button>
+                        <button onclick="selectFitnessIdentity('custom')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🎯</div>
+                            <div class="font-medium">Custom</div>
+                            <div class="text-xs opacity-75">Define goals</div>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Mind Section -->
-                <div class="glass-card rounded-2xl p-6 onboarding-section domain-mind-section">
-                    <div class="flex items-center space-x-3 mb-4">
+                <div class="glass-card rounded-2xl p-4 onboarding-section domain-mind-section">
+                    <div class="flex items-center space-x-3 mb-3">
                         <span class="text-2xl">🧠</span>
-                        <div>
-                            <label class="text-lg font-light block text-white">Mind Practice</label>
-                            <p class="text-sm text-gray-400">Reading and writing habits</p>
+                        <div class="flex-1">
+                            <label class="text-base font-light block text-white">Mind Identity</label>
+                            <p class="text-xs text-gray-400">How do you want to think?</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-sm text-gray-400 block mb-2">Reading</label>
-                            <select id="commit-reading" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-yellow-400 focus:bg-slate-800/80 transition-colors"></select>
-                        </div>
-                        <div>
-                            <label class="text-sm text-gray-400 block mb-2">Writing</label>
-                            <select id="commit-writing" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-yellow-400 focus:bg-slate-800/80 transition-colors"></select>
-                        </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectMindIdentity('reader')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">📚</div>
+                            <div class="font-medium">Reader</div>
+                            <div class="text-xs opacity-75">Deep knowledge</div>
+                        </button>
+                        <button onclick="selectMindIdentity('writer')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">✍️</div>
+                            <div class="font-medium">Writer</div>
+                            <div class="text-xs opacity-75">Creative expression</div>
+                        </button>
+                        <button onclick="selectMindIdentity('learner')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🧠</div>
+                            <div class="font-medium">Learner</div>
+                            <div class="text-xs opacity-75">Skill development</div>
+                        </button>
+                        <button onclick="selectMindIdentity('custom')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🎨</div>
+                            <div class="font-medium">Custom</div>
+                            <div class="text-xs opacity-75">Define practice</div>
+                        </button>
                     </div>
                 </div>
 
                 <!-- Spirit Section -->
-                <div class="glass-card rounded-2xl p-6 onboarding-section domain-spirit-section">
-                    <div class="flex items-center space-x-3 mb-4">
+                <div class="glass-card rounded-2xl p-4 onboarding-section domain-spirit-section">
+                    <div class="flex items-center space-x-3 mb-3">
                         <span class="text-2xl">🧘</span>
-                        <div>
-                            <label class="text-lg font-light block text-white">Spirit Practice</label>
-                            <p class="text-sm text-gray-400">Meditation and mindfulness</p>
+                        <div class="flex-1">
+                            <label class="text-base font-light block text-white">Spirit Identity</label>
+                            <p class="text-xs text-gray-400">How do you want to connect?</p>
                         </div>
                     </div>
-                    <select id="commit-meditation" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-green-400 focus:bg-slate-800/80 transition-colors"></select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectSpiritIdentity('mindful')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🧘</div>
+                            <div class="font-medium">Mindful</div>
+                            <div class="text-xs opacity-75">Present awareness</div>
+                        </button>
+                        <button onclick="selectSpiritIdentity('reflective')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🔍</div>
+                            <div class="font-medium">Reflective</div>
+                            <div class="text-xs opacity-75">Self-discovery</div>
+                        </button>
+                        <button onclick="selectSpiritIdentity('connected')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">🌟</div>
+                            <div class="font-medium">Connected</div>
+                            <div class="text-xs opacity-75">Higher purpose</div>
+                        </button>
+                        <button onclick="selectSpiritIdentity('custom')" class="identity-button py-3 px-3 rounded-lg text-center font-light text-sm">
+                            <div class="text-lg mb-1">✨</div>
+                            <div class="font-medium">Custom</div>
+                            <div class="text-xs opacity-75">Define practice</div>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Continue Button -->
-                <button onclick="confirmCommitments()" class="glass-button w-full py-5 px-8 rounded-2xl text-lg font-light ripple mt-8">
+                <button onclick="confirmCommitments()" class="glass-button w-full py-4 px-6 rounded-2xl text-lg font-light ripple mt-6">
                     Continue to Confirmation
                 </button>
             </div>

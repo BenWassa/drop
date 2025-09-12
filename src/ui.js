@@ -60,78 +60,260 @@ function showScreen(screenId) {
 window.selectPath = function(path) {
     state.path = path;
     debugLog('selectPath ->', path);
-    if (path === 'archetypes') {
-        state.selectedArchetype = Object.keys(ARCHETYPES)[0];
-    } else {
-        state.selectedArchetype = null;
+
+    // Initialize selected identities based on path
+    if (!state.selectedIdentities) {
+        state.selectedIdentities = {
+            sleep: 'earlybird',
+            fitness: 'endurance',
+            mind: 'reader',
+            spirit: 'mindful'
+        };
     }
+
     if (path === 'growth') {
-        applyGrowthSuggestions();
+        // Simple Tracking path - minimal defaults
+        state.selectedIdentities = {
+            sleep: 'earlybird',
+            fitness: 'endurance',
+            mind: 'reader',
+            spirit: 'mindful'
+        };
     }
+
     populateCommitmentsScreen();
     showScreen('commitments-screen');
 }
 function populateCommitmentsScreen() {
-    const { sleep, fitness, mind, spirit } = CONFIG;
-    document.getElementById('commit-sleep').innerHTML = Object.entries(sleep).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name} (${v.wake} / ${v.sleep})</option>`).join('');
-    document.getElementById('commit-fitness-mode').innerHTML = Object.entries(fitness).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name}</option>`).join('');
-    document.getElementById('commit-reading').innerHTML = Object.entries(mind.reading).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name} Reading (${v.target}x/wk)</option>`).join('');
-    document.getElementById('commit-writing').innerHTML = Object.entries(mind.writing).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name} Writing (${v.target}x/wk)</option>`).join('');
-    document.getElementById('commit-meditation').innerHTML = Object.entries(spirit.meditation).map(([k, v]) => `<option value="${k}">${v.icon} ${v.name}</option>`).join('');
-
-    const archDiv = document.getElementById('archetype-select');
-    if (state.path === 'archetypes') {
-        archDiv.classList.remove('hidden');
-        const select = document.getElementById('archetype-choice');
-        select.innerHTML = Object.entries(ARCHETYPES).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('');
-        if (!state.selectedArchetype) state.selectedArchetype = Object.keys(ARCHETYPES)[0];
-        select.value = state.selectedArchetype;
-        select.onchange = (e) => { state.selectedArchetype = e.target.value; applyArchetype(state.selectedArchetype); populateCommitmentsScreen(); };
-        applyArchetype(state.selectedArchetype);
-    } else {
-        archDiv.classList.add('hidden');
+    // Initialize selected identities if not set
+    if (!state.selectedIdentities) {
+        state.selectedIdentities = {
+            sleep: 'earlybird',
+            fitness: 'endurance',
+            mind: 'reader',
+            spirit: 'mindful'
+        };
     }
 
-    document.getElementById('commit-sleep').value = state.commitments.sleep;
-    document.getElementById('commit-fitness-mode').value = state.commitments.fitnessMode;
-    document.getElementById('commit-fitness-baseline').value = state.commitments.fitnessBaseline;
-    document.getElementById('commit-fitness-unit').value = state.commitments.fitnessUnit;
-    document.getElementById('commit-reading').value = state.commitments.reading;
-    document.getElementById('commit-writing').value = state.commitments.writing;
-    document.getElementById('commit-meditation').value = state.commitments.meditation;
+    // Update button states based on current selections
+    updateIdentityButtonStates();
+
+    // Hide custom sleep input by default
+    document.getElementById('custom-sleep-input').classList.add('hidden');
+}
+
+function updateIdentityButtonStates() {
+    // Clear all active states
+    document.querySelectorAll('.identity-button').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-500/30', 'border-blue-400');
+        btn.classList.add('bg-slate-800/30', 'border-white/20');
+    });
+
+    // Set active state for selected identities
+    const { selectedIdentities } = state;
+
+    if (selectedIdentities.sleep) {
+        const sleepBtn = document.querySelector(`[onclick="selectSleepIdentity('${selectedIdentities.sleep}')"]`);
+        if (sleepBtn) {
+            sleepBtn.classList.add('active', 'bg-blue-500/30', 'border-blue-400');
+            sleepBtn.classList.remove('bg-slate-800/30', 'border-white/20');
+        }
+    }
+
+    if (selectedIdentities.fitness) {
+        const fitnessBtn = document.querySelector(`[onclick="selectFitnessIdentity('${selectedIdentities.fitness}')"]`);
+        if (fitnessBtn) {
+            fitnessBtn.classList.add('active', 'bg-blue-500/30', 'border-blue-400');
+            fitnessBtn.classList.remove('bg-slate-800/30', 'border-white/20');
+        }
+    }
+
+    if (selectedIdentities.mind) {
+        const mindBtn = document.querySelector(`[onclick="selectMindIdentity('${selectedIdentities.mind}')"]`);
+        if (mindBtn) {
+            mindBtn.classList.add('active', 'bg-blue-500/30', 'border-blue-400');
+            mindBtn.classList.remove('bg-slate-800/30', 'border-white/20');
+        }
+    }
+
+    if (selectedIdentities.spirit) {
+        const spiritBtn = document.querySelector(`[onclick="selectSpiritIdentity('${selectedIdentities.spirit}')"]`);
+        if (spiritBtn) {
+            spiritBtn.classList.add('active', 'bg-blue-500/30', 'border-blue-400');
+            spiritBtn.classList.remove('bg-slate-800/30', 'border-white/20');
+        }
+    }
+}
+
+// Identity selection functions
+window.selectSleepIdentity = function(identity) {
+    state.selectedIdentities.sleep = identity;
+    updateIdentityButtonStates();
+
+    const customInput = document.getElementById('custom-sleep-input');
+    if (identity === 'custom') {
+        customInput.classList.remove('hidden');
+    } else {
+        customInput.classList.add('hidden');
+    }
+
+    debugLog('selectSleepIdentity ->', identity);
+}
+
+window.selectFitnessIdentity = function(identity) {
+    state.selectedIdentities.fitness = identity;
+    updateIdentityButtonStates();
+    debugLog('selectFitnessIdentity ->', identity);
+}
+
+window.selectMindIdentity = function(identity) {
+    state.selectedIdentities.mind = identity;
+    updateIdentityButtonStates();
+    debugLog('selectMindIdentity ->', identity);
+}
+
+window.selectSpiritIdentity = function(identity) {
+    state.selectedIdentities.spirit = identity;
+    updateIdentityButtonStates();
+    debugLog('selectSpiritIdentity ->', identity);
 }
 window.confirmCommitments = function() {
-    state.commitments.sleep = document.getElementById('commit-sleep').value;
-    state.commitments.fitnessMode = document.getElementById('commit-fitness-mode').value;
-    state.commitments.fitnessBaseline = parseFloat(document.getElementById('commit-fitness-baseline').value) || 0;
-    state.commitments.fitnessUnit = document.getElementById('commit-fitness-unit').value.trim();
-    state.commitments.reading = document.getElementById('commit-reading').value;
-    state.commitments.writing = document.getElementById('commit-writing').value;
-    state.commitments.meditation = document.getElementById('commit-meditation').value;
-    const { reading, writing, fitnessMode } = state.commitments;
-    const isMaxMind = reading === 'erudition' && writing === 'treatise';
-    const isMaxFitness = fitnessMode === 'growth';
-    let warning = null;
-    if (isMaxMind && isMaxFitness) {
-        warning = 'Growth fitness with Erudition reading and Treatise writing is extremely ambitious. Consider Maintain fitness or Editorial writing for balance. Continue?';
-    } else if (isMaxMind) {
-        warning = 'Erudition reading with Treatise writing is a demanding combination. Consider Editorial writing for a balanced quarter. Continue?';
-    } else if (isMaxFitness && reading === 'erudition') {
-        warning = 'Growth fitness alongside Erudition reading may be overwhelming. Consider Maintain fitness for balance. Continue?';
+    const { selectedIdentities } = state;
+
+    // Handle custom sleep time
+    if (selectedIdentities.sleep === 'custom') {
+        const customTime = document.getElementById('custom-wake-time').value;
+        if (!customTime) {
+            showToast('Please set a custom wake-up time');
+            return;
+        }
+        // Store custom time in commitments
+        state.commitments.customWakeTime = customTime;
     }
-    if (warning && !confirm(warning)) return;
+
+    // Apply selected identities to commitments based on path
+    if (state.path === 'identities') {
+        // Domain Identities path - use selected identities directly
+        applyDomainIdentitiesToCommitments(selectedIdentities);
+    } else if (state.path === 'direct') {
+        // Direct Control path - use selected identities as defaults but allow full customization
+        applyDomainIdentitiesToCommitments(selectedIdentities);
+    } else if (state.path === 'growth') {
+        // Simple Tracking path - minimal setup, just track without goals
+        applySimpleTrackingSetup(selectedIdentities);
+    }
+
     debugLog('confirmCommitments ->', JSON.stringify(state.commitments));
     renderConfirmationScreen();
     showScreen('confirmation-screen');
 }
+
+function applyDomainIdentitiesToCommitments(identities) {
+    const { sleep, fitness, mind, spirit } = CONFIG;
+
+    // Apply sleep identity
+    if (identities.sleep && sleep[identities.sleep]) {
+        state.commitments.sleep = identities.sleep;
+    }
+
+    // Apply fitness identity
+    if (identities.fitness && fitness[identities.fitness]) {
+        state.commitments.fitnessMode = identities.fitness;
+        // Set default baseline based on identity
+        const fitnessDefaults = {
+            endurance: { baseline: 5, unit: 'km' },
+            strength: { baseline: 3, unit: 'sessions' },
+            mobility: { baseline: 4, unit: 'sessions' },
+            custom: { baseline: 3, unit: 'units' }
+        };
+        const defaults = fitnessDefaults[identities.fitness] || fitnessDefaults.custom;
+        state.commitments.fitnessBaseline = defaults.baseline;
+        state.commitments.fitnessUnit = defaults.unit;
+    }
+
+    // Apply mind identity
+    if (identities.mind) {
+        const mindDefaults = {
+            reader: { reading: 'comprehensive', writing: 'journal' },
+            writer: { reading: 'casual', writing: 'article' },
+            learner: { reading: 'comprehensive', writing: 'journal' },
+            custom: { reading: 'casual', writing: 'journal' }
+        };
+        const defaults = mindDefaults[identities.mind] || mindDefaults.custom;
+        state.commitments.reading = defaults.reading;
+        state.commitments.writing = defaults.writing;
+    }
+
+    // Apply spirit identity
+    if (identities.spirit) {
+        const spiritDefaults = {
+            mindful: 'mindfulness',
+            reflective: 'reflection',
+            connected: 'gratitude',
+            custom: 'mindfulness'
+        };
+        state.commitments.meditation = spiritDefaults[identities.spirit] || spiritDefaults.custom;
+    }
+}
+
+function applySimpleTrackingSetup(identities) {
+    // Simple tracking - minimal commitments, just enable tracking
+    applyDomainIdentitiesToCommitments(identities);
+
+    // Mark as simple tracking mode
+    state.commitments.simpleTracking = true;
+
+    // Reduce baseline expectations for simple tracking
+    state.commitments.fitnessBaseline = Math.max(1, state.commitments.fitnessBaseline * 0.6);
+}
 function renderConfirmationScreen() {
-    const { commitments } = state; const { sleep, fitness, mind } = CONFIG;
-    document.getElementById('path-summary-v2').innerHTML = `
-        <p>${sleep[commitments.sleep].icon} <strong>Sleep:</strong> ${sleep[commitments.sleep].name}</p>
-        <p>${fitness[commitments.fitnessMode].icon} <strong>Fitness:</strong> ${fitness[commitments.fitnessMode].name} (${commitments.fitnessBaseline} ${commitments.fitnessUnit})</p>
-        <p>${mind.reading[commitments.reading].icon} <strong>Reading:</strong> ${mind.reading[commitments.reading].name}</p>
-        <p>${mind.writing[commitments.writing].icon} <strong>Writing:</strong> ${mind.writing[commitments.writing].name}</p>
-    `;
+    const { commitments, selectedIdentities } = state;
+    const { sleep, fitness, mind } = CONFIG;
+
+    let summaryHTML = '';
+
+    // Sleep summary
+    if (commitments.sleep && sleep[commitments.sleep]) {
+        const sleepConfig = sleep[commitments.sleep];
+        summaryHTML += `<p>${sleepConfig.icon} <strong>Sleep:</strong> ${sleepConfig.name}`;
+        if (commitments.customWakeTime) {
+            summaryHTML += ` (Wake: ${commitments.customWakeTime})`;
+        } else {
+            summaryHTML += ` (${sleepConfig.wake})`;
+        }
+        summaryHTML += '</p>';
+    }
+
+    // Fitness summary
+    if (commitments.fitnessMode && fitness[commitments.fitnessMode]) {
+        const fitnessConfig = fitness[commitments.fitnessMode];
+        summaryHTML += `<p>${fitnessConfig.icon} <strong>Fitness:</strong> ${fitnessConfig.name} (${commitments.fitnessBaseline} ${commitments.fitnessUnit})</p>`;
+    }
+
+    // Mind summary
+    if (commitments.reading && mind.reading[commitments.reading]) {
+        const readingConfig = mind.reading[commitments.reading];
+        summaryHTML += `<p>${readingConfig.icon} <strong>Reading:</strong> ${readingConfig.name}</p>`;
+    }
+    if (commitments.writing && mind.writing[commitments.writing]) {
+        const writingConfig = mind.writing[commitments.writing];
+        summaryHTML += `<p>${writingConfig.icon} <strong>Writing:</strong> ${writingConfig.name}</p>`;
+    }
+
+    // Spirit summary
+    if (commitments.meditation) {
+        summaryHTML += `<p>🧘 <strong>Spirit:</strong> ${commitments.meditation}</p>`;
+    }
+
+    // Path-specific messaging
+    if (state.path === 'growth') {
+        summaryHTML += '<p class="text-green-400 mt-2"><em>Simple tracking mode - focus on consistency, not goals</em></p>';
+    } else if (state.path === 'identities') {
+        summaryHTML += '<p class="text-purple-400 mt-2"><em>Domain identities selected - you can adjust these anytime</em></p>';
+    }
+
+    document.getElementById('path-summary-v2').innerHTML = summaryHTML;
+
     const q = getQuarterInfo();
     document.getElementById('quarter-info-v2').innerText = `Q${q.quarter} ${q.year} (${q.startDate} - ${q.endDate})`;
 }

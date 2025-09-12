@@ -6,6 +6,12 @@ let DEV_MODE = false; // <<< Toggle developer mode here
 const state = {
     path: null,
     selectedArchetype: null,
+    selectedIdentities: {
+        sleep: 'earlybird',
+        fitness: 'endurance',
+        mind: 'reader',
+        spirit: 'mindful'
+    },
     commitments: {
         sleep: 'balanced',
         fitnessMode: 'maintain',
@@ -13,7 +19,9 @@ const state = {
         fitnessUnit: 'km',
         reading: 'perspicacity',
         writing: 'journal',
-        meditation: 'awareness'
+        meditation: 'awareness',
+        customWakeTime: null,
+        simpleTracking: false
     },
 
     weeklyTargets: { fitness: 5 },

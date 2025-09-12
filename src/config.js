@@ -1,58 +1,34 @@
 const CONFIG = {
   sleep: {
-    Dawnchaser: { name: "Dawnchaser", icon: "🌅", wake: "5:30", sleep: "21:30" },
-    Earlybird: { name: "Earlybird", icon: "☀️", wake: "6:30", sleep: "22:30" },
-    Nightowl: { name: "Nightowl", icon: "🦉", wake: "7:30", sleep: "23:30" }
+    dawnchaser: { name: "Dawn Chaser", icon: "🌅", wake: "5:30 AM", identity: "Early riser, peak performance" },
+    earlybird: { name: "Early Bird", icon: "☀️", wake: "6:30 AM", identity: "Balanced energy, productive mornings" },
+    nightowl: { name: "Night Owl", icon: "🦉", wake: "7:30 AM", identity: "Creative evenings, flexible mornings" },
+    custom: { name: "Custom Time", icon: "⏰", wake: "6:00 AM", identity: "Set your own schedule" }
   },
   fitness: {
-    maintain: { name: "Maintain", icon: "〰️", multiplier: 1.0 },
-    deload: { name: "Deload", icon: "📉", multiplier: 0.8 },
-    growth: { name: "Growth", icon: "📈", multiplier: 1.1 }
+    endurance: { name: "Endurance", icon: "🏃", identity: "Long-distance, steady pace" },
+    strength: { name: "Strength", icon: "�", identity: "Power, resistance training" },
+    mobility: { name: "Mobility", icon: "🧘", identity: "Flexibility, movement quality" },
+    custom: { name: "Custom", icon: "🎯", identity: "Define your own fitness goals" }
   },
   mind: {
-    reading: {
-      leisure: { name: "Leisure", icon: "🛋️", target: 2 },
-      perspicacity: { name: "Perspicacity", icon: "🧐", target: 5 },
-      erudition: { name: "Erudition", icon: "📚", target: 8 }
-    },
-    writing: {
-      journal: { name: "Journal", icon: "✍️", target: 3 },
-      editorial: { name: "Editorial", icon: "📰", target: 5 },
-      treatise: { name: "Treatise", icon: "📜", target: 7 }
-    }
+    reader: { name: "Reader", icon: "📚", identity: "Deep knowledge, thoughtful insights" },
+    writer: { name: "Writer", icon: "✍️", identity: "Creative expression, clear thinking" },
+    learner: { name: "Learner", icon: "🧠", identity: "Continuous growth, skill development" },
+    custom: { name: "Custom", icon: "🎨", identity: "Define your mental practice" }
   },
   spirit: {
-    meditation: {
-      awareness: { name: "Awareness", icon: "🧘" },
-      introspection: { name: "Introspection", icon: "🔍" },
-      transcendence: { name: "Transcendence", icon: "🌌" }
-    }
+    mindful: { name: "Mindful", icon: "🧘", identity: "Present awareness, inner peace" },
+    reflective: { name: "Reflective", icon: "🔍", identity: "Deep contemplation, self-discovery" },
+    connected: { name: "Connected", icon: "🌟", identity: "Spiritual awareness, higher purpose" },
+    custom: { name: "Custom", icon: "✨", identity: "Define your spiritual practice" }
   }
 };
 
-const ARCHETYPES = {
-  scholar: {
-    name: "Scholar",
-    commitments: {
-      sleep: "Earlybird",
-      fitnessMode: "maintain",
-      fitnessBaseline: 5,
-      fitnessUnit: "km",
-      reading: "erudition",
-      writing: "treatise",
-      meditation: "awareness"
-    }
-  },
-  athlete: {
-    name: "Athlete",
-    commitments: {
-      sleep: "Dawnchaser",
-      fitnessMode: "growth",
-      fitnessBaseline: 8,
-      fitnessUnit: "km",
-      reading: "leisure",
-      writing: "journal",
-      meditation: "awareness"
-    }
-  }
+// Remove the old ARCHETYPES - we'll use domain-specific identities instead
+const DOMAIN_IDENTITIES = {
+  sleep: CONFIG.sleep,
+  fitness: CONFIG.fitness,
+  mind: CONFIG.mind,
+  spirit: CONFIG.spirit
 };
