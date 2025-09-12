@@ -57,21 +57,56 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const response = await fetch(TOKEN_URL, {
+    let response = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body
     });
 
     // Read response text and attempt to parse JSON (so we can log raw text on errors)
-    const text = await response.text();
+    let text = await response.text();
     let data;
     try { data = JSON.parse(text); } catch (e) { data = { raw: text }; }
 
     console.log('oura-token-proxy: Oura token endpoint status=', response.status, 'response=', data);
 
     if (!response.ok) {
-      // Forward Oura's error message
+      // If Oura returned 400 Bad Request, try again WITHOUT redirect_uri (some apps are configured with a single redirect)
+      if (response.status === 400) {
+        try {
+          console.log('oura-token-proxy: first attempt 400 — retrying without redirect_uri');
+          const bodyNoRedirect = new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: code,
+            client_id: CLIENT_ID,
+            code_verifier: verifier
+          });
+
+          const retryResp = await fetch(TOKEN_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bodyNoRedirect
+          });
+
+          const retryText = await retryResp.text();
+          let retryData;
+          try { retryData = JSON.parse(retryText); } catch (e) { retryData = { raw: retryText }; }
+          console.log('oura-token-proxy: retry status=', retryResp.status, 'response=', retryData);
+
+          if (retryResp.ok) {
+            return { statusCode: 200, body: JSON.stringify(retryData) };
+          }
+
+          // If retry also failed, return the retry response (more recent)
+          return { statusCode: retryResp.status, body: JSON.stringify(retryData) };
+
+        } catch (retryErr) {
+          console.log('oura-token-proxy: retry error', retryErr && retryErr.message);
+          // Fall through to return original error below
+        }
+      }
+
+      // Forward Oura's original error message
       return { statusCode: response.status, body: JSON.stringify(data) };
     }
 
