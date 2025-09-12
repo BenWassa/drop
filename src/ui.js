@@ -17,6 +17,17 @@ window.saveSettings = function() {
     showScreen('presence-screen');
 };
 
+// Registry for screen-specific render/setup handlers. Keeps showScreen simple and
+// makes it easier to move handlers into separate modules later.
+const ScreenRegistry = {
+    'presence-screen': () => setupPresenceScreen(),
+    'gratitude-screen': () => setupGratitudeScreen(),
+    'quarterly-review-screen': () => setupQuarterlyReviewScreen(),
+    'commitments-screen': () => populateCommitmentsScreen(),
+    'confirmation-screen': () => renderConfirmationScreen(),
+    'settings-screen': () => setupSettingsScreen()
+};
+
 function showScreen(screenId) {
     const current = document.querySelector('.app-screen:not(.hidden)');
     const next = document.getElementById(screenId);
@@ -45,15 +56,9 @@ function showScreen(screenId) {
     }
 
     debugLog('showScreen ->', screenId);
-    // Dynamically render screens that need fresh data
-    if (screenId === 'presence-screen') setupPresenceScreen();
-    if (screenId === 'gratitude-screen') setupGratitudeScreen();
-    if (screenId === 'quarterly-review-screen') setupQuarterlyReviewScreen();
-    if (screenId === 'commitments-screen') populateCommitmentsScreen();
-    if (screenId === 'confirmation-screen') renderConfirmationScreen();
-    if (screenId === 'settings-screen') { // Update this block
-        setupSettingsScreen();
-    }
+    // Dynamically render screens that need fresh data using the registry.
+    const renderer = ScreenRegistry[screenId];
+    if (renderer) renderer();
 }
 
 // --- ONBOARDING LOGIC ---
