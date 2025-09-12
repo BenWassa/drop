@@ -47,6 +47,38 @@ drop/
 
 - The app is browser-native and runs without Node. Some unit tests in `tests/` may require Node tooling; if you do not use Node, test manually in a browser and use the in-app dev tools.
 
+## Running automated smoke tests without Node (Python + Playwright)
+
+If you don't use Node, you can run browser-based smoke tests with Playwright's Python bindings.
+
+1. Create and activate a Python virtual environment (recommended):
+
+    ```powershell
+    python -m venv .venv
+    .\.venv\Scripts\Activate.ps1
+    ```
+
+2. Install Playwright Python package and browser binaries:
+
+    ```powershell
+    pip install -r tests\requirements.txt
+    python -m playwright install
+    ```
+
+3. Start a local static server (in a separate terminal):
+
+    ```powershell
+    python -m http.server 8000
+    ```
+
+4. Run the smoke test script:
+
+    ```powershell
+    python tests\e2e_onboarding.py
+    ```
+
+The script runs three onboarding smoke checks and prints success messages if flows complete. If a selector is missing or the app throws an error, the script will print an ERROR and exit with code 1.
+
 ## Legal & Privacy
 
 See `PRIVACY.md` and `TERMS.md` for details on local data handling and terms.
