@@ -2,11 +2,25 @@
 
 A personal, mobile-first dashboard for quarterly goal setting and daily reflection. This app reimagines habit tracking as **identity practice over time**, helping you align your daily actions with your long-term vision.
 
-## Core Vision
+## 📖 Original Vision & Philosophy
 
-*   **Quarterly Commitments:** Commit to a specific identity and resource allocation for a ~13-week quarter.
-*   **Frictionless Logging:** Log your daily presence with minimal taps. All tracking is manual to maintain full user control and privacy.
-*   **Adaptive Reflection:** Review your progress with visuals that adapt to your chosen path (Direct Control, Archetypes, or Growth).
+**drop** was born from a fundamental insight: habit tracking should focus on *identity formation* rather than achievement optimization. Instead of chasing arbitrary goals, users commit to quarterly archetypes and practice daily presence with minimal friction.
+
+### Core Principles
+- **Quarterly Identity Practice**: 90-day commitments create resistance to frequent switching
+- **Resource Allocation Model**: Smart distribution of time/energy across life domains
+- **Minimal Friction Logging**: Daily actions take seconds, not minutes
+- **Identity Over Achievement**: Focus on who you become, not what you accomplish
+- **Mobile-First Design**: Touch-optimized, responsive, offline-capable
+
+### The Resource Model
+- **Sleep** = Identity (wake/sleep rhythm embodiment)
+- **Fitness** = Allocation (time/energy resource management)
+- **Reading/Writing** = Tiered Practice (flexible frequency targets)
+- **Meditation** = Tracked Practice (instance logging, no pressure)
+- **Burnout** = State Awareness (1-5 scale, pure awareness tool)
+
+📖 **[Read the complete Original Vision & Thoughts →](docs/Original_Vision.md)**
 
 ---
 

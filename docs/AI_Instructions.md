@@ -1,8 +1,23 @@
-# AI Agent Instructions for Ocean in a Drop
+# AI Agent Instructions for drop
+
+## 📖 Original Vision & Philosophy
+
+**Before making any changes, read the [Original Vision & Thoughts](Original_Vision.md)** document to understand the foundational principles that guide all development decisions.
+
+**drop** reimagines habit tracking as **identity practice over time**. The core insight: users should focus on *who they want to become* rather than *what they want to achieve*. This fundamental philosophy must guide all technical and design decisions.
+
+### Key Principles to Remember
+- **Identity over achievement** → Small actions compound into meaningful personal change
+- **Quarterly commitments** → 90-day cycles create resistance to frequent switching
+- **Resource allocation model** → Smart distribution of time/energy across domains
+- **Minimal friction logging** → Daily actions should take seconds, not minutes
+- **Mobile-first design** → Touch-optimized, responsive, offline-capable
+
+---
 
 ## Project Overview
 
-**Ocean in a Drop** is a mobile-first web application that reimagines habit tracking as "identity practice over time." Users commit to quarterly archetypes (≈90 days) and log daily presence with minimal friction, creating durable identity through consistent small actions.
+**drop** is a mobile-first web application that reimagines habit tracking as "identity practice over time." Users commit to quarterly archetypes (≈90 days) and log daily presence with minimal friction, creating durable identity through consistent small actions.
 
 ### Core Philosophy
 - **Quarterly commitments** → Resistance to frequent switching, focus on identity
@@ -250,4 +265,4 @@ console.log('Quarter:', quarter);
 - **Data persistence**: localStorage for client-side storage
 - **Performance**: Lightweight, fast-loading, offline-capable
 
-This document provides the foundation for AI agents to understand and contribute effectively to the Ocean in a Drop project. Follow these guidelines to maintain code quality, consistency, and the project's core philosophy of simplicity and intentionality.
+This document provides the foundation for AI agents to understand and contribute effectively to the drop project. Follow these guidelines to maintain code quality, consistency, and the project's core philosophy of simplicity and intentionality.
