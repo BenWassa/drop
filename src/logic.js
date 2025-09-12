@@ -240,17 +240,24 @@ async function exchangeCodeForToken(code, verifier) {
     const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code, verifier: verifier, redirect_uri: redirectUri })
+        body: JSON.stringify({ code: code, verifier: verifier, redirect_uri: redirectUri, debug: true })
     });
 
     if (!response.ok) {
         const text = await response.text();
         let errMsg = response.statusText;
-        try { const parsed = JSON.parse(text); errMsg = parsed.error || parsed.message || text; } catch(e) {}
+        let parsedBody = null;
+        try { parsedBody = JSON.parse(text); errMsg = parsedBody.error || parsedBody.message || text; } catch(e) {}
+        console.error('exchangeCodeForToken -> proxy error, parsedBody=', parsedBody);
         throw new Error(`Proxy token exchange failed: ${errMsg}`);
     }
 
-    return response.json();
+    const result = await response.json();
+    // If server provided debug info, print it to the console for developer visibility
+    if (result && result.debug) {
+      console.debug('Proxy debug:', result.debug);
+    }
+    return result;
 }
 
 // 4. Function to disconnect from Oura

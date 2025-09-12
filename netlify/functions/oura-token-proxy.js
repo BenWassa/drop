@@ -28,6 +28,7 @@ exports.handler = async function(event, context) {
   }
 
   const { code, verifier, redirect_uri } = payload;
+  const debugMode = !!payload.debug;
   // Get the Client ID from the environment variables for security
   const CLIENT_ID = process.env.VITE_OURA_CLIENT_ID;
 
@@ -52,6 +53,14 @@ exports.handler = async function(event, context) {
     const bodyString = body.toString();
     const redacted = bodyString.replace(/(client_id=)[^&]+/, '$1[REDACTED]');
     console.log('oura-token-proxy: posting to Oura body (redacted)=', redacted);
+    if (debugMode) {
+      // attach a small debug echo to logs
+      console.log('oura-token-proxy: debugMode enabled; received payload (redacted) =', {
+        code_len: code ? code.length : 0,
+        verifier_len: verifier ? verifier.length : 0,
+        redirect_uri: redirect_uri
+      });
+    }
   } catch (e) {
     console.log('oura-token-proxy: error preparing logs', e && e.message);
   }
@@ -63,12 +72,12 @@ exports.handler = async function(event, context) {
       body: body
     });
 
-    // Read response text and attempt to parse JSON (so we can log raw text on errors)
-    let text = await response.text();
-    let data;
-    try { data = JSON.parse(text); } catch (e) { data = { raw: text }; }
+  // Read response text and attempt to parse JSON (so we can log raw text on errors)
+  let text = await response.text();
+  let data;
+  try { data = JSON.parse(text); } catch (e) { data = { raw: text }; }
 
-    console.log('oura-token-proxy: Oura token endpoint status=', response.status, 'response=', data);
+  console.log('oura-token-proxy: Oura token endpoint status=', response.status, 'response=', data);
 
     if (!response.ok) {
       // If Oura returned 400 Bad Request, try again WITHOUT redirect_uri (some apps are configured with a single redirect)
@@ -94,11 +103,15 @@ exports.handler = async function(event, context) {
           console.log('oura-token-proxy: retry status=', retryResp.status, 'response=', retryData);
 
           if (retryResp.ok) {
-            return { statusCode: 200, body: JSON.stringify(retryData) };
+            const result = { statusCode: 200, body: JSON.stringify(retryData) };
+            if (debugMode) result.debug = { retryRequest: bodyNoRedirect.toString(), retryResponse: retryData };
+            return result;
           }
 
           // If retry also failed, return the retry response (more recent)
-          return { statusCode: retryResp.status, body: JSON.stringify(retryData) };
+          const retryResult = { statusCode: retryResp.status, body: JSON.stringify(retryData) };
+          if (debugMode) retryResult.debug = { retryRequest: bodyNoRedirect.toString(), retryResponse: retryData };
+          return retryResult;
 
         } catch (retryErr) {
           console.log('oura-token-proxy: retry error', retryErr && retryErr.message);
