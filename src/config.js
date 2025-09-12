@@ -6,29 +6,29 @@
     custom: { name: 'Custom Time', icon: '⏰', wake: '6:00 AM', sleep: '11:00 PM', identity: 'Set your own schedule' }
   },
   fitness: {
-    endurance: { name: 'Endurance', icon: '', identity: 'Long-distance, steady pace' },
-    strength: { name: 'Strength', icon: '', identity: 'Power, resistance training' },
-    mobility: { name: 'Mobility', icon: '', identity: 'Flexibility, movement quality' },
-    custom: { name: 'Custom', icon: '', identity: 'Define your own fitness goals' }
+    endurance: { name: 'Endurance', icon: '🏃', identity: 'Long-distance, steady pace', multiplier: 1.0 },
+    strength: { name: 'Strength', icon: '💪', identity: 'Power, resistance training', multiplier: 0.8 },
+    mobility: { name: 'Mobility', icon: '🧘', identity: 'Flexibility, movement quality', multiplier: 0.9 },
+    custom: { name: 'Custom', icon: '🎯', identity: 'Define your own fitness goals', multiplier: 1.0 }
   },
   mind: {
     reading: {
-      casual: { name: 'Casual Reading', icon: '', target: 2, identity: 'Enjoyable reading, no pressure' },
-      perspicacity: { name: 'Perspicacity', icon: '', target: 4, identity: 'Thoughtful reading, weekly insights' },
-      erudition: { name: 'Erudition', icon: '', target: 6, identity: 'Deep study, comprehensive knowledge' }
+      casual: { name: 'Casual Reading', icon: '📖', target: 2, identity: 'Enjoyable reading, no pressure' },
+      perspicacity: { name: 'Perspicacity', icon: '📚', target: 4, identity: 'Thoughtful reading, weekly insights' },
+      erudition: { name: 'Erudition', icon: '🎓', target: 6, identity: 'Deep study, comprehensive knowledge' }
     },
     writing: {
-      journal: { name: 'Journal', icon: '', target: 3, identity: 'Personal reflection, daily notes' },
-      editorial: { name: 'Editorial', icon: '', target: 5, identity: 'Structured writing, weekly articles' },
-      treatise: { name: 'Treatise', icon: '', target: 7, identity: 'In-depth writing, major projects' }
+      journal: { name: 'Journal', icon: '📝', target: 3, identity: 'Personal reflection, daily notes' },
+      editorial: { name: 'Editorial', icon: '✍️', target: 5, identity: 'Structured writing, weekly articles' },
+      treatise: { name: 'Treatise', icon: '📜', target: 7, identity: 'In-depth writing, major projects' }
     }
   },
   spirit: {
     meditation: {
-      awareness: { name: 'Awareness', icon: '', identity: 'Basic mindfulness, daily practice' },
-      mindfulness: { name: 'Mindfulness', icon: '', identity: 'Present awareness, inner peace' },
-      reflection: { name: 'Reflection', icon: '', identity: 'Deep contemplation, self-discovery' },
-      gratitude: { name: 'Gratitude', icon: '', identity: 'Thankful practice, positive focus' }
+      awareness: { name: 'Awareness', icon: '🧘', identity: 'Basic mindfulness, daily practice' },
+      mindfulness: { name: 'Mindfulness', icon: '🌸', identity: 'Present awareness, inner peace' },
+      reflection: { name: 'Reflection', icon: '🔍', identity: 'Deep contemplation, self-discovery' },
+      gratitude: { name: 'Gratitude', icon: '🙏', identity: 'Thankful practice, positive focus' }
     }
   }
 };
