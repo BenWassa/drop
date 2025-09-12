@@ -98,6 +98,17 @@ function getDateString(date) {
 
 // --- OURA API AUTHENTICATION LOGIC ---
 
+// This new helper function ensures we always use the exact, whitelisted URI.
+function getRedirectUri() {
+    if (window.location.hostname === '127.0.0.1') {
+        // We are on a local server
+        return 'http://127.0.0.1:5500/index.html';
+    } else {
+        // We are on the live GitHub Pages site
+        return 'https://benwassa.github.io/drop/';
+    }
+}
+
 // Generates a secure random string for the PKCE flow
 function generateCodeVerifier() {
     const randomBytes = window.crypto.getRandomValues(new Uint8Array(32));
@@ -112,19 +123,20 @@ async function generateCodeChallenge(verifier) {
     return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-// 1. Kicks off the authentication process
+// 1. Kicks off the authentication process (UPDATED)
 window.redirectToOuraAuth = async function() {
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
     
-    // Temporarily save the verifier in the browser's session storage
     sessionStorage.setItem('oura_code_verifier', verifier);
+
+    const redirectUri = getRedirectUri(); // Use our new helper function
 
     const params = new URLSearchParams({
         client_id: OURA_CONFIG.CLIENT_ID,
-        redirect_uri: window.location.origin + window.location.pathname,
+        redirect_uri: redirectUri, // Use the precise URI
         response_type: 'code',
-        scope: 'sleep activity readiness', // The data we want to read
+        scope: 'sleep activity readiness',
         code_challenge: challenge,
         code_challenge_method: 'S256'
     });
@@ -170,12 +182,14 @@ async function handleOuraRedirect() {
     }
 }
 
-// 3. Exchanges the temporary code for a long-lived access token
+// 3. Exchanges the temporary code for a long-lived access token (UPDATED)
 async function exchangeCodeForToken(code, verifier) {
+    const redirectUri = getRedirectUri(); // Use our new helper function
+
     const body = new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: window.location.origin + window.location.pathname,
+        redirect_uri: redirectUri, // Use the precise URI
         client_id: OURA_CONFIG.CLIENT_ID,
         code_verifier: verifier
     });
