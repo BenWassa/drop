@@ -1,5 +1,7 @@
 # 🌊 Project drop — Habit App README (Refined with Target Assignment)
 
+> **🚀 No Node.js Required!** This is a browser-native web app. Simply open `index.html` in any modern web browser to run the application. All development and testing can be done without installing Node.js.
+
 ## 1. Vision
 
 “You are not a drop in the ocean, but the ocean in a single drop.”
@@ -65,7 +67,12 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
 
   ## Quick start
 
-  Open `index.html` in a browser (mobile or desktop) for quick prototyping. For production-like builds, the project now uses a built Tailwind CSS file (`dist/styles.css`) instead of the CDN. This keeps CSS deterministic and avoids loading Tailwind via CDN in production.
+  **Open `index.html` in a browser (mobile or desktop) for quick prototyping.** No Node.js required!
+
+  For production-like builds, the project now uses a built Tailwind CSS file (`dist/styles.css`) instead of the CDN. This keeps CSS deterministic and avoids loading Tailwind via CDN in production.
+
+  **CSS Building (Optional - requires Node.js and npm):**
+  The app works perfectly with Tailwind CDN - you don't need to build CSS locally unless you want to customize Tailwind configuration.
 
   To build the CSS locally (requires Node.js and npm):
 
@@ -86,6 +93,8 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
   ```powershell
   npm run watch:css
   ```
+
+  **Note:** Skip CSS building entirely - the app loads Tailwind from CDN and works immediately!
 
   Files of interest:
   - `index.html` — UI scaffolding and screens.
