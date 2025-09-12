@@ -1,8 +1,6 @@
-// In src/config.js
-
 const OURA_CONFIG = {
   // IMPORTANT: Paste your actual Client ID here
-  CLIENT_ID: 'YOUR_CLIENT_ID_GOES_HERE',
+  CLIENT_ID: 'L76FLDOGHZ75ZVPB',
   
   // Standard Oura API URLs
   AUTH_URL: 'https://cloud.ouraring.com/oauth/authorize',
