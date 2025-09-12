@@ -38,6 +38,9 @@ drop/
 ├── index.html              # Main application entry point
 ├── style.css              # Custom CSS with Tailwind utilities
 ├── package.json           # npm configuration and scripts (optional, for testing)
+├── PRIVACY.md             # Privacy policy and data handling
+├── TERMS.md               # Terms of service and usage conditions
+├── LICENSE                # MIT license file
 ├── src/                   # Modular JavaScript architecture
 │   ├── config.js         # Application configuration & archetypes
 │   ├── state.js          # State management & localStorage

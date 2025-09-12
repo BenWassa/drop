@@ -235,10 +235,18 @@ This project now follows a better folder architecture:
   - **docs/NextSteps.md**: Current development roadmap and priorities.
 - **tests/**: Contains test files.
 - **config/**: Contains configuration files.
+- **PRIVACY.md**: Privacy policy and data handling information.
+- **TERMS.md**: Terms of service and usage conditions.
+- **LICENSE**: MIT license file.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Legal & Privacy
+
+- **[Privacy Policy](PRIVACY.md)** - Learn how your data is handled and stored locally in your browser
+- **[Terms of Service](TERMS.md)** - Terms and conditions for using the application
 
 ## AI Agent Instructions
 
