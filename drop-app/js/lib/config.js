@@ -3,8 +3,7 @@ const CONFIG = {
     sleep: {
         dawnchaser: { name: 'Dawn Chaser', icon: '🌅', wake: '5:30 AM', sleep: '10:30 PM', identity: 'Early riser, peak performance' },
         earlybird: { name: 'Early Bird', icon: '☀️', wake: '6:30 AM', sleep: '11:30 PM', identity: 'Balanced energy, productive mornings' },
-        nightowl: { name: 'Night Owl', icon: '🦉', wake: '7:30 AM', sleep: '12:30 AM', identity: 'Creative evenings, flexible mornings' },
-        custom: { name: 'Custom Time', icon: '⏰', wake: '6:00 AM', sleep: '11:00 PM', identity: 'Set your own schedule' }
+        nightowl: { name: 'Night Owl', icon: '🦉', wake: '7:30 AM', sleep: '12:30 AM', identity: 'Creative evenings, flexible mornings' }
     },
     fitness: {
         cardio: {
@@ -53,10 +52,15 @@ const CONFIG = {
 // Keep window.CONFIG available (archive code expects a global CONFIG)
 window.CONFIG = window.CONFIG || CONFIG;
 
-// Light compatibility map of domain identities
+// Curated domain identities: ensure exactly three identities per aspect for the UI.
+// This provides a compact, predictable shape for onboarding identity pickers.
 window.DOMAIN_IDENTITIES = window.DOMAIN_IDENTITIES || {
-    sleep: CONFIG.sleep,
-    fitness: CONFIG.fitness,
-    mind: CONFIG.mind,
-    spirit: CONFIG.spirit
+    sleep: {
+        dawnchaser: CONFIG.sleep.dawnchaser,
+        earlybird: CONFIG.sleep.earlybird,
+        nightowl: CONFIG.sleep.nightowl
+    },
+    fitness: CONFIG.fitness, // cardio / strength / skills each have low/medium/high
+    mind: CONFIG.mind,       // reading / writing with three tiers each
+    spirit: CONFIG.spirit    // stress / meditation with three tiers each
 };
