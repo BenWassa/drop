@@ -242,6 +242,106 @@
             </div>
         </div>
 
+        <!-- Onboarding: Direct Control (set aspects directly) -->
+        <div id="direct-control-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-4 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-16 right-12 w-24 h-24 bg-blue-500/15 rounded-full blur-lg"></div>
+                <div class="absolute bottom-16 left-12 w-32 h-32 bg-red-500/15 rounded-full blur-lg"></div>
+            </div>
+
+            <div class="text-center mb-6 relative z-10">
+                <h2 class="text-3xl font-light mb-2 text-gradient">Direct Control — Configure Aspects</h2>
+                <p class="text-base text-gray-300 font-light">Set tiers for each domain aspect</p>
+            </div>
+
+            <div class="w-full max-w-sm space-y-4 relative z-10 direct-control-form">
+                <!-- Sleep direct control -->
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Sleep — Set wake/sleep times</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="time" id="direct-wake-time" class="bg-slate-800/60 border border-white/20 rounded-lg p-3">
+                        <input type="time" id="direct-sleep-time" class="bg-slate-800/60 border border-white/20 rounded-lg p-3">
+                    </div>
+                </div>
+
+                <!-- Fitness aspects -->
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Fitness — Set tiers</label>
+                    <div class="space-y-2 text-sm text-gray-300">
+                        <div class="flex items-center justify-between"><div>Cardio</div>
+                            <select id="direct-fitness-cardio" class="bg-slate-800/50 p-2 rounded-lg">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select></div>
+                        <div class="flex items-center justify-between"><div>Strength</div>
+                            <select id="direct-fitness-strength" class="bg-slate-800/50 p-2 rounded-lg">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select></div>
+                        <div class="flex items-center justify-between"><div>Skills / Performance</div>
+                            <select id="direct-fitness-skills" class="bg-slate-800/50 p-2 rounded-lg">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select></div>
+                    </div>
+                </div>
+
+                <!-- Mind aspects -->
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Mind — Reading & Writing</label>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                        <div>
+                            <div class="text-xs mb-1">Reading</div>
+                            <select id="direct-mind-reading" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                                <option value="casual">Casual</option>
+                                <option value="perspicacity" selected>Perspicacity</option>
+                                <option value="erudition">Erudition</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="text-xs mb-1">Writing</div>
+                            <select id="direct-mind-writing" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                                <option value="journal">Journal</option>
+                                <option value="editorial" selected>Editorial</option>
+                                <option value="treatise">Treatise</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spirit aspects -->
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Spirit — Stress & Meditation</label>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                        <div>
+                            <div class="text-xs mb-1">Stress Tolerance</div>
+                            <select id="direct-spirit-stress" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="text-xs mb-1">Meditation</div>
+                            <select id="direct-spirit-meditation" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                                <option value="awareness">Awareness</option>
+                                <option value="introspection" selected>Introspection</option>
+                                <option value="transcendence">Transcendence</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2">
+                    <button onclick="showScreen('commitments-screen')" class="glass-button flex-1 py-3 rounded-xl text-base font-light ripple">Back</button>
+                    <button id="direct-continue" class="glass-button flex-1 py-3 rounded-xl text-base font-light ripple">Continue</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmation Screen -->
         <div id="confirmation-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
             <!-- Background decorative elements -->
@@ -359,6 +459,7 @@
     <script src="src/state.js"></script>
     <script src="src/logic.js"></script>
     <script src="src/screens/commitments.js"></script>
+    <script src="src/screens/direct-control.js"></script>
     <script src="src/ui.js"></script>
     <script src="src/main.js"></script>
 </body>

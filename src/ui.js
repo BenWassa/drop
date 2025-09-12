@@ -92,8 +92,18 @@ window.selectPath = function(path) {
         };
     }
 
-    populateCommitmentsScreen();
-    showScreen('commitments-screen');
+    // For Direct Control, take user to the Direct Control page where they can set aspects.
+    if (path === 'direct') {
+        // ensure commitments screen state exists
+        populateCommitmentsScreen();
+        showScreen('direct-control-screen');
+        // call direct control setup if registered
+        const directSetup = ScreenRegistry['direct-control-screen'];
+        if (directSetup) directSetup();
+    } else {
+        populateCommitmentsScreen();
+        showScreen('commitments-screen');
+    }
 }
 
 function applyDomainIdentitiesToCommitments(identities) {
