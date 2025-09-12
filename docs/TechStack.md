@@ -4,7 +4,7 @@
 
 ## Overview
 
-**Ocean in a Drop** is a mobile-first web application for quarterly habit tracking and identity practice. This is a **browser-native application** that runs directly in any modern web browser without requiring Node.js, build tools, or compilation. Simply open `index.html` in your browser to run the app.
+**drop** is a mobile-first web application for quarterly habit tracking and identity practice. This is a **browser-native application** that runs directly in any modern web browser without requiring Node.js, build tools, or compilation. Simply open `index.html` in your browser to run the app.
 
 ## Core Technologies
 

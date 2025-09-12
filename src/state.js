@@ -36,7 +36,7 @@ const state = {
 
 function saveState() {
     try {
-        localStorage.setItem('oceanDropState_v2', JSON.stringify(state));
+    localStorage.setItem('dropState_v2', JSON.stringify(state));
         state.meta.storageOk = true;
         state.meta.lastError = null;
         if (typeof window.showToast === 'function') window.showToast('Saved');
@@ -49,13 +49,13 @@ function saveState() {
 
 function loadState() {
     try {
-        const savedState = localStorage.getItem('oceanDropState_v2');
+    const savedState = localStorage.getItem('dropState_v2');
         if (savedState) Object.assign(state, JSON.parse(savedState));
         state.meta.storageOk = true;
         state.meta.lastError = null;
     } catch (e) {
         // Corrupted data or storage failure; reset volatile parts and continue
-        try { localStorage.removeItem('oceanDropState_v2'); } catch {}
+    try { localStorage.removeItem('dropState_v2'); } catch {}
         state.logs = {};
         state.onboardingComplete = false;
         state.meta.storageOk = false;

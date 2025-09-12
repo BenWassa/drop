@@ -516,7 +516,7 @@ function ensureDevToolbar() {
     });
 
     document.getElementById('dev-reset').addEventListener('click', () => {
-        localStorage.removeItem('oceanDropState_v2');
+        localStorage.removeItem('dropState_v2');
         debugLog('DEV reset -> localStorage cleared');
         location.reload();
     });
@@ -557,7 +557,7 @@ window.showBanner = function(message, type = 'info') {
 };
 
 window.resetData = function() {
-    try { localStorage.removeItem('oceanDropState_v2'); } catch {}
+    try { localStorage.removeItem('dropState_v2'); } catch {}
     state.logs = {};
     state.onboardingComplete = false;
     state.meta = { storageOk: true, lastError: null };

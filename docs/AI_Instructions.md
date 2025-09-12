@@ -232,10 +232,10 @@ console.log('Debug info:', data);
 #### State Not Persisting
 ```javascript
 // Check localStorage key
-console.log(localStorage.getItem('oceanDropState_v2'));
+console.log(localStorage.getItem('dropState_v2'));
 
 // Reset state if corrupted
-localStorage.removeItem('oceanDropState_v2');
+localStorage.removeItem('dropState_v2');
 location.reload();
 ```
 

@@ -1,6 +1,6 @@
 # Documentation Archive
 
-This folder contains completed and archived markdown documentation files from the Ocean in a Drop project.
+This folder contains completed and archived markdown documentation files from earlier stages of the project (historical snapshots). Some archived documents reference older naming and concepts.
 
 ## Archived Files (2025-09-11)
 
