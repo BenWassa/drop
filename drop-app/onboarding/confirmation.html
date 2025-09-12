@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drop - Confirm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script defer src="../js/lib/state.js"></script>
+    <script defer src="../js/onboarding.js"></script>
+    <script defer src="../js/lib/config.js"></script>
+    <script defer src="../js/lib/logic.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <main class="p-6 max-w-3xl mx-auto">
+        <h2 class="text-2xl mb-4">Confirm your choices</h2>
+        <div id="confirmation-summary" class="bg-gray-800 rounded p-4">
+            <pre id="summary-pre" class="whitespace-pre-wrap text-sm text-gray-200"></pre>
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <a href="index.html" class="px-4 py-2 bg-gray-700 rounded">Back</a>
+            <button id="start-journey-btn" class="px-4 py-2 bg-green-600 rounded">Start Journey</button>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            const pre = document.getElementById('summary-pre');
+            pre.textContent = JSON.stringify(state.commitments || {}, null, 2);
+
+            document.getElementById('start-journey-btn').addEventListener('click', () => {
+                state.onboardingComplete = true;
+                saveState();
+                window.location.href = '../app/index.html';
+            });
+        });
+    </script>
+</body>
+</html>

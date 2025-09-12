@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drop - Choose Your Path</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script defer src="../js/lib/state.js"></script>
+    <script defer src="../js/onboarding.js"></script>
+    <script defer src="../js/lib/config.js"></script>
+    <script defer src="../js/lib/logic.js"></script>
+</head>
+<body class="text-gray-100 min-h-screen overflow-x-hidden bg-gray-900">
+
+    <div id="vision-screen" class="min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-30">
+            <div class="absolute top-20 left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-xl"></div>
+            <div class="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/20 rounded-full blur-xl"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-green-500/20 rounded-full blur-xl"></div>
+        </div>
+
+        <div class="text-center mb-12 relative z-10">
+            <h1 class="text-5xl font-light mb-6">drop</h1>
+            <p class="text-xl text-gray-300 font-light mb-2">Choose your path</p>
+            <p class="text-sm text-gray-400 font-light">Define how you'll approach your quarter</p>
+        </div>
+
+        <div class="space-y-4 w-full max-w-md relative z-10">
+            <a href="direct-control.html" class="path-button block w-full py-6 px-8 rounded-2xl text-left font-light bg-gray-800/60 hover:bg-gray-700/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium">Direct Control</h3>
+                        <p class="text-sm text-gray-400">Manually set your targets and baselines.</p>
+                    </div>
+                    <div class="text-2xl">🎛️</div>
+                </div>
+            </a>
+
+            <a href="domain-identities.html" class="path-button block w-full py-6 px-8 rounded-2xl text-left font-light bg-gray-800/60 hover:bg-gray-700/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium">Domain Identities</h3>
+                        <p class="text-sm text-gray-400">Choose curated identities to adopt.</p>
+                    </div>
+                    <div class="text-2xl">🧭</div>
+                </div>
+            </a>
+
+            <a href="growth-mode.html" class="path-button block w-full py-6 px-8 rounded-2xl text-left font-light bg-gray-800/60 hover:bg-gray-700/60">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium">Growth Mode</h3>
+                        <p class="text-sm text-gray-400">Let the app suggest AI targets for you.</p>
+                    </div>
+                    <div class="text-2xl">🌱</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

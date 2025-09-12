@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drop - Domain Identities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script defer src="../js/lib/state.js"></script>
+    <script defer src="../js/onboarding.js"></script>
+    <script defer src="../js/lib/config.js"></script>
+    <script defer src="../js/lib/logic.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <main class="p-6 max-w-3xl mx-auto">
+        <h2 class="text-2xl mb-4">Domain Identities</h2>
+        <p class="text-sm text-gray-400 mb-4">Choose an identity profile to apply default commitments.</p>
+
+        <div id="identities-list" class="space-y-3">
+            <button class="identity-btn w-full text-left px-4 py-3 bg-gray-800 rounded" data-id="earlybird">Earlybird (sleep focus)</button>
+            <button class="identity-btn w-full text-left px-4 py-3 bg-gray-800 rounded" data-id="athlete">Athlete (fitness focus)</button>
+            <button class="identity-btn w-full text-left px-4 py-3 bg-gray-800 rounded" data-id="reader">Reader (mind focus)</button>
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <a href="index.html" class="px-4 py-2 bg-gray-700 rounded">Back</a>
+            <a href="confirmation.html" class="px-4 py-2 bg-blue-600 rounded">Next</a>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.identity-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    loadState();
+                    state.commitments = state.commitments || {};
+                    state.commitments.identity = id;
+                    saveState();
+                    window.location.href = 'confirmation.html';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

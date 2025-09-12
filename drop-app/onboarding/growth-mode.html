@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drop - Growth Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script defer src="../js/lib/state.js"></script>
+    <script defer src="../js/onboarding.js"></script>
+    <script defer src="../js/lib/config.js"></script>
+    <script defer src="../js/lib/logic.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <main class="p-6 max-w-3xl mx-auto">
+        <h2 class="text-2xl mb-4">Growth Mode</h2>
+        <p class="text-sm text-gray-400 mb-4">We'll suggest targets using simple heuristics (placeholder for AI).</p>
+
+        <div class="space-y-4">
+            <div class="bg-gray-800 rounded p-4">
+                <h3 class="font-medium">Suggested Fitness</h3>
+                <p class="text-sm text-gray-400">Run 3x per week, 5 km each</p>
+            </div>
+            <div class="bg-gray-800 rounded p-4">
+                <h3 class="font-medium">Suggested Sleep</h3>
+                <p class="text-sm text-gray-400">Aim for consistent 7-8 hours</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <a href="index.html" class="px-4 py-2 bg-gray-700 rounded">Back</a>
+            <a id="use-growth" class="px-4 py-2 bg-blue-600 rounded">Use these</a>
+        </div>
+
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('use-growth').addEventListener('click', () => {
+                loadState();
+                state.commitments = state.commitments || {};
+                state.commitments.fitnessBaseline = 5;
+                state.commitments.fitnessUnit = 'km';
+                saveState();
+                window.location.href = 'confirmation.html';
+            });
+        });
+    </script>
+</body>
+</html>

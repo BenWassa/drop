@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>drop - Direct Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script defer src="../js/lib/state.js"></script>
+    <script defer src="../js/onboarding.js"></script>
+    <script defer src="../js/lib/config.js"></script>
+    <script defer src="../js/lib/logic.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <main class="p-6 max-w-3xl mx-auto">
+        <h2 class="text-2xl mb-4">Direct Control</h2>
+
+        <form id="direct-control-form" class="space-y-4">
+            <label class="block">
+                <div class="text-sm text-gray-300 mb-1">Fitness baseline (number)</div>
+                <input id="fitnessBaseline" type="number" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+            </label>
+
+            <label class="block">
+                <div class="text-sm text-gray-300 mb-1">Fitness unit</div>
+                <select id="fitnessUnit" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
+                    <option value="km">km</option>
+                    <option value="mi">mi</option>
+                    <option value="mins">mins</option>
+                </select>
+            </label>
+
+            <div class="flex justify-between">
+                <a href="index.html" class="px-4 py-2 bg-gray-700 rounded">Back</a>
+                <button id="continue-btn" type="button" class="px-4 py-2 bg-blue-600 rounded">Continue</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
