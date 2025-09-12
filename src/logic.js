@@ -32,12 +32,6 @@ function getWeekDates(date = new Date()) {
     return week;
 }
 
-function applyArchetype(key) {
-    const arch = ARCHETYPES[key];
-    if (!arch) return;
-    Object.assign(state.commitments, arch.commitments);
-}
-
 function applyGrowthSuggestions() {
     let readingCount = 0, writingCount = 0;
     const today = new Date();
