@@ -123,20 +123,26 @@ async function generateCodeChallenge(verifier) {
     return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-// 1. Kicks off the authentication process (UPDATED)
+// 1. Kicks off the authentication process (UPDATED with 'state' parameter)
 window.redirectToOuraAuth = async function() {
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
     
-    sessionStorage.setItem('oura_code_verifier', verifier);
+    // ADD THIS: Generate a random string for the state parameter
+    const stateValue = generateCodeVerifier(); 
 
-    const redirectUri = getRedirectUri(); // Use our new helper function
+    // Temporarily save both the verifier and the state value
+    sessionStorage.setItem('oura_code_verifier', verifier);
+    sessionStorage.setItem('oura_state', stateValue); // ADD THIS
+
+    const redirectUri = getRedirectUri();
 
     const params = new URLSearchParams({
         client_id: OURA_CONFIG.CLIENT_ID,
-        redirect_uri: redirectUri, // Use the precise URI
+        redirect_uri: redirectUri,
         response_type: 'code',
         scope: 'sleep activity readiness',
+        state: stateValue, // ADD THIS
         code_challenge: challenge,
         code_challenge_method: 'S256'
     });
@@ -144,14 +150,29 @@ window.redirectToOuraAuth = async function() {
     window.location.href = `${OURA_CONFIG.AUTH_URL}?${params.toString()}`;
 }
 
-// 2. Handles the redirect back from Oura after user approval
+// 2. Handles the redirect back from Oura after user approval (UPDATED with 'state' check)
 async function handleOuraRedirect() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const returnedState = urlParams.get('state'); // ADD THIS
 
+    // This is not an Oura redirect if there's no code.
     if (!code) {
-        return; // Not a redirect from Oura, do nothing
+        return; 
     }
+    
+    // --- ADD THIS ENTIRE SECURITY CHECK BLOCK ---
+    const originalState = sessionStorage.getItem('oura_state');
+    if (!originalState || returnedState !== originalState) {
+        console.error("Oura redirect failed: State mismatch. Possible CSRF attack.");
+        showBanner("Oura connection failed due to a security check. Please try again.", "error");
+        // Clean up immediately
+        sessionStorage.removeItem('oura_code_verifier');
+        sessionStorage.removeItem('oura_state');
+        history.replaceState(null, '', window.location.pathname);
+        return;
+    }
+    // --- END OF SECURITY CHECK BLOCK ---
 
     const verifier = sessionStorage.getItem('oura_code_verifier');
     if (!verifier) {
@@ -165,7 +186,6 @@ async function handleOuraRedirect() {
         
         state.oura.accessToken = tokenData.access_token;
         state.oura.refreshToken = tokenData.refresh_token;
-        // Calculate expiration time (in milliseconds)
         state.oura.tokenExpiresAt = Date.now() + (tokenData.expires_in * 1000);
         
         saveState();
@@ -177,8 +197,9 @@ async function handleOuraRedirect() {
     } finally {
         // Clean up the URL and session storage
         sessionStorage.removeItem('oura_code_verifier');
+        sessionStorage.removeItem('oura_state'); // ADD THIS
         history.replaceState(null, '', window.location.pathname);
-        showScreen('settings-screen'); // Go back to settings to see the connected state
+        showScreen('settings-screen');
     }
 }
 
