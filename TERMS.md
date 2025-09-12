@@ -26,11 +26,7 @@ You are solely responsible for the data you enter into the App.
 
 Because all data is stored locally on your device, **you are also solely responsible for maintaining backups of your data** by regularly using the built-in "Export Data" feature. Failure to do so may result in the permanent loss of your data if your browser cache is cleared or your device is lost.
 
-### 5. Oura API Integration
-
-The App's integration with the Oura API is provided as a convenience. Your use of the Oura API is subject to Oura's own Terms of Service and Privacy Policy. The developer of this App is not responsible for the availability or functionality of the Oura API.
-
-### 6. Changes to Terms
+### 5. Changes to Terms
 
 These terms may be updated from time to time. The latest version will always be available in the project's public GitHub repository. Continued use of the App after changes are made constitutes acceptance of the new terms.
 

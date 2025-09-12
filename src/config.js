@@ -1,12 +1,3 @@
-const OURA_CONFIG = {
-  // IMPORTANT: Client ID is public and used in the browser for the client-side OAuth2 flow.
-  CLIENT_ID: 'HCYZORM2TCBDBPZP',
-  
-  // Standard Oura API URLs
-  AUTH_URL: 'https://cloud.ouraring.com/oauth/authorize',
-  API_URL: 'https://api.ouraring.com/v2'
-};
-
 const CONFIG = {
   sleep: {
     Dawnchaser: { name: "Dawnchaser", icon: "🌅", wake: "5:30", sleep: "21:30" },

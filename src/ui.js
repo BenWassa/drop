@@ -53,7 +53,6 @@ function showScreen(screenId) {
     if (screenId === 'confirmation-screen') renderConfirmationScreen();
     if (screenId === 'settings-screen') { // Update this block
         setupSettingsScreen();
-        renderOuraCard(); // ADD THIS LINE
     }
 }
 
@@ -455,44 +454,3 @@ document.addEventListener('DOMContentLoaded', () => {
         showBanner('Storage unavailable. Changes may not persist.', 'warning');
     }
 });
-
-// --- OURA UI FUNCTIONS ---
-
-function renderOuraCard() {
-    const container = document.getElementById('oura-card-content');
-    if (!container) return;
-
-    let content = '';
-    if (state.oura.accessToken) {
-        const expiryDate = new Date(state.oura.tokenExpiresAt).toLocaleDateString();
-        content = `
-            <div class="flex justify-between items-center">
-                <label class="text-lg font-light">💍 Oura Ring</label>
-                <span class="text-xs font-light text-green-400">Connected</span>
-            </div>
-            <p class="text-xs text-gray-400 mt-2 mb-4">Connection is active. Sleep and Activity will be synced automatically. Expires around ${expiryDate}.</p>
-            <div class="flex space-x-2">
-                <button onclick="copyOuraToken()" class="glass-button w-full py-3 rounded-xl text-base font-light ripple">Copy Token</button>
-                <button onclick="disconnectFromOura()" class="glass-button w-full py-3 rounded-xl text-base font-light ripple">Disconnect</button>
-            </div>
-        `;
-    } else {
-        content = `
-            <label class="text-lg font-light block mb-2">💍 Oura Ring</label>
-            <p class="text-xs text-gray-400 mb-4">Connect your Oura account to automatically track Sleep and Activity, reducing manual effort.</p>
-            <button onclick="redirectToOuraAuth()" class="glass-button w-full py-3 rounded-xl text-base font-light ripple">Connect to Oura</button>
-        `;
-    }
-    container.innerHTML = content;
-}
-
-window.copyOuraToken = function() {
-    if (state.oura.accessToken) {
-        navigator.clipboard.writeText(state.oura.accessToken).then(() => {
-            showToast('Oura token copied to clipboard');
-        }).catch(err => {
-            showToast('Failed to copy token', 'error');
-            console.error('Failed to copy token: ', err);
-        });
-    }
-};

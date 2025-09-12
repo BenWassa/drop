@@ -12,7 +12,6 @@ All data you generate and use within the app is stored exclusively in your brows
 
 *   **Quarterly Commitments:** Your chosen path (Direct, Archetype, Growth) and the specific archetypes or targets you set for each domain.
 *   **Daily Logs:** All daily presence data you log, such as sleep embodiment, fitness activities, reading/writing sessions, meditation instances, and burnout levels.
-*   **Oura API Data:** If you choose to connect your Oura Ring, the application will fetch data (such as sleep, activity, and readiness scores) from the Oura API. This data is also stored only in your browser's `localStorage` and is never shared.
 
 ### Data Usage
 
@@ -24,12 +23,7 @@ Your data is used solely for the functionality of the application, which include
 
 ### Third-Party Services
 
-#### Oura API Integration
-This application reads data from the Oura API to automate sleep and activity tracking. The connection is made securely via an OAuth 2.0 flow that runs entirely in your browser.
-
-*   The app requests **read-only** access to your sleep, activity, and readiness data.
-*   The app **does not** send any personal log data (like reading, writing, or burnout) *to* Oura.
-*   The fetched Oura data is subject to the same privacy principle: it is stored locally on your device and is not shared.
+This application does not integrate with any third-party APIs or services. All tracking is manual and performed by the user directly within the application.
 
 ### Data Sharing and Transmission
 

@@ -5,7 +5,7 @@ A personal, mobile-first dashboard for quarterly goal setting and daily reflecti
 ## Core Vision
 
 *   **Quarterly Commitments:** Commit to a specific identity and resource allocation for a ~13-week quarter.
-*   **Frictionless Logging:** Log your daily presence with minimal taps. Automate tracking where possible with API integrations.
+*   **Frictionless Logging:** Log your daily presence with minimal taps. All tracking is manual to maintain full user control and privacy.
 *   **Adaptive Reflection:** Review your progress with visuals that adapt to your chosen path (Direct Control, Archetypes, or Growth).
 
 ---

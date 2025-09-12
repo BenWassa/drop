@@ -1,5 +1,9 @@
 ```markdown
-# Backend Integration Considerations
+# Backend Integration Considerations (Archived - Not Pursued)
+
+**Status:** This backend integration approach was considered but ultimately not implemented. The application now focuses on a manual-only, client-side approach for maximum privacy and simplicity.
+
+---
 
 To support syncing data across devices or multiple users, the app could migrate state persistence from `localStorage` to a backend service such as **Supabase** or **Firebase**. Doing so would involve replacing the `saveState()` and `loadState()` functions in `state.js` with API calls to the chosen database.
 
