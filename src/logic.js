@@ -95,3 +95,109 @@ function calculateWeeklyFitnessTarget() {
 function getDateString(date) {
     return date.toISOString().split('T')[0];
 }
+
+// --- OURA API AUTHENTICATION LOGIC ---
+
+// Generates a secure random string for the PKCE flow
+function generateCodeVerifier() {
+    const randomBytes = window.crypto.getRandomValues(new Uint8Array(32));
+    return btoa(String.fromCharCode(...randomBytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+// Hashes the verifier string to create the code challenge
+async function generateCodeChallenge(verifier) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const hash = await window.crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+// 1. Kicks off the authentication process
+window.redirectToOuraAuth = async function() {
+    const verifier = generateCodeVerifier();
+    const challenge = await generateCodeChallenge(verifier);
+    
+    // Temporarily save the verifier in the browser's session storage
+    sessionStorage.setItem('oura_code_verifier', verifier);
+
+    const params = new URLSearchParams({
+        client_id: OURA_CONFIG.CLIENT_ID,
+        redirect_uri: window.location.origin + window.location.pathname,
+        response_type: 'code',
+        scope: 'sleep activity readiness', // The data we want to read
+        code_challenge: challenge,
+        code_challenge_method: 'S256'
+    });
+
+    window.location.href = `${OURA_CONFIG.AUTH_URL}?${params.toString()}`;
+}
+
+// 2. Handles the redirect back from Oura after user approval
+async function handleOuraRedirect() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+
+    if (!code) {
+        return; // Not a redirect from Oura, do nothing
+    }
+
+    const verifier = sessionStorage.getItem('oura_code_verifier');
+    if (!verifier) {
+        console.error("Oura redirect failed: Code verifier not found.");
+        showBanner("Oura connection failed. Please try again.", "error");
+        return;
+    }
+
+    try {
+        const tokenData = await exchangeCodeForToken(code, verifier);
+        
+        state.oura.accessToken = tokenData.access_token;
+        state.oura.refreshToken = tokenData.refresh_token;
+        // Calculate expiration time (in milliseconds)
+        state.oura.tokenExpiresAt = Date.now() + (tokenData.expires_in * 1000);
+        
+        saveState();
+        showToast("Oura connected successfully!");
+
+    } catch (error) {
+        console.error("Error exchanging Oura code for token:", error);
+        showBanner("Could not connect to Oura. Please try again.", "error");
+    } finally {
+        // Clean up the URL and session storage
+        sessionStorage.removeItem('oura_code_verifier');
+        history.replaceState(null, '', window.location.pathname);
+        showScreen('settings-screen'); // Go back to settings to see the connected state
+    }
+}
+
+// 3. Exchanges the temporary code for a long-lived access token
+async function exchangeCodeForToken(code, verifier) {
+    const body = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: window.location.origin + window.location.pathname,
+        client_id: OURA_CONFIG.CLIENT_ID,
+        code_verifier: verifier
+    });
+
+    const response = await fetch(OURA_CONFIG.TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
+    });
+
+    if (!response.ok) {
+        throw new Error(`Oura token exchange failed: ${response.statusText}`);
+    }
+    return response.json();
+}
+
+// 4. Function to disconnect from Oura
+window.disconnectFromOura = function() {
+    if (confirm("Are you sure you want to disconnect from Oura?")) {
+        state.oura = { accessToken: null, refreshToken: null, tokenExpiresAt: null };
+        saveState();
+        showToast("Oura disconnected.");
+        renderOuraCard(); // Re-render the settings card
+    }
+}

@@ -1,5 +1,9 @@
-function initializeApp() {
+async function initializeApp() { // Make the function async
     loadState();
+    
+    // Handle Oura redirect BEFORE doing anything else
+    await handleOuraRedirect();
+
     state.quarter = getQuarterInfo();
     debugLog('initializeApp -> quarter', state.quarter);
 

@@ -1,3 +1,15 @@
+// In src/config.js
+
+const OURA_CONFIG = {
+  // IMPORTANT: Paste your actual Client ID here
+  CLIENT_ID: 'YOUR_CLIENT_ID_GOES_HERE',
+  
+  // Standard Oura API URLs
+  AUTH_URL: 'https://cloud.ouraring.com/oauth/authorize',
+  TOKEN_URL: 'https://api.ouraring.com/oauth/token',
+  API_URL: 'https://api.ouraring.com/v2'
+};
+
 const CONFIG = {
   sleep: {
     Dawnchaser: { name: "Dawnchaser", icon: "🌅", wake: "5:30", sleep: "21:30" },

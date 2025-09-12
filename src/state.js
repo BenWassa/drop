@@ -15,6 +15,14 @@ const state = {
         writing: 'journal',
         meditation: 'awareness'
     },
+    
+    // ADD THIS NEW OBJECT
+    oura: {
+        accessToken: null,
+        refreshToken: null,
+        tokenExpiresAt: null, // A timestamp (in ms) for when the access token expires
+    },
+
     weeklyTargets: { fitness: 5 },
     logs: {},
     onboardingComplete: false,
