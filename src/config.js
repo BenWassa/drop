@@ -1,6 +1,6 @@
 const OURA_CONFIG = {
   // IMPORTANT: Paste your actual Client ID here
-  CLIENT_ID: 'L76FLDOGHZ75ZVPB',
+  CLIENT_ID: 'HCYZORM2TCBDBPZP',
   
   // Standard Oura API URLs
   AUTH_URL: 'https://cloud.ouraring.com/oauth/authorize',
