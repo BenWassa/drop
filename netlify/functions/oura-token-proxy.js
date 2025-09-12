@@ -44,6 +44,17 @@ exports.handler = async function(event, context) {
   });
 
   try {
+    // Log whether the CLIENT_ID is present (don't print the secret itself)
+    console.log('oura-token-proxy: CLIENT_ID present=', !!CLIENT_ID);
+    // Log the exact body we will send to Oura, but redact the client_id value for safety
+    const bodyString = body.toString();
+    const redacted = bodyString.replace(/(client_id=)[^&]+/, '$1[REDACTED]');
+    console.log('oura-token-proxy: posting to Oura body (redacted)=', redacted);
+  } catch (e) {
+    console.log('oura-token-proxy: error preparing logs', e && e.message);
+  }
+
+  try {
     const response = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

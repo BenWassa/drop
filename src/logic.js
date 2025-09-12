@@ -147,6 +147,9 @@ window.redirectToOuraAuth = async function() {
 
     const redirectUri = getRedirectUri();
 
+    // Persist the exact redirect URI we used so the exchange uses the identical value
+    sessionStorage.setItem('oura_redirect_uri', redirectUri);
+
     const params = new URLSearchParams({
         client_id: OURA_CONFIG.CLIENT_ID,
         redirect_uri: redirectUri,
@@ -208,6 +211,8 @@ async function handleOuraRedirect() {
         // Clean up the URL and session storage
         sessionStorage.removeItem('oura_code_verifier');
         sessionStorage.removeItem('oura_state'); // ADD THIS
+        // Remove the stored redirect URI used for the PKCE exchange
+        sessionStorage.removeItem('oura_redirect_uri');
         history.replaceState(null, '', window.location.pathname);
         showScreen('settings-screen');
     }
@@ -215,7 +220,8 @@ async function handleOuraRedirect() {
 
 // 3. Exchanges the temporary code for a long-lived access token (UPDATED)
 async function exchangeCodeForToken(code, verifier) {
-    const redirectUri = getRedirectUri(); // Use our new helper function
+    // Use the exact redirect URI that was stored when the auth flow started.
+    const redirectUri = sessionStorage.getItem('oura_redirect_uri') || getRedirectUri();
     // POST to our Netlify function which will exchange the code for us.
     const proxyUrl = '/.netlify/functions/oura-token-proxy';
 
