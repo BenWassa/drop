@@ -58,6 +58,14 @@ window.registerScreen('example-screen', { setup: setupFn, teardown: teardownFn }
 
 - `showScreen` would then call teardown on the previous screen (if provided) and setup on the next screen.
 
+## Notes on script load order & autoload behavior
+
+Small sites often include multiple `<script>` tags in the page header. Some `src/screens/*.js` files may be loaded before `src/ui.js` (the registry). To avoid race conditions and keep backward compatibility with inline `onclick` handlers, the ScreenRegistry will auto-register well-known setup functions attached to `window` (for example `window.setupDirectControl`, `window.populateCommitmentsScreen`).
+
+When creating new screens, either call `window.registerScreen('my-screen', setupFn)` (if the registry is available) or attach your setup to `window` and the registry's autoload will pick it up.
+
+Also note: onboarding second-step paths exist now (`direct`, `identities`, `growth`) and should be considered when adding or migrating onboarding screens.
+
 Future improvements
 
 - Convert to ES modules and use dynamic `import()` for lazy-loading screens on demand.

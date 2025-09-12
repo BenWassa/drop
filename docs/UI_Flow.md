@@ -54,5 +54,14 @@ console.log(window.ScreenRegistry);
 window.populateCommitmentsScreen();
 ```
 
+## Recent implementation notes
+
+A short note on recent changes that affect onboarding and screen wiring:
+
+- The app now supports three onboarding second-step flows: `direct` (Direct Control), `identities` (Domain Identities detail), and `growth` (Growth setup). Each path writes into `state.commitments` in a way that downstream rendering and calculations expect.
+- Screen modules are now modularized under `src/screens/` and register setup functions with the central ScreenRegistry in `src/ui.js`. To avoid timing issues when scripts load before the registry, the registry auto-registers known `window`-exposed setup functions.
+- The fitness model has been updated to be per-aspect (cardio, strength, skills) with tiered multipliers; UI rendering and weekly target calculations prefer the per-aspect model but preserve a legacy fallback for migration.
+
+See **[Creative_Direction.md](Creative_Direction.md)** for designer and product rationale behind these changes.
 
 *** End of UI Flow doc

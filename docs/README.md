@@ -13,6 +13,17 @@ Quick reference for the most important design decisions and implementation princ
 ### 🤖 **[AI_Instructions.md](AI_Instructions.md)**
 Technical guide for AI assistants working on the codebase. Includes architecture overview, development patterns, and contribution guidelines.
 
+## 🧭 Creative Direction & Recent Changes
+
+See **[Creative_Direction.md](Creative_Direction.md)** for a concise summary of the product philosophy and recent implementation notes. It captures high-level design decisions (identity-first approach, quarterly commitments) and recent engineering choices including:
+
+- Modular screens under `src/screens/` and the ScreenRegistry pattern in `src/ui.js`.
+- ScreenRegistry autoload behavior: modules that attach setup functions to `window` are auto-registered to avoid race conditions when scripts load before `src/ui.js`.
+- Per-aspect fitness model (cardio/strength/skills) with tiered multipliers used to compute weekly targets.
+- Onboarding second-step paths: `direct`, `identities`, and `growth` and how they write to `state.commitments`.
+
+This note is intentionally short; refer to the full docs for implementation details.
+
 ## 📋 Project Management
 
 ### 🚀 **[NextSteps.md](NextSteps.md)**

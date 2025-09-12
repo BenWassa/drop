@@ -1,5 +1,17 @@
 # AI Agent Instructions for drop
 
+## Creative Direction & Recent Implementation Notes
+
+Before making changes, also read **[Creative_Direction.md](Creative_Direction.md)** which captures the design and product rationale for recent structural changes (modular screens, ScreenRegistry autoload, per-aspect fitness model, and onboarding paths). Key points for AI agents and contributors:
+
+- Keep changes aligned with the identity-first philosophy and quarterly commitments model.
+- New screen modules register with the ScreenRegistry; the registry autoloads known `window`-exposed setup functions to avoid timing issues.
+- Fitness is now modeled per-aspect (cardio/strength/skills). When modifying calculations, update `src/config.js` and `src/logic.js` and preserve legacy fallback for migration.
+
+Refer to `docs/Creative_Direction.md` for the short rationale; use the rest of these AI instructions for code-level guidelines.
+
+---
+
 ## 📖 Original Vision & Philosophy
 
 **Before making any changes, read the [Original Vision & Thoughts](Original_Vision.md)** document to understand the foundational principles that guide all development decisions.
