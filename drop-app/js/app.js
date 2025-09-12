@@ -24,45 +24,62 @@ function renderAllDomainCards(){
 
 function renderSleepCard(){
     const todayLog = state.logs[getTodaysDateString()] || {};
-    const sleepCommitment = CONFIG.sleep[state.commitments.sleep] || CONFIG.sleep.earlybird;
     const el = document.getElementById('sleep-card');
     if(!el) return;
     el.classList.add('domain-sleep');
+    const identities = window.DOMAIN_IDENTITIES?.sleep || CONFIG.sleep;
+    const selected = (state.identities && state.identities.sleep) || null;
+    let optionsHtml = '';
+    Object.keys(identities).forEach(key => {
+        const item = identities[key];
+        const active = selected === key ? 'active' : '';
+        optionsHtml += `<button onclick="setIdentity('sleep', null, '${key}')" class="glass-button py-3 rounded-lg w-full font-light ripple ${active}"><div class=\"flex items-center justify-between\"><span>${item.icon} ${item.name}</span><span class=\"text-xs text-gray-400\">${item.wake || ''} · ${item.sleep || ''}</span></div></button>`;
+    });
+
+    const sleepInfo = state.commitments?.sleep ? `<div class=\"text-sm text-gray-300 mt-3\">Wake: ${state.commitments.sleep.wakeTime || '—'} · Target: ${state.commitments.sleep.target_hours || '—'} hrs</div>` : '';
+
     el.innerHTML = `
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-light">${sleepCommitment.icon} ${sleepCommitment.name}</h3>
-            <span class="text-sm font-light text-gray-400">${sleepCommitment.wake} / ${sleepCommitment.sleep}</span>
+        <div class="mb-3">
+            <h3 class="text-xl font-light">🛌 Sleep — pick an identity</h3>
         </div>
-        <button onclick="logPresence('embodiedSleep', ${!todayLog.embodiedSleep})"
-            class="glass-button w-full py-4 rounded-xl text-lg font-light ripple ${todayLog.embodiedSleep ? 'active' : ''}">
-            Embody Rhythm
-        </button>
+        <div class="grid grid-cols-1 gap-3">${optionsHtml}</div>
+        ${sleepInfo}
+        <div class="mt-4">
+            <button onclick="logPresence('embodiedSleep', ${!todayLog.embodiedSleep})" class="glass-button w-full py-3 rounded-xl text-lg font-light ripple ${todayLog.embodiedSleep ? 'active' : ''}">Embody Rhythm</button>
+        </div>
     `;
 }
 
 function renderFitnessCard(){
     const todayLog = state.logs[getTodaysDateString()] || {};
     const fitnessCommit = state.commitments.fitness || { cardio: 'medium', strength: 'medium', skills: 'medium' };
-    const cardioCfg = CONFIG.fitness.cardio[fitnessCommit.cardio] || {};
-    const strengthCfg = CONFIG.fitness.strength[fitnessCommit.strength] || {};
-    const skillsCfg = CONFIG.fitness.skills[fitnessCommit.skills] || {};
-    const displayIcon = (cardioCfg && cardioCfg.icon) || (strengthCfg && strengthCfg.icon) || (skillsCfg && skillsCfg.icon) || '💪';
     const el = document.getElementById('fitness-card');
     if(!el) return;
     el.classList.add('domain-fitness');
+    const identities = window.DOMAIN_IDENTITIES?.fitness || CONFIG.fitness;
+    const selected = (state.identities && state.identities.fitness) || { cardio: null, strength: null, skills: null };
+    const displayIcon = '💪';
+    const aspects = ['cardio','strength','skills'];
+    let rows = '';
+    aspects.forEach(a => {
+        const opts = identities[a] || {};
+        let optHtml = '';
+        Object.keys(opts).forEach(k => {
+            const item = opts[k];
+            const active = (selected[a] === k) ? 'active' : '';
+            optHtml += `<button onclick="setIdentity('fitness','${a}','${k}')" class="glass-button py-2 px-3 rounded-lg mr-2 ${active}">${item.icon} ${item.name}</button>`;
+        });
+        rows += `<div class=\"mb-3\"><div class=\"text-sm text-gray-400 mb-2 capitalize\">${a}</div><div class=\"flex\">${optHtml}</div></div>`;
+    });
+
     el.innerHTML = `
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-light">${displayIcon} Fitness</h3>
-            <span class="text-sm font-light text-gradient">Target: ${state.weeklyTargets.fitness || state.commitments.fitnessBaseline || 0} ${state.commitments.fitnessUnit || ''}</span>
+            <span class="text-sm font-light text-gradient">Target: ${state.weeklyTargets.fitness || 0}</span>
         </div>
-        <div class="text-sm text-gray-300 mb-3">
-            <div>Cardio: ${fitnessCommit.cardio || ''}</div>
-            <div>Strength: ${fitnessCommit.strength || ''}</div>
-            <div>Skills: ${fitnessCommit.skills || ''}</div>
-        </div>
+        ${rows}
         <div class="flex items-center space-x-4">
-            <input type="number" id="fitness-log-input" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"
-                   value="${todayLog.fitnessLogged || ''}" placeholder="Log units...">
+            <input type="number" id="fitness-log-input" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" value="${todayLog.fitnessLogged || ''}" placeholder="Log units...">
             <button onclick="logFitness()" class="glass-button px-6 py-3 rounded-xl text-lg font-light ripple">Log</button>
         </div>
     `;
@@ -70,45 +87,78 @@ function renderFitnessCard(){
 
 function renderMindCard(){
     const todayLog = state.logs[getTodaysDateString()] || {};
-    const reading = CONFIG.mind.reading[state.commitments.reading] || CONFIG.mind.reading.casual;
-    const writing = CONFIG.mind.writing[state.commitments.writing] || CONFIG.mind.writing.journal;
+    const identities = window.DOMAIN_IDENTITIES?.mind || CONFIG.mind;
+    const selected = (state.identities && state.identities.mind) || { reading: null, writing: null };
     const el = document.getElementById('mind-card');
     if(!el) return;
     el.classList.add('domain-mind');
+
+    let readingHtml = '';
+    Object.keys(identities.reading || {}).forEach(k => {
+        const it = identities.reading[k];
+        const active = selected.reading === k ? 'active' : '';
+        readingHtml += `<button onclick="setIdentity('mind','reading','${k}')" class="glass-button py-3 rounded-lg w-full ${active}">${it.icon} ${it.name}</button>`;
+    });
+    let writingHtml = '';
+    Object.keys(identities.writing || {}).forEach(k => {
+        const it = identities.writing[k];
+        const active = selected.writing === k ? 'active' : '';
+        writingHtml += `<button onclick="setIdentity('mind','writing','${k}')" class="glass-button py-3 rounded-lg w-full ${active}">${it.icon} ${it.name}</button>`;
+    });
+
     el.innerHTML = `
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-light">🧠 Mind</h3>
-        </div>
+        <div class="mb-4"><h3 class="text-xl font-light">📚 Mind — pick identities</h3></div>
         <div class="grid grid-cols-2 gap-4">
-            <button onclick="logPresence('reading', ${!todayLog.reading})" class="glass-button py-4 rounded-xl font-light ripple ${todayLog.reading ? 'active' : ''}">
-                ${reading.icon} ${reading.name}
-            </button>
-            <button onclick="logPresence('writing', ${!todayLog.writing})" class="glass-button py-4 rounded-xl font-light ripple ${todayLog.writing ? 'active' : ''}">
-                ${writing.icon} ${writing.name}
-            </button>
+            <div>${readingHtml}</div>
+            <div>${writingHtml}</div>
         </div>
     `;
 }
 
 function renderSpiritCard(){
     const todayLog = state.logs[getTodaysDateString()] || {};
-    const meditation = CONFIG.spirit.meditation[state.commitments.meditation] || CONFIG.spirit.meditation.awareness;
+    const identities = window.DOMAIN_IDENTITIES?.spirit || CONFIG.spirit;
+    const selected = (state.identities && state.identities.spirit) || { meditation: null, stress: null };
     const el = document.getElementById('spirit-card');
     if(!el) return;
     el.classList.add('domain-spirit');
+
+    let medHtml = '';
+    Object.keys(identities.meditation || {}).forEach(k => {
+        const it = identities.meditation[k];
+        const active = selected.meditation === k ? 'active' : '';
+        medHtml += `<button onclick="setIdentity('spirit','meditation','${k}')" class="glass-button py-3 rounded-lg w-full ${active}">${it.icon} ${it.name}</button>`;
+    });
+    let stressHtml = '';
+    Object.keys(identities.stress || {}).forEach(k => {
+        const it = identities.stress[k];
+        const active = selected.stress === k ? 'active' : '';
+        stressHtml += `<button onclick="setIdentity('spirit','stress','${k}')" class="glass-button py-2 px-3 rounded-lg mr-2 ${active}">${it.icon} ${it.name}</button>`;
+    });
+
     el.innerHTML = `
-         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-light">${meditation.icon} ${meditation.name}</h3>
-             <button onclick="logPresence('meditation', ${!todayLog.meditation})" class="glass-button px-8 py-3 rounded-xl font-light ripple ${todayLog.meditation ? 'active' : ''}">
-                Meditate
-            </button>
-        </div>
-        <div class="flex items-center space-x-4 mt-6">
-            <span class="text-sm font-light text-gray-400">Burnout</span>
-            <input type="range" min="1" max="5" value="${todayLog.burnout || 3}" onchange="logPresence('burnout', parseInt(this.value))" class="slider flex-1 domain-spirit">
-            <span class="text-sm font-light w-4 text-center">${todayLog.burnout || 3}</span>
+        <div class="mb-4"><h3 class="text-xl font-light">🧘 Spirit — pick identities</h3></div>
+        <div class="grid grid-cols-1 gap-4">
+            <div>${medHtml}</div>
+            <div class="mt-2"><div class="text-sm text-gray-400 mb-2">Stress tolerance</div><div class="flex">${stressHtml}</div></div>
         </div>
     `;
+}
+
+// Helper to persist identity selections
+function setIdentity(domain, aspect, key){
+    state.identities = state.identities || {};
+    if(!aspect){
+        // top-level domain identity (sleep)
+        state.identities[domain] = key;
+    } else {
+        state.identities[domain] = state.identities[domain] || {};
+        state.identities[domain][aspect] = key;
+    }
+    debugLog('setIdentity ->', domain, aspect, key);
+    saveState();
+    renderAllDomainCards();
+    try { showToast?.('Identity saved'); } catch {}
 }
 
 function logFitness(){
