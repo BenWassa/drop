@@ -20,7 +20,9 @@ exports.handler = async function(event, context) {
   try {
     console.log('oura-token-proxy: received payload keys =', Object.keys(payload));
     // Log presence of critical fields without printing secrets
-    console.log('oura-token-proxy: has code=', !!payload.code, 'has verifier=', !!payload.verifier, 'redirect_uri=', payload.redirect_uri);
+    console.log('oura-token-proxy: has code=', !!payload.code, 'code_len=', payload.code ? payload.code.length : 0,
+                'has verifier=', !!payload.verifier, 'verifier_len=', payload.verifier ? payload.verifier.length : 0,
+                'redirect_uri=', payload.redirect_uri);
   } catch (e) {
     console.log('oura-token-proxy: error logging payload', e && e.message);
   }
