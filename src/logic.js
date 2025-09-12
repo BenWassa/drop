@@ -98,15 +98,25 @@ function getDateString(date) {
 
 // --- OURA API AUTHENTICATION LOGIC ---
 
-// This new helper function ensures we always use the exact, whitelisted URI.
+// Helper to return the exact redirect URI we registered with Oura.
+// Accepts multiple local hostnames and preserves the port when present.
 function getRedirectUri() {
-    if (window.location.hostname === '127.0.0.1') {
-        // We are on a local server
-        return 'http://127.0.0.1:5500/index.html';
-    } else {
-        // We are on the live GitHub Pages site
+    const host = window.location.hostname;
+    const port = window.location.port;
+
+    // Common local dev hosts — include any port the dev server uses
+    if (host === '127.0.0.1' || host === 'localhost' || host === '0.0.0.0') {
+        const p = port || '5500';
+        return `http://${host}:${p}/index.html`;
+    }
+
+    // GitHub pages production host
+    if (host === 'benwassa.github.io') {
         return 'https://benwassa.github.io/drop/';
     }
+
+    // Fallback: use the exact current origin + pathname (useful for unusual setups)
+    return window.location.origin + window.location.pathname;
 }
 
 // Generates a secure random string for the PKCE flow
