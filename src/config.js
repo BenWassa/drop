@@ -1,12 +1,9 @@
 const OURA_CONFIG = {
-  // IMPORTANT: Client ID is public (used in the browser) and can remain in client code.
-  // The sensitive secret is not needed for PKCE flows. The serverless function uses
-  // VITE_OURA_CLIENT_ID from Netlify environment variables to perform the token exchange.
+  // IMPORTANT: Client ID is public and used in the browser for the client-side OAuth2 flow.
   CLIENT_ID: 'HCYZORM2TCBDBPZP',
   
   // Standard Oura API URLs
   AUTH_URL: 'https://cloud.ouraring.com/oauth/authorize',
-  TOKEN_URL: 'https://api.ouraring.com/oauth/token',
   API_URL: 'https://api.ouraring.com/v2'
 };
 

@@ -19,7 +19,6 @@ const state = {
     // ADD THIS NEW OBJECT
     oura: {
         accessToken: null,
-        refreshToken: null,
         tokenExpiresAt: null, // A timestamp (in ms) for when the access token expires
     },
 
