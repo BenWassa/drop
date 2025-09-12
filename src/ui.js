@@ -251,11 +251,20 @@ function renderSleepCard() {
 
 function renderFitnessCard() {
     const todayLog = state.logs[getTodaysDateString()];
-    const fitnessMode = CONFIG.fitness[state.commitments.fitnessMode];
+    const fitnessCommit = state.commitments.fitness || { cardio: 'medium', strength: 'medium', skills: 'medium' };
+    const cardioCfg = CONFIG.fitness.cardio[fitnessCommit.cardio];
+    const strengthCfg = CONFIG.fitness.strength[fitnessCommit.strength];
+    const skillsCfg = CONFIG.fitness.skills[fitnessCommit.skills];
+    const displayIcon = (cardioCfg && cardioCfg.icon) || (strengthCfg && strengthCfg.icon) || (skillsCfg && skillsCfg.icon) || '💪';
     const content = `
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-light">${fitnessMode.icon} ${fitnessMode.name}</h3>
-            <span class="text-sm font-light text-gradient">Target: ${state.weeklyTargets.fitness} ${state.commitments.fitnessUnit}</span>
+            <h3 class="text-xl font-light">${displayIcon} Fitness</h3>
+            <span class="text-sm font-light text-gradient">Target: ${state.weeklyTargets.fitness} ${state.commitments.fitnessUnit || ''}</span>
+        </div>
+        <div class="text-sm text-gray-300 mb-3">
+            <div>Cardio: ${fitnessCommit.cardio}</div>
+            <div>Strength: ${fitnessCommit.strength}</div>
+            <div>Skills: ${fitnessCommit.skills}</div>
         </div>
         <div class="flex items-center space-x-4">
             <input type="number" id="fitness-log-input" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"
@@ -326,7 +335,19 @@ function calculateWeeklyFitnessTarget() {
         ? loggedValues.reduce((a, b) => a + b, 0) / loggedValues.length
         : state.commitments.fitnessBaseline;
 
-    const multiplier = CONFIG.fitness[state.commitments.fitnessMode].multiplier;
+    let multiplier = 1.0;
+    // If we have per-aspect fitness commitments, derive multiplier as the average of aspect multipliers
+    if (state.commitments.fitness && CONFIG.fitness) {
+        const aspects = ['cardio', 'strength', 'skills'];
+        const mults = aspects.map(a => {
+            const tier = state.commitments.fitness[a];
+            return (CONFIG.fitness[a] && CONFIG.fitness[a][tier] && CONFIG.fitness[a][tier].multiplier) || 1.0;
+        });
+        const sum = mults.reduce((s, v) => s + v, 0);
+        multiplier = sum / mults.length;
+    } else if (state.commitments.fitnessMode && CONFIG.fitness[state.commitments.fitnessMode]) {
+        multiplier = CONFIG.fitness[state.commitments.fitnessMode].multiplier || 1.0;
+    }
     const newTarget = lastWeekPerformance * multiplier;
     state.weeklyTargets.fitness = Math.round(newTarget * 10) / 10;
     debugLog('calculateWeeklyFitnessTarget -> avg:', lastWeekPerformance, 'mode*:', multiplier, 'target:', state.weeklyTargets.fitness);

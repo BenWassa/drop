@@ -134,29 +134,45 @@
             state.commitments.sleep = identities.sleep;
         }
 
-        // Apply fitness identity
-        if (identities.fitness && fitness[identities.fitness]) {
-            state.commitments.fitnessMode = identities.fitness;
-            // Set default baseline based on identity
-            const fitnessDefaults = {
-                endurance: { baseline: 5, unit: 'km' },
-                strength: { baseline: 3, unit: 'sessions' },
-                mobility: { baseline: 4, unit: 'sessions' },
-                custom: { baseline: 3, unit: 'units' }
-            };
-            const defaults = fitnessDefaults[identities.fitness] || fitnessDefaults.custom;
-            state.commitments.fitnessBaseline = defaults.baseline;
-            state.commitments.fitnessUnit = defaults.unit;
+        // Apply fitness identity -> map to per-aspect tiers (cardio, strength, skills)
+        // The UI currently selects a high-level fitness identity (endurance/strength/mobility)
+        // We'll map those to sensible per-aspect defaults. In future you can add a
+        // direct-control screen to pick each aspect explicitly.
+        if (identities.fitness) {
+            const preset = identities.fitness;
+            state.commitments.fitness = state.commitments.fitness || { cardio: 'low', strength: 'low', skills: 'low' };
+            if (preset === 'endurance') {
+                state.commitments.fitness.cardio = 'medium';
+                state.commitments.fitness.strength = 'low';
+                state.commitments.fitness.skills = 'low';
+            } else if (preset === 'strength') {
+                state.commitments.fitness.cardio = 'low';
+                state.commitments.fitness.strength = 'medium';
+                state.commitments.fitness.skills = 'low';
+            } else if (preset === 'mobility') {
+                state.commitments.fitness.cardio = 'low';
+                state.commitments.fitness.strength = 'low';
+                state.commitments.fitness.skills = 'medium';
+            } else if (preset === 'custom') {
+                state.commitments.fitness.cardio = 'medium';
+                state.commitments.fitness.strength = 'medium';
+                state.commitments.fitness.skills = 'medium';
+            }
+            // Derive a simple baseline & unit from cardio tier (used by existing UI)
+            const cardioTier = state.commitments.fitness.cardio;
+            const cardioBaseline = { low: 2, medium: 5, high: 8 };
+            state.commitments.fitnessBaseline = cardioBaseline[cardioTier] || 3;
+            state.commitments.fitnessUnit = 'units';
         }
 
         // Apply mind identity
         if (identities.mind) {
-            const mindDefaults = {
-                reader: { reading: 'comprehensive', writing: 'journal' },
-                writer: { reading: 'casual', writing: 'article' },
-                learner: { reading: 'comprehensive', writing: 'journal' },
-                custom: { reading: 'casual', writing: 'journal' }
-            };
+                const mindDefaults = {
+                    reader: { reading: 'perspicacity', writing: 'journal' },
+                    writer: { reading: 'casual', writing: 'editorial' },
+                    learner: { reading: 'erudition', writing: 'treatise' },
+                    custom: { reading: 'casual', writing: 'journal' }
+                };
             const defaults = mindDefaults[identities.mind] || mindDefaults.custom;
             state.commitments.reading = defaults.reading;
             state.commitments.writing = defaults.writing;
@@ -164,13 +180,16 @@
 
         // Apply spirit identity
         if (identities.spirit) {
-            const spiritDefaults = {
-                mindful: 'mindfulness',
-                reflective: 'reflection',
-                connected: 'gratitude',
-                custom: 'mindfulness'
+            // Map spirit identity to stress & meditation aspects
+            const spiritMap = {
+                mindful: { stress: 'low', meditation: 'awareness' },
+                reflective: { stress: 'medium', meditation: 'introspection' },
+                connected: { stress: 'medium', meditation: 'introspection' },
+                custom: { stress: 'low', meditation: 'awareness' }
             };
-            state.commitments.meditation = spiritDefaults[identities.spirit] || spiritDefaults.custom;
+            const chosen = spiritMap[identities.spirit] || spiritMap.custom;
+            state.commitments.stress = chosen.stress;
+            state.commitments.meditation = chosen.meditation;
         }
     }
 
