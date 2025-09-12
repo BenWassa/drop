@@ -65,3 +65,24 @@ drop/
 
 ## Legal & Privacy
 - See `PRIVACY.md` and `TERMS.md` for local data handling and terms.
+
+## Running end-to-end smoke tests (Playwright)
+
+These repository includes a small Playwright-based smoke test suite that exercises onboarding flows (Direct Control, Domain Identities, Growth Mode).
+
+1. Install dev dependencies (Playwright):
+
+```powershell
+npm install --save-dev playwright @playwright/test
+npx playwright install
+```
+
+2. Start the local static server and run tests (Playwright will start its own server via playwright.config.js webServer):
+
+```powershell
+npm run test:e2e
+```
+
+Notes:
+- The Playwright config uses `python -m http.server 8000` as the web server command. Ensure Python is available in your PATH.
+- Tests run headless by default. To debug visually, run Playwright in headed mode by setting `PWDEBUG=1` in the environment or edit the test command to include `--headed`.

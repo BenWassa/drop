@@ -7,7 +7,9 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "dev": "python -m http.server 8000"
+    "dev": "python -m http.server 8000",
+    "start": "python -m http.server 8000",
+    "test:e2e": "npx playwright test --project=chromium"
   },
   "devDependencies": {
     "vitest": "^1.0.0"
