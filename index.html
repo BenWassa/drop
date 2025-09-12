@@ -15,46 +15,201 @@
              data-type="info"></div>
 
         <!-- Vision Screen -->
-        <div id="vision-screen" class="app-screen active-screen min-h-screen flex flex-col justify-center items-center p-6">
-            <div class="text-center mb-16"><h1 class="text-4xl font-light mb-4 text-gradient glow-text">drop</h1><p class="text-gray-400 font-light">Choose your path</p></div>
-            <div class="space-y-6 w-full max-w-sm">
-                <button onclick="selectPath('direct')" class="glass-button w-full py-8 rounded-2xl text-xl font-light ripple">Direct Control</button>
-                <button onclick="selectPath('archetypes')" class="glass-button w-full py-8 rounded-2xl text-xl font-light ripple">Archetypes</button>
-                <button onclick="selectPath('growth')" class="glass-button w-full py-8 rounded-2xl text-xl font-light ripple">Growth Mode</button>
+        <div id="vision-screen" class="app-screen active-screen min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
+            <!-- Background decorative elements -->
+            <div class="absolute inset-0 opacity-30">
+                <div class="absolute top-20 left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-xl"></div>
+                <div class="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/20 rounded-full blur-xl"></div>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-green-500/20 rounded-full blur-xl"></div>
             </div>
-            <div class="glass-card rounded-2xl p-5 mt-8 w-full max-w-sm text-sm text-gray-300 font-light">
-                <div class="mb-2 text-gradient">Which path is right for me?</div>
-                <ul class="list-disc list-inside space-y-1">
-                    <li><strong>Direct Control:</strong> Manually set everything for full control.</li>
-                    <li><strong>Archetypes:</strong> Start from a template (e.g., Scholar, Athlete), then tweak.</li>
-                    <li><strong>Growth Mode:</strong> Suggests targets from your recent consistency.</li>
-                </ul>
+
+            <div class="text-center mb-16 relative z-10">
+                <h1 class="text-5xl font-light mb-6 text-gradient glow-text">drop</h1>
+                <p class="text-xl text-gray-300 font-light mb-2">Choose your path</p>
+                <p class="text-sm text-gray-400 font-light">Define how you'll approach your quarter</p>
+            </div>
+
+            <div class="space-y-4 w-full max-w-md relative z-10">
+                <button onclick="selectPath('direct')" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                            <span class="text-2xl">🎯</span>
+                        </div>
+                        <div>
+                            <div class="text-lg font-medium text-white">Direct Control</div>
+                            <div class="text-sm text-gray-400">Manually set everything for full control</div>
+                        </div>
+                    </div>
+                </button>
+
+                <button onclick="selectPath('archetypes')" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                            <span class="text-2xl">🌟</span>
+                        </div>
+                        <div>
+                            <div class="text-lg font-medium text-white">Archetypes</div>
+                            <div class="text-sm text-gray-400">Start from a template, then customize</div>
+                        </div>
+                    </div>
+                </button>
+
+                <button onclick="selectPath('growth')" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                            <span class="text-2xl">📈</span>
+                        </div>
+                        <div>
+                            <div class="text-lg font-medium text-white">Growth Mode</div>
+                            <div class="text-sm text-gray-400">AI suggests targets from your history</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 mt-8 w-full max-w-md text-sm text-gray-300 font-light relative z-10">
+                <div class="mb-3 text-gradient font-medium">💡 Quick Guide</div>
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-start space-x-2">
+                        <span class="text-blue-400 mt-0.5">•</span>
+                        <span><strong>Direct Control:</strong> Full customization for experienced users</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <span class="text-purple-400 mt-0.5">•</span>
+                        <span><strong>Archetypes:</strong> Pre-built templates like "Scholar" or "Athlete"</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <span class="text-green-400 mt-0.5">•</span>
+                        <span><strong>Growth Mode:</strong> Smart suggestions based on your patterns</span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- Onboarding: Commitments -->
-        <div id="commitments-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6">
-            <div class="text-center mb-12"><h2 class="text-3xl font-light mb-4 text-gradient">Set Commitments</h2><p class="text-gray-400 font-light">Define your quarter</p></div>
-            <div class="w-full max-w-sm space-y-6">
+        <div id="commitments-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
+            <!-- Background decorative elements -->
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-16 right-12 w-24 h-24 bg-blue-500/15 rounded-full blur-lg"></div>
+                <div class="absolute bottom-16 left-12 w-32 h-32 bg-red-500/15 rounded-full blur-lg"></div>
+            </div>
+
+            <div class="text-center mb-12 relative z-10">
+                <h2 class="text-4xl font-light mb-4 text-gradient">Set Commitments</h2>
+                <p class="text-lg text-gray-300 font-light">Define your quarter's focus areas</p>
+            </div>
+
+            <div class="w-full max-w-lg space-y-8 relative z-10 commitments-form">
+                <!-- Archetype Selection (when applicable) -->
                 <div id="archetype-select" class="glass-card rounded-2xl p-6 hidden">
-                    <label class="text-lg font-light block mb-4">🌟 Archetype</label>
-                    <select id="archetype-choice" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="text-2xl">🌟</span>
+                        <div>
+                            <label class="text-lg font-light block text-white">Choose Archetype</label>
+                            <p class="text-sm text-gray-400">Start with a pre-built template</p>
+                        </div>
+                    </div>
+                    <select id="archetype-choice" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-blue-400 focus:bg-slate-800/80 transition-colors"></select>
                 </div>
-                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">💤 Sleep Identity</label><select id="commit-sleep" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
-                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">💪 Fitness Allocation</label><select id="commit-fitness-mode" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 mb-4"></select><div class="flex space-x-2"><input type="number" id="commit-fitness-baseline" value="5" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="Weekly baseline"><input type="text" id="commit-fitness-unit" value="km" class="w-24 bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400" placeholder="km"></div></div>
-                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">🧠 Mind Archetypes</label><select id="commit-reading" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400 mb-4"></select><select id="commit-writing" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
-                <div class="glass-card rounded-2xl p-6"><label class="text-lg font-light block mb-4">🧘 Spirit Practice</label><select id="commit-meditation" class="w-full bg-slate-800/50 border border-white/20 rounded-lg p-3 text-base font-light focus:outline-none focus:border-blue-400"></select></div>
-                <button onclick="confirmCommitments()" class="glass-button w-full py-4 rounded-2xl text-lg font-light ripple">Continue</button>
+
+                <!-- Sleep Section -->
+                <div class="glass-card rounded-2xl p-6 onboarding-section domain-sleep-section">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="text-2xl">💤</span>
+                        <div>
+                            <label class="text-lg font-light block text-white">Sleep Identity</label>
+                            <p class="text-sm text-gray-400">Your natural rhythm</p>
+                        </div>
+                    </div>
+                    <select id="commit-sleep" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-blue-400 focus:bg-slate-800/80 transition-colors"></select>
+                </div>
+
+                <!-- Fitness Section -->
+                <div class="glass-card rounded-2xl p-6 onboarding-section domain-fitness-section">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="text-2xl">💪</span>
+                        <div>
+                            <label class="text-lg font-light block text-white">Fitness Allocation</label>
+                            <p class="text-sm text-gray-400">Movement and strength goals</p>
+                        </div>
+                    </div>
+                    <select id="commit-fitness-mode" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-red-400 focus:bg-slate-800/80 transition-colors mb-4"></select>
+                    <div class="flex space-x-3">
+                        <div class="flex-1">
+                            <label class="text-sm text-gray-400 block mb-2">Weekly Baseline</label>
+                            <input type="number" id="commit-fitness-baseline" value="5" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-red-400 focus:bg-slate-800/80 transition-colors" placeholder="5">
+                        </div>
+                        <div class="w-24">
+                            <label class="text-sm text-gray-400 block mb-2">Unit</label>
+                            <input type="text" id="commit-fitness-unit" value="km" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-red-400 focus:bg-slate-800/80 transition-colors" placeholder="km">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mind Section -->
+                <div class="glass-card rounded-2xl p-6 onboarding-section domain-mind-section">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="text-2xl">🧠</span>
+                        <div>
+                            <label class="text-lg font-light block text-white">Mind Practice</label>
+                            <p class="text-sm text-gray-400">Reading and writing habits</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-2">Reading</label>
+                            <select id="commit-reading" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-yellow-400 focus:bg-slate-800/80 transition-colors"></select>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400 block mb-2">Writing</label>
+                            <select id="commit-writing" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-yellow-400 focus:bg-slate-800/80 transition-colors"></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spirit Section -->
+                <div class="glass-card rounded-2xl p-6 onboarding-section domain-spirit-section">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <span class="text-2xl">🧘</span>
+                        <div>
+                            <label class="text-lg font-light block text-white">Spirit Practice</label>
+                            <p class="text-sm text-gray-400">Meditation and mindfulness</p>
+                        </div>
+                    </div>
+                    <select id="commit-meditation" class="w-full bg-slate-800/60 border border-white/20 rounded-lg p-4 text-base font-light focus:outline-none focus:border-green-400 focus:bg-slate-800/80 transition-colors"></select>
+                </div>
+
+                <!-- Continue Button -->
+                <button onclick="confirmCommitments()" class="glass-button w-full py-5 px-8 rounded-2xl text-lg font-light ripple mt-8">
+                    Continue to Confirmation
+                </button>
             </div>
         </div>
 
         <!-- Confirmation Screen -->
-        <div id="confirmation-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6">
-             <div class="floating-card rounded-3xl p-10 w-full max-w-sm text-center">
-                <h2 class="text-2xl font-light mb-8 text-gradient">Your Quarter</h2>
-                <div id="path-summary-v2" class="mb-8 text-gray-300 space-y-2 text-left"></div>
-                <div id="quarter-info-v2" class="mb-8 text-sm text-gray-400"></div>
-                <button onclick="startJourney()" class="glass-button w-full py-5 rounded-2xl text-lg font-light ripple">Begin Journey</button>
+        <div id="confirmation-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
+            <!-- Background decorative elements -->
+            <div class="absolute inset-0 opacity-25">
+                <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="floating-card rounded-3xl p-8 w-full max-w-md text-center relative z-10 shadow-2xl">
+                <div class="mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">✨</span>
+                    </div>
+                    <h2 class="text-3xl font-light mb-2 text-gradient">Your Quarter</h2>
+                    <p class="text-gray-400 font-light">Ready to begin your journey</p>
+                </div>
+
+                <div id="path-summary-v2" class="mb-6 text-gray-300 space-y-3 text-left bg-slate-800/30 rounded-xl p-4"></div>
+
+                <div id="quarter-info-v2" class="mb-6 text-sm text-gray-400 bg-slate-800/20 rounded-lg p-3"></div>
+
+                <button onclick="startJourney()" class="glass-button w-full py-4 px-6 rounded-2xl text-lg font-light ripple bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-400/30 hover:border-blue-400/50">
+                    Begin Journey 🚀
+                </button>
             </div>
         </div>
         
