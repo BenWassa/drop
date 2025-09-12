@@ -12,30 +12,27 @@
     <script defer src="../js/lib/logic.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100">
-    <main class="p-6 max-w-3xl mx-auto">
-        <h2 class="text-2xl mb-4">Confirm your choices</h2>
-        <div id="confirmation-summary" class="bg-gray-800 rounded p-4">
-            <pre id="summary-pre" class="whitespace-pre-wrap text-sm text-gray-200"></pre>
-        </div>
+    <main class="p-6 min-h-screen flex items-center justify-center">
+        <div class="floating-card rounded-3xl p-8 w-full max-w-md text-center relative z-10 shadow-2xl">
+            <div class="mb-4">
+                <h2 class="text-2xl font-light text-gradient">Confirm your choices</h2>
+            </div>
 
-        <div class="flex justify-between mt-6">
-            <a href="index.html" class="px-4 py-2 bg-gray-700 rounded">Back</a>
-            <button id="start-journey-btn" class="px-4 py-2 bg-green-600 rounded">Start Journey</button>
+            <div id="confirmation-summary" class="mb-6 text-gray-300 space-y-3 text-left bg-slate-800/30 rounded-xl p-4">
+                <pre id="summary-pre" class="whitespace-pre-wrap text-sm text-gray-200">Loading summary...</pre>
+            </div>
+
+            <div id="quarter-info" class="mb-6 text-sm text-gray-400 bg-slate-800/20 rounded-lg p-3"></div>
+
+            <div>
+                <button id="start-journey-btn" class="glass-button w-full py-4 px-6 rounded-2xl text-lg font-light ripple">Begin Journey 🚀</button>
+            </div>
         </div>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            const pre = document.getElementById('summary-pre');
-            pre.textContent = JSON.stringify(state.commitments || {}, null, 2);
-
-            document.getElementById('start-journey-btn').addEventListener('click', () => {
-                state.onboardingComplete = true;
-                saveState();
-                window.location.href = '../app/index.html';
-            });
-        });
-    </script>
+    <script src="../js/lib/config.js"></script>
+    <script src="../js/lib/state.js"></script>
+    <script src="../js/lib/logic.js"></script>
+    <script src="../js/onboarding.js"></script>
 </body>
 </html>

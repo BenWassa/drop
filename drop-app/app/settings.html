@@ -15,15 +15,20 @@
     <main class="p-6 max-w-3xl mx-auto">
         <h1 class="text-2xl mb-4">Settings</h1>
         <div id="settings-content">
-            <button id="clear-data" class="px-3 py-2 bg-red-600 rounded">Clear local data</button>
+            <button id="clear-data" class="glass-button px-3 py-2 bg-red-600 rounded ripple">Clear local data</button>
         </div>
     </main>
-    <nav class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 rounded-full px-4 py-2 flex gap-2">
-        <a href="index.html" class="nav-button px-3 py-2 bg-gray-700 rounded">🎭</a>
-        <a href="gratitude.html" class="nav-button px-3 py-2 rounded">🙏</a>
-        <a href="review.html" class="nav-button px-3 py-2 rounded">📊</a>
-        <a href="settings.html" class="nav-button px-3 py-2 rounded">⚙️</a>
+    <nav class="main-nav glass-nav">
+        <a href="index.html" class="nav-button">🎭</a>
+        <a href="gratitude.html" class="nav-button">🙏</a>
+        <a href="review.html" class="nav-button">📊</a>
+        <a href="settings.html" class="nav-button active">⚙️</a>
     </nav>
+
+    <script src="../js/lib/config.js"></script>
+    <script src="../js/lib/state.js"></script>
+    <script src="../js/lib/logic.js"></script>
+    <script src="../js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('clear-data').addEventListener('click', () => {

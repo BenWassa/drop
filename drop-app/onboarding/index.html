@@ -14,46 +14,56 @@
 <body class="text-gray-100 min-h-screen overflow-x-hidden bg-gray-900">
 
     <div id="vision-screen" class="min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
-        <div class="absolute inset-0 opacity-30">
-            <div class="absolute top-20 left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-xl"></div>
-            <div class="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/20 rounded-full blur-xl"></div>
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-green-500/20 rounded-full blur-xl"></div>
+        <!-- Decorative background elements using our new CSS classes -->
+        <div class="vision-screen-deco">
+            <div class="deco-blur-1"></div>
+            <div class="deco-blur-2"></div>
+            <div class="deco-blur-3"></div>
         </div>
 
-        <div class="text-center mb-12 relative z-10">
-            <h1 class="text-5xl font-light mb-6">drop</h1>
+        <div class="text-center mb-16 relative z-10">
+            <h1 class="text-5xl font-light mb-6 text-gradient glow-text">drop</h1>
             <p class="text-xl text-gray-300 font-light mb-2">Choose your path</p>
             <p class="text-sm text-gray-400 font-light">Define how you'll approach your quarter</p>
         </div>
 
         <div class="space-y-4 w-full max-w-md relative z-10">
-            <a href="direct-control.html" class="path-button block w-full py-6 px-8 rounded-2xl text-left font-light bg-gray-800/60 hover:bg-gray-700/60">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-medium">Direct Control</h3>
-                        <p class="text-sm text-gray-400">Manually set your targets and baselines.</p>
+            <!-- Link to Direct Control page -->
+            <a href="direct-control.html" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                        <span class="text-2xl">🎯</span>
                     </div>
-                    <div class="text-2xl">🎛️</div>
+                    <div>
+                        <div class="text-lg font-medium text-white">Direct Control</div>
+                        <div class="text-sm text-gray-400">Manually set your targets and baselines.</div>
+                    </div>
                 </div>
             </a>
 
-            <a href="domain-identities.html" class="path-button block w-full py-6 px-8 rounded-2xl text-left font-light bg-gray-800/60 hover:bg-gray-700/60">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-medium">Domain Identities</h3>
-                        <p class="text-sm text-gray-400">Choose curated identities to adopt.</p>
+            <!-- Link to Domain Identities page -->
+            <a href="domain-identities.html" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                        <span class="text-2xl">🌟</span>
                     </div>
-                    <div class="text-2xl">🧭</div>
+                    <div>
+                        <div class="text-lg font-medium text-white">Domain Identities</div>
+                        <div class="text-sm text-gray-400">Choose curated identities to adopt.</div>
+                    </div>
                 </div>
             </a>
 
-            <a href="growth-mode.html" class="path-button block w-full py-6 px-8 rounded-2xl text-left font-light bg-gray-800/60 hover:bg-gray-700/60">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-medium">Growth Mode</h3>
-                        <p class="text-sm text-gray-400">Let the app suggest AI targets for you.</p>
+            <!-- Link to Growth Mode page -->
+            <a href="growth-mode.html" class="path-button w-full py-6 px-8 rounded-2xl text-left font-light ripple group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                        <span class="text-2xl">📈</span>
                     </div>
-                    <div class="text-2xl">🌱</div>
+                    <div>
+                        <div class="text-lg font-medium text-white">Growth Mode</div>
+                        <div class="text-sm text-gray-400">Let the app suggest AI targets for you.</div>
+                    </div>
                 </div>
             </a>
         </div>

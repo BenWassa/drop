@@ -7,11 +7,16 @@ function loadState(){
         if(raw){
             window.state = Object.assign({}, window.state, JSON.parse(raw));
         } else {
-            window.state = Object.assign({}, window.state, {onboardingComplete:false, commitments:{}, logs:{}});
+            window.state = Object.assign({}, window.state, {
+                onboardingComplete:false,
+                commitments:{},
+                logs:{},
+                weeklyTargets: { fitness: 0 }
+            });
         }
     }catch(e){
         console.error('Failed to load state', e);
-        window.state = {onboardingComplete:false, commitments:{}, logs:{}};
+        window.state = {onboardingComplete:false, commitments:{}, logs:{}, weeklyTargets: { fitness: 0 }};
     }
 }
 

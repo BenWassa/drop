@@ -22,4 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // Populate confirmation summary if present
+    const summary = document.getElementById('confirmation-summary');
+    if(summary){
+        const pre = document.getElementById('summary-pre');
+        pre.textContent = JSON.stringify(state.commitments || {}, null, 2);
+
+        const quarterInfo = document.getElementById('quarter-info');
+        if(quarterInfo){
+            const q = getQuarterInfo();
+            quarterInfo.textContent = `Quarter ${q.quarter} — ${q.year}`;
+        }
+
+        const startBtn = document.getElementById('start-journey-btn');
+        if(startBtn){
+            startBtn.addEventListener('click', () => {
+                state.onboardingComplete = true;
+                saveState();
+                window.location.href = '../app/index.html';
+            });
+        }
+    }
 });
