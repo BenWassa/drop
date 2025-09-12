@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const fitnessStrength = document.getElementById('fitness_strength_sessions');
         const fitnessSkill = document.getElementById('fitness_skill_sessions');
 
-        const mindReading = document.getElementById('mind_reading_minutes_week');
+    const mindReading = document.getElementById('mind_reading_minutes_week');
+    const mindWriting = document.getElementById('mind_writing_minutes_week');
 
         const spiritStress = document.getElementById('spirit_stress');
         const spiritMeditation = document.getElementById('spirit_meditation_sessions_week');
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if(state.commitments.mind){
                 mindReading.value = state.commitments.mind.reading_minutes_per_week || '';
+                mindWriting.value = state.commitments.mind.writing_minutes_per_week || '';
             }
             if(state.commitments.spirit){
                 spiritStress.value = state.commitments.spirit.stress_level || '3';
@@ -83,11 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     skill_sessions_week: skillSessions
                 };
 
-                // Mind: minutes per week (30 min increments)
+                // Mind: reading & writing minutes per week (30 min increments)
                 let readingMin = parseInt(mindReading.value) || 0;
+                let writingMin = parseInt(mindWriting.value) || 0;
                 // snap to 30-min steps
                 readingMin = Math.round(readingMin / 30) * 30;
-                state.commitments.mind = { reading_minutes_per_week: readingMin };
+                writingMin = Math.round(writingMin / 30) * 30;
+                state.commitments.mind = { reading_minutes_per_week: readingMin, writing_minutes_per_week: writingMin };
 
                 // Spirit: stress (1-5) and meditation sessions per week
                 const stress = parseInt(spiritStress.value) || 3;
@@ -100,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.weeklyTargets.fitness_strength = state.commitments.fitness.strength_sessions_week || 0;
                 state.weeklyTargets.fitness_skill = state.commitments.fitness.skill_sessions_week || 0;
                 state.weeklyTargets.mind_reading = state.commitments.mind.reading_minutes_per_week || 0;
+                state.weeklyTargets.mind_writing = state.commitments.mind.writing_minutes_per_week || 0;
                 state.weeklyTargets.spirit_meditation = state.commitments.spirit.meditation_sessions_week || 0;
 
                 saveState();
@@ -133,7 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if(mindEl){
             const reading = s.mind?.reading_minutes_per_week != null ? `${s.mind.reading_minutes_per_week} min/week` : '0';
-            mindEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-2xl">📚</div><div><div class="font-medium">Mind</div><div class="text-xs text-gray-400">Reading target</div></div></div><div class="text-sm text-gray-200">${reading}</div>`;
+            const writing = s.mind?.writing_minutes_per_week != null ? `${s.mind.writing_minutes_per_week} min/week` : '0';
+            mindEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-2xl">📚</div><div><div class="font-medium">Mind</div><div class="text-xs text-gray-400">Reading · Writing targets</div></div></div><div class="text-sm text-gray-200">${reading} · ${writing}</div>`;
         }
 
         if(spiritEl){
