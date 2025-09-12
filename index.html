@@ -342,6 +342,87 @@
             </div>
         </div>
 
+        <!-- Onboarding: Identities Detail (tweak domain identity defaults) -->
+        <div id="identities-detail-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-4 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-16 right-12 w-24 h-24 bg-blue-500/15 rounded-full blur-lg"></div>
+                <div class="absolute bottom-16 left-12 w-32 h-32 bg-red-500/15 rounded-full blur-lg"></div>
+            </div>
+
+            <div class="text-center mb-6 relative z-10">
+                <h2 class="text-3xl font-light mb-2 text-gradient">Domain Identities — Review & Tweak</h2>
+                <p class="text-base text-gray-300 font-light">Review the identities you chose and tweak per-domain defaults if you want.</p>
+            </div>
+
+            <div class="w-full max-w-sm space-y-4 relative z-10 identities-detail-form">
+                <div class="glass-card rounded-2xl p-4">
+                    <h3 class="text-lg font-medium mb-2">Selected Identities</h3>
+                    <div id="identities-summary" class="text-sm text-gray-300"></div>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="showScreen('commitments-screen')" class="glass-button flex-1 py-3 rounded-xl text-base font-light ripple">Back</button>
+                    <button id="identities-continue" class="glass-button flex-1 py-3 rounded-xl text-base font-light ripple">Continue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onboarding: Growth Setup (user inputs current levels) -->
+        <div id="growth-setup-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-4 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-20">
+                <div class="absolute top-16 right-12 w-24 h-24 bg-blue-500/15 rounded-full blur-lg"></div>
+                <div class="absolute bottom-16 left-12 w-32 h-32 bg-red-500/15 rounded-full blur-lg"></div>
+            </div>
+
+            <div class="text-center mb-6 relative z-10">
+                <h2 class="text-3xl font-light mb-2 text-gradient">Growth Mode — Tell us your current levels</h2>
+                <p class="text-base text-gray-300 font-light">We'll suggest sustainable targets from your current baseline.</p>
+            </div>
+
+            <div class="w-full max-w-sm space-y-4 relative z-10 growth-setup-form">
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Fitness — Current weekly averages</label>
+                    <div class="space-y-2 text-sm text-gray-300">
+                        <div class="flex items-center justify-between"><div>Cardio (units/week)</div><input id="growth-cardio" type="number" class="bg-slate-800/50 p-2 rounded-lg w-24" value=""></div>
+                        <div class="flex items-center justify-between"><div>Strength (units/week)</div><input id="growth-strength" type="number" class="bg-slate-800/50 p-2 rounded-lg w-24" value=""></div>
+                        <div class="flex items-center justify-between"><div>Skills (units/week)</div><input id="growth-skills" type="number" class="bg-slate-800/50 p-2 rounded-lg w-24" value=""></div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Mind — Current weekly counts</label>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                        <div>
+                            <div class="text-xs mb-1">Reading (sessions/week)</div>
+                            <input id="growth-reading" type="number" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                        </div>
+                        <div>
+                            <div class="text-xs mb-1">Writing (sessions/week)</div>
+                            <input id="growth-writing" type="number" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4">
+                    <label class="text-base font-light block text-white mb-2">Spirit</label>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                        <div>
+                            <div class="text-xs mb-1">Stress tolerance</div>
+                            <select id="growth-stress" class="bg-slate-800/50 p-2 rounded-lg w-full"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+                        </div>
+                        <div>
+                            <div class="text-xs mb-1">Meditation (sessions/week)</div>
+                            <input id="growth-meditation" type="number" class="bg-slate-800/50 p-2 rounded-lg w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2">
+                    <button onclick="showScreen('vision-screen')" class="glass-button flex-1 py-3 rounded-xl text-base font-light ripple">Back</button>
+                    <button id="growth-continue" class="glass-button flex-1 py-3 rounded-xl text-base font-light ripple">Continue</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmation Screen -->
         <div id="confirmation-screen" class="app-screen hidden min-h-screen flex flex-col justify-center items-center p-6 relative overflow-hidden">
             <!-- Background decorative elements -->
@@ -460,6 +541,8 @@
     <script src="src/logic.js"></script>
     <script src="src/screens/commitments.js"></script>
     <script src="src/screens/direct-control.js"></script>
+    <script src="src/screens/identities-detail.js"></script>
+    <script src="src/screens/growth-setup.js"></script>
     <script src="src/ui.js"></script>
     <script src="src/main.js"></script>
 </body>

@@ -34,6 +34,18 @@ window.registerScreen = function(name, setupFn) {
     ScreenRegistry[name] = setupFn;
 };
 
+// Some screen modules are loaded before ui.js and may expose setup functions on window.
+// Auto-register any known setup functions so they don't rely on registerScreen existing.
+const autoRegisterMap = {
+    'direct-control-screen': window.setupDirectControl,
+    'identities-detail-screen': window.setupIdentitiesDetail,
+    'growth-setup-screen': window.setupGrowth,
+    'commitments-screen': window.populateCommitmentsScreen
+};
+Object.entries(autoRegisterMap).forEach(([id, fn]) => {
+    if (typeof fn === 'function') ScreenRegistry[id] = fn;
+});
+
 function showScreen(screenId) {
     const current = document.querySelector('.app-screen:not(.hidden)');
     const next = document.getElementById(screenId);
@@ -92,14 +104,16 @@ window.selectPath = function(path) {
         };
     }
 
-    // For Direct Control, take user to the Direct Control page where they can set aspects.
+    // Route to the appropriate onboarding second step
     if (path === 'direct') {
-        // ensure commitments screen state exists
         populateCommitmentsScreen();
         showScreen('direct-control-screen');
-        // call direct control setup if registered
-        const directSetup = ScreenRegistry['direct-control-screen'];
-        if (directSetup) directSetup();
+    } else if (path === 'identities') {
+        populateCommitmentsScreen();
+        showScreen('identities-detail-screen');
+    } else if (path === 'growth') {
+        populateCommitmentsScreen();
+        showScreen('growth-setup-screen');
     } else {
         populateCommitmentsScreen();
         showScreen('commitments-screen');
