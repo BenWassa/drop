@@ -15,6 +15,16 @@ exports.handler = async function(event, context) {
     return { statusCode: 400, body: 'Invalid JSON body' };
   }
 
+  // DEBUG: log payload (safe-ish) and whether CLIENT_ID is available.
+  // These logs appear in Netlify's Function logs and help diagnose 400s.
+  try {
+    console.log('oura-token-proxy: received payload keys =', Object.keys(payload));
+    // Log presence of critical fields without printing secrets
+    console.log('oura-token-proxy: has code=', !!payload.code, 'has verifier=', !!payload.verifier, 'redirect_uri=', payload.redirect_uri);
+  } catch (e) {
+    console.log('oura-token-proxy: error logging payload', e && e.message);
+  }
+
   const { code, verifier, redirect_uri } = payload;
   // Get the Client ID from the environment variables for security
   const CLIENT_ID = process.env.VITE_OURA_CLIENT_ID;
@@ -40,7 +50,12 @@ exports.handler = async function(event, context) {
       body: body
     });
 
-    const data = await response.json();
+    // Read response text and attempt to parse JSON (so we can log raw text on errors)
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch (e) { data = { raw: text }; }
+
+    console.log('oura-token-proxy: Oura token endpoint status=', response.status, 'response=', data);
 
     if (!response.ok) {
       // Forward Oura's error message
