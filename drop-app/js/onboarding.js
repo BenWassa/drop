@@ -6,9 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if(form){
         const baseline = document.getElementById('fitnessBaseline');
         const unit = document.getElementById('fitnessUnit');
+        const sleepSel = document.getElementById('sleepIdentity');
+        const fitnessModeSel = document.getElementById('fitnessMode');
+        const mindSel = document.getElementById('mindFocus');
+        const spiritSel = document.getElementById('spiritPractice');
+
+        // Populate with existing commitments if present
         if(state.commitments){
             baseline.value = state.commitments.fitnessBaseline || '';
             unit.value = state.commitments.fitnessUnit || 'km';
+            if(state.commitments.sleep) sleepSel.value = state.commitments.sleep;
+            if(state.commitments.fitnessMode) fitnessModeSel.value = state.commitments.fitnessMode;
+            if(state.commitments.mind) mindSel.value = state.commitments.mind;
+            if(state.commitments.spirit) spiritSel.value = state.commitments.spirit;
         }
 
         const continueBtn = document.getElementById('continue-btn');
@@ -17,6 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.commitments = state.commitments || {};
                 state.commitments.fitnessBaseline = Number(baseline.value) || 0;
                 state.commitments.fitnessUnit = unit.value;
+                // structured commitments for each domain
+                state.commitments.sleep = sleepSel.value;
+                state.commitments.fitnessMode = fitnessModeSel.value;
+                state.commitments.mind = mindSel.value;
+                state.commitments.spirit = spiritSel.value;
+                // initialize weeklyTargets if absent
+                state.weeklyTargets = state.weeklyTargets || {};
+                if(!state.weeklyTargets.fitness){ state.weeklyTargets.fitness = state.commitments.fitnessBaseline || 0; }
                 saveState();
                 window.location.href = 'confirmation.html';
             });
