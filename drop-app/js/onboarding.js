@@ -111,8 +111,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Populate confirmation summary if present
     const summary = document.getElementById('confirmation-summary');
     if(summary){
-        const pre = document.getElementById('summary-pre');
-        pre.textContent = JSON.stringify(state.commitments || {}, null, 2);
+        // Friendly summary rendering
+        const s = state.commitments || {};
+        const sleepEl = document.getElementById('confirm-sleep');
+        const fitnessEl = document.getElementById('confirm-fitness');
+        const mindEl = document.getElementById('confirm-mind');
+        const spiritEl = document.getElementById('confirm-spirit');
+
+        if(sleepEl){
+            const hours = s.sleep?.target_hours != null ? `${s.sleep.target_hours} hrs/night` : '—';
+            const wake = s.sleep?.wakeTime || '—';
+            sleepEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-2xl">🛌</div><div><div class="font-medium">Sleep</div><div class="text-xs text-gray-400">Wake: ${wake}</div></div></div><div class="text-sm text-gray-200">${hours}</div>`;
+        }
+
+        if(fitnessEl){
+            const km = s.fitness?.km_week != null ? `${s.fitness.km_week} km/week` : '0 km/week';
+            const str = s.fitness?.strength_sessions_week != null ? `${s.fitness.strength_sessions_week} strength/wk` : '0';
+            const skl = s.fitness?.skill_sessions_week != null ? `${s.fitness.skill_sessions_week} skill/wk` : '0';
+            fitnessEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-2xl">🏃</div><div><div class="font-medium">Fitness</div><div class="text-xs text-gray-400">Distance / strength / skill</div></div></div><div class="text-sm text-gray-200">${km} · ${str} · ${skl}</div>`;
+        }
+
+        if(mindEl){
+            const reading = s.mind?.reading_minutes_per_week != null ? `${s.mind.reading_minutes_per_week} min/week` : '0';
+            mindEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-2xl">📚</div><div><div class="font-medium">Mind</div><div class="text-xs text-gray-400">Reading target</div></div></div><div class="text-sm text-gray-200">${reading}</div>`;
+        }
+
+        if(spiritEl){
+            const stress = s.spirit?.stress_level != null ? `Stress ${s.spirit.stress_level}/5` : '—';
+            const med = s.spirit?.meditation_sessions_week != null ? `${s.spirit.meditation_sessions_week} sessions/wk` : '0';
+            spiritEl.innerHTML = `<div class="flex items-center gap-3"><div class="text-2xl">🧘</div><div><div class="font-medium">Spirit</div><div class="text-xs text-gray-400">Stress · Meditation</div></div></div><div class="text-sm text-gray-200">${stress} · ${med}</div>`;
+        }
 
         const quarterInfo = document.getElementById('quarter-info');
         if(quarterInfo){
