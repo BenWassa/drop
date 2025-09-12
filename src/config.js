@@ -1,4 +1,4 @@
-const CONFIG = {
+const CON    strength: { name: "Strength", icon: "💪", identity: "Power, resistance training" },IG = {
   sleep: {
     dawnchaser: { name: "Dawn Chaser", icon: "🌅", wake: "5:30 AM", sleep: "10:30 PM", identity: "Early riser, peak performance" },
     earlybird: { name: "Early Bird", icon: "☀️", wake: "6:30 AM", sleep: "11:30 PM", identity: "Balanced energy, productive mornings" },
