@@ -15,63 +15,90 @@
     <main class="p-6 max-w-3xl mx-auto">
         <h2 class="text-2xl mb-4 text-gradient">Direct Control</h2>
 
-        <form id="direct-control-form" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="glass-card p-4 rounded-lg">
-                    <h4 class="text-sm text-gray-300 mb-2">Sleep identity</h4>
-                    <select id="sleepIdentity" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
-                        <option value="earlybird">Earlybird</option>
-                        <option value="nightowl">Night Owl</option>
-                        <option value="dawnchaser">Dawn Chaser</option>
-                        <option value="custom">Custom</option>
-                    </select>
+        <form id="direct-control-form" class="space-y-6">
+            <!-- Sleep -->
+            <div class="glass-card p-4 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-lg font-light">🛌 Sleep</h4>
+                    <small class="text-sm text-gray-400">Set wake time first — we suggest bedtime for 8 hours</small>
                 </div>
-
-                <div class="glass-card p-4 rounded-lg">
-                    <h4 class="text-sm text-gray-300 mb-2">Fitness mode</h4>
-                    <select id="fitnessMode" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
-                        <option value="cardio">Cardio</option>
-                        <option value="strength">Strength</option>
-                        <option value="skills">Skills</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                </div>
-
-                <div class="glass-card p-4 rounded-lg">
-                    <h4 class="text-sm text-gray-300 mb-2">Mind focus</h4>
-                    <select id="mindFocus" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
-                        <option value="reading">Reading</option>
-                        <option value="writing">Writing</option>
-                    </select>
-                </div>
-
-                <div class="glass-card p-4 rounded-lg">
-                    <h4 class="text-sm text-gray-300 mb-2">Spirit practice</h4>
-                    <select id="spiritPractice" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
-                        <option value="meditation">Meditation</option>
-                        <option value="reflection">Reflection</option>
-                        <option value="breathwork">Breathwork</option>
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                    <label class="block">
+                        <div class="text-xs text-gray-300 mb-1">Wake time</div>
+                        <input id="sleepWake" type="time" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                    </label>
+                    <label class="block">
+                        <div class="text-xs text-gray-300 mb-1">Hours / night</div>
+                        <input id="sleepHours" type="number" step="0.5" min="0" max="12" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                    </label>
+                    <div class="text-sm text-gray-300">
+                        <div>Suggested bedtime</div>
+                        <div id="suggestedBedtime" class="text-gradient font-medium">—</div>
+                    </div>
                 </div>
             </div>
 
-            <label class="block">
-                <div class="text-sm text-gray-300 mb-1">Fitness baseline (number)</div>
-                <input id="fitnessBaseline" type="number" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
-            </label>
+            <!-- Fitness -->
+            <div class="glass-card p-4 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-lg font-light">🏃 Fitness</h4>
+                    <small class="text-sm text-gray-400">Weekly totals</small>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <label>
+                        <div class="text-xs text-gray-300 mb-1">Distance / week (km)</div>
+                        <input id="fitness_km_week" type="number" step="0.1" min="0" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                    </label>
+                    <label>
+                        <div class="text-xs text-gray-300 mb-1">Strength sessions / week</div>
+                        <input id="fitness_strength_sessions" type="number" step="1" min="0" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                    </label>
+                    <label>
+                        <div class="text-xs text-gray-300 mb-1">Skill sessions / week</div>
+                        <input id="fitness_skill_sessions" type="number" step="1" min="0" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                    </label>
+                </div>
+            </div>
 
-            <label class="block">
-                <div class="text-sm text-gray-300 mb-1">Fitness unit</div>
-                <select id="fitnessUnit" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
-                    <option value="km">km</option>
-                    <option value="mi">mi</option>
-                    <option value="mins">mins</option>
-                </select>
-            </label>
+            <!-- Mind -->
+            <div class="glass-card p-4 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-lg font-light">📚 Mind</h4>
+                    <small class="text-sm text-gray-400">Reading minutes per week (30 min steps)</small>
+                </div>
+                <label>
+                    <div class="text-xs text-gray-300 mb-1">Reading minutes / week</div>
+                    <input id="mind_reading_minutes_week" type="number" step="30" min="0" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                </label>
+            </div>
+
+            <!-- Spirit -->
+            <div class="glass-card p-4 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-lg font-light">🧘 Spirit</h4>
+                    <small class="text-sm text-gray-400">Stress level (1 low — 5 high) · Meditation sessions / week</small>
+                </div>
+                <div class="grid grid-cols-2 gap-3 items-center">
+                    <label>
+                        <div class="text-xs text-gray-300 mb-1">Stress level</div>
+                        <select id="spirit_stress" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </label>
+                    <label>
+                        <div class="text-xs text-gray-300 mb-1">Meditation sessions / week</div>
+                        <input id="spirit_meditation_sessions_week" type="number" step="1" min="0" class="w-full rounded px-3 py-2 bg-gray-800 border border-gray-700" />
+                    </label>
+                </div>
+            </div>
 
             <div class="flex justify-between">
                 <a href="index.html" class="glass-button px-4 py-2 bg-gray-700 rounded ripple">Back</a>
-                <button id="continue-btn" type="button" class="glass-button px-4 py-2 bg-blue-600 rounded ripple">Continue</button>
+                <button id="continue-btn" type="button" class="glass-button px-4 py-2 bg-blue-600 rounded ripple">Save & Continue</button>
             </div>
         </form>
     </main>

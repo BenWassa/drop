@@ -4,37 +4,104 @@ document.addEventListener('DOMContentLoaded', () => {
     // Populate direct control form if present
     const form = document.getElementById('direct-control-form');
     if(form){
-        const baseline = document.getElementById('fitnessBaseline');
-        const unit = document.getElementById('fitnessUnit');
-        const sleepSel = document.getElementById('sleepIdentity');
-        const fitnessModeSel = document.getElementById('fitnessMode');
-        const mindSel = document.getElementById('mindFocus');
-        const spiritSel = document.getElementById('spiritPractice');
+        // new quantitative fields
+        const sleepWake = document.getElementById('sleepWake');
+        const sleepHours = document.getElementById('sleepHours');
+        const suggestedBedtime = document.getElementById('suggestedBedtime');
 
-        // Populate with existing commitments if present
+        const fitnessKm = document.getElementById('fitness_km_week');
+        const fitnessStrength = document.getElementById('fitness_strength_sessions');
+        const fitnessSkill = document.getElementById('fitness_skill_sessions');
+
+        const mindReading = document.getElementById('mind_reading_minutes_week');
+
+        const spiritStress = document.getElementById('spirit_stress');
+        const spiritMeditation = document.getElementById('spirit_meditation_sessions_week');
+
+        // populate with existing quantitative commitments
         if(state.commitments){
-            baseline.value = state.commitments.fitnessBaseline || '';
-            unit.value = state.commitments.fitnessUnit || 'km';
-            if(state.commitments.sleep) sleepSel.value = state.commitments.sleep;
-            if(state.commitments.fitnessMode) fitnessModeSel.value = state.commitments.fitnessMode;
-            if(state.commitments.mind) mindSel.value = state.commitments.mind;
-            if(state.commitments.spirit) spiritSel.value = state.commitments.spirit;
+            if(state.commitments.sleep){
+                sleepWake.value = state.commitments.sleep.wakeTime || '';
+                sleepHours.value = state.commitments.sleep.target_hours || '';
+            }
+            if(state.commitments.fitness){
+                fitnessKm.value = state.commitments.fitness.km_week || '';
+                fitnessStrength.value = state.commitments.fitness.strength_sessions_week || '';
+                fitnessSkill.value = state.commitments.fitness.skill_sessions_week || '';
+            }
+            if(state.commitments.mind){
+                mindReading.value = state.commitments.mind.reading_minutes_per_week || '';
+            }
+            if(state.commitments.spirit){
+                spiritStress.value = state.commitments.spirit.stress_level || '3';
+                spiritMeditation.value = state.commitments.spirit.meditation_sessions_week || '';
+            }
         }
+
+        function updateSuggestedBedtime(){
+            const wake = sleepWake.value; // HH:MM
+            const hours = parseFloat(sleepHours.value) || 8;
+            if(!wake){ suggestedBedtime.textContent = '—'; return; }
+            // compute bedtime = wakeTime - hours
+            const [wh, wm] = wake.split(':').map(Number);
+            const wakeDate = new Date();
+            wakeDate.setHours(wh, wm, 0, 0);
+            wakeDate.setHours(wakeDate.getHours() - Math.floor(hours));
+            // subtract fractional hours as minutes
+            const fractional = hours - Math.floor(hours);
+            wakeDate.setMinutes(wakeDate.getMinutes() - Math.round(fractional * 60));
+            const hh = String(wakeDate.getHours()).padStart(2,'0');
+            const mm = String(wakeDate.getMinutes()).padStart(2,'0');
+            suggestedBedtime.textContent = `${hh}:${mm}`;
+        }
+
+        sleepWake?.addEventListener('change', updateSuggestedBedtime);
+        sleepHours?.addEventListener('input', updateSuggestedBedtime);
+        updateSuggestedBedtime();
 
         const continueBtn = document.getElementById('continue-btn');
         if(continueBtn){
             continueBtn.addEventListener('click', () => {
+                // basic validation and normalization
                 state.commitments = state.commitments || {};
-                state.commitments.fitnessBaseline = Number(baseline.value) || 0;
-                state.commitments.fitnessUnit = unit.value;
-                // structured commitments for each domain
-                state.commitments.sleep = sleepSel.value;
-                state.commitments.fitnessMode = fitnessModeSel.value;
-                state.commitments.mind = mindSel.value;
-                state.commitments.spirit = spiritSel.value;
-                // initialize weeklyTargets if absent
+
+                // Sleep: wake time (priority) + hours (0.5 step)
+                const wakeVal = sleepWake.value || '';
+                let hoursVal = parseFloat(sleepHours.value);
+                if(isNaN(hoursVal)) hoursVal = 8;
+                // snap to 0.5 steps
+                hoursVal = Math.round(hoursVal * 2) / 2;
+                state.commitments.sleep = { wakeTime: wakeVal, target_hours: hoursVal };
+
+                // Fitness: km per week, strength sessions, skill sessions
+                const km = parseFloat(fitnessKm.value) || 0;
+                const strengthSessions = parseInt(fitnessStrength.value) || 0;
+                const skillSessions = parseInt(fitnessSkill.value) || 0;
+                state.commitments.fitness = {
+                    km_week: Math.round(km * 10) / 10,
+                    strength_sessions_week: strengthSessions,
+                    skill_sessions_week: skillSessions
+                };
+
+                // Mind: minutes per week (30 min increments)
+                let readingMin = parseInt(mindReading.value) || 0;
+                // snap to 30-min steps
+                readingMin = Math.round(readingMin / 30) * 30;
+                state.commitments.mind = { reading_minutes_per_week: readingMin };
+
+                // Spirit: stress (1-5) and meditation sessions per week
+                const stress = parseInt(spiritStress.value) || 3;
+                const medSessions = parseInt(spiritMeditation.value) || 0;
+                state.commitments.spirit = { stress_level: Math.min(5, Math.max(1, stress)), meditation_sessions_week: medSessions };
+
+                // Mirror critical weekly targets for quick use
                 state.weeklyTargets = state.weeklyTargets || {};
-                if(!state.weeklyTargets.fitness){ state.weeklyTargets.fitness = state.commitments.fitnessBaseline || 0; }
+                state.weeklyTargets.fitness = state.commitments.fitness.km_week || 0;
+                state.weeklyTargets.fitness_strength = state.commitments.fitness.strength_sessions_week || 0;
+                state.weeklyTargets.fitness_skill = state.commitments.fitness.skill_sessions_week || 0;
+                state.weeklyTargets.mind_reading = state.commitments.mind.reading_minutes_per_week || 0;
+                state.weeklyTargets.spirit_meditation = state.commitments.spirit.meditation_sessions_week || 0;
+
                 saveState();
                 window.location.href = 'confirmation.html';
             });
