@@ -1,6 +1,8 @@
 ```markdown
 # 🌊 Ocean in a Drop — Commissioning Document (Upgraded)
 
+> NOTE: This archived document contains historical naming and concepts. The project is currently branded as "drop"; archive files are preserved for historical context.
+
 ## 1. Project Goal
 
 Build a **mobile-first web app** (HTML/CSS/JS, no backend required at prototype stage) that allows users to:

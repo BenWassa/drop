@@ -62,7 +62,7 @@ The insight that different life domains need different tracking approaches:
 
 ### Future Considerations
 - **Over-allocation warnings** (prevent burnout)
-- **OCEAN personality integration** (adaptive onboarding)
+- **Personality-driven onboarding** (adaptive onboarding; formerly explored as OCEAN integration)
 - **Reflection export** (Markdown, sharing)
 - **Advanced analytics** (trends, insights)
 

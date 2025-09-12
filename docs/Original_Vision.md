@@ -86,7 +86,7 @@
 - **Feedback**: subtle glow, ripple, streak, wave animations
 
 ### Visual Language
-- **Ocean metaphor**: Small drops creating lasting change
+- **Drop metaphor**: Small drops creating lasting change
 - **Identity embodiment**: Being vs. doing
 - **Resource allocation**: Smart distribution, not optimization
 - **Sustainable growth**: Progressive improvement over time
@@ -140,7 +140,7 @@
 
 ### Phase 3: Advanced Features
 - 📋 **Planned**: Over-allocation warnings
-- 📋 **Planned**: OCEAN-based personality onboarding
+- 📋 **Planned**: Personality-based adaptive onboarding
 - 📋 **Planned**: Reflection export (Markdown)
 - 📋 **Planned**: Advanced analytics and insights
 

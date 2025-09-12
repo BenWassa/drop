@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Ocean in a Drop** is a mobile-first habit tracking app focused on quarterly identity practice. This document tracks the evolution from prototype to polished product, organized by priority and impact.
+**Ocean in a Drop** is a historical name for the project now branded as **drop**. This document tracks the evolution from prototype to polished product and is preserved for archive purposes.
 
 **Last Updated:** September 12, 2025
 **Current Status:** Enhanced prototype with improved algorithms and testing infrastructure
