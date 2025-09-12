@@ -27,7 +27,7 @@
   },
   mind: {
     reading: {
-      casual: { name: 'Casual Reading', icon: '📖', target: 2, identity: 'Enjoyable reading, light exposure' },
+      casual: { name: 'Leisure', icon: '📖', target: 2, identity: 'Enjoyable reading, light exposure' },
       perspicacity: { name: 'Perspicacity', icon: '📚', target: 4, identity: 'Thoughtful reading and synthesis' },
       erudition: { name: 'Erudition', icon: '🎓', target: 6, identity: 'Deep study and comprehensive knowledge' }
     },
