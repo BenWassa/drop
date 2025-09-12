@@ -26,7 +26,7 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
 
   1. **Direct control** → manual target assignment.
   2. **Archetypes** → semi-automatic targets based on chosen archetype.
-  3. **Growth mode** → automatic target assignment from system (trend-driven).
+  3. **Growth mode** → automatic target assignment from system using 21-day rolling averages with baseline clamping (trend-driven, stable adjustments).
 * **Vibe-first logging** → intuitive, minimal, optional numbers.
 
 ---
@@ -99,7 +99,7 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
 
   1. Direct Control — user sets weekly targets manually.
   2. Archetypes — user picks a persona; the system proposes targets which can be adjusted.
-  3. Growth Mode — system-driven targets derived from past logs/trends.
+  3. Growth Mode — system-driven targets derived from past logs/trends using 21-day rolling averages with 80-120% baseline clamping for stable, realistic adjustments.
 
   Daily Presence is the default screen. Domains are represented as cards: Sleep (identity), Fitness (allocation & mode), Mind (reading & writing), Spirit (meditation & burnout). Interactions are intentionally simple: tap to log, hold to record duration, and sliders for intensity.
 
@@ -113,7 +113,9 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
 
   ## Technical notes
 
-  - Stack: HTML5, CSS (Tailwind + custom styles), vanilla JS.
+  - **Stack: HTML5, CSS (Tailwind + custom styles), vanilla JS.**
+  - **No Node.js required** - runs directly in any modern web browser
+  - **Zero build process** - open `index.html` in browser to run
   - Persistence: localStorage key `oceanDropState` stores `state` (targets, logs, commitments, onboarding flag).
   - Configuration: `config.json` includes `sleep`, `fitness`, `mind`, and `spirit`. Archetypes are a UX concept (optionally defined in config) but not required for the single-user pilot.
 
@@ -123,12 +125,19 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
   - JavaScript files are organized in `src/` folder for better code organization
   - HTML script tags point to `src/config.js`, `src/state.js`, etc.
   - This allows for modular development and better file management
+  - **No build tools needed** - edit files directly and refresh browser
 
   **GitHub Pages Deployment:**
   - GitHub Pages serves files from the repository root
   - Script tags in `index.html` are configured to load from `src/` paths
   - All necessary files (HTML, CSS, JS) remain in root for deployment
   - Static assets can be served from `assets/` folder
+
+  **Simple Development Workflow:**
+  1. Open `index.html` in your web browser
+  2. Edit source files in `src/` with any code editor
+  3. Refresh browser to see changes
+  4. Use browser DevTools for debugging and testing
 
   This setup allows for clean development organization while maintaining deployment compatibility.
 
@@ -152,18 +161,32 @@ This project will grow. For now, keep things simple and single-user focused. Sug
 
 - Keep UI and logic separate: `index.html` + `style.css` + `app.js` is fine for the prototype. When adding complexity, split `app.js` into `state.js`, `ui.js`, `storage.js`.
 - Add a `src/` folder and migrate JS there when you introduce build tooling.
-- Add `tests/` and a tiny test runner (Node + Jest or Vitest) for date/quarter logic and import/export validation.
-- Use a minimal `package.json` to record dev tools (linters, test runner). This helps later CI integration.
+- Add `tests/` and a tiny test runner (Node + Jest or Vitest) for date/quarter logic and import/export validation. *(Optional - app works without Node.js)*
+- Use a minimal `package.json` to record dev tools (linters, test runner). This helps later CI integration. *(Optional - not required for development)*
 - Keep data model stable: `state` shape is central (targets, logs, commitments, onboardingComplete). Prefer migration helpers when evolving the model.
 - Maintain a simple changelog (CHANGELOG.md) for commissions and versioned experiments.
 
-If you'd like, I can scaffold a `package.json`, move JS into `src/`, and add a couple tests for the quarter-week calculation as a next step.
+If you'd like, I can scaffold a `package.json`, move JS into `src/`, and add a couple tests for the quarter-week calculation as a next step. *(Note: Node.js is not required - the app runs directly in browser)*
 
   If you'd like, I can implement any of the next steps (recommend starting with the growth-mode algorithm and a basic unit test for quarter calculation).
 
   ## Running quick tests locally (no Node required)
 
-  If you can't install Node on this machine you can still validate important logic using Python + pytest. A small test suite is included to validate the quarter/week calculation.
+  **The main application runs directly in your browser** - no Node.js installation needed! Simply open `index.html` in any modern web browser.
+
+  If you want to run the included unit tests locally, you'll need Node.js installed. The test suite validates:
+  - Quarter calculation logic
+  - Date formatting
+  - Week numbering
+  - Year transitions
+
+  To run tests (requires Node.js):
+  ```bash
+  npm install
+  npm test
+  ```
+
+  **Note:** Tests are completely optional. The app functions perfectly without them.
 
   1. Create and activate a Python virtual environment (optional but recommended):
 

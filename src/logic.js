@@ -59,13 +59,39 @@ function applyGrowthSuggestions() {
 }
 
 function calculateWeeklyFitnessTarget() {
-    const lastWeek = getWeekDates(new Date(new Date().setDate(new Date().getDate() - 7)));
-    const loggedValues = lastWeek.map(date => state.logs[date]?.fitnessLogged).filter(val => val != null && val > 0);
-    const lastWeekPerformance = loggedValues.length > 0
+    // Look back over the last 21 days (3 weeks)
+    const today = new Date();
+    const past21Days = [];
+    for (let i = 0; i < 21; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        past21Days.push(getDateString(d));
+    }
+
+    // Collect logged fitness values
+    const loggedValues = past21Days
+        .map(date => state.logs[date]?.fitnessLogged)
+        .filter(val => val != null && val > 0);
+
+    // Calculate rolling average
+    const avgPerformance = loggedValues.length > 0
         ? loggedValues.reduce((a, b) => a + b, 0) / loggedValues.length
         : state.commitments.fitnessBaseline;
+
     const multiplier = CONFIG.fitness[state.commitments.fitnessMode].multiplier;
-    const newTarget = lastWeekPerformance * multiplier;
+
+    // Raw new target
+    let newTarget = avgPerformance * multiplier;
+
+    // Clamp within 80–120% of baseline
+    const minTarget = state.commitments.fitnessBaseline * 0.8;
+    const maxTarget = state.commitments.fitnessBaseline * 1.2;
+    newTarget = Math.max(minTarget, Math.min(maxTarget, newTarget));
+
     state.weeklyTargets.fitness = Math.round(newTarget * 10) / 10;
-    debugLog('calculateWeeklyFitnessTarget -> avg:', lastWeekPerformance, 'mode*:', multiplier, 'target:', state.weeklyTargets.fitness);
+    debugLog('calculateWeeklyFitnessTarget -> avg(21d):', avgPerformance, 'target:', state.weeklyTargets.fitness);
+}
+
+function getDateString(date) {
+    return date.toISOString().split('T')[0];
 }

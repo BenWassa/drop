@@ -1,0 +1,27 @@
+{
+  "name": "ocean-drop",
+  "version": "0.1.0",
+  "description": "Ocean in a Drop - Quarterly habit tracking app",
+  "type": "module",
+  "main": "index.html",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dev": "python -m http.server 8000"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "habit-tracking",
+    "productivity",
+    "quarterly-goals",
+    "mobile-first"
+  ],
+  "author": "Benjamin P. Haddon",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BenWassa/drop.git"
+  }
+}

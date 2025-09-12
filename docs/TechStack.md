@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Ocean in a Drop** is a mobile-first web application for quarterly habit tracking and identity practice. The app uses modern web technologies with a focus on simplicity, performance, and maintainability.
+**Ocean in a Drop** is a mobile-first web application for quarterly habit tracking and identity practice. This is a **browser-native application** that runs directly in any modern web browser without requiring Node.js, build tools, or compilation. Simply open `index.html` in your browser to run the app.
 
 ## Core Technologies
 
@@ -15,6 +15,7 @@
 - **Tailwind CSS** - Utility-first CSS framework (CDN delivery)
 - **Inter Font** - Google Fonts for typography
 - **LocalStorage API** - Client-side data persistence
+- **Vitest** - Fast unit testing framework for JavaScript (optional, requires Node.js)
 - **GitHub Pages** - Static site hosting and deployment
 
 ### Development Environment
@@ -29,29 +30,31 @@
 drop/
 ├── index.html              # Main application entry point
 ├── style.css              # Custom CSS with Tailwind utilities
+├── package.json           # npm configuration and scripts (optional, for testing)
 ├── src/                   # Modular JavaScript architecture
 │   ├── config.js         # Application configuration & archetypes
 │   ├── state.js          # State management & localStorage
 │   ├── logic.js          # Business logic & calculations
 │   ├── ui.js            # UI rendering & interactions
 │   └── main.js           # App initialization & orchestration
+├── tests/                 # Unit test files
+│   └── quarter.test.js   # Quarter calculation tests
 ├── docs/                  # Documentation
 │   ├── CONTRIBUTING.md   # Contribution guidelines
 │   ├── archive/          # Historical documentation
 │   └── AI_Instructions.md # AI agent guidelines
 ├── assets/               # Static assets (images, icons)
 ├── config/               # Configuration files
-├── tests/                # Test files
 └── README.md            # Project documentation
 ```
 
 ## Development Setup
 
 ### Prerequisites
-- Modern web browser (Chrome, Firefox, Safari, Edge)
+- **Modern web browser** (Chrome, Firefox, Safari, Edge) - that's it!
 - VS Code (recommended) or any code editor
-- Git for version control
-- Internet connection for Tailwind CSS CDN
+- Git for version control (optional, for collaboration)
+- Internet connection for Tailwind CSS CDN (optional, can work offline once loaded)
 
 ### Local Development
 1. **Clone the repository:**
@@ -65,11 +68,19 @@ drop/
    code .
    ```
 
-3. **Start development:**
-   - Open `index.html` in your browser
-   - Make changes to source files in `src/`
-   - Refresh browser to see changes
-   - Use browser DevTools for debugging
+3. **Start development (no build tools needed!):**
+   - **Double-click `index.html`** or drag it into your web browser
+   - Edit source files in `src/` with your code editor
+   - **Refresh browser** to see changes instantly
+   - Use browser DevTools (F12) for debugging and testing
+   - **That's it!** No compilation, no servers, no Node.js required
+
+### Testing Setup (Optional)
+The project includes unit tests that can be run locally if you have Node.js installed:
+- `package.json` contains test configuration
+- `tests/quarter.test.js` contains test cases
+- Run tests with `npm test` (requires Node.js/npm installation)
+- Tests are optional - the app works perfectly without them
 
 ### File Organization Principles
 
