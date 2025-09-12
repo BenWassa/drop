@@ -1,39 +1,23 @@
-# 🌊 drop
+# drop
 
-A personal, mobile-first dashboard for quarterly goal setting and daily reflection. This app reimagines habit tracking as **identity practice over time**, helping you align your daily actions with your long-term vision.
+A personal, mobile-first dashboard for quarterly goal setting and daily reflection. drop reimagines habit tracking as identity practice over time — focusing on small, repeatable actions that build identity across a 90-day quarter.
 
-# 🌊 drop
+## Quick Start (no Node required)
 
-A personal, mobile-first dashboard for quarterly goal setting and daily reflection. This app reimagines habit tracking as identity practice over time, helping you align daily actions with a quarterly focus.
-
-## What's new (developer note)
-- The UI is now modular: screens register setup handlers with a central ScreenRegistry (`src/ui.js`).
-- Commitments UI has been moved to `src/screens/commitments.js` as the first example of a per-screen module.
-
-## Quick Start: No Build Tools Required
-Open `index.html` in any modern browser. The app is browser-native and doesn't require Node or a build step.
-
-If you prefer to run a lightweight local server (recommended for consistent module/script loading), you can use either Python or npx:
-
-PowerShell examples:
+Open `index.html` in any modern browser. For a reliable local experience (recommended), start a simple HTTP server with Python and open the app in your browser:
 
 ```powershell
-# Using Python 3 (if installed)
 python -m http.server 8000
-
-# Using npm's http-server (if you have Node.js)
-npx http-server -p 8000
+# then open http://localhost:8000 in your browser
 ```
 
-Then open http://localhost:8000 in your browser.
+## How It Works — Core Flow
 
-## How It Works: Core Flow
+1. Vision / Path Selection — choose Direct Control, Domain Identities, or Growth Mode.
+2. Commitments — pick domain identities or set per-aspect tiers.
+3. Confirmation & Journey — begin daily presence logging and weekly reflection.
 
-1. Quarterly Reset — choose a path (Direct Control, Domain Identities, or Growth Mode).
-2. Daily Presence — log actions across Sleep, Fitness, Mind (reading/writing), and Spirit.
-3. Reflection — weekly gratitude and quarterly review screens summarize progress.
-
-## Project Structure (updated)
+## Project structure
 
 ```
 drop/
@@ -42,28 +26,27 @@ drop/
 ├── src/
 │   ├── config.js
 │   ├── state.js
-   │   ├── logic.js
-│   ├── ui.js                # central registry + app shell
+│   ├── logic.js
+│   ├── ui.js          # central registry + app shell
 │   ├── main.js
-│   └── screens/             # per-screen modules (new pattern)
-│       └── commitments.js   # commitments screen module (example)
-├── docs/
-│   ├── TechStack.md
-│   ├── UI_Flow.md           # new: onboarding & UI lifecycle
-│   └── Modularization.md    # new: how to add/move screens
-└── README.md
+│   └── screens/       # per-screen modules
+│       └── commitments.js
+└── docs/
+   ├── TechStack.md
+   ├── UI_Flow.md
+   └── Modularization.md
 ```
 
 ## Developer notes
-- The ScreenRegistry in `src/ui.js` maps screen ids (e.g. `commitments-screen`) to setup functions. Screens can register via `window.registerScreen(name, setupFn)`.
-- Per-screen files should attach any DOM event handlers they need and can expose teardown logic if necessary.
-- This keeps the app single-page (smooth UX) while allowing modular code organization.
 
-## Tests & Debugging
-- Unit tests are optional and live in `tests/` (run with Node.js). The app itself runs without Node.
-- To debug, enable `DEV_MODE` in `src/state.js` to reveal in-app debug controls.
+- Screen modules register setup functions with the ScreenRegistry in `src/ui.js` via `window.registerScreen(name, setupFn)` or by exposing a `window.setup<ScreenName>` function (the registry auto-registers common window-exposed setup functions).
+- Keep setup functions idempotent and lightweight; run heavy work asynchronously after render.
+- Use `DEV_MODE` in `src/state.js` to enable an in-app developer toolbar for quick navigation and testing.
+
+## Tests & debugging
+
+- The app is browser-native and runs without Node. Some unit tests in `tests/` may require Node tooling; if you do not use Node, test manually in a browser and use the in-app dev tools.
 
 ## Legal & Privacy
-- See `PRIVACY.md` and `TERMS.md` for local data handling and terms.
 
-<!-- End-to-end test instructions removed (Playwright) because this environment does not use Node/npm. If you want optional Playwright tests later, they are available in the repo history. -->
+See `PRIVACY.md` and `TERMS.md` for details on local data handling and terms.
