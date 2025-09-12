@@ -471,7 +471,10 @@ function renderOuraCard() {
                 <span class="text-xs font-light text-green-400">Connected</span>
             </div>
             <p class="text-xs text-gray-400 mt-2 mb-4">Connection is active. Sleep and Activity will be synced automatically. Expires around ${expiryDate}.</p>
-            <button onclick="disconnectFromOura()" class="glass-button w-full py-3 rounded-xl text-base font-light ripple">Disconnect</button>
+            <div class="flex space-x-2">
+                <button onclick="copyOuraToken()" class="glass-button w-full py-3 rounded-xl text-base font-light ripple">Copy Token</button>
+                <button onclick="disconnectFromOura()" class="glass-button w-full py-3 rounded-xl text-base font-light ripple">Disconnect</button>
+            </div>
         `;
     } else {
         content = `
@@ -482,3 +485,14 @@ function renderOuraCard() {
     }
     container.innerHTML = content;
 }
+
+window.copyOuraToken = function() {
+    if (state.oura.accessToken) {
+        navigator.clipboard.writeText(state.oura.accessToken).then(() => {
+            showToast('Oura token copied to clipboard');
+        }).catch(err => {
+            showToast('Failed to copy token', 'error');
+            console.error('Failed to copy token: ', err);
+        });
+    }
+};
