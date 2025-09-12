@@ -69,10 +69,17 @@ Users commit to archetypes across **quarters** (≈90 days), reinforcing durable
 
   **Open `index.html` in a browser (mobile or desktop) for quick prototyping.** No Node.js required!
 
-  For production-like builds, the project now uses a built Tailwind CSS file (`dist/styles.css`) instead of the CDN. This keeps CSS deterministic and avoids loading Tailwind via CDN in production.
+  **Tailwind CSS Setup: No Building Required!**
+  The app uses Tailwind CSS via CDN (Content Delivery Network). This means:
+  - ✅ No Node.js installation needed
+  - ✅ No build process required
+  - ✅ Works offline once initially loaded
+  - ✅ All Tailwind classes available immediately
 
-  **CSS Building (Optional - requires Node.js and npm):**
-  The app works perfectly with Tailwind CDN - you don't need to build CSS locally unless you want to customize Tailwind configuration.
+  The line `<script src="https://cdn.tailwindcss.com"></script>` in `index.html` loads Tailwind CSS directly from their servers. Custom styles are in `style.css`.
+
+  **Optional: Local Tailwind Building (requires Node.js)**
+  For production builds or custom Tailwind configuration, you can build CSS locally. But this is completely optional - the app works perfectly with the CDN version!
 
   To build the CSS locally (requires Node.js and npm):
 

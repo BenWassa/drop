@@ -14,11 +14,16 @@
 - **Vanilla JavaScript (ES6+)** - No heavy frameworks, modular architecture
 
 ### Key Libraries & Tools
-- **Tailwind CSS** - Utility-first CSS framework (CDN delivery)
+- **Tailwind CSS** - Utility-first CSS framework (CDN delivery - no building required!)
 - **Inter Font** - Google Fonts for typography
 - **LocalStorage API** - Client-side data persistence
 - **Vitest** - Fast unit testing framework for JavaScript (optional, requires Node.js)
 - **GitHub Pages** - Static site hosting and deployment
+
+### CSS Architecture
+- **Tailwind CSS via CDN**: No build process needed - loads directly from `https://cdn.tailwindcss.com`
+- **Custom Styles**: Additional styling in `style.css` for glass effects, gradients, and custom components
+- **No Compilation**: All CSS works immediately in the browser without any processing
 
 ### Development Environment
 - **VS Code** - Primary IDE with recommended extensions
