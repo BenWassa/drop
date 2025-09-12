@@ -173,6 +173,18 @@ async function handleOuraRedirect() {
     if (!code) {
         return; 
     }
+
+        // DEBUG PAUSE: If the developer set localStorage.drop_debug_pause = '1' before starting the auth
+        // flow, show a blocking alert so they can open devtools and inspect sessionStorage values
+        // (e.g., the code verifier) before the app continues with the exchange.
+        try {
+            if (localStorage.getItem('drop_debug_pause') === '1') {
+                alert('DEBUG PAUSE: You can now open devtools and run sessionStorage.getItem("oura_code_verifier") to copy the verifier. Click OK to continue.');
+                localStorage.removeItem('drop_debug_pause');
+            }
+        } catch (e) {
+            // ignore if localStorage unavailable
+        }
     
     // --- ADD THIS ENTIRE SECURITY CHECK BLOCK ---
     const originalState = sessionStorage.getItem('oura_state');
