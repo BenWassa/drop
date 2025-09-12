@@ -31,6 +31,7 @@ exports.handler = async function(event, context) {
   const debugMode = !!payload.debug;
   // Get the Client ID from the environment variables for security
   const CLIENT_ID = process.env.VITE_OURA_CLIENT_ID;
+  const CLIENT_SECRET = process.env.VITE_OURA_CLIENT_SECRET;
 
   if (!code || !verifier || !CLIENT_ID || !redirect_uri) {
     return { statusCode: 400, body: 'Missing required parameters.' };
@@ -48,7 +49,7 @@ exports.handler = async function(event, context) {
 
   try {
     // Log whether the CLIENT_ID is present (don't print the secret itself)
-    console.log('oura-token-proxy: CLIENT_ID present=', !!CLIENT_ID);
+  console.log('oura-token-proxy: CLIENT_ID present=', !!CLIENT_ID, 'CLIENT_SECRET present=', !!CLIENT_SECRET);
     // Log the exact body we will send to Oura, but redact the client_id value for safety
     const bodyString = body.toString();
     const redacted = bodyString.replace(/(client_id=)[^&]+/, '$1[REDACTED]');
@@ -66,9 +67,16 @@ exports.handler = async function(event, context) {
   }
 
   try {
+    // If a client secret is provided in the environment, prefer Basic auth.
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    if (CLIENT_SECRET) {
+      const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
+      headers['Authorization'] = `Basic ${basic}`;
+    }
+
     let response = await fetch(TOKEN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers,
       body: body
     });
 
@@ -87,9 +95,10 @@ exports.handler = async function(event, context) {
           const bodyNoRedirect = new URLSearchParams({
             grant_type: 'authorization_code',
             code: code,
-            client_id: CLIENT_ID,
             code_verifier: verifier
           });
+          // If no Basic auth is available, include client_id in the body
+          if (!CLIENT_SECRET) bodyNoRedirect.append('client_id', CLIENT_ID);
 
           const retryResp = await fetch(TOKEN_URL, {
             method: 'POST',
