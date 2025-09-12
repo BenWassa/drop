@@ -96,171 +96,94 @@ function getDateString(date) {
     return date.toISOString().split('T')[0];
 }
 
-// --- OURA API AUTHENTICATION LOGIC ---
+// --- OURA API AUTHENTICATION LOGIC (Client-Side Implicit Flow) ---
 
 // Helper to return the exact redirect URI we registered with Oura.
-// Accepts multiple local hostnames and preserves the port when present.
 function getRedirectUri() {
     const host = window.location.hostname;
     const port = window.location.port;
 
-    // Common local dev hosts — include any port the dev server uses
+    // For local development
     if (host === '127.0.0.1' || host === 'localhost' || host === '0.0.0.0') {
         const p = port || '5500';
         return `http://${host}:${p}/index.html`;
     }
+    
+    // For Netlify deployment
+    if (host.endsWith('netlify.app')) {
+        return `https://${host}/`;
+    }
 
-    // GitHub pages production host
+    // For GitHub Pages production host
     if (host === 'benwassa.github.io') {
         return 'https://benwassa.github.io/drop/';
     }
 
-    // Fallback: use the exact current origin + pathname (useful for unusual setups)
+    // Fallback to the current location
     return window.location.origin + window.location.pathname;
 }
 
-// Generates a secure random string for the PKCE flow
-function generateCodeVerifier() {
-    const randomBytes = window.crypto.getRandomValues(new Uint8Array(32));
-    return btoa(String.fromCharCode(...randomBytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-// Hashes the verifier string to create the code challenge
-async function generateCodeChallenge(verifier) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(verifier);
-    const hash = await window.crypto.subtle.digest('SHA-256', data);
-    return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-// 1. Kicks off the authentication process (UPDATED with 'state' parameter)
+// 1. Kicks off the authentication process
 window.redirectToOuraAuth = async function() {
-    const verifier = generateCodeVerifier();
-    const challenge = await generateCodeChallenge(verifier);
-    
-    // ADD THIS: Generate a random string for the state parameter
-    const stateValue = generateCodeVerifier(); 
-
-    // Temporarily save both the verifier and the state value
-    sessionStorage.setItem('oura_code_verifier', verifier);
-    sessionStorage.setItem('oura_state', stateValue); // ADD THIS
+    // Generate a random string for the state parameter for security
+    const stateValue = Math.random().toString(36).substring(2);
+    sessionStorage.setItem('oura_state', stateValue);
 
     const redirectUri = getRedirectUri();
-
-    // Persist the exact redirect URI we used so the exchange uses the identical value
-    sessionStorage.setItem('oura_redirect_uri', redirectUri);
 
     const params = new URLSearchParams({
         client_id: OURA_CONFIG.CLIENT_ID,
         redirect_uri: redirectUri,
-        response_type: 'code',
+        response_type: 'token', // Use 'token' for client-side flow
         scope: 'sleep activity readiness',
-        state: stateValue, // ADD THIS
-        code_challenge: challenge,
-        code_challenge_method: 'S256'
+        state: stateValue,
     });
 
     window.location.href = `${OURA_CONFIG.AUTH_URL}?${params.toString()}`;
 }
 
-// 2. Handles the redirect back from Oura after user approval (UPDATED with 'state' check)
+// 2. Handles the redirect back from Oura after user approval
 async function handleOuraRedirect() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const returnedState = urlParams.get('state'); // ADD THIS
-
-    // This is not an Oura redirect if there's no code.
-    if (!code) {
-        return; 
+    // For the client-side flow, the token is in the URL fragment (#)
+    if (!window.location.hash.includes('access_token')) {
+        return; // Not an Oura token redirect
     }
 
-        // DEBUG PAUSE: If the developer set localStorage.drop_debug_pause = '1' before starting the auth
-        // flow, show a blocking alert so they can open devtools and inspect sessionStorage values
-        // (e.g., the code verifier) before the app continues with the exchange.
-        try {
-            if (localStorage.getItem('drop_debug_pause') === '1') {
-                alert('DEBUG PAUSE: You can now open devtools and run sessionStorage.getItem("oura_code_verifier") to copy the verifier. Click OK to continue.');
-                localStorage.removeItem('drop_debug_pause');
-            }
-        } catch (e) {
-            // ignore if localStorage unavailable
-        }
-    
-    // --- ADD THIS ENTIRE SECURITY CHECK BLOCK ---
+    const fragmentParams = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = fragmentParams.get('access_token');
+    const returnedState = fragmentParams.get('state');
+    const expiresIn = fragmentParams.get('expires_in');
+
     const originalState = sessionStorage.getItem('oura_state');
+
+    // Clean up session storage and URL immediately
+    sessionStorage.removeItem('oura_state');
+    history.replaceState(null, '', window.location.pathname);
+
+    // Security check: Ensure the state parameter matches
     if (!originalState || returnedState !== originalState) {
         console.error("Oura redirect failed: State mismatch. Possible CSRF attack.");
         showBanner("Oura connection failed due to a security check. Please try again.", "error");
-        // Clean up immediately
-        sessionStorage.removeItem('oura_code_verifier');
-        sessionStorage.removeItem('oura_state');
-        history.replaceState(null, '', window.location.pathname);
         return;
     }
-    // --- END OF SECURITY CHECK BLOCK ---
 
-    const verifier = sessionStorage.getItem('oura_code_verifier');
-    if (!verifier) {
-        console.error("Oura redirect failed: Code verifier not found.");
+    if (!accessToken) {
+        console.error("Oura redirect failed: No access token provided.");
         showBanner("Oura connection failed. Please try again.", "error");
         return;
     }
 
-    try {
-        const tokenData = await exchangeCodeForToken(code, verifier);
-        
-        state.oura.accessToken = tokenData.access_token;
-        state.oura.refreshToken = tokenData.refresh_token;
-        state.oura.tokenExpiresAt = Date.now() + (tokenData.expires_in * 1000);
-        
-        saveState();
-        showToast("Oura connected successfully!");
+    // Store the token and its expiration time
+    state.oura.accessToken = accessToken;
+    state.oura.refreshToken = null; // No refresh token in this flow
+    state.oura.tokenExpiresAt = Date.now() + (parseInt(expiresIn, 10) * 1000);
 
-    } catch (error) {
-        console.error("Error exchanging Oura code for token:", error);
-        showBanner("Could not connect to Oura. Please try again.", "error");
-    } finally {
-        // Clean up the URL and session storage
-        sessionStorage.removeItem('oura_code_verifier');
-        sessionStorage.removeItem('oura_state'); // ADD THIS
-        // Remove the stored redirect URI used for the PKCE exchange
-        sessionStorage.removeItem('oura_redirect_uri');
-        history.replaceState(null, '', window.location.pathname);
-        showScreen('settings-screen');
-    }
+    saveState();
+    showToast("Oura connected successfully!");
+    showScreen('settings-screen');
 }
 
-// 3. Exchanges the temporary code for a long-lived access token (UPDATED)
-async function exchangeCodeForToken(code, verifier) {
-    // Use the exact redirect URI that was stored when the auth flow started.
-    const redirectUri = sessionStorage.getItem('oura_redirect_uri') || getRedirectUri();
-    // POST to our Netlify function which will exchange the code for us.
-    const proxyUrl = '/.netlify/functions/oura-token-proxy';
-
-    const response = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code, verifier: verifier, redirect_uri: redirectUri, debug: true })
-    });
-
-    if (!response.ok) {
-        const text = await response.text();
-        let errMsg = response.statusText;
-        let parsedBody = null;
-        try { parsedBody = JSON.parse(text); errMsg = parsedBody.error || parsedBody.message || text; } catch(e) {}
-        console.error('exchangeCodeForToken -> proxy error, parsedBody=', parsedBody);
-        throw new Error(`Proxy token exchange failed: ${errMsg}`);
-    }
-
-    const result = await response.json();
-    // If server provided debug info, print it to the console for developer visibility
-    if (result && result.debug) {
-      console.debug('Proxy debug:', result.debug);
-    }
-    return result;
-}
-
-// 4. Function to disconnect from Oura
+// 3. Function to disconnect from Oura
 window.disconnectFromOura = function() {
     if (confirm("Are you sure you want to disconnect from Oura?")) {
         state.oura = { accessToken: null, refreshToken: null, tokenExpiresAt: null };
