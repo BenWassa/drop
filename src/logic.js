@@ -216,24 +216,22 @@ async function handleOuraRedirect() {
 // 3. Exchanges the temporary code for a long-lived access token (UPDATED)
 async function exchangeCodeForToken(code, verifier) {
     const redirectUri = getRedirectUri(); // Use our new helper function
+    // POST to our Netlify function which will exchange the code for us.
+    const proxyUrl = '/.netlify/functions/oura-token-proxy';
 
-    const body = new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: redirectUri, // Use the precise URI
-        client_id: OURA_CONFIG.CLIENT_ID,
-        code_verifier: verifier
-    });
-
-    const response = await fetch(OURA_CONFIG.TOKEN_URL, {
+    const response = await fetch(proxyUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, verifier: verifier, redirect_uri: redirectUri })
     });
 
     if (!response.ok) {
-        throw new Error(`Oura token exchange failed: ${response.statusText}`);
+        const text = await response.text();
+        let errMsg = response.statusText;
+        try { const parsed = JSON.parse(text); errMsg = parsed.error || parsed.message || text; } catch(e) {}
+        throw new Error(`Proxy token exchange failed: ${errMsg}`);
     }
+
     return response.json();
 }
 
