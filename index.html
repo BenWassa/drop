@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Drop - Simple Goals (GSheets Offline)</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between}
+    input,textarea{width:100%;padding:8px;margin:6px 0}
+    button{padding:8px 12px}
+    ul{padding-left:20px}
+    .offline{color:#a33}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Simple Goals — Offline + Google Sheets</h1>
+    <div id="status">—</div>
+  </header>
+
+  <section>
+    <label for="title">Title</label>
+    <input id="title" placeholder="Enter goal title" />
+    <label for="note">Note</label>
+    <textarea id="note" rows="3" placeholder="Optional note"></textarea>
+    <button id="add">Add Goal</button>
+    <button id="sync">Sync Now</button>
+  </section>
+
+  <section>
+    <h2>Goals</h2>
+    <ul id="items"></ul>
+  </section>
+
+  <script src="config.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

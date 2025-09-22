@@ -1,0 +1,9 @@
+{
+  "name": "Drop - Simple Goals",
+  "short_name": "DropSimple",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "Simple offline-first goals editor that syncs with Google Sheets.",
+  "icons": []
+}
