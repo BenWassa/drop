@@ -5,8 +5,8 @@ const STATIC_ASSETS = [
 ];
 
 const CONFIG = {
-  SCRIPT_URL: '', // will be set in client; SW can't read window.APP_CONFIG
-  API_KEY: ''
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9qnxbMfNN3-Ed7iHmLTIIb_9bqwgUaJWh88uU2amkQL_UIzGCXnmTRrvX7Evg8O89/exec',
+  API_KEY: 'AKfycby9qnxbMfNN3-Ed7iHmLTIIb_9bqwgUaJWh88uU2amkQL_UIzGCXnmTRrvX7Evg8O89',
 };
 
 // Minimal IndexedDB mirror for outbox flushing
