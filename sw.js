@@ -5,8 +5,8 @@ const STATIC_ASSETS = [
 ];
 
 const CONFIG = {
-  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycby9qnxbMfNN3-Ed7iHmLTIIb_9bqwgUaJWh88uU2amkQL_UIzGCXnmTRrvX7Evg8O89/exec',
-  API_KEY: 'AKfycby9qnxbMfNN3-Ed7iHmLTIIb_9bqwgUaJWh88uU2amkQL_UIzGCXnmTRrvX7Evg8O89',
+  SCRIPT_URL: 'https://script.google.com/macros/s/YOUR_NEW_SCRIPT_ID_HERE/exec',
+  API_KEY: '1QnI2H56tNySDZjLAKsiAAvkp7RzzvAUnfs-Hcsf6Z4S1PLgX5_HXTkQk',
 };
 
 // Minimal IndexedDB mirror for outbox flushing
