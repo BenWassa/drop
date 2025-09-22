@@ -1,5 +1,5 @@
 // ====== Configure these ======
-const SPREADSHEET_ID = 'RrwasutKZFvkNnEkLtsXWfIxe-pBD1MyQek-ElUYs';
+const SPREADSHEET_ID = '1XaRrwasutKZFvkNnEkLtsXWfIxe-pBD1MyQek-ElUYs';
 const SHEET_NAME = 'Entries';
 const API_KEY = '1QnI2H56tNySDZjLAKsiAAvkp7RzzvAUnfs-Hcsf6Z4S1PLgX5_HXTkQk'; // must match client
 
