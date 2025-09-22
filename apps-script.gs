@@ -1,7 +1,7 @@
 // ====== Configure these ======
-const SPREADSHEET_ID = 'PUT_YOUR_SPREADSHEET_ID_HERE';
+const SPREADSHEET_ID = 'RrwasutKZFvkNnEkLtsXWfIxe-pBD1MyQek-ElUYs';
 const SHEET_NAME = 'Entries';
-const API_KEY = 'replace-with-a-random-string'; // must match client
+const API_KEY = '1QnI2H56tNySDZjLAKsiAAvkp7RzzvAUnfs-Hcsf6Z4S1PLgX5_HXTkQk'; // must match client
 
 // ====== Helpers ======
 function sheet() {
