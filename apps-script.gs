@@ -15,29 +15,21 @@ function sheet() {
   return sh;
 }
 
-function _corsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-Api-Key',
-    'Content-Type': 'application/json; charset=utf-8',
-  };
-}
-
 function doOptions(e) {
   return ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders(_corsHeaders());
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 function doGet(e) {
   const params = e.parameter || {};
   const action = params.action || 'health';
+  
   if (action === 'health') {
-    return ContentService.createTextOutput(JSON.stringify({ ok: true, time: new Date().toISOString() }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders(_corsHeaders());
+    return ContentService.createTextOutput(
+      JSON.stringify({ ok: true, time: new Date().toISOString() })
+    ).setMimeType(ContentService.MimeType.JSON);
   }
+  
   if (action === 'list') {
     const sh = sheet();
     const last = Math.min(200, Math.max(0, Number(params.limit || 100)));
@@ -45,12 +37,12 @@ function doGet(e) {
     const data = lr > 1 ? sh.getRange(Math.max(2, lr - last + 1), 1, Math.min(last, lr - 1), 5).getValues() : [];
     const rows = data.map(r => ({ timestamp: r[0], localId: r[1], clientId: r[2], title: r[3], note: r[4] }));
     return ContentService.createTextOutput(JSON.stringify({ rows }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders(_corsHeaders());
+      .setMimeType(ContentService.MimeType.JSON);
   }
-  return ContentService.createTextOutput(JSON.stringify({ ok: false, error: 'unknown action' }))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders(_corsHeaders());
+  
+  return ContentService.createTextOutput(
+    JSON.stringify({ ok: false, error: 'unknown action' })
+  ).setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
@@ -58,9 +50,9 @@ function doPost(e) {
     const headers = e.headers || {};
     const key = headers['X-Api-Key'] || headers['x-api-key'] || '';
     if (API_KEY && key !== API_KEY) {
-      return ContentService.createTextOutput(JSON.stringify({ ok:false, error:'unauthorized' }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders(_corsHeaders());
+      return ContentService.createTextOutput(
+        JSON.stringify({ ok: false, error: 'unauthorized' })
+      ).setMimeType(ContentService.MimeType.JSON);
     }
 
     const params = e.parameter || {};
@@ -77,17 +69,17 @@ function doPost(e) {
       // Return the inserted row numbers so client can mark "synced"
       const startRow = sh.getLastRow() - rows.length + 1;
       const results = ops.map((op, i) => ({ localId: op.payload.id, row: startRow + i }));
-      return ContentService.createTextOutput(JSON.stringify({ ok:true, results }))
-        .setMimeType(ContentService.MimeType.JSON)
-        .setHeaders(_corsHeaders());
+      return ContentService.createTextOutput(
+        JSON.stringify({ ok: true, results })
+      ).setMimeType(ContentService.MimeType.JSON);
     }
 
-    return ContentService.createTextOutput(JSON.stringify({ ok:false, error:'unknown action' }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders(_corsHeaders());
+    return ContentService.createTextOutput(
+      JSON.stringify({ ok: false, error: 'unknown action' })
+    ).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ ok:false, error: String(err) }))
-      .setMimeType(ContentService.MimeType.JSON)
-      .setHeaders(_corsHeaders());
+    return ContentService.createTextOutput(
+      JSON.stringify({ ok: false, error: String(err) })
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
