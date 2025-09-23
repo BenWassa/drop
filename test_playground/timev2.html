@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Six Creative Concepts for Time & Domains</title>
+<style>
+  /* General Body Styles */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px;
+    background-color: #f8f9fa;
+    color: #212529;
+    line-height: 1.5;
+  }
+
+  .concept-container {
+    width: 450px; /* Slightly wider to accommodate complex visuals */
+    padding: 25px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #343a40;
+  }
+
+  .concept-description {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.4;
+      font-style: italic;
+  }
+
+  .domain-scores-row {
+      margin-top: 20px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding-top: 10px;
+      border-top: 1px dashed #e9ecef;
+  }
+  .domain-scores-row span {
+      white-space: nowrap;
+  }
+
+  /* --- 1) Quarter Reservoir (Evolved) --- */
+  .reservoir-container .ledger-stamp {
+    font-family: 'SF Mono', 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+  }
+  .reservoir-container .quarter-info {
+    font-family: 'SF Mono', 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: #212529;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .reservoir-container .quarter-reservoir-wrapper {
+    height: 150px; /* Taller for stratified view */
+    border: 2px solid #333;
+    padding: 3px;
+    box-sizing: border-box;
+    display: flex; /* For stacking sediments */
+    flex-direction: column-reverse; /* Sediments build from bottom */
+    position: relative;
+    overflow: hidden; /* Keep sediments inside */
+    background: linear-gradient(to top, #e9ecef, #fff); /* Background for empty part */
+  }
+  .reservoir-container .quarter-reservoir-fill {
+    height: 67%; /* Represents 67% progress */
+    background-color: rgba(60, 90, 153, 0.7); /* Main liquid color */
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Sediments stack inside fill */
+    justify-content: flex-end; /* Sediments at bottom */
+  }
+  .reservoir-container .sediment {
+      height: 4px; /* Thickness of daily sediment */
+      width: 100%;
+      opacity: 0.8;
+  }
+  .reservoir-container .sediment-sleep { background-color: #4285F4; } /* Blue */
+  .reservoir-container .sediment-fit { background-color: #DB4437; }    /* Red */
+  .reservoir-container .sediment-mind { background-color: #F4B400; }   /* Yellow */
+  .reservoir-container .sediment-spirit { background-color: #0F9D58; } /* Green */
+  .reservoir-container .sediment:nth-child(even) { opacity: 0.9; } /* Slight variation */
+  .reservoir-container .sediment:nth-child(odd) { opacity: 0.7; }
+
+
+  /* --- 2) Orbital Rings (Evolved) --- */
+  .orbital-container {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+  }
+  .orbital-container .center-label {
+    text-align: center;
+    border: 2px solid #adb5bd; /* Stronger border for implied radar */
+    padding: 12px 18px;
+    border-radius: 50%; /* Circular for radar hint */
+    z-index: 2; /* Ensure on top of rings */
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .orbital-container .center-label div:first-child {
+      font-weight: bold;
+      font-size: 1.1em;
+  }
+  .orbital-container .center-label div:last-child {
+      font-size: 0.9em;
+      color: #6c757d;
+  }
+  .orbital-container .ring {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+  }
+  /* Evolved rings with varied thickness and glow */
+  .orbital-container .day-ring {
+    width: 150px; height: 150px;
+    border-width: 3px; border-color: #4285F4;
+    transform: rotate(270deg); /* Representative progress */
+    box-shadow: 0 0 8px rgba(66, 133, 244, 0.5); /* Glow */
+  }
+  .orbital-container .week-ring {
+    width: 200px; height: 200px;
+    border-width: 2px; border-color: #0F9D58;
+    transform: rotate(180deg); /* Representative progress */
+  }
+  .orbital-container .quarter-ring {
+    width: 250px; height: 250px;
+    border-width: 4px; border-color: #F4B400;
+    transform: rotate(241.2deg); /* 67% of 360 degrees */
+    box-shadow: 0 0 12px rgba(244, 180, 0, 0.7); /* Stronger glow */
+  }
+  .orbital-container .dot {
+    position: absolute;
+    width: 9px; height: 9px;
+    background-color: #212529;
+    border-radius: 50%;
+    top: -6px; /* Adjust for border width */
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  }
+
+
+  /* --- 3) Ledger + Watermark (Evolved) --- */
+  .ledger-container {
+    position: relative;
+    padding: 20px;
+    overflow: hidden; /* Keep watermark contained */
+    min-height: 220px; /* Ensure space for watermark */
+  }
+  .ledger-container .watermark-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    color: #e9ecef; /* Watermark color */
+    z-index: 1;
+    user-select: none;
+    opacity: 0.7;
+  }
+  .ledger-container .watermark-svg path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+  }
+  .ledger-container .ledger-content {
+    position: relative;
+    z-index: 2; /* Ensure content is on top */
+  }
+  .ledger-container .month-year {
+    font-size: 1.3rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #343a40;
+    text-align: center;
+  }
+  .ledger-container .ledger-line {
+    border-top: 3px solid #000;
+    margin: 15px 0;
+  }
+  .ledger-container .quarter-details {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+  }
+  .ledger-container .domain-scores-ledger {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding-top: 10px;
+  }
+
+
+  /* --- 4) Quarter Dial (Evolved - Sunburst) --- */
+  .dial-outer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  .dial-outer-container .dial-label {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #343a40;
+  }
+  .dial-outer-container .dial-sunburst-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0f2f5, #e0e3e6);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .dial-outer-container .dial-sunburst-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg); /* Start rays from the top */
+  }
+  .dial-outer-container .dial-sunburst-svg line {
+    transform-origin: 50px 50px; /* Center of SVG viewBox */
+    stroke-linecap: round;
+  }
+  /* Example ray styling */
+  .dial-outer-container .ray-strong { stroke: #212529; stroke-width: 3; }
+  .dial-outer-container .ray-medium { stroke: #6c757d; stroke-width: 2; }
+  .dial-outer-container .ray-light { stroke: #adb5bd; stroke-width: 1; }
+  .dial-outer-container .date-info {
+    font-size: 14px;
+    color: #6c757d;
+  }
+
+
+  /* --- 5) Chronoscape (Generative Landscape) --- */
+  .chronoscape-container {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #333;
+  }
+  .chronoscape-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-weight: 600;
+  }
+  .chronoscape-landscape {
+      height: 180px;
+      width: 100%;
+      border-bottom: 2px solid #343a40;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(to bottom, #e0e8ff, #f5f7ff); /* Sky gradient */
+  }
+  .chronoscape-landscape svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleY(-1); /* Flip vertically for landscape */
+      transform-origin: bottom;
+  }
+  .chronoscape-landscape .path-base {
+      fill: #d0d8e8;
+      stroke: #aab8d0;
+      stroke-width: 1;
+  }
+  .chronoscape-landscape .path-today {
+      fill: #a0b0d8;
+      stroke: #4a5a8a;
+      stroke-width: 2;
+  }
+  .chronoscape-landscape .star-spirit {
+      fill: gold;
+      opacity: 0.7;
+  }
+
+
+  /* --- 6) Temporal Weave (Interwoven Timeline) --- */
+  .temporal-weave-container {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #333;
+  }
+  .temporal-weave-header {
+      display:flex;
+      justify-content:space-between;
+      margin-bottom: 15px;
+      font-weight: 600;
+  }
+  .temporal-weave-chart {
+      height: 180px;
+      position: relative;
+      margin-top:10px;
+  }
+  .temporal-weave-chart svg {
+      width: 100%;
+      height: 100%;
+  }
+  .temporal-weave-chart .timeline-axis {
+      stroke: #ccc;
+      stroke-width: 2;
+  }
+  .temporal-weave-chart .timeline-axis-progress {
+      stroke: #ccc;
+      stroke-width: 2;
+      stroke-dasharray: 4;
+  }
+  .temporal-weave-chart .thread-sleep { stroke: #4285F4; stroke-width: 3; fill: none; opacity: 0.8;}
+  .temporal-weave-chart .thread-fit { stroke: #DB4437; stroke-width: 2.5; fill: none; opacity: 0.8;}
+  .temporal-weave-chart .thread-mind { stroke: #F4B400; stroke-width: 2; fill: none; opacity: 0.8;}
+  .temporal-weave-chart .thread-spirit { stroke: #0F9D58; stroke-width: 3.5; fill: none; opacity: 0.9;}
+  .temporal-weave-chart .crown-knot {
+      fill: currentColor; /* Use thread color */
+      stroke: white;
+      stroke-width: 2;
+  }
+  .temporal-weave-legend {
+      margin-top: 15px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e9ecef;
+  }
+  .temporal-weave-legend span::before {
+      content: '●';
+      margin-right: 5px;
+  }
+  .temporal-weave-legend .sleep::before { color: #4285F4; }
+  .temporal-weave-legend .fit::before { color: #DB4437; }
+  .temporal-weave-legend .mind::before { color: #F4B400; }
+  .temporal-weave-legend .spirit::before { color: #0F9D58; }
+
+</style>
+</head>
+<body>
+
+<!-- Concept 1: Quarter Reservoir (Evolved) -->
+<div class="concept-container">
+  <h2>1. Quarter Reservoir (Evolved)</h2>
+  <p class="concept-description">A vertical tank fills linearly, with daily domain scores settling as thin, colored 'sediment' layers at the bottom, creating a visual history.</p>
+  <div class="reservoir-container">
+    <div class="ledger-stamp">SEP 24</div>
+    <div class="quarter-info">Q3 • 67% • 28 days left</div>
+    <div class="quarter-reservoir-wrapper">
+      <div class="quarter-reservoir-fill">
+          <!-- Example sediments - these would be dynamically generated -->
+          <div class="sediment sediment-sleep"></div>
+          <div class="sediment sediment-fit"></div>
+          <div class="sediment sediment-mind"></div>
+          <div class="sediment sediment-spirit"></div>
+          <div class="sediment sediment-sleep"></div>
+          <div class="sediment sediment-fit"></div>
+          <div class="sediment sediment-mind"></div>
+          <div class="sediment sediment-spirit"></div>
+          <div class="sediment sediment-sleep"></div>
+          <div class="sediment sediment-fit"></div>
+          <div class="sediment sediment-mind"></div>
+          <div class="sediment sediment-spirit"></div>
+      </div>
+    </div>
+    <div class="domain-scores-row">
+      <span>Sleep 82 👑</span>
+      <span>Fit 77</span>
+      <span>Mind 64</span>
+      <span>Spirit 85 👑</span>
+    </div>
+  </div>
+</div>
+
+<!-- Concept 2: Orbital Rings (Evolved) -->
+<div class="concept-container">
+  <h2>2. Orbital Rings (Evolved)</h2>
+  <p class="concept-description">Concentric rings represent timeframes, with varying thickness/glow for performance. A central 'radar' implies daily balance.</p>
+  <div class="orbital-container">
+    <div class="center-label">
+      <div>SEP 24</div>
+      <div>WK 39 Q3</div>
+    </div>
+    <div class="ring day-ring"><div class="dot"></div></div>
+    <div class="ring week-ring"><div class="dot"></div></div>
+    <div class="ring quarter-ring"><div class="dot"></div></div>
+  </div>
+</div>
+
+<!-- Concept 3: Ledger + Watermark (Evolved) -->
+<div class="concept-container">
+    <h2>3. Ledger + Watermark (Evolved)</h2>
+    <p class="concept-description">Oversized, faint generative art as a watermark reflects the day's overall 'feeling', overlaid with bold ledger data.</p>
+    <div class="ledger-container">
+        <svg class="watermark-svg" viewBox="0 0 100 100">
+            <!-- Abstract generative shape example -->
+            <path d="M 10 20 C 30 5, 70 5, 90 20 S 80 50, 90 80 C 70 95, 30 95, 10 80 S 20 50, 10 20 Z" />
+            <circle cx="50" cy="50" r="15" />
+            <line x1="10" y1="50" x2="90" y2="50" />
+            <line x1="50" y1="10" x2="50" y2="90" />
+        </svg>
+        <div class="ledger-content">
+            <div class="month-year">SEPTEMBER 2025</div>
+            <div class="ledger-line"></div>
+            <div class="quarter-details">Q3 • 67% • 28 left</div>
+            <div class="domain-scores-row domain-scores-ledger">
+            <span>Sleep 82 👑</span>
+            <span>Fit 77</span>
+            <span>Mind 64</span>
+            <span>Spirit 85 👑</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Concept 4: Quarter Dial (Evolved - Sunburst) -->
+<div class="concept-container">
+  <h2>4. Quarter Dial (Evolved: Sunburst)</h2>
+  <p class="concept-description">The quarter is a radial sunburst. Each 'ray' is a day, its length and color showing daily average and dominant domain.</p>
+  <div class="dial-outer-container">
+    <div class="dial-label">Q3 • 67%</div>
+    <div class="dial-sunburst-wrapper">
+        <svg class="dial-sunburst-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="48" fill="rgba(0,0,0,0.02)"/>
+            <!-- Generate a few example rays (max 90 for a quarter) -->
+            <!-- Ray for day 1 (0 degrees) -->
+            <line x1="50" y1="50" x2="50" y2="10" transform="rotate(0, 50, 50)" class="ray-strong" style="stroke: #F4B400; stroke-width: 4px;"/>
+            <!-- Ray for day 5 (5 * 4 = 20 degrees) -->
+            <line x1="50" y1="50" x2="50" y2="15" transform="rotate(20, 50, 50)" class="ray-medium" style="stroke: #DB4437;"/>
+            <!-- Ray for day 10 -->
+            <line x1="50" y1="50" x2="50" y2="20" transform="rotate(40, 50, 50)" class="ray-light" style="stroke: #4285F4;"/>
+            <!-- ... more rays ... -->
+            <!-- Ray for day 30 -->
+            <line x1="50" y1="50" x2="50" y2="12" transform="rotate(120, 50, 50)" class="ray-strong" style="stroke: #0F9D58; stroke-width: 3px;"/>
+            <!-- Ray for day 45 -->
+            <line x1="50" y1="50" x2="50" y2="18" transform="rotate(180, 50, 50)" class="ray-medium" style="stroke: #F4B400;"/>
+            <!-- Ray for day 60 (approx 67% progress) -->
+            <line x1="50" y1="50" x2="50" y2="10" transform="rotate(240, 50, 50)" class="ray-strong" style="stroke: #4285F4; stroke-width: 4px;"/>
+            <!-- "Today" dot or marker -->
+            <circle cx="50" cy="10" r="3" fill="#212529" transform="rotate(240, 50, 50)"/>
+        </svg>
+    </div>
+    <div class="date-info">SEP 24 • WK 39</div>
+  </div>
+</div>
+
+<!-- Concept 5: Chronoscape (Generative Landscape) - NEW -->
+<div class="concept-container">
+  <h2>5. Chronoscape (Generative Landscape)</h2>
+  <p class="concept-description">Your quarter as an evolving landscape. Daily domain scores determine the shape, height, and atmospheric elements of each day's 'structure'.</p>
+  <div class="chronoscape-container">
+    <div class="chronoscape-header">
+      <span>SEP 24</span> <span>Q3 • 67%</span>
+    </div>
+    <div class="chronoscape-landscape">
+      <svg width="100%" height="100%" viewBox="0 0 500 150" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#e0e8ff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f5f7ff;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#skyGradient)" />
+        <!-- Older days' landscape -->
+        <path d="M 0 0 L 50 50 L 100 30 L 150 70 L 200 40 L 250 80 L 300 60 L 350 100 L 400 70 L 450 85 L 500 60" class="path-base" />
+        <!-- Example for a spirit crown event on day 2 -->
+        <circle cx="100" cy="120" r="8" class="star-spirit" />
+      </svg>
+    </div>
+    <div class="domain-scores-row">
+      <span>Sleep 82 👑</span><span>Fit 77</span><span>Mind 64</span><span>Spirit 85 👑</span>
+    </div>
+  </div>
+</div>
+
+<!-- Concept 6: Temporal Weave (Interwoven Timeline) - NEW -->
+<div class="concept-container">
+  <h2>6. Temporal Weave (Interwoven Timeline)</h2>
+  <p class="concept-description">Four colored threads representing domains weave along a timeline. Amplitude and thickness show daily scores and interplay.</p>
+  <div class="temporal-weave-container">
+    <div class="temporal-weave-header">
+      <span>SEPTEMBER 24</span> <span>Q3 • 67% COMPLETE</span>
+    </div>
+    <div class="temporal-weave-chart">
+      <svg viewBox="0 0 500 150">
+          <!-- Central timeline axis -->
+          <line x1="0" y1="75" x2="335" y2="75" class="timeline-axis" />
+          <line x1="335" y1="75" x2="500" y2="75" class="timeline-axis-progress" />
+
+          <!-- Weaving Threads (using quadratic bezier for waves) -->
+          <path d="M 0 75 Q 50 25, 100 75 Q 150 125, 200 75 Q 250 50, 300 100 Q 350 120, 400 75" class="thread-sleep"/>
+          <path d="M 0 75 Q 50 125, 100 75 Q 150 25, 200 75 Q 250 100, 300 50 Q 350 40, 400 90" class="thread-fit"/>
+          <path d="M 0 75 Q 50 90, 100 60 Q 150 40, 200 75 Q 250 80, 300 65 Q 350 50, 400 65" class="thread-mind"/>
+          <path d="M 0 75 Q 50 60, 100 90 Q 150 110, 200 60 Q 250 50, 300 100 Q 350 110, 400 75" class="thread-spirit"/>
+
+          <!-- Crown Event Knot (e.g., Sleep crown) -->
+          <circle cx="100" cy="75" r="7" class="crown-knot thread-sleep" />
+      </svg>
+    </div>
+    <div class="temporal-weave-legend">
+      <span class="sleep">Sleep 82 👑</span>
+      <span class="fit">Fit 77</span>
+      <span class="mind">Mind 64</span>
+      <span class="spirit">Spirit 85</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

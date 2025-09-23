@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Six Creative Concepts for Time & Domains (with Vanilla JS)</title>
+<style>
+  /* General Body Styles */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px;
+    background-color: #f8f9fa;
+    color: #212529;
+    line-height: 1.5;
+  }
+
+  .concept-container {
+    width: 480px; /* Slightly wider for better presentation */
+    padding: 30px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #343a40;
+  }
+
+  .concept-description {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.4;
+      font-style: italic;
+  }
+
+  .domain-scores-row {
+      margin-top: 20px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding-top: 10px;
+      border-top: 1px dashed #e9ecef;
+  }
+  .domain-scores-row span {
+      white-space: nowrap;
+  }
+
+  /* --- 1) Quarter Reservoir (Evolved) --- */
+  .reservoir-container .ledger-stamp {
+    font-family: 'SF Mono', 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 5px;
+  }
+  .reservoir-container .quarter-info {
+    font-family: 'SF Mono', 'Courier New', Courier, monospace;
+    font-size: 14px;
+    color: #212529;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .reservoir-container .quarter-reservoir-wrapper {
+    height: 150px; /* Taller for stratified view */
+    border: 2px solid #333;
+    padding: 3px;
+    box-sizing: border-box;
+    display: flex; /* For stacking sediments */
+    flex-direction: column-reverse; /* Sediments build from bottom */
+    position: relative;
+    overflow: hidden; /* Keep sediments inside */
+    background: linear-gradient(to top, #e9ecef, #fff); /* Background for empty part */
+  }
+  .reservoir-container #reservoirFill {
+    height: 0%; /* Initial state for JS fill */
+    background-color: rgba(60, 90, 153, 0.7); /* Main liquid color */
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Sediments stack inside fill */
+    justify-content: flex-end; /* Sediments at bottom */
+    transition: height 1s ease-out; /* Smooth fill animation */
+  }
+  .reservoir-container .sediment {
+      height: 4px; /* Thickness of daily sediment */
+      width: 100%;
+      opacity: 0.8;
+  }
+  .reservoir-container .sediment-sleep { background-color: #4285F4; } /* Blue */
+  .reservoir-container .sediment-fit { background-color: #DB4437; }    /* Red */
+  .reservoir-container .sediment-mind { background-color: #F4B400; }   /* Yellow */
+  .reservoir-container .sediment-spirit { background-color: #0F9D58; } /* Green */
+
+
+  /* --- 2) Orbital Rings (Evolved) --- */
+  .orbital-container {
+    position: relative;
+    width: 280px; /* Slightly larger */
+    height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+  }
+  .orbital-container .center-label {
+    text-align: center;
+    border: 2px solid #adb5bd;
+    padding: 15px 20px;
+    border-radius: 50%;
+    z-index: 2;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  .orbital-container .center-label div:first-child {
+      font-weight: bold;
+      font-size: 1.2em;
+  }
+  .orbital-container .center-label div:last-child {
+      font-size: 0.9em;
+      color: #6c757d;
+  }
+  .orbital-container .ring {
+    position: absolute;
+    border-radius: 50%;
+    border-style: solid;
+    transition: all 0.5s ease-out; /* Smooth transitions for dynamic changes */
+  }
+  .orbital-container .day-ring {
+    width: 170px; height: 170px;
+    border-color: #4285F4;
+  }
+  .orbital-container .week-ring {
+    width: 220px; height: 220px;
+    border-color: #0F9D58;
+  }
+  .orbital-container .quarter-ring {
+    width: 280px; height: 280px;
+    border-color: #F4B400;
+  }
+  .orbital-container .dot {
+    position: absolute;
+    width: 9px; height: 9px;
+    background-color: #212529;
+    border-radius: 50%;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    transition: transform 0.1s linear; /* Smooth dot rotation */
+  }
+  .orbital-container .glowing {
+      box-shadow: 0 0 15px currentColor;
+  }
+
+
+  /* --- 3) Ledger + Watermark (Evolved) --- */
+  .ledger-container {
+    position: relative;
+    padding: 20px;
+    overflow: hidden;
+    min-height: 250px; /* Ensure space for watermark */
+  }
+  .ledger-container .watermark-svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; /* Larger watermark */
+    height: 300px;
+    color: #e9ecef;
+    z-index: 1;
+    user-select: none;
+    opacity: 0.7;
+  }
+  .ledger-container .watermark-svg path {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: all 1s ease-out; /* Smooth shape change */
+  }
+  .ledger-container .ledger-content {
+    position: relative;
+    z-index: 2;
+  }
+  .ledger-container .month-year {
+    font-size: 1.4rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #343a40;
+    text-align: center;
+  }
+  .ledger-container .ledger-line {
+    border-top: 3px solid #000;
+    margin: 15px 0;
+  }
+  .ledger-container .quarter-details {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+
+  /* --- 4) Quarter Dial (Evolved - Sunburst) --- */
+  .dial-outer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  .dial-outer-container .dial-label {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #343a40;
+  }
+  .dial-outer-container .dial-sunburst-wrapper {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f0f2f5, #e0e3e6);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
+  }
+  .dial-outer-container .dial-sunburst-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg); /* Start rays from the top */
+  }
+  .dial-outer-container .dial-sunburst-svg line {
+    transform-origin: 50px 50px; /* Center of SVG viewBox */
+    stroke-linecap: round;
+    transition: all 0.3s ease-out; /* Smooth ray changes */
+  }
+  .dial-outer-container .ray-today {
+      stroke: #212529;
+      stroke-width: 4px;
+  }
+  .dial-outer-container .ray-crown {
+      stroke: #FFD700; /* Gold for crown */
+      stroke-width: 5px;
+      box-shadow: 0 0 8px #FFD700;
+  }
+  .dial-outer-container .date-info {
+    font-size: 14px;
+    color: #6c757d;
+  }
+
+
+  /* --- 5) Chronoscape (Generative Landscape) --- */
+  .chronoscape-container {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #333;
+  }
+  .chronoscape-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-weight: 600;
+  }
+  .chronoscape-landscape {
+      height: 180px;
+      width: 100%;
+      border-bottom: 2px solid #343a40;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(to bottom, #e0e8ff, #f5f7ff); /* Sky gradient */
+  }
+  .chronoscape-landscape svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: scaleY(-1); /* Flip vertically for landscape */
+      transform-origin: bottom;
+  }
+  .chronoscape-landscape #landscapePath {
+      fill: #d0d8e8;
+      stroke: #aab8d0;
+      stroke-width: 1;
+      transition: d 0.5s ease-out;
+  }
+  .chronoscape-landscape .star-spirit {
+      fill: gold;
+      opacity: 0.7;
+      transition: all 0.3s ease-out;
+  }
+  .chronoscape-landscape .today-mark {
+      fill: #212529;
+      opacity: 0.8;
+  }
+
+
+  /* --- 6) Temporal Weave (Interwoven Timeline) --- */
+  .temporal-weave-container {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #333;
+  }
+  .temporal-weave-header {
+      display:flex;
+      justify-content:space-between;
+      margin-bottom: 15px;
+      font-weight: 600;
+  }
+  .temporal-weave-chart {
+      height: 180px;
+      position: relative;
+      margin-top:10px;
+  }
+  .temporal-weave-chart svg {
+      width: 100%;
+      height: 100%;
+  }
+  .temporal-weave-chart .timeline-axis {
+      stroke: #ccc;
+      stroke-width: 2;
+  }
+  .temporal-weave-chart .timeline-axis-progress {
+      stroke: #ccc;
+      stroke-width: 2;
+      stroke-dasharray: 4;
+  }
+  .temporal-weave-chart path {
+      fill: none;
+      transition: d 0.3s ease-out;
+  }
+  .temporal-weave-chart .thread-sleep { stroke: #4285F4; stroke-width: 3; opacity: 0.8;}
+  .temporal-weave-chart .thread-fit { stroke: #DB4437; stroke-width: 2.5; opacity: 0.8;}
+  .temporal-weave-chart .thread-mind { stroke: #F4B400; stroke-width: 2; opacity: 0.8;}
+  .temporal-weave-chart .thread-spirit { stroke: #0F9D58; stroke-width: 3.5; opacity: 0.9;}
+  .temporal-weave-chart .crown-knot {
+      fill: currentColor;
+      stroke: white;
+      stroke-width: 2;
+      transition: all 0.2s ease-out;
+  }
+  .temporal-weave-legend {
+      margin-top: 15px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e9ecef;
+  }
+  .temporal-weave-legend span::before {
+      content: '●';
+      margin-right: 5px;
+  }
+  .temporal-weave-legend .sleep::before { color: #4285F4; }
+  .temporal-weave-legend .fit::before { color: #DB4437; }
+  .temporal-weave-legend .mind::before { color: #F4B400; }
+  .temporal-weave-legend .spirit::before { color: #0F9D58; }
+
+</style>
+</head>
+<body>
+
+<!-- Concept 1: Quarter Reservoir (Evolved) -->
+<div class="concept-container">
+  <h2>1. Quarter Reservoir (Evolved)</h2>
+  <p class="concept-description">A vertical tank fills linearly, with daily domain scores settling as thin, colored 'sediment' layers at the bottom, creating a visual history.</p>
+  <div class="reservoir-container">
+    <div class="ledger-stamp" id="reservoirDate"></div>
+    <div class="quarter-info" id="reservoirQuarterInfo"></div>
+    <div class="quarter-reservoir-wrapper">
+      <div id="reservoirFill">
+          <!-- Sediments will be dynamically generated here by JS -->
+      </div>
+    </div>
+    <div class="domain-scores-row" id="reservoirDomainScores"></div>
+  </div>
+</div>
+
+<!-- Concept 2: Orbital Rings (Evolved) -->
+<div class="concept-container">
+  <h2>2. Orbital Rings (Evolved)</h2>
+  <p class="concept-description">Concentric rings represent timeframes, with varying thickness/glow for performance. A central 'radar' implies daily balance.</p>
+  <div class="orbital-container">
+    <div class="center-label" id="orbitalCenterLabel">
+      <div></div>
+      <div></div>
+    </div>
+    <div class="ring day-ring" id="dayRing"><div class="dot" id="dayDot"></div></div>
+    <div class="ring week-ring" id="weekRing"><div class="dot" id="weekDot"></div></div>
+    <div class="ring quarter-ring" id="quarterRing"><div class="dot" id="quarterDot"></div></div>
+  </div>
+</div>
+
+<!-- Concept 3: Ledger + Watermark (Evolved) -->
+<div class="concept-container">
+    <h2>3. Ledger + Watermark (Evolved)</h2>
+    <p class="concept-description">Oversized, faint generative art as a watermark reflects the day's overall 'feeling', overlaid with bold ledger data.</p>
+    <div class="ledger-container">
+        <svg class="watermark-svg" viewBox="0 0 100 100" id="watermarkSVG">
+            <!-- Dynamic path will be inserted here by JS -->
+        </svg>
+        <div class="ledger-content">
+            <div class="month-year" id="ledgerMonthYear"></div>
+            <div class="ledger-line"></div>
+            <div class="quarter-details" id="ledgerQuarterDetails"></div>
+            <div class="domain-scores-row domain-scores-ledger" id="ledgerDomainScores"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Concept 4: Quarter Dial (Evolved - Sunburst) -->
+<div class="concept-container">
+  <h2>4. Quarter Dial (Evolved: Sunburst)</h2>
+  <p class="concept-description">The quarter is a radial sunburst. Each 'ray' is a day, its length and color showing daily average and dominant domain.</p>
+  <div class="dial-outer-container">
+    <div class="dial-label" id="dialLabel"></div>
+    <div class="dial-sunburst-wrapper">
+        <svg class="dial-sunburst-svg" viewBox="0 0 100 100" id="sunburstSVG">
+            <circle cx="50" cy="50" r="48" fill="rgba(0,0,0,0.02)"/>
+            <!-- Rays will be dynamically generated here by JS -->
+        </svg>
+    </div>
+    <div class="date-info" id="dialDateInfo"></div>
+  </div>
+</div>
+
+<!-- Concept 5: Chronoscape (Generative Landscape) - NEW -->
+<div class="concept-container">
+  <h2>5. Chronoscape (Generative Landscape)</h2>
+  <p class="concept-description">Your quarter as an evolving landscape. Daily domain scores determine the shape, height, and atmospheric elements of each day's 'structure'.</p>
+  <div class="chronoscape-container">
+    <div class="chronoscape-header">
+      <span id="chronoscapeDate"></span> <span id="chronoscapeQuarterInfo"></span>
+    </div>
+    <div class="chronoscape-landscape">
+      <svg width="100%" height="100%" viewBox="0 0 500 150" preserveAspectRatio="none" id="chronoscapeSVG">
+        <defs>
+          <linearGradient id="skyGradientCrono" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#e0e8ff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f5f7ff;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#skyGradientCrono)" />
+        <path id="landscapePath" class="path-base" />
+        <!-- Stars/crowns will be dynamically generated -->
+      </svg>
+    </div>
+    <div class="domain-scores-row" id="chronoscapeDomainScores"></div>
+  </div>
+</div>
+
+<!-- Concept 6: Temporal Weave (Interwoven Timeline) - NEW -->
+<div class="concept-container">
+  <h2>6. Temporal Weave (Interwoven Timeline)</h2>
+  <p class="concept-description">Four colored threads representing domains weave along a timeline. Amplitude and thickness show daily scores and interplay.</p>
+  <div class="temporal-weave-container">
+    <div class="temporal-weave-header">
+      <span id="weaveDate"></span> <span id="weaveQuarterInfo"></span>
+    </div>
+    <div class="temporal-weave-chart">
+      <svg viewBox="0 0 500 150" id="weaveSVG">
+          <line x1="0" y1="75" x2="0" y2="75" class="timeline-axis" id="weaveAxisPast" />
+          <line x1="0" y1="75" x2="0" y2="75" class="timeline-axis-progress" id="weaveAxisFuture" />
+
+          <path id="threadSleep" class="thread-sleep"/>
+          <path id="threadFit" class="thread-fit"/>
+          <path id="threadMind" class="thread-mind"/>
+          <path id="threadSpirit" class="thread-spirit"/>
+          <!-- Crown event knots will be added by JS -->
+      </svg>
+    </div>
+    <div class="temporal-weave-legend" id="weaveLegend">
+      <span class="sleep">Sleep <span id="weaveSleepScore"></span></span>
+      <span class="fit">Fit <span id="weaveFitScore"></span></span>
+      <span class="mind">Mind <span id="weaveMindScore"></span></span>
+      <span class="spirit">Spirit <span id="weaveSpiritScore"></span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Mock Data (for demonstration) ---
+  const MOCK_DATE = new Date(); // Use current date for 'today'
+  const TOTAL_QUARTER_DAYS = 90; // Approx 3 months
+  const DAYS_IN_QUARTER_SO_FAR = Math.floor(MOCK_DATE.getDate() / 30 * TOTAL_QUARTER_DAYS); // Simulate days passed in quarter
+  const QUARTER_PROGRESS_PERCENT = Math.round((DAYS_IN_QUARTER_SO_FAR / TOTAL_QUARTER_DAYS) * 100);
+  const DAYS_LEFT = TOTAL_QUARTER_DAYS - DAYS_IN_QUARTER_SO_FAR;
+  const CURRENT_WEEK_IN_QUARTER = Math.ceil(DAYS_IN_QUARTER_SO_FAR / 7);
+
+  const DOMAIN_NAMES = ['Sleep', 'Fit', 'Mind', 'Spirit'];
+  const DOMAIN_COLORS = {
+      'Sleep': '#4285F4', // Blue
+      'Fit': '#DB4437',    // Red
+      'Mind': '#F4B400',   // Yellow
+      'Spirit': '#0F9D58'  // Green
+  };
+
+  // Generate mock daily scores for the quarter
+  const mockDailyScores = [];
+  for (let i = 0; i < TOTAL_QUARTER_DAYS; i++) {
+    const dayScores = {};
+    let hasCrown = false;
+    DOMAIN_NAMES.forEach(domain => {
+      const score = Math.floor(Math.random() * 40) + 60; // Scores between 60-99
+      dayScores[domain] = score;
+      if (score > 85 && Math.random() < 0.2) { // 20% chance of a crown for high scores
+          dayScores[`${domain}Crown`] = true;
+          hasCrown = true;
+      }
+    });
+    // Ensure today has current values if needed for live update demo
+    if (i === DAYS_IN_QUARTER_SO_FAR - 1) { // Current day
+        dayScores['Sleep'] = 82; dayScores['SleepCrown'] = true;
+        dayScores['Fit'] = 77;
+        dayScores['Mind'] = 64;
+        dayScores['Spirit'] = 85; dayScores['SpiritCrown'] = true;
+    }
+    dayScores.totalAvg = DOMAIN_NAMES.reduce((sum, d) => sum + dayScores[d], 0) / DOMAIN_NAMES.length;
+    mockDailyScores.push(dayScores);
+  }
+
+  const currentDayScores = mockDailyScores[DAYS_IN_QUARTER_SO_FAR - 1] || mockDailyScores[mockDailyScores.length - 1]; // Current day's scores
+
+
+  // --- Helper Functions ---
+  function getFormattedDate(date) {
+    const options = { month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options).toUpperCase();
+  }
+
+  function getFullMonthYear(date) {
+    const options = { year: 'numeric', month: 'long' };
+    return date.toLocaleDateString('en-US', options).toUpperCase();
+  }
+
+  function createDomainScoresHTML(scores, domainNames, showCrown = true) {
+    return domainNames.map(domain => {
+      let html = `<span>${domain} ${scores[domain]}`;
+      if (showCrown && scores[`${domain}Crown`]) {
+        html += ' 👑';
+      }
+      html += '</span>';
+      return html;
+    }).join('');
+  }
+
+  function getDomainColor(domainName) {
+      return DOMAIN_COLORS[domainName] || '#000';
+  }
+
+  // --- Concept 1: Quarter Reservoir (Evolved) ---
+  function initQuarterReservoir() {
+    document.getElementById('reservoirDate').textContent = getFormattedDate(MOCK_DATE);
+    document.getElementById('reservoirQuarterInfo').textContent = `Q3 • ${QUARTER_PROGRESS_PERCENT}% • ${DAYS_LEFT} days left`;
+    document.getElementById('reservoirDomainScores').innerHTML = createDomainScoresHTML(currentDayScores, DOMAIN_NAMES);
+
+    const reservoirFill = document.getElementById('reservoirFill');
+    reservoirFill.style.height = `${QUARTER_PROGRESS_PERCENT}%`;
+
+    // Add sediment layers
+    // Limit to a reasonable number of sediments to avoid too many DOM elements
+    const sedimentsToShow = Math.min(DAYS_IN_QUARTER_SO_FAR, 20); // Show last 20 days or fewer
+    for (let i = 0; i < sedimentsToShow; i++) {
+        const dayIdx = DAYS_IN_QUARTER_SO_FAR - sedimentsToShow + i;
+        if (dayIdx >= 0) {
+            const dayData = mockDailyScores[dayIdx];
+            const maxScoreDomain = DOMAIN_NAMES.reduce((a, b) => dayData[a] > dayData[b] ? a : b);
+            const sediment = document.createElement('div');
+            sediment.className = `sediment sediment-${maxScoreDomain.toLowerCase()}`;
+            sediment.style.height = `${(dayData.totalAvg - 60) / 40 * 5 + 1}px`; // Height based on avg score
+            reservoirFill.appendChild(sediment);
+        }
+    }
+  }
+
+  // --- Concept 2: Orbital Rings (Evolved) ---
+  function initOrbitalRings() {
+    const centerLabel = document.getElementById('orbitalCenterLabel');
+    centerLabel.children[0].textContent = getFormattedDate(MOCK_DATE);
+    centerLabel.children[1].textContent = `WK ${CURRENT_WEEK_IN_QUARTER} Q3`;
+
+    const dayRing = document.getElementById('dayRing');
+    const weekRing = document.getElementById('weekRing');
+    const quarterRing = document.getElementById('quarterRing');
+
+    const dayDot = document.getElementById('dayDot');
+    const weekDot = document.getElementById('weekDot');
+    const quarterDot = document.getElementById('quarterDot');
+
+    // Day progress (e.g., in hours)
+    const hours = MOCK_DATE.getHours();
+    const dayProgressDegrees = (hours / 24) * 360;
+    dayRing.style.transform = `rotate(${dayProgressDegrees}deg)`;
+
+    // Week progress (using 7 days in a week)
+    const dayOfWeek = MOCK_DATE.getDay(); // 0 for Sunday, 1 for Monday
+    const weekProgressDegrees = (dayOfWeek / 7) * 360;
+    weekRing.style.transform = `rotate(${weekProgressDegrees}deg)`;
+
+    // Quarter progress
+    const quarterProgressDegrees = (QUARTER_PROGRESS_PERCENT / 100) * 360;
+    quarterRing.style.transform = `rotate(${quarterProgressDegrees}deg)`;
+
+    // Simulate ring thickness and glow based on average scores
+    const dayAvg = currentDayScores.totalAvg;
+    dayRing.style.borderWidth = `${Math.round((dayAvg - 60) / 40 * 4) + 1}px`; // 1-5px
+    if (dayAvg > 80) dayRing.classList.add('glowing'); else dayRing.classList.remove('glowing');
+
+    // For week and quarter, would need to calculate average of past days. Mocking here.
+    const weekAvg = (currentDayScores.totalAvg + 70 + 80) / 3; // Mock average
+    weekRing.style.borderWidth = `${Math.round((weekAvg - 60) / 40 * 3) + 1}px`; // 1-4px
+    if (weekAvg > 80) weekRing.classList.add('glowing'); else weekRing.classList.remove('glowing');
+
+    const quarterAvg = (currentDayScores.totalAvg + 75) / 2; // Mock average
+    quarterRing.style.borderWidth = `${Math.round((quarterAvg - 60) / 40 * 5) + 1}px`; // 1-6px
+    if (quarterAvg > 80) quarterRing.classList.add('glowing'); else quarterRing.classList.remove('glowing');
+  }
+
+  // --- Concept 3: Ledger + Watermark (Evolved) ---
+  function initLedgerWatermark() {
+    document.getElementById('ledgerMonthYear').textContent = getFullMonthYear(MOCK_DATE);
+    document.getElementById('ledgerQuarterDetails').textContent = `Q3 • ${QUARTER_PROGRESS_PERCENT}% • ${DAYS_LEFT} left`;
+    document.getElementById('ledgerDomainScores').innerHTML = createDomainScoresHTML(currentDayScores, DOMAIN_NAMES);
+
+    const watermarkSVG = document.getElementById('watermarkSVG');
+    const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+    // Generate a simple generative shape based on current day's average scores
+    const avgScore = currentDayScores.totalAvg;
+    let pathData;
+
+    if (avgScore > 85) { // High scores: more complex, vibrant
+        pathData = `M 10 20 C 30 5, 70 5, 90 20 S 80 50, 90 80 C 70 95, 30 95, 10 80 S 20 50, 10 20 Z M 50 10 L 50 90 M 10 50 L 90 50`;
+        watermarkSVG.style.color = '#cce5ff'; // Brighter
+    } else if (avgScore > 70) { // Medium scores: balanced, flowing
+        pathData = `M 20 20 C 40 10, 60 10, 80 20 S 70 50, 80 80 C 60 90, 40 90, 20 80 S 30 50, 20 20 Z`;
+        watermarkSVG.style.color = '#e9ecef';
+    } else { // Lower scores: simpler, more angular
+        pathData = `M 20 20 L 80 20 L 80 80 L 20 80 Z M 50 20 L 50 80 M 20 50 L 80 50`;
+        watermarkSVG.style.color = '#f8f9fa';
+    }
+
+    pathElement.setAttribute('d', pathData);
+    watermarkSVG.innerHTML = ''; // Clear previous paths
+    watermarkSVG.appendChild(pathElement);
+  }
+
+  // --- Concept 4: Quarter Dial (Evolved - Sunburst) ---
+  function initQuarterDial() {
+    document.getElementById('dialLabel').textContent = `Q3 • ${QUARTER_PROGRESS_PERCENT}%`;
+    document.getElementById('dialDateInfo').textContent = `${getFormattedDate(MOCK_DATE)} • WK ${CURRENT_WEEK_IN_QUARTER}`;
+
+    const sunburstSVG = document.getElementById('sunburstSVG');
+    const center = { x: 50, y: 50 };
+    const maxRayLength = 40; // Max length from center to outer edge (radius is 50, so 40 is good)
+    const raysContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    sunburstSVG.appendChild(raysContainer);
+
+    // Number of degrees per day (360 degrees / 90 days)
+    const degreesPerDay = 360 / TOTAL_QUARTER_DAYS;
+
+    mockDailyScores.slice(0, DAYS_IN_QUARTER_SO_FAR).forEach((dayData, index) => {
+        const rotationAngle = index * degreesPerDay;
+        const avgScore = dayData.totalAvg;
+        const rayLength = (avgScore - 60) / 40 * maxRayLength + 5; // Scale score (60-99) to length (5-45)
+        const ray = document.createElementNS("http://www.w3.org/2000/svg", "line");
+
+        ray.setAttribute('x1', center.x);
+        ray.setAttribute('y1', center.y);
+        ray.setAttribute('x2', center.x);
+        ray.setAttribute('y2', center.y - rayLength); // Rays extend upwards initially
+        ray.setAttribute('transform', `rotate(${rotationAngle}, ${center.x}, ${center.y})`);
+
+        // Determine ray color based on highest score or crown
+        let rayColor = '#adb5bd'; // Default light color
+        let strokeWidth = 1.5;
+
+        const crownedDomains = DOMAIN_NAMES.filter(d => dayData[`${d}Crown`]);
+        if (crownedDomains.length > 0) {
+            rayColor = DOMAIN_COLORS[crownedDomains[0]]; // Use first crown color
+            strokeWidth = 3.5;
+            ray.classList.add('ray-crown');
+        } else {
+            const maxScoreDomain = DOMAIN_NAMES.reduce((a, b) => dayData[a] > dayData[b] ? a : b);
+            if (dayData[maxScoreDomain] > 80) {
+                rayColor = DOMAIN_COLORS[maxScoreDomain];
+                strokeWidth = 2.5;
+            } else if (dayData[maxScoreDomain] > 70) {
+                rayColor = DOMAIN_COLORS[maxScoreDomain];
+                strokeWidth = 1.8;
+            }
+        }
+        ray.setAttribute('stroke', rayColor);
+        ray.setAttribute('stroke-width', strokeWidth);
+
+        if (index === DAYS_IN_QUARTER_SO_FAR - 1) { // Today's ray
+            ray.classList.add('ray-today');
+            ray.setAttribute('stroke', '#212529'); // Today is black
+            ray.setAttribute('stroke-width', 4);
+            // Add a small circle at the end of today's ray
+            const todayMarker = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            todayMarker.setAttribute('cx', center.x);
+            todayMarker.setAttribute('cy', center.y - rayLength);
+            todayMarker.setAttribute('r', 3);
+            todayMarker.setAttribute('fill', '#212529');
+            todayMarker.setAttribute('transform', `rotate(${rotationAngle}, ${center.x}, ${center.y})`);
+            raysContainer.appendChild(todayMarker);
+        }
+
+        raysContainer.appendChild(ray);
+    });
+  }
+
+
+  // --- Concept 5: Chronoscape (Generative Landscape) ---
+  function initChronoscape() {
+    document.getElementById('chronoscapeDate').textContent = getFormattedDate(MOCK_DATE);
+    document.getElementById('chronoscapeQuarterInfo').textContent = `Q3 ${QUARTER_PROGRESS_PERCENT}%`;
+    document.getElementById('chronoscapeDomainScores').innerHTML = createDomainScoresHTML(currentDayScores, DOMAIN_NAMES);
+
+    const chronoscapeSVG = document.getElementById('chronoscapeSVG');
+    const landscapePath = document.getElementById('landscapePath');
+    const pathData = [];
+    const widthPerDay = 500 / TOTAL_QUARTER_DAYS; // SVG width is 500
+    const basePathY = 0; // Base of the landscape (bottom of SVG)
+
+    // Clear previous stars
+    chronoscapeSVG.querySelectorAll('.star-spirit').forEach(s => s.remove());
+    chronoscapeSVG.querySelectorAll('.today-mark').forEach(m => m.remove());
+
+    pathData.push(`M 0 ${basePathY}`);
+
+    for (let i = 0; i < DAYS_IN_QUARTER_SO_FAR; i++) {
+        const dayData = mockDailyScores[i];
+        const x = (i + 0.5) * widthPerDay; // Midpoint of the day's segment
+        const yOffset = (dayData.totalAvg - 60) / 40 * 100; // Height based on avg score (0-100)
+        const peakY = basePathY + yOffset + (Math.random() - 0.5) * 20; // Add some randomness
+
+        if (i === 0) {
+            pathData.push(`L ${x} ${peakY}`);
+        } else {
+            const prevX = (i - 0.5) * widthPerDay;
+            const prevY = pathData[pathData.length - 1].split(' ')[2]; // Get last Y
+            pathData.push(`Q ${prevX + widthPerDay/2} ${prevY}, ${x} ${peakY}`);
+        }
+
+        // Add spirit stars for crown events
+        if (dayData.SpiritCrown && dayData.Spirit > 85) {
+            const star = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            star.classList.add('star-spirit');
+            star.setAttribute('cx', x);
+            star.setAttribute('cy', peakY + 30); // Position above the peak
+            star.setAttribute('r', 5);
+            chronoscapeSVG.appendChild(star);
+        }
+    }
+
+    pathData.push(`L ${500} ${basePathY}`); // Extend to end
+    pathData.push(`Z`); // Close the path
+
+    landscapePath.setAttribute('d', pathData.join(' '));
+
+    // Mark today
+    const todayX = (DAYS_IN_QUARTER_SO_FAR - 0.5) * widthPerDay;
+    const todayMarker = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    todayMarker.classList.add('today-mark');
+    todayMarker.setAttribute('cx', todayX);
+    todayMarker.setAttribute('cy', landscapePath.getPointAtLength(landscapePath.getTotalLength() * (todayX / 500)).y - 5);
+    todayMarker.setAttribute('r', 3);
+    chronoscapeSVG.appendChild(todayMarker);
+  }
+
+  // --- Concept 6: Temporal Weave (Interwoven Timeline) ---
+  function initTemporalWeave() {
+    document.getElementById('weaveDate').textContent = getFormattedDate(MOCK_DATE);
+    document.getElementById('weaveQuarterInfo').textContent = `Q3 • ${QUARTER_PROGRESS_PERCENT}% COMPLETE`;
+    document.getElementById('weaveSleepScore').textContent = currentDayScores.Sleep + (currentDayScores.SleepCrown ? ' 👑' : '');
+    document.getElementById('weaveFitScore').textContent = currentDayScores.Fit + (currentDayScores.FitCrown ? ' 👑' : '');
+    document.getElementById('weaveMindScore').textContent = currentDayScores.Mind + (currentDayScores.MindCrown ? ' 👑' : '');
+    document.getElementById('weaveSpiritScore').textContent = currentDayScores.Spirit + (currentDayScores.SpiritCrown ? ' 👑' : '');
+
+    const weaveSVG = document.getElementById('weaveSVG');
+    const xAxisLength = 500;
+    const midY = 75;
+    const amplitudeScale = 0.5; // Controls how much scores affect wave height
+
+    const axisPast = document.getElementById('weaveAxisPast');
+    const axisFuture = document.getElementById('weaveAxisFuture');
+    axisPast.setAttribute('x2', (DAYS_IN_QUARTER_SO_FAR / TOTAL_QUARTER_DAYS) * xAxisLength);
+    axisFuture.setAttribute('x1', (DAYS_IN_QUARTER_SO_FAR / TOTAL_QUARTER_DAYS) * xAxisLength);
+    axisFuture.setAttribute('x2', xAxisLength);
+
+
+    // Clear previous knots
+    weaveSVG.querySelectorAll('.crown-knot').forEach(k => k.remove());
+
+    DOMAIN_NAMES.forEach(domain => {
+        const threadPath = document.getElementById(`thread${domain}`);
+        const pathPoints = [];
+        pathPoints.push(`M 0 ${midY}`);
+
+        for (let i = 0; i < DAYS_IN_QUARTER_SO_FAR; i++) {
+            const dayData = mockDailyScores[i];
+            const x = (i / TOTAL_QUARTER_DAYS) * xAxisLength;
+            const nextX = ((i + 1) / TOTAL_QUARTER_DAYS) * xAxisLength;
+            const currentScore = dayData[domain];
+            const waveAmplitude = (currentScore - 50) * amplitudeScale; // Scale score to amplitude
+
+            // Create a curve for each day segment
+            pathPoints.push(`Q ${x + (nextX - x) / 2} ${midY + (i % 2 === 0 ? waveAmplitude : -waveAmplitude)}, ${nextX} ${midY}`);
+
+            // Add crown knots
+            if (dayData[`${domain}Crown`]) {
+                const knot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                knot.classList.add('crown-knot', `thread-${domain.toLowerCase()}`);
+                knot.setAttribute('cx', x + (nextX - x) / 2);
+                knot.setAttribute('cy', midY + (i % 2 === 0 ? waveAmplitude : -waveAmplitude));
+                knot.setAttribute('r', 5);
+                weaveSVG.appendChild(knot);
+            }
+        }
+        threadPath.setAttribute('d', pathPoints.join(' '));
+    });
+  }
+
+
+  // --- Initialize all concepts on DOMContentLoaded ---
+  document.addEventListener('DOMContentLoaded', () => {
+    initQuarterReservoir();
+    initOrbitalRings();
+    initLedgerWatermark();
+    initQuarterDial();
+    initChronoscape();
+    initTemporalWeave();
+  });
+</script>
+</body>
+</html>
