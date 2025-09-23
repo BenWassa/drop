@@ -463,43 +463,7 @@ function initializeUI() {
     });
   }
 
-  // Audio recording
-  const voiceButton = $('voiceButton');
-  let mediaRecorder;
-  let audioChunks = [];
-  if (voiceButton) {
-    voiceButton.addEventListener('click', async () => {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        voiceButton.classList.remove('recording');
-        voiceButton.classList.add('processing');
-        voiceButton.querySelector('span:last-child').textContent = 'PROCESSING...';
-      } else {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          mediaRecorder = new MediaRecorder(stream);
-          audioChunks = [];
-          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-          mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            const mp3Blob = await encodeToMP3(audioBlob);
-            const today = new Date().toISOString().split('T')[0];
-            await window.saveAudioNote(today, mp3Blob);
-            voiceButton.querySelector('span:last-child').textContent = 'RECORD AUDIO NOTE';
-            voiceButton.classList.remove('processing');
-            stream.getTracks().forEach(track => track.stop());
-            renderAudioNotes();
-          };
-          mediaRecorder.start();
-          voiceButton.classList.add('recording');
-          voiceButton.querySelector('span:last-child').textContent = 'STOP RECORDING';
-        } catch (err) {
-          console.error('Recording failed', err);
-          alert('Microphone access denied or not available.');
-        }
-      }
-    });
-  }
+  initializeVoiceControls();
 
   document.addEventListener('click', e => {
     if (e.target.classList.contains('toggle-domain')) {
@@ -515,59 +479,702 @@ function initializeUI() {
 
   renderAspectsManager();
 
+  initializeAudioNotesList();
+
   loadTodayData();
   showScreen('todayScreen');
 }
 
+const voiceState = {
+  mediaRecorder: null,
+  stream: null,
+  chunks: [],
+  recognition: null,
+  recognitionShouldRestart: false,
+  isRecording: false,
+  finalTranscript: '',
+  interimTranscript: '',
+};
+
+function supportsSpeechRecognition() {
+  return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+}
+
+const setVoiceStatus = (() => {
+  let hideTimer = null;
+  return (message, { tone = 'muted', persist = false } = {}) => {
+    const status = $('voiceStatus');
+    if (!status) {
+      return;
+    }
+
+    if (!message) {
+      status.textContent = '';
+      status.classList.add('hidden');
+      status.removeAttribute('data-tone');
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+      return;
+    }
+
+    status.textContent = message;
+    status.dataset.tone = tone;
+    status.classList.remove('hidden');
+
+    if (hideTimer) {
+      clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+
+    if (!persist) {
+      hideTimer = setTimeout(() => {
+        status.textContent = '';
+        status.classList.add('hidden');
+        status.removeAttribute('data-tone');
+        hideTimer = null;
+      }, 6000);
+    }
+  };
+})();
+
+function resetTranscriptState() {
+  voiceState.finalTranscript = '';
+  voiceState.interimTranscript = '';
+}
+
+function updateTranscriptionPreview() {
+  const preview = $('transcriptionPreview');
+  const content = $('transcriptionContent');
+  const copyButton = $('copyTranscription');
+  if (!preview || !content || !copyButton) {
+    return;
+  }
+
+  const transcript = `${voiceState.finalTranscript} ${voiceState.interimTranscript}`.trim();
+  if (transcript) {
+    content.textContent = transcript;
+    preview.classList.remove('hidden');
+    copyButton.disabled = false;
+  } else {
+    content.textContent = '';
+    copyButton.disabled = true;
+    if (!voiceState.isRecording) {
+      preview.classList.add('hidden');
+    }
+  }
+}
+
+function clearTranscriptionPreview({ hide = true } = {}) {
+  const preview = $('transcriptionPreview');
+  const content = $('transcriptionContent');
+  const copyButton = $('copyTranscription');
+  if (content) {
+    content.textContent = '';
+  }
+  if (copyButton) {
+    copyButton.disabled = true;
+  }
+  if (hide && preview) {
+    preview.classList.add('hidden');
+  }
+}
+
+async function copyTextToClipboard(text) {
+  if (!text) {
+    return;
+  }
+
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const helper = document.createElement('textarea');
+  helper.value = text;
+  helper.setAttribute('readonly', '');
+  helper.style.position = 'absolute';
+  helper.style.left = '-9999px';
+  document.body.appendChild(helper);
+  helper.select();
+  document.execCommand('copy');
+  document.body.removeChild(helper);
+}
+
+function initializeVoiceControls() {
+  const voiceButton = $('voiceButton');
+  if (!voiceButton) {
+    return;
+  }
+
+  const copyButton = $('copyTranscription');
+  if (copyButton) {
+    copyButton.addEventListener('click', async () => {
+      const content = $('transcriptionContent');
+      const text = content?.textContent?.trim() || '';
+      if (!text) {
+        setVoiceStatus('No transcription captured yet.', { tone: 'warning' });
+        return;
+      }
+      try {
+        await copyTextToClipboard(text);
+        setVoiceStatus('Transcription copied to clipboard.', { tone: 'success' });
+      } catch (error) {
+        console.error('Copy failed', error);
+        setVoiceStatus('Unable to copy transcription.', { tone: 'error' });
+      }
+    });
+  }
+
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder !== 'function') {
+    voiceButton.disabled = true;
+    setVoiceStatus('Microphone recording is not supported in this browser.', { tone: 'error', persist: true });
+    return;
+  }
+
+  if (supportsSpeechRecognition()) {
+    setVoiceStatus('Tap to record. Live transcription is available.', { tone: 'muted' });
+  } else {
+    setVoiceStatus('Tap to record. Add transcription manually after saving.', { tone: 'warning', persist: true });
+  }
+
+  const label = voiceButton.querySelector('span:last-child');
+
+  const stopStream = () => {
+    if (voiceState.stream) {
+      try {
+        voiceState.stream.getTracks().forEach(track => track.stop());
+      } catch (error) {
+        console.warn('Stream cleanup failed', error);
+      }
+      voiceState.stream = null;
+    }
+  };
+
+  const teardownRecording = ({ hidePreview = false } = {}) => {
+    voiceState.isRecording = false;
+    voiceState.recognitionShouldRestart = false;
+    voiceState.mediaRecorder = null;
+    voiceState.chunks = [];
+    stopRecognition();
+    stopStream();
+
+    voiceButton.classList.remove('recording', 'processing');
+    voiceButton.disabled = false;
+    voiceButton.setAttribute('aria-pressed', 'false');
+    if (label) {
+      label.textContent = 'RECORD AUDIO NOTE';
+    }
+
+    if (hidePreview) {
+      clearTranscriptionPreview({ hide: true });
+    } else {
+      updateTranscriptionPreview();
+    }
+  };
+
+  const stopRecognition = () => {
+    if (!voiceState.recognition) {
+      return;
+    }
+    try {
+      voiceState.recognitionShouldRestart = false;
+      voiceState.recognition.stop();
+    } catch (error) {
+      console.warn('Failed to stop recognition', error);
+    }
+  };
+
+  const startSpeechRecognition = () => {
+    if (!supportsSpeechRecognition()) {
+      resetTranscriptState();
+      clearTranscriptionPreview({ hide: false });
+      updateTranscriptionPreview();
+      setVoiceStatus('Recording… automatic transcription unavailable.', { tone: 'warning' });
+      return;
+    }
+
+    const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    try {
+      const recognition = new RecognitionCtor();
+      voiceState.recognition = recognition;
+      voiceState.recognitionShouldRestart = true;
+      resetTranscriptState();
+      clearTranscriptionPreview({ hide: true });
+      updateTranscriptionPreview();
+
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = event => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (!result || !result[0]) {
+            continue;
+          }
+          const text = result[0].transcript.trim();
+          if (result.isFinal) {
+            voiceState.finalTranscript = `${voiceState.finalTranscript} ${text}`.trim();
+          } else {
+            interim = `${interim} ${text}`.trim();
+          }
+        }
+        voiceState.interimTranscript = interim;
+        updateTranscriptionPreview();
+      };
+
+      recognition.onerror = event => {
+        console.warn('Speech recognition error', event.error);
+        if (event.error === 'no-speech') {
+          setVoiceStatus('No speech detected. Audio will still be saved.', { tone: 'warning' });
+          return;
+        }
+        if (event.error === 'aborted') {
+          return;
+        }
+        voiceState.recognitionShouldRestart = false;
+        setVoiceStatus('Speech recognition stopped. You can edit transcription manually.', { tone: 'warning', persist: true });
+        try {
+          recognition.stop();
+        } catch (error) {
+          console.warn('Recognition stop after error failed', error);
+        }
+      };
+
+      recognition.onend = () => {
+        voiceState.interimTranscript = '';
+        updateTranscriptionPreview();
+        if (voiceState.recognitionShouldRestart) {
+          try {
+            recognition.start();
+          } catch (error) {
+            console.warn('Failed to restart recognition', error);
+            voiceState.recognitionShouldRestart = false;
+            voiceState.recognition = null;
+          }
+        } else {
+          voiceState.recognition = null;
+        }
+      };
+
+      recognition.start();
+      setVoiceStatus('Recording… live transcription active.', { tone: 'muted' });
+    } catch (error) {
+      console.warn('Speech recognition initialization failed', error);
+      resetTranscriptState();
+      clearTranscriptionPreview({ hide: false });
+      updateTranscriptionPreview();
+      setVoiceStatus('Unable to start speech recognition. Edit transcription manually.', { tone: 'warning', persist: true });
+    }
+  };
+
+  const startRecording = async () => {
+    if (voiceState.isRecording) {
+      return;
+    }
+
+    voiceButton.disabled = true;
+    voiceButton.classList.remove('processing');
+    voiceButton.classList.add('recording');
+    voiceButton.setAttribute('aria-pressed', 'true');
+    if (label) {
+      label.textContent = 'STOP RECORDING';
+    }
+
+    setVoiceStatus('Preparing microphone…', { tone: 'muted' });
+
+    try {
+      voiceState.stream = await navigator.mediaDevices.getUserMedia({
+        audio: { noiseSuppression: true, echoCancellation: true },
+      });
+
+      voiceState.mediaRecorder = new MediaRecorder(voiceState.stream);
+      voiceState.chunks = [];
+      voiceState.mediaRecorder.addEventListener('dataavailable', event => {
+        if (event.data && event.data.size > 0) {
+          voiceState.chunks.push(event.data);
+        }
+      });
+      voiceState.mediaRecorder.addEventListener('error', event => {
+        console.error('Recording error', event.error || event);
+        setVoiceStatus('Recording failed. Please try again.', { tone: 'error', persist: true });
+        teardownRecording({ hidePreview: true });
+      });
+      voiceState.mediaRecorder.addEventListener('stop', async () => {
+        const blob = new Blob(voiceState.chunks, {
+          type: voiceState.mediaRecorder?.mimeType || 'audio/webm',
+        });
+
+        try {
+          setVoiceStatus('Encoding audio…', { tone: 'muted' });
+          const mp3Blob = await encodeToMP3(blob);
+          const today = new Date().toISOString().split('T')[0];
+          const transcript = `${voiceState.finalTranscript} ${voiceState.interimTranscript}`.trim();
+          await window.saveAudioNote(today, mp3Blob, transcript);
+          if (transcript) {
+            setVoiceStatus('Audio note saved with transcription.', { tone: 'success' });
+          } else {
+            setVoiceStatus('Audio note saved. Add a transcription when ready.', { tone: 'warning' });
+          }
+          renderAudioNotes();
+        } catch (error) {
+          console.error('Audio processing failed', error);
+          setVoiceStatus('Failed to save audio note. Please retry.', { tone: 'error', persist: true });
+          teardownRecording({ hidePreview: true });
+          return;
+        }
+
+        teardownRecording({ hidePreview: false });
+      });
+
+      voiceState.mediaRecorder.start();
+      voiceState.isRecording = true;
+      voiceButton.disabled = false;
+      resetTranscriptState();
+      clearTranscriptionPreview({ hide: true });
+      updateTranscriptionPreview();
+      startSpeechRecognition();
+    } catch (error) {
+      console.error('Microphone access failed', error);
+      setVoiceStatus('Microphone access denied or unavailable.', { tone: 'error', persist: true });
+      teardownRecording({ hidePreview: true });
+    }
+  };
+
+  const stopRecording = () => {
+    if (!voiceState.isRecording || !voiceState.mediaRecorder) {
+      return;
+    }
+    voiceState.isRecording = false;
+    voiceButton.classList.remove('recording');
+    voiceButton.classList.add('processing');
+    voiceButton.disabled = true;
+    setVoiceStatus('Processing audio note…', { tone: 'muted' });
+    stopRecognition();
+    try {
+      voiceState.mediaRecorder.stop();
+    } catch (error) {
+      console.error('Failed to stop recorder', error);
+      teardownRecording({ hidePreview: true });
+    }
+  };
+
+  voiceButton.addEventListener('click', () => {
+    if (voiceButton.disabled) {
+      return;
+    }
+    if (voiceState.isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+
+  window.addEventListener('pagehide', () => {
+    if (voiceState.isRecording) {
+      stopRecording();
+    }
+  });
+}
+
 // Audio recording functions
 function encodeToMP3(blob) {
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  if (typeof lamejs === 'undefined' || typeof lamejs.Mp3Encoder !== 'function' || !AudioContextCtor) {
+    return Promise.resolve(blob);
+  }
+
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const arrayBuffer = reader.result;
-      const audioContext = new AudioContext();
-      audioContext.decodeAudioData(arrayBuffer, buffer => {
-        const mp3encoder = new lamejs.Mp3Encoder(1, buffer.sampleRate, 128); // mono, sampleRate, bitrate
-        const samples = buffer.getChannelData(0); // left channel
-        const mp3Data = [];
-        const sampleBlockSize = 1152;
-        for (let i = 0; i < samples.length; i += sampleBlockSize) {
-          const sampleChunk = samples.subarray(i, i + sampleBlockSize);
-          const intSamples = sampleChunk.map(s => s * 32767); // to 16-bit
-          const mp3buf = mp3encoder.encodeBuffer(intSamples);
-          if (mp3buf.length > 0) mp3Data.push(mp3buf);
-        }
-        const mp3buf = mp3encoder.flush();
-        if (mp3buf.length > 0) mp3Data.push(mp3buf);
-        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-        resolve(blob);
-      });
+
+    reader.onerror = () => {
+      console.warn('Audio read failed, using original blob.', reader.error);
+      resolve(blob);
     };
+
+    reader.onload = async () => {
+      const audioContext = new AudioContextCtor();
+      try {
+        const arrayBuffer = reader.result;
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        const channelCount = audioBuffer.numberOfChannels;
+        let samples = audioBuffer.getChannelData(0);
+
+        if (channelCount > 1) {
+          const mixed = new Float32Array(audioBuffer.length);
+          for (let channel = 0; channel < channelCount; channel++) {
+            const channelSamples = audioBuffer.getChannelData(channel);
+            for (let i = 0; i < mixed.length; i++) {
+              mixed[i] += channelSamples[i];
+            }
+          }
+          for (let i = 0; i < mixed.length; i++) {
+            mixed[i] /= channelCount;
+          }
+          samples = mixed;
+        }
+
+        const mp3encoder = new lamejs.Mp3Encoder(1, audioBuffer.sampleRate, 128);
+        const sampleBlockSize = 1152;
+        const mp3Data = [];
+
+        for (let i = 0; i < samples.length; i += sampleBlockSize) {
+          const end = Math.min(i + sampleBlockSize, samples.length);
+          const chunk = samples.subarray(i, end);
+          const int16Samples = new Int16Array(chunk.length);
+          for (let j = 0; j < chunk.length; j++) {
+            const sample = Math.max(-1, Math.min(1, chunk[j]));
+            int16Samples[j] = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+          }
+          const mp3buf = mp3encoder.encodeBuffer(int16Samples);
+          if (mp3buf.length > 0) {
+            mp3Data.push(mp3buf);
+          }
+        }
+
+        const flush = mp3encoder.flush();
+        if (flush.length > 0) {
+          mp3Data.push(flush);
+        }
+
+        if (mp3Data.length > 0) {
+          resolve(new Blob(mp3Data, { type: 'audio/mp3' }));
+        } else {
+          resolve(blob);
+        }
+      } catch (error) {
+        console.warn('MP3 encoding failed, using original blob.', error);
+        resolve(blob);
+      } finally {
+        audioContext.close().catch(() => {});
+      }
+    };
+
     reader.readAsArrayBuffer(blob);
+  });
+}
+
+const HTML_ESCAPE_LOOKUP = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
+
+function escapeHTML(value) {
+  return (value ?? '').replace(/[&<>"']/g, char => HTML_ESCAPE_LOOKUP[char] || char);
+}
+
+function formatAudioNoteTime(timestamp) {
+  if (!timestamp) {
+    return '—';
+  }
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+  return date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+function initializeAudioNotesList() {
+  const list = $('audioNotesList');
+  if (!list || list.dataset.bound === 'true') {
+    return;
+  }
+
+  list.dataset.bound = 'true';
+
+  list.addEventListener('input', event => {
+    if (!event.target.matches('[data-role="transcription"]')) {
+      return;
+    }
+
+    const textarea = event.target;
+    const container = textarea.closest('.audio-note');
+    if (!container) {
+      return;
+    }
+
+    const saveButton = container.querySelector('[data-action="save-transcription"]');
+    const copyButton = container.querySelector('[data-action="copy-transcription"]');
+    const originalValue = decodeURIComponent(textarea.dataset.originalValue || '');
+    const currentValue = textarea.value;
+
+    if (saveButton) {
+      saveButton.disabled = currentValue.trim() === originalValue.trim();
+      if (!saveButton.disabled) {
+        saveButton.textContent = 'Save';
+      }
+    }
+
+    if (copyButton) {
+      copyButton.disabled = currentValue.trim().length === 0;
+    }
+  });
+
+  list.addEventListener('click', async event => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const container = button.closest('.audio-note');
+    if (!container) {
+      return;
+    }
+
+    const noteId = container.dataset.noteId;
+    if (!noteId) {
+      return;
+    }
+
+    if (button.dataset.action === 'save-transcription') {
+      const textarea = container.querySelector('[data-role="transcription"]');
+      if (!textarea) {
+        return;
+      }
+      button.disabled = true;
+      button.textContent = 'Saving…';
+      try {
+        await updateTranscription(noteId, textarea.value, { button, textarea });
+      } catch (error) {
+        console.error('Transcription save failed', error);
+      }
+      return;
+    }
+
+    if (button.dataset.action === 'copy-transcription') {
+      const textarea = container.querySelector('[data-role="transcription"]');
+      const text = textarea?.value?.trim() || '';
+      if (!text) {
+        setVoiceStatus('No transcription to copy.', { tone: 'warning' });
+        return;
+      }
+      try {
+        await copyTextToClipboard(text);
+        setVoiceStatus('Transcription copied to clipboard.', { tone: 'success' });
+      } catch (error) {
+        console.error('Copy failed', error);
+        setVoiceStatus('Unable to copy transcription.', { tone: 'error' });
+      }
+    }
   });
 }
 
 // Render audio notes for today
 function renderAudioNotes() {
   const list = $('audioNotesList');
-  if (!list) return;
+  if (!list) {
+    return;
+  }
+
+  if (Array.isArray(list._activeUrls)) {
+    list._activeUrls.forEach(url => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        console.warn('Failed to revoke audio URL', error);
+      }
+    });
+  }
+  list._activeUrls = [];
+
   const today = new Date().toISOString().split('T')[0];
-  window.getAudioNotes(today).then(notes => {
-    list.innerHTML = notes.map(note => `
-      <div class="audio-note">
-        <audio controls src="${URL.createObjectURL(note.blob)}"></audio>
-        <textarea placeholder="Transcription">${note.transcription}</textarea>
-        <button onclick="updateTranscription('${note.id}', this.previousElementSibling.value)">Save Transcription</button>
-        <a href="${URL.createObjectURL(note.blob)}" download="audio-${note.id}.mp3">Download MP3</a>
-      </div>
-    `).join('');
-  });
+  window.getAudioNotes(today)
+    .then(notes => {
+      if (!Array.isArray(notes) || notes.length === 0) {
+        list.innerHTML = '<p class="audio-note-empty">No audio notes logged today.</p>';
+        return;
+      }
+
+      notes.sort((a, b) => {
+        const timeA = new Date(a.timestamp || 0).getTime();
+        const timeB = new Date(b.timestamp || 0).getTime();
+        return timeB - timeA;
+      });
+
+      const markup = notes
+        .map(note => {
+          const audioUrl = URL.createObjectURL(note.blob);
+          list._activeUrls.push(audioUrl);
+          const transcription = typeof note.transcription === 'string' ? note.transcription : '';
+          const encodedOriginal = encodeURIComponent(transcription || '');
+          const safeTranscription = escapeHTML(transcription);
+          const displayTime = formatAudioNoteTime(note.timestamp);
+          return `
+            <article class="audio-note" data-note-id="${note.id}">
+              <header class="audio-note-header">
+                <span class="audio-note-time">${displayTime}</span>
+                <button type="button" class="audio-note-copy" data-action="copy-transcription"${transcription ? '' : ' disabled'}>Copy text</button>
+              </header>
+              <audio controls src="${audioUrl}"></audio>
+              <label class="audio-note-label" for="transcription-${note.id}">Transcription</label>
+              <textarea id="transcription-${note.id}" data-role="transcription" data-original-value="${encodedOriginal}" placeholder="Add or edit transcription…">${safeTranscription}</textarea>
+              <div class="audio-note-actions">
+                <button type="button" class="audio-note-save" data-action="save-transcription" disabled>Save</button>
+                <a href="${audioUrl}" download="audio-${note.id}.mp3">Download MP3</a>
+              </div>
+            </article>
+          `;
+        })
+        .join('');
+
+      list.innerHTML = markup;
+    })
+    .catch(error => {
+      console.error('Failed to load audio notes', error);
+      list.innerHTML = '<p class="audio-note-empty">Unable to load audio notes.</p>';
+    });
 }
 
-function updateTranscription(id, text) {
-  window.updateAudioTranscription(id, text).then(() => {
-    alert('Transcription saved');
-  });
+function updateTranscription(id, text, { button, textarea } = {}) {
+  if (!id) {
+    return Promise.resolve();
+  }
+
+  const trimmed = (text || '').trim();
+  const savePromise = window.updateAudioTranscription(id, trimmed);
+
+  return savePromise
+    .then(() => {
+      if (textarea) {
+        textarea.dataset.originalValue = encodeURIComponent(trimmed);
+      }
+      if (button) {
+        button.textContent = 'Saved';
+        button.disabled = true;
+        setTimeout(() => {
+          if (button.dataset.action === 'save-transcription') {
+            button.textContent = 'Save';
+          }
+        }, 1800);
+      }
+      setVoiceStatus('Transcription saved.', { tone: 'success' });
+    })
+    .catch(error => {
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Retry';
+        setTimeout(() => {
+          if (button.dataset.action === 'save-transcription') {
+            button.textContent = 'Save';
+          }
+        }, 1800);
+      }
+      setVoiceStatus('Failed to save transcription. Try again.', { tone: 'error', persist: true });
+      throw error;
+    });
 }
 
 // Expose for testing and cross-script usage
