@@ -36,7 +36,11 @@ const appState = {
   online: navigator.onLine,
   syncing: false,
   disabledAspects: JSON.parse(localStorage.getItem('disabled_aspects') || '[]'),
-  lastSyncTime: localStorage.getItem('last_sync_time') || 'Never'
+  lastSyncTime: localStorage.getItem('last_sync_time') || 'Never',
+  syncError: null,
+  syncRetryCount: 0,
+  transitioning: false,
+  outboxCount: 0
 };
 
 function getClientId() {
@@ -67,6 +71,10 @@ const dbp = new Promise((resolve, reject) => {
 });
 
 async function saveEntry(domain, aspect, completed) {
+  if (!DOMAINS[domain] || !DOMAINS[domain].includes(aspect)) {
+    console.error('Invalid domain or aspect:', domain, aspect);
+    return;
+  }
   const today = new Date().toISOString().split('T')[0];
   const id = `${today}-${domain}-${aspect}`;
   const streak = completed ? await getCurrentStreak(domain, aspect) : 0;
@@ -76,8 +84,8 @@ async function saveEntry(domain, aspect, completed) {
     date: today,
     domain,
     aspect,
-    completed,
-    streak,
+    completed: Boolean(completed),
+    streak: Math.max(0, streak),
     timestamp: Date.now(),
     synced: false
   };
@@ -89,6 +97,7 @@ async function saveEntry(domain, aspect, completed) {
 
   await calculateStreaks();
   updateProgress();
+  await updateOutboxCount();
 }
 
 function updateStreaks(domain, aspect, completed) {
@@ -246,13 +255,28 @@ function triggerConfetti() {
 }
 
 async function showScreen(screenName) {
+  if (appState.currentScreen === screenName || appState.transitioning) return;
+
+  appState.transitioning = true;
+
+  const currentScreen = $(`${appState.currentScreen}Screen`);
+  if (currentScreen) {
+    currentScreen.classList.add('leaving');
+    setTimeout(() => {
+      currentScreen.classList.remove('active', 'leaving');
+    }, 300);
+  }
+
   $$('.screen').forEach((screen) => screen.classList.remove('active'));
   $$('.nav-item').forEach((nav) => nav.classList.remove('active'));
   $$('.bottom-nav-item').forEach((nav) => nav.classList.remove('active'));
 
   const screenElement = $(`${screenName}Screen`);
   if (screenElement) {
-    screenElement.classList.add('active');
+    setTimeout(() => {
+      screenElement.classList.add('active');
+      appState.transitioning = false;
+    }, 150);
   }
   $$(`[data-screen="${screenName}"]`).forEach((nav) => nav.classList.add('active'));
 
@@ -429,6 +453,67 @@ function updateVisibleAspects() {
   });
 }
 
+async function updateOutboxCount() {
+  const db = await dbp;
+  const tx = db.transaction('outbox', 'readonly');
+  const store = tx.objectStore('outbox');
+  const count = await new Promise((resolve, reject) => {
+    const request = store.count();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  appState.outboxCount = count;
+}
+
+async function checkStorageQuota() {
+  if ('storage' in navigator && 'estimate' in navigator.storage) {
+    try {
+      const estimate = await navigator.storage.estimate();
+      const used = estimate.usage || 0;
+      const quota = estimate.quota || 0;
+      const usedPercent = quota > 0 ? (used / quota) * 100 : 0;
+      if (usedPercent > 80) {
+        console.warn(`Storage usage: ${usedPercent.toFixed(1)}%`);
+        await cleanupOldData();
+      }
+    } catch (error) {
+      console.error('Storage estimate failed:', error);
+    }
+  }
+}
+
+async function cleanupOldData() {
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const cutoff = oneYearAgo.toISOString().split('T')[0];
+
+  const db = await dbp;
+  const tx = db.transaction('entries', 'readwrite');
+  const store = tx.objectStore('entries');
+  const index = store.index('by_date');
+
+  const oldEntries = await new Promise((resolve, reject) => {
+    const request = index.openCursor(IDBKeyRange.upperBound(cutoff));
+    const results = [];
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        results.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(results);
+      }
+    };
+    request.onerror = () => reject(request.error);
+  });
+
+  oldEntries.forEach(entry => {
+    store.delete(entry.id);
+  });
+
+  console.log(`Cleaned up ${oldEntries.length} old entries`);
+}
+
 function updateSyncStatus() {
   const syncStatus = $('syncStatus');
   const syncText = $('syncText');
@@ -437,12 +522,15 @@ function updateSyncStatus() {
   }
 
   syncStatus.classList.toggle('offline', !appState.online);
+  syncStatus.classList.toggle('error', !!appState.syncError);
   if (!appState.online) {
-    syncText.textContent = 'Offline';
+    syncText.textContent = appState.outboxCount > 0 ? `Offline (${appState.outboxCount})` : 'Offline';
   } else if (appState.syncing) {
     syncText.textContent = 'Syncing...';
+  } else if (appState.syncError) {
+    syncText.textContent = 'Sync Error';
   } else {
-    syncText.textContent = 'Online';
+    syncText.textContent = appState.outboxCount > 0 ? `Online (${appState.outboxCount})` : 'Online';
   }
 }
 
@@ -452,6 +540,7 @@ async function trySync() {
   }
 
   appState.syncing = true;
+  appState.syncError = null;
   updateSyncStatus();
 
   try {
@@ -489,13 +578,22 @@ async function trySync() {
 
     appState.lastSyncTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     localStorage.setItem('last_sync_time', appState.lastSyncTime);
+    appState.syncRetryCount = 0;
 
     const lastSyncTime = $('lastSyncTime');
     if (lastSyncTime) {
       lastSyncTime.textContent = `Last sync at ${appState.lastSyncTime}`;
     }
+    await updateOutboxCount();
   } catch (error) {
     console.error('Sync failed:', error);
+    appState.syncError = error.message;
+    appState.syncRetryCount++;
+    // Retry with exponential backoff, max 5 retries
+    if (appState.syncRetryCount < 5) {
+      const delay = Math.min(1000 * Math.pow(2, appState.syncRetryCount), 30000);
+      setTimeout(() => trySync(), delay);
+    }
   } finally {
     appState.syncing = false;
     appState.online = navigator.onLine;
@@ -505,14 +603,15 @@ async function trySync() {
 
 async function saveReflection() {
   const note = $('reflectionNote')?.value.trim() || '';
+  const sanitizedNote = note.replace(/[<>\"']/g, '').substring(0, 500); // Basic sanitization
   const today = new Date().toISOString().split('T')[0];
   const entry = {
     id: `${today}-reflection`,
     clientId: getClientId(),
     date: today,
     type: 'reflection',
-    mood: appState.mood,
-    note,
+    mood: Math.max(1, Math.min(4, appState.mood)), // Clamp mood
+    note: sanitizedNote,
     timestamp: Date.now(),
     synced: false
   };
@@ -592,7 +691,7 @@ async function loadTodayData() {
   });
 
   entries.forEach((entry) => {
-    if (entry.domain && DOMAINS[entry.domain] && DOMAINS[entry.domain].includes(entry.aspect)) {
+    if (entry && entry.domain && DOMAINS[entry.domain] && DOMAINS[entry.domain].includes(entry.aspect) && typeof entry.completed === 'boolean') {
       appState.todayData[entry.domain][entry.aspect] = Boolean(entry.completed);
       const toggle = document.querySelector(
         `.aspect-toggle[data-domain="${entry.domain}"][data-aspect="${entry.aspect}"]`
@@ -601,8 +700,8 @@ async function loadTodayData() {
         toggle.classList.toggle('completed', Boolean(entry.completed));
       }
     }
-    if (entry.type === 'reflection') {
-      appState.mood = entry.mood || appState.mood;
+    if (entry && entry.type === 'reflection' && entry.mood >= 1 && entry.mood <= 4) {
+      appState.mood = entry.mood;
     }
   });
 
@@ -627,12 +726,17 @@ async function initializeUI() {
   $$('.aspect-toggle').forEach((toggle) => {
     toggle.addEventListener('click', async function handleToggle() {
       const { domain, aspect } = this.dataset;
-      if (!domain || !aspect) {
+      if (!domain || !aspect || this.classList.contains('loading')) {
         return;
       }
+      this.classList.add('loading');
       const isCompleted = this.classList.toggle('completed');
       appState.todayData[domain][aspect] = isCompleted;
-      await saveEntry(domain, aspect, isCompleted);
+      try {
+        await saveEntry(domain, aspect, isCompleted);
+      } finally {
+        this.classList.remove('loading');
+      }
       if (navigator.vibrate) {
         navigator.vibrate(10);
       }
@@ -682,8 +786,18 @@ async function initializeUI() {
     showScreen('reflect');
   });
 
-  $('syncNow')?.addEventListener('click', () => {
-    trySync();
+  $('syncNow')?.addEventListener('click', async () => {
+    const button = $('syncNow');
+    if (button && !appState.syncing && appState.online) {
+      button.disabled = true;
+      button.textContent = 'Syncing...';
+      try {
+        await trySync();
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Sync';
+      }
+    }
   });
 
   $('exportCSV')?.addEventListener('click', () => {
@@ -736,6 +850,8 @@ async function initializeUI() {
   updateProgress();
   await loadTodayData();
   updateSyncStatus();
+  await checkStorageQuota();
+  await updateOutboxCount();
 
   if (Number.isFinite(CONFIG.SYNC_INTERVAL_MS) && CONFIG.SYNC_INTERVAL_MS > 0) {
     setInterval(() => {

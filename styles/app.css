@@ -84,6 +84,11 @@ body {
   animation: none;
 }
 
+.sync-status.error .sync-dot {
+  background: var(--error);
+  animation: none;
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -183,6 +188,10 @@ body {
   display: block;
 }
 
+.screen.leaving {
+  animation: fadeOut 0.3s ease;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -191,6 +200,17 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
 
@@ -314,6 +334,11 @@ body {
 .aspect-toggle.completed .aspect-check {
   display: inline;
   animation: checkPop 0.3s ease;
+}
+
+.aspect-toggle.loading {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 @keyframes checkPop {
