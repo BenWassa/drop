@@ -34,6 +34,14 @@ A mobile-first Progressive Web App (PWA) that measures daily execution across fo
    - For GitHub Pages: Go to repository Settings → Pages → Source: "Deploy from a branch" → Branch: main → Folder: /docs
    - Install as PWA on your device
 
+## 🧪 Testing
+
+The app includes a browser-run test suite using QUnit to verify functionality without external dependencies.
+
+- **Run Tests**: Start a local HTTP server in the project root (e.g., `python -m http.server 8000`) and open `http://localhost:8000/tests/tests.html` in a browser.
+- **Test Coverage**: Smoke tests for UI elements, data functions (getClientId, saveReflection, exportToCSV), UI interactions (navigation, toggles, mood selection), and CSV export.
+- **Mocking**: Tests use in-memory mocks for localStorage, IndexedDB, and crypto to run deterministically without affecting browser state.
+
 ## 🗂️ Files
 
 - `index.html` — Main UI with Today/Review/Reflect/Settings screens
