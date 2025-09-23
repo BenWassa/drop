@@ -28,38 +28,95 @@
         }
         .pass { color: #4ade80; }
         .fail { color: #ef4444; }
-        .test-controls {
+        .test-toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #0a0a0a;
+            border-bottom: 2px solid #333;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .test-toolbar h1 {
+            margin: 0;
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .test-toolbar .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+            .test-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .test-toolbar h1 {
+                text-align: center;
+                font-size: 18px;
+            }
+            .test-toolbar .toolbar-section {
+                justify-content: center;
+            }
+            body {
+                padding-top: 140px;
+            }
+        }
+        .test-toolbar .status {
+            font-size: 14px;
+            color: #ccc;
+            padding: 5px 10px;
             background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+            border-radius: 4px;
             border: 1px solid #333;
         }
-        .test-controls h3 {
-            margin: 0 0 10px 0;
-            color: #fff;
-            font-size: 18px;
-        }
-        .test-controls p {
-            margin: 0 0 15px 0;
-            color: #ccc;
-            font-size: 14px;
-        }
-        .test-controls button {
+        .test-toolbar button {
             background: #2a2a2a;
             color: #fff;
             border: 1px solid #555;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-right: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .test-controls button:hover {
+        .test-toolbar button:hover:not(:disabled) {
             background: #3a3a3a;
+            border-color: #777;
+            transform: translateY(-1px);
         }
-        .test-controls button:disabled {
-            opacity: 0.5;
+        .test-toolbar button:disabled {
+            opacity: 0.4;
             cursor: not-allowed;
+            transform: none;
+        }
+        .test-toolbar button.success {
+            background: #1a3a1a;
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+        .test-toolbar button.warning {
+            background: #3a2a1a;
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        body {
+            padding-top: 100px; /* Make room for fixed toolbar */
         }
         .failed-tests-output {
             background: #1a1a1a;
@@ -88,15 +145,17 @@
     </style>
 </head>
 <body>
-    <div id="qunit"></div>
-
-    <div class="test-controls">
-        <h3>Test Results Tools</h3>
-        <p>Run tests first, then use these buttons to copy results for sharing/debugging:</p>
-        <button id="copyFailedTests" disabled>📋 Copy Failed Tests</button>
-        <button id="copyAllTests" disabled>📋 Copy All Test Results</button>
-        <button id="clearResults">🗑️ Clear Results</button>
+    <div class="test-toolbar">
+        <h1>🧪 Drop Webapp Tests</h1>
+        <div class="toolbar-section">
+            <div class="status" id="testStatus">Ready to run tests</div>
+            <button id="copyFailedTests" disabled>📋 Failed Tests</button>
+            <button id="copyAllTests" disabled>📋 All Results</button>
+            <button id="clearResults">🗑️ Clear</button>
+        </div>
     </div>
+
+    <div id="qunit"></div>
 
     <div class="failed-tests-output" id="failedTestsOutput">
         <h3>Test Results Output</h3>
@@ -539,22 +598,132 @@
             }
         });
 
+        // Event listeners for buttons
+        document.getElementById('copyFailedTests').addEventListener('click', async function() {
+            if (failedTests.length === 0) {
+                alert('No failed tests to copy.');
+                return;
+            }
+
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = '⏳ Copying...';
+            button.disabled = true;
+
+            const output = formatTestResults(failedTests, 'FAILED TESTS');
+            const success = await copyToClipboard(output);
+
+            const status = document.getElementById('copyStatus');
+            const textarea = document.getElementById('failedTestsTextarea');
+
+            textarea.value = output;
+            document.getElementById('failedTestsOutput').style.display = 'block';
+
+            if (success) {
+                button.textContent = '✅ Copied!';
+                button.className = 'success';
+                status.textContent = '✓ Failed tests copied to clipboard!';
+                status.style.color = '#4ade80';
+            } else {
+                button.textContent = '⚠️ Manual Copy';
+                button.className = 'warning';
+                status.textContent = '⚠ Copy failed - text shown above. Please copy manually.';
+                status.style.color = '#fbbf24';
+                // Auto-select the text for manual copying
+                textarea.focus();
+                textarea.select();
+            }
+
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.className = '';
+                button.disabled = failedTests.length === 0;
+            }, 3000);
+        });
+
+        document.getElementById('copyAllTests').addEventListener('click', async function() {
+            if (allTestResults.length === 0) {
+                alert('No test results to copy yet. Run tests first.');
+                return;
+            }
+
+            const button = this;
+            const originalText = button.textContent;
+            button.textContent = '⏳ Copying...';
+            button.disabled = true;
+
+            const output = formatTestResults(allTestResults, 'ALL TEST RESULTS');
+            const success = await copyToClipboard(output);
+
+            const status = document.getElementById('copyStatus');
+            const textarea = document.getElementById('failedTestsTextarea');
+
+            textarea.value = output;
+            document.getElementById('failedTestsOutput').style.display = 'block';
+
+            if (success) {
+                button.textContent = '✅ Copied!';
+                button.className = 'success';
+                status.textContent = '✓ All test results copied to clipboard!';
+                status.style.color = '#4ade80';
+            } else {
+                button.textContent = '⚠️ Manual Copy';
+                button.className = 'warning';
+                status.textContent = '⚠ Copy failed - text shown above. Please copy manually.';
+                status.style.color = '#fbbf24';
+                // Auto-select the text for manual copying
+                textarea.focus();
+                textarea.select();
+            }
+
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.className = '';
+                button.disabled = allTestResults.length === 0;
+            }, 3000);
+        });
+
         document.getElementById('clearResults').addEventListener('click', function() {
             allTestResults = [];
             failedTests = [];
             document.getElementById('failedTestsTextarea').value = '';
             document.getElementById('failedTestsOutput').style.display = 'none';
             document.getElementById('copyStatus').textContent = '';
+            document.getElementById('testStatus').textContent = 'Results cleared - run tests again';
+            document.getElementById('testStatus').style.color = '#ccc';
 
-            // Re-enable buttons
-            document.getElementById('copyFailedTests').disabled = false;
-            document.getElementById('copyAllTests').disabled = false;
+            // Reset button states
+            document.getElementById('copyFailedTests').disabled = true;
+            document.getElementById('copyFailedTests').className = '';
+            document.getElementById('copyFailedTests').textContent = '📋 Failed Tests';
+            document.getElementById('copyAllTests').disabled = true;
+            document.getElementById('copyAllTests').className = '';
+            document.getElementById('copyAllTests').textContent = '📋 All Results';
         });
 
         // Update button states based on results
+        QUnit.on('runStart', function() {
+            document.getElementById('testStatus').textContent = 'Running tests...';
+            document.getElementById('testStatus').style.color = '#fbbf24';
+        });
+
         QUnit.on('runEnd', function() {
-            document.getElementById('copyFailedTests').disabled = failedTests.length === 0;
-            document.getElementById('copyAllTests').disabled = allTestResults.length === 0;
+            const totalTests = allTestResults.length;
+            const failedCount = failedTests.length;
+            const passedCount = totalTests - failedCount;
+
+            document.getElementById('copyFailedTests').disabled = failedCount === 0;
+            document.getElementById('copyAllTests').disabled = totalTests === 0;
+
+            if (failedCount > 0) {
+                document.getElementById('testStatus').textContent = `${passedCount}/${totalTests} passed, ${failedCount} failed`;
+                document.getElementById('testStatus').style.color = '#ef4444';
+            } else {
+                document.getElementById('testStatus').textContent = `All ${totalTests} tests passed!`;
+                document.getElementById('testStatus').style.color = '#4ade80';
+            }
         });
 
         // Start QUnit
