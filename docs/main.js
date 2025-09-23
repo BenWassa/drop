@@ -45,17 +45,23 @@ const appState = {
 
     // Register service worker
     if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register('sw.js');
+      navigator.serviceWorker.register('sw.js').then(registration => {
         console.log('SW registered:', registration);
-
-        // Set up background sync
-        if ('sync' in registration) {
-          await registration.sync.register('background-sync');
-        }
-      } catch (error) {
+      }).catch(error => {
         console.error('SW registration failed:', error);
-      }
+      });
+
+      navigator.serviceWorker.ready.then(registration => {
+        if ('sync' in registration) {
+          registration.sync.register('sync-outbox') // Correct tag
+            .then(() => {
+              console.log('Background sync registered');
+            })
+            .catch(err => {
+              console.error('Background sync registration failed:', err);
+            });
+        }
+      });
     }
 
     // Initial sync attempt

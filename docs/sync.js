@@ -23,14 +23,14 @@ async function trySync() {
   console.log(`Syncing ${outbox.length} items...`);
 
   try {
-    const response = await fetch(CONFIG.syncUrl, {
+    const response = await fetch(CONFIG.SCRIPT_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Key': CONFIG.API_KEY,
         'X-Client-ID': window.getClientId(),
       },
-      body: JSON.stringify({ entries: outbox.map(item => item.payload) }),
+      body: JSON.stringify({ ops: outbox.map(item => item.payload) }),
     });
 
     if (!response.ok) {

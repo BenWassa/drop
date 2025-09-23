@@ -59,51 +59,49 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    const headers = e.headers || {};
-    const key = headers['X-Api-Key'] || headers['x-api-key'] || '';
-    if (API_KEY && key !== API_KEY) {
-      return ContentService.createTextOutput(
-        JSON.stringify({ ok: false, error: 'unauthorized' })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
+    // The sheet where you want to save the data
+    var sh = sheet();
+    
+    // Parse the JSON data sent from the app
+    var data = JSON.parse(e.postData.contents);
+    var clientId = data.clientId;
+    var ops = data.ops; // ops is the array you are sending
 
-    const params = e.parameter || {};
-    const action = params.action || 'append';
-    const body = e.postData && e.postData.contents ? JSON.parse(e.postData.contents) : {};
+    var results = [];
 
-    if (action === 'append') {
-      const entries = body.entries || [];
-      if (!Array.isArray(entries) || !entries.length) throw new Error('no entries');
-      const sh = sheet();
-      const now = new Date();
-      const rows = entries.map(entry => [
-        new Date(entry.timestamp || now),
-        entry.id,
-        entry.clientId,
-        entry.date,
-        entry.domain || '',
-        entry.aspect || '',
-        entry.completed || false,
-        entry.streak || 0,
-        entry.type || 'practice',
-        entry.mood || '',
-        entry.note || ''
+    // Loop through the operations and append rows to the sheet
+    for (var i = 0; i < ops.length; i++) {
+      var op = ops[i];
+      // Append a row. Adjust the columns as needed to match headers.
+      sh.appendRow([
+        new Date(), // Timestamp
+        op.id, // LocalId
+        clientId, // ClientId
+        op.date,
+        op.domain,
+        op.aspect,
+        op.completed,
+        op.streak,
+        op.type || 'practice',
+        op.mood || '',
+        op.note || ''
       ]);
-      if (rows.length) sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
-      // Return the inserted row numbers so client can mark "synced"
-      const startRow = sh.getLastRow() - rows.length + 1;
-      const results = entries.map((entry, i) => ({ localId: entry.id, row: startRow + i }));
-      return ContentService.createTextOutput(
-        JSON.stringify({ ok: true, results })
-      ).setMimeType(ContentService.MimeType.JSON);
+      
+      results.push({
+        localId: op.id,
+        row: sh.getLastRow() // Send back the new row number
+      });
     }
+    
+    // Return a success response with the results
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "success", results: results }))
+      .setMimeType(ContentService.MimeType.JSON);
 
-    return ContentService.createTextOutput(
-      JSON.stringify({ ok: false, error: 'unknown action' })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ ok: false, error: String(err) })
-    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    // Return an error response
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
