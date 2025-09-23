@@ -86,7 +86,7 @@ async function updateOutboxCount() {
 
     const outboxCountEl = $('outboxCount');
     if (outboxCountEl) {
-      outboxCountEl.textContent = count > 0 ? ` (${count})` : '';
+      outboxCountEl.textContent = count > 0 ? `PENDING ${count}` : '';
     }
   } catch (error) {
     console.error('Failed to update outbox count:', error);

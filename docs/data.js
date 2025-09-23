@@ -74,6 +74,7 @@ async function saveEntry(domain, aspect, completed) {
   tx.objectStore('outbox').add({ type: 'ENTRY', payload: entry, ts: Date.now() });
 
   await calculateStreaks();
+  renderAspectsManager();
   updateProgress();
   await updateOutboxCount();
 }
@@ -184,7 +185,7 @@ async function saveReflection() {
     clientId: getClientId(),
     date: today,
     type: 'reflection',
-    mood: Math.max(1, Math.min(4, appState.mood)), // Clamp mood
+    mood: Math.max(1, Math.min(5, appState.mood)), // Clamp mood
     note: sanitizedNote,
     timestamp: Date.now(),
     synced: false
@@ -194,8 +195,6 @@ async function saveReflection() {
   const tx = db.transaction(['entries', 'outbox'], 'readwrite');
   tx.objectStore('entries').put(entry);
   tx.objectStore('outbox').add({ type: 'REFLECTION', payload: entry, ts: Date.now() });
-
-  triggerConfetti();
   const noteField = $('reflectionNote');
   if (noteField) {
     noteField.value = '';
@@ -204,9 +203,11 @@ async function saveReflection() {
   const saveButton = $('saveReflection');
   if (saveButton) {
     const originalText = saveButton.textContent;
-    saveButton.textContent = 'Saved! ✨';
+    saveButton.textContent = 'LOGGED';
+    saveButton.classList.add('saved');
     setTimeout(() => {
-      saveButton.textContent = originalText || 'Save Reflection';
+      saveButton.textContent = originalText || 'LOG REFLECTION';
+      saveButton.classList.remove('saved');
     }, 2000);
   }
 }
@@ -274,20 +275,17 @@ async function loadTodayData() {
         toggle.classList.toggle('completed', Boolean(entry.completed));
       }
     }
-    if (entry && entry.type === 'reflection' && entry.mood >= 1 && entry.mood <= 4) {
+    if (entry && entry.type === 'reflection' && entry.mood >= 1 && entry.mood <= 5) {
       appState.mood = entry.mood;
     }
   });
 
-  const moodSlider = $('moodSlider');
-  if (moodSlider) {
-    moodSlider.value = String(appState.mood);
-  }
-  $$('.mood-emoji').forEach((emoji) => {
-    emoji.classList.toggle('selected', Number(emoji.dataset.mood) === appState.mood);
+  $$('.mood-option').forEach(option => {
+    option.classList.toggle('selected', Number(option.dataset.mood) === appState.mood);
   });
 
   await calculateStreaks();
+  renderAspectsManager();
   updateProgress();
   updateVisibleAspects();
 }

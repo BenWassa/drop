@@ -1,74 +1,240 @@
 // ui.js - UI layer: DOM manipulation and rendering
 
-function updateProgress() {
-  const totalCompleted = Object.values(appState.todayData).reduce((sum, domain) => {
-    return sum + Object.values(domain).filter(Boolean).length;
-  }, 0);
+const DOMAIN_ICONS = {
+  sleep: '🌙',
+  fitness: '🏃',
+  mind: '📚',
+  spirit: '🧘',
+};
 
-  const progressBar = $('progressBar');
-  if (progressBar) {
-    const percentage = (totalCompleted / TOTAL_ASPECTS) * 100;
-    progressBar.style.width = `${percentage}%`;
+function getISOWeek(date) {
+  const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNr = (target.getUTCDay() + 6) % 7;
+  target.setUTCDate(target.getUTCDate() - dayNr + 3);
+  const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
+  const diff = target - firstThursday;
+  return 1 + Math.round(diff / (7 * 24 * 60 * 60 * 1000));
+}
+
+function updateQuarterReservoir() {
+  const ledger = $('quarterLedger');
+  const fill = $('quarterFill');
+  if (!ledger || !fill) {
+    return;
   }
 
-  const progressText = $('progressText');
-  if (progressText) {
-    progressText.textContent = `${totalCompleted}/${TOTAL_ASPECTS}`;
+  const today = new Date();
+  const quarterIndex = Math.floor(today.getMonth() / 3);
+  const quarterStart = new Date(today.getFullYear(), quarterIndex * 3, 1);
+  const quarterEnd = new Date(today.getFullYear(), quarterIndex * 3 + 3, 0);
+  const dayMs = 24 * 60 * 60 * 1000;
+  const totalQuarterDays = Math.round((quarterEnd - quarterStart) / dayMs) + 1;
+  const daysElapsed = Math.min(totalQuarterDays, Math.floor((today - quarterStart) / dayMs) + 1);
+  const progress = Math.max(0, Math.min(1, daysElapsed / totalQuarterDays));
+  const percent = Math.round(progress * 100);
+  const daysLeft = Math.max(0, totalQuarterDays - daysElapsed);
+  const weekNumber = String(getISOWeek(today)).padStart(2, '0');
+
+  const ledgerSegments = [
+    today.toLocaleString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
+    `Q${quarterIndex + 1}`,
+    `WK ${weekNumber}`,
+    `${percent}%`,
+    `${daysLeft} DAYS LEFT`,
+  ];
+
+  ledger.textContent = ledgerSegments.join(' · ');
+  fill.style.width = `${percent}%`;
+}
+
+function initializeParticles() {
+  const canvas = $('backgroundParticles');
+  if (!canvas || !canvas.getContext) {
+    return;
   }
 
-  const dayCounter = $('dayCounter');
-  if (dayCounter) {
+  const ctx = canvas.getContext('2d');
+  const particles = Array.from({ length: 42 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    radius: 0.4 + Math.random() * 1.2,
+    speed: 0.00015 + Math.random() * 0.00035,
+  }));
+  let width = 0;
+  let height = 0;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+
+  function step() {
+    ctx.globalAlpha = 1;
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.25)';
+    particles.forEach(particle => {
+      particle.y -= particle.speed;
+      if (particle.y < -0.05) {
+        particle.y = 1.05;
+        particle.x = Math.random();
+      }
+      const px = particle.x * width;
+      const py = particle.y * height;
+      ctx.globalAlpha = 0.18;
+      ctx.beginPath();
+      ctx.arc(px, py, particle.radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(step);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(step);
+}
+
+async function refreshDomainScorePanel() {
+  const grid = $('domainScoreGrid');
+  if (!grid) {
+    return;
+  }
+
+  try {
+    const db = await dbp;
+    const tx = db.transaction('entries', 'readonly');
+    const store = tx.objectStore('entries');
+    const allEntries = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+
     const today = new Date();
-    const startOfYear = new Date(today.getFullYear(), 0, 1);
-    const dayOfYear = Math.floor((today - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
-    dayCounter.textContent = `Day ${dayOfYear}`;
+    const targetDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      targetDates.push(d.toISOString().split('T')[0]);
+    }
+    const dateSet = new Set(targetDates);
+    const entriesByDate = new Map();
+
+    allEntries.forEach(entry => {
+      if (!entry || !entry.date || !entry.domain || !dateSet.has(entry.date)) {
+        return;
+      }
+      if (!entriesByDate.has(entry.date)) {
+        entriesByDate.set(entry.date, []);
+      }
+      entriesByDate.get(entry.date).push(entry);
+    });
+
+    const styles = getComputedStyle(document.documentElement);
+    grid.innerHTML = '';
+
+    Object.entries(DOMAINS).forEach(([domain, aspects]) => {
+      const domainColor = styles.getPropertyValue(`--${domain}`).trim() || '#94a3b8';
+      let completed = 0;
+      let possible = 0;
+
+      targetDates.forEach(dateStr => {
+        const dayEntries = entriesByDate.get(dateStr) || [];
+        aspects.forEach(aspect => {
+          possible += 1;
+          const entry = dayEntries.find(e => e.domain === domain && e.aspect === aspect);
+          if (entry && entry.completed) {
+            completed += 1;
+          }
+        });
+      });
+
+      const score = possible > 0 ? Math.round((completed / possible) * 100) : 0;
+      const hasCrown = score >= 80;
+      const todayCompleted = aspects.reduce((sum, aspect) => {
+        return sum + (appState.todayData?.[domain]?.[aspect] ? 1 : 0);
+      }, 0);
+      const activeStreaks = aspects.reduce((sum, aspect) => {
+        return sum + ((appState.streaks?.[`${domain}-${aspect}`] || 0) > 0 ? 1 : 0);
+      }, 0);
+
+      const card = document.createElement('div');
+      card.className = 'domain-score-card';
+      card.style.setProperty('--accent-color', domainColor);
+
+      const aspectsMarkup = aspects
+        .map(aspect => {
+          const completedToday = Boolean(appState.todayData?.[domain]?.[aspect]);
+          return `<span class="domain-score-aspect ${completedToday ? 'complete' : ''}">${aspect.toUpperCase()}<span class="status">${completedToday ? '✓' : '—'}</span></span>`;
+        })
+        .join('');
+
+      card.innerHTML = `
+        <div class="domain-score-header">
+          <div class="domain-score-title">${DOMAIN_ICONS[domain] ? `${DOMAIN_ICONS[domain]} ` : ''}${domain.toUpperCase()}</div>
+          <div class="domain-score-score">${score}<span class="unit">%</span>${
+        hasCrown ? '<span class="crown-icon" aria-label="High performer">👑</span>' : ''
+      }</div>
+        </div>
+        <div class="domain-score-metrics">
+          <div class="domain-score-metric">
+            <div class="domain-score-metric-label">ROLLING 7D</div>
+            <div class="domain-score-metric-value">${score}%</div>
+          </div>
+          <div class="domain-score-metric">
+            <div class="domain-score-metric-label">ACTIVE STREAKS</div>
+            <div class="domain-score-metric-value">${activeStreaks}</div>
+          </div>
+          <div class="domain-score-metric">
+            <div class="domain-score-metric-label">TODAY</div>
+            <div class="domain-score-metric-value">${todayCompleted}/${aspects.length}</div>
+          </div>
+        </div>
+        <div class="domain-score-aspects">
+          ${aspectsMarkup}
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  } catch (error) {
+    console.error('Failed to refresh domain score panel', error);
   }
 }
 
-function triggerConfetti() {
-  const confettiContainer = $('confettiContainer');
-  if (!confettiContainer) return;
+function updateProgress() {
+  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
+    const completedCount = aspects.reduce((sum, aspect) => {
+      return sum + (appState.todayData?.[domain]?.[aspect] ? 1 : 0);
+    }, 0);
+    const statusEl = document.querySelector(`[data-domain-status="${domain}"]`);
+    if (statusEl) {
+      statusEl.textContent = `${completedCount}/${aspects.length}`;
+    }
+  });
 
-  for (let i = 0; i < 50; i++) {
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti';
-    confetti.style.left = Math.random() * 100 + '%';
-    confetti.style.animationDelay = Math.random() * 2 + 's';
-    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 50%)`;
-    confettiContainer.appendChild(confetti);
-
-    setTimeout(() => {
-      confetti.remove();
-    }, 3000);
-  }
+  refreshDomainScorePanel().catch(error => console.error('Domain panel update error', error));
 }
 
 function showScreen(screenId) {
-  $$('.screen').forEach(screen => screen.classList.add('hidden'));
+  $$('.screen').forEach(screen => screen.classList.remove('active'));
   const targetScreen = $(screenId);
   if (targetScreen) {
-    targetScreen.classList.remove('hidden');
+    targetScreen.classList.add('active');
   }
 
-  // Update navigation
   $$('.nav-item, .bottom-nav-item').forEach(item => item.classList.remove('active'));
   const screenName = screenId.replace('Screen', '');
   const navItems = document.querySelectorAll(`[data-screen="${screenName}"]`);
   navItems.forEach(item => item.classList.add('active'));
 
-  // Special handling for review screen
   if (screenId === 'reviewScreen') {
     renderReview();
   }
 
-  // Special handling for reflect screen
   if (screenId === 'reflectScreen') {
-    const moodSlider = $('moodSlider');
-    if (moodSlider) {
-      moodSlider.value = String(appState.mood);
-    }
-    $$('.mood-emoji').forEach(emoji => {
-      emoji.classList.toggle('selected', Number(emoji.dataset.mood) === appState.mood);
+    $$('.mood-option').forEach(option => {
+      option.classList.toggle('selected', Number(option.dataset.mood) === appState.mood);
     });
   }
 
@@ -86,7 +252,6 @@ async function renderReview() {
   });
 
   const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
   // Group entries by date
   const entriesByDate = {};
@@ -121,8 +286,10 @@ async function renderReview() {
     }
 
     const dateObj = new Date(date);
-    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-    const monthDay = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    const monthDay = dateObj
+      .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      .toUpperCase();
 
     dayDiv.innerHTML = `
       <div class="review-day-header">
@@ -135,14 +302,14 @@ async function renderReview() {
       <div class="review-day-details">
         ${Object.entries(DOMAINS).map(([domain, aspects]) => `
           <div class="review-domain">
-            <div class="review-domain-name">${domain.charAt(0).toUpperCase() + domain.slice(1)}</div>
+            <div class="review-domain-name">${domain.toUpperCase()}</div>
             <div class="review-aspects">
               ${aspects.map(aspect => {
                 const entry = dayEntries.find(e => e.domain === domain && e.aspect === aspect);
                 const completed = entry && entry.completed;
                 const streak = entry ? entry.streak : 0;
                 return `
-                  <div class="review-aspect ${completed ? 'completed' : ''}" title="${ASPECT_LABELS[aspect]} (${streak} streak)">
+                  <div class="review-aspect ${completed ? 'completed' : ''}" title="${ASPECT_LABELS[aspect]} · streak ${streak}">
                     ${aspect.charAt(0).toUpperCase()}
                   </div>
                 `;
@@ -152,7 +319,7 @@ async function renderReview() {
         `).join('')}
         ${reflection ? `
           <div class="review-reflection">
-            <div class="review-mood">Mood: ${'😢😕😐😊'[reflection.mood - 1]}</div>
+            <div class="review-mood">MOOD ${reflection.mood}</div>
             ${reflection.note ? `<div class="review-note">${reflection.note}</div>` : ''}
           </div>
         ` : ''}
@@ -170,11 +337,11 @@ async function renderReview() {
       const domainDiv = document.createElement('div');
       domainDiv.className = 'streak-domain';
       domainDiv.innerHTML = `
-        <h4>${domain.charAt(0).toUpperCase() + domain.slice(1)}</h4>
+        <h4>${domain.toUpperCase()}</h4>
         <div class="streak-list">
           ${aspects.map(aspect => {
             const streak = appState.streaks[`${domain}-${aspect}`] || 0;
-            return `<div class="streak-item">🔥 ${ASPECT_LABELS[aspect]}: ${streak}</div>`;
+            return `<div class="streak-item">${ASPECT_LABELS[aspect].toUpperCase()} · STREAK ${streak}</div>`;
           }).join('')}
         </div>
       `;
@@ -191,19 +358,8 @@ async function renderReview() {
       return sum + dayEntries.filter(entry => entry.completed).length;
     }, 0);
     const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
-    
-    weeklyCompletion.innerHTML = `
-      <div class="weekly-stats">
-        <div class="weekly-stat">
-          <div class="weekly-stat-value">${completionRate}%</div>
-          <div class="weekly-stat-label">Weekly Completion</div>
-        </div>
-        <div class="weekly-stat">
-          <div class="weekly-stat-value">${totalCompleted}/${totalPossible}</div>
-          <div class="weekly-stat-label">Total Tasks</div>
-        </div>
-      </div>
-    `;
+    const activeStreaks = Object.values(appState.streaks || {}).filter(count => count > 0).length;
+    weeklyCompletion.textContent = `${totalCompleted} / ${totalPossible} · ${completionRate}% · ${activeStreaks} ACTIVE STREAKS`;
   }
 
 function renderAspectsManager() {
@@ -218,16 +374,16 @@ function renderAspectsManager() {
 
     domainDiv.innerHTML = `
       <div class="aspect-domain-header">
-        <h3>${domain.charAt(0).toUpperCase() + domain.slice(1)}</h3>
+        <h3>${domain.toUpperCase()}</h3>
         <button class="toggle-domain" data-domain="${domain}">
-          ${appState.visibleAspects[domain] ? 'Hide' : 'Show'}
+          ${appState.visibleAspects[domain] ? 'HIDE' : 'SHOW'}
         </button>
       </div>
       <div class="aspect-list ${appState.visibleAspects[domain] ? '' : 'hidden'}">
         ${aspects.map(aspect => `
           <div class="aspect-item">
             <span class="aspect-label">${ASPECT_LABELS[aspect]}</span>
-            <div class="aspect-streak">🔥 ${appState.streaks[`${domain}-${aspect}`] || 0}</div>
+            <div class="aspect-streak">STREAK ${appState.streaks[`${domain}-${aspect}`] || 0}</div>
           </div>
         `).join('')}
       </div>
@@ -247,13 +403,18 @@ function updateVisibleAspects() {
 }
 
 function initializeUI() {
-  // Initialize app state
-  Object.keys(DOMAINS).forEach(domain => {
+  initializeParticles();
+  updateQuarterReservoir();
+  setInterval(updateQuarterReservoir, 60 * 1000);
+
+  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
     appState.todayData[domain] = {};
     appState.visibleAspects[domain] = true;
+    aspects.forEach(aspect => {
+      appState.todayData[domain][aspect] = false;
+    });
   });
 
-  // Set up aspect toggles
   $$('.aspect-toggle').forEach(toggle => {
     toggle.addEventListener('click', async () => {
       const domain = toggle.dataset.domain;
@@ -268,7 +429,6 @@ function initializeUI() {
     });
   });
 
-  // Set up navigation
   $$('.nav-item, .bottom-nav-item').forEach(item => {
     item.addEventListener('click', () => {
       const screen = item.dataset.screen;
@@ -276,45 +436,25 @@ function initializeUI() {
     });
   });
 
-  // Set up mood selector
-  $$('.mood-emoji').forEach(emoji => {
-    emoji.addEventListener('click', () => {
-      const mood = Number(emoji.dataset.mood);
+  $$('.mood-option').forEach(option => {
+    option.addEventListener('click', () => {
+      const mood = Number(option.dataset.mood);
       appState.mood = mood;
-      $$('.mood-emoji').forEach(e => e.classList.remove('selected'));
-      emoji.classList.add('selected');
-      const moodSlider = $('moodSlider');
-      if (moodSlider) {
-        moodSlider.value = String(mood);
-      }
+      $$('.mood-option').forEach(btn => btn.classList.remove('selected'));
+      option.classList.add('selected');
     });
   });
 
-  // Set up mood slider
-  const moodSlider = $('moodSlider');
-  if (moodSlider) {
-    moodSlider.addEventListener('input', () => {
-      const mood = Number(moodSlider.value);
-      appState.mood = mood;
-      $$('.mood-emoji').forEach(emoji => {
-        emoji.classList.toggle('selected', Number(emoji.dataset.mood) === mood);
-      });
-    });
-  }
-
-  // Set up save reflection button
   const saveReflectionBtn = $('saveReflection');
   if (saveReflectionBtn) {
     saveReflectionBtn.addEventListener('click', saveReflection);
   }
 
-  // Set up export button
   const exportBtn = $('exportCSV');
   if (exportBtn) {
     exportBtn.addEventListener('click', exportToCSV);
   }
 
-  // Set up sync button
   const syncBtn = $('syncNow');
   if (syncBtn) {
     syncBtn.addEventListener('click', () => {
@@ -322,20 +462,20 @@ function initializeUI() {
     });
   }
 
-  // Set up aspect manager toggles
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', e => {
     if (e.target.classList.contains('toggle-domain')) {
       const domain = e.target.dataset.domain;
       appState.visibleAspects[domain] = !appState.visibleAspects[domain];
-      e.target.textContent = appState.visibleAspects[domain] ? 'Hide' : 'Show';
+      e.target.textContent = appState.visibleAspects[domain] ? 'HIDE' : 'SHOW';
       updateVisibleAspects();
       renderAspectsManager();
     }
   });
 
-  // Load initial data
-  loadTodayData();
+  refreshDomainScorePanel().catch(error => console.error('Domain panel update error', error));
 
-  // Show initial screen
+  renderAspectsManager();
+
+  loadTodayData();
   showScreen('todayScreen');
 }
