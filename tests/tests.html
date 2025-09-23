@@ -790,8 +790,45 @@
             }
         });
 
-        // Start QUnit
-        QUnit.start();
+        // Start QUnit only after the app has defined its functions to avoid
+        // race conditions where data/ui scripts haven't finished loading.
+        (function waitForAppReady() {
+            const ready = typeof window.getClientId === 'function'
+                && typeof window.saveReflection === 'function'
+                && typeof window.exportToCSV === 'function'
+                && typeof window.initializeUI === 'function';
+
+            if (ready) {
+                // Attach UI handlers now that functions exist (safe to call)
+                try { window.initializeUI(); } catch (e) { /* ignore init errors during tests */ }
+                QUnit.start();
+                return;
+            }
+
+            // Retry a few times with a small delay. After timeout, start tests
+            // anyway and let failing assertions surface so we can debug.
+            const startTime = Date.now();
+            const maxWait = 3000; // ms
+            const interval = 50; // ms
+
+            const poll = setInterval(() => {
+                const now = Date.now();
+                const ok = typeof window.getClientId === 'function'
+                    && typeof window.saveReflection === 'function'
+                    && typeof window.exportToCSV === 'function'
+                    && typeof window.initializeUI === 'function';
+
+                if (ok) {
+                    clearInterval(poll);
+                    try { window.initializeUI(); } catch (e) {}
+                    QUnit.start();
+                } else if (now - startTime > maxWait) {
+                    clearInterval(poll);
+                    console.warn('App functions not fully available before timeout; starting QUnit anyway.');
+                    QUnit.start();
+                }
+            }, interval);
+        })();
     </script>
 </body>
 </html>
