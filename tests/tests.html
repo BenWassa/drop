@@ -183,6 +183,91 @@
         </div>
     </div>
 
+    <!-- Test mocks: localStorage, crypto, and an in-memory mock IndexedDB.
+         These run before the app scripts so the app initializes against
+         deterministic test doubles and seeded sample data. -->
+    <script>
+        // Minimal helpers
+        const $ = (id) => document.getElementById(id);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // Mock localStorage (in-memory) so getClientId persists between calls
+        const mockLocalStorage = (function() {
+            let store = {};
+            return {
+                getItem: function(key) { return store.hasOwnProperty(key) ? store[key] : null; },
+                setItem: function(key, value) { store[key] = String(value); },
+                removeItem: function(key) { delete store[key]; },
+                clear: function() { store = {}; }
+            };
+        })();
+        Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+
+        // Mock crypto
+        window.crypto = {
+            getRandomValues: (arr) => {
+                for (let i = 0; i < arr.length; i++) {
+                    arr[i] = Math.floor(Math.random() * 256);
+                }
+                return arr;
+            }
+        };
+
+        // Simple in-memory mock DB with seeded sample entries
+        const mockDB = (function() {
+            const stores = {
+                entries: [
+                    {
+                        id: '2024-01-01-sleep-wake',
+                        date: '2024-01-01',
+                        domain: 'sleep',
+                        aspect: 'wake',
+                        completed: true,
+                        type: 'entry',
+                        streak: 5,
+                        mood: null,
+                        note: '',
+                        timestamp: 1704067200000,
+                        synced: false
+                    }
+                ],
+                outbox: []
+            };
+
+            function ensureStore(name) { if (!stores[name]) stores[name] = []; }
+
+            return {
+                transaction: function(storeNames, mode) {
+                    // normalize storeNames parameter
+                    const names = Array.isArray(storeNames) ? storeNames : [storeNames];
+                    return {
+                        objectStore: function(name) {
+                            ensureStore(name);
+                            return {
+                                put: function(val) {
+                                    const idx = stores[name].findIndex(e => e && e.id === val.id);
+                                    if (idx >= 0) stores[name][idx] = val; else stores[name].push(val);
+                                },
+                                add: function(val) { stores[name].push(val); },
+                                getAll: function() {
+                                    const req = {};
+                                    // emulate async IDB behavior
+                                    setTimeout(() => {
+                                        req.result = (stores[name] || []).slice();
+                                        if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
+                                    }, 0);
+                                    return req;
+                                }
+                            };
+                        }
+                    };
+                }
+            };
+        })();
+
+        window.dbp = Promise.resolve(mockDB);
+    </script>
+
     <!-- Load app scripts -->
     <script src="config.js"></script>
     <script src="data.js"></script>
@@ -211,44 +296,7 @@
             spirit: ['stress', 'meditation']
         };
 
-        // Mock $ function
-        const $ = (id) => document.getElementById(id);
-        const $$ = (selector) => document.querySelectorAll(selector);
-
-        // Mock localStorage (in-memory) so getClientId persists between calls
-        const mockLocalStorage = (function() {
-            let store = {};
-            return {
-                getItem: function(key) { return store.hasOwnProperty(key) ? store[key] : null; },
-                setItem: function(key, value) { store[key] = String(value); },
-                removeItem: function(key) { delete store[key]; },
-                clear: function() { store = {}; }
-            };
-        })();
-        Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
-
-        // Mock crypto
-        window.crypto = {
-            getRandomValues: (arr) => {
-                for (let i = 0; i < arr.length; i++) {
-                    arr[i] = Math.floor(Math.random() * 256);
-                }
-                return arr;
-            }
-        };
-
-        // Mock IndexedDB for testing
-        const mockDB = {
-            transaction: () => ({
-                objectStore: () => ({
-                    put: () => {},
-                    add: () => {},
-                    getAll: () => ({ onsuccess: () => {}, onerror: () => {} })
-                })
-            })
-        };
-
-        window.dbp = Promise.resolve(mockDB);
+        // ...mocks moved above so app scripts initialize against them
 
         // The real app implementations of getClientId, saveReflection, and exportToCSV
         // are provided by the included app scripts (data.js). We intentionally
