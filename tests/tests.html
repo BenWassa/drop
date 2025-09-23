@@ -392,7 +392,7 @@
                 const toggle = document.querySelector('.aspect-toggle');
 
                 const initialState = toggle.classList.contains('completed');
-                toggle.click();
+                toggle.dispatchEvent(new Event('click'));
 
                 const newState = toggle.classList.contains('completed');
                 assert.notEqual(initialState, newState, 'Toggle state changed');
@@ -412,7 +412,6 @@
             });
         });
 
-        QUnit.module('Export Functionality', function() {
             QUnit.test('exportToCSV generates correct CSV', async function(assert) {
                 const mockEntries = [
                     {
@@ -430,20 +429,23 @@
                     }
                 ];
 
-                // Mock the getAll result
+                // Mock the getAll result with proper async simulation
                 const originalTransaction = mockDB.transaction;
                 mockDB.transaction = function(stores) {
                     return {
                         objectStore: function(name) {
                             return {
                                 getAll: function() {
-                                    return {
-                                        onsuccess: (event) => {
-                                            event.target.result = mockEntries;
-                                        },
-                                        onerror: () => {},
-                                        result: mockEntries
+                                    const req = {
+                                        onsuccess: null,
+                                        onerror: null,
+                                        result: null
                                     };
+                                    setTimeout(() => {
+                                        req.result = mockEntries;
+                                        if (req.onsuccess) req.onsuccess({ target: req });
+                                    }, 0);
+                                    return req;
                                 }
                             };
                         }
@@ -461,7 +463,6 @@
                 // Restore mock
                 mockDB.transaction = originalTransaction;
             });
-        });
 
         // Test results collection (capture assertions and per-test details)
         let allTestResults = [];
