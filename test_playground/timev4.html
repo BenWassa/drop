@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Six Novel Data Visualizations</title>
+<style>
+  /* General Body Styles */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px; /* More space between concepts */
+    padding: 40px;
+    background-color: #f8f9fa;
+    color: #212529;
+    line-height: 1.5;
+  }
+
+  .concept-container {
+    width: 500px; /* Slightly wider for more complex visuals */
+    padding: 25px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease-in-out; /* Smooth hover effects */
+    position: relative; /* For tooltips or overlays */
+  }
+  .concept-container:hover {
+      box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 15px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #343a40;
+  }
+
+  .concept-description {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.4;
+      font-style: italic;
+  }
+
+  .concept-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #343a40;
+  }
+  .concept-header span {
+      font-size: 1.1em;
+  }
+  .concept-footer {
+      margin-top: 20px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding-top: 10px;
+      border-top: 1px dashed #e9ecef;
+      color: #495057;
+  }
+  .mood-icon {
+      font-size: 1.2em; /* Ensure mood icons are visible */
+      margin-left: 5px;
+  }
+
+  /* Key Colors for Domains */
+  .domain-sleep { color: #4285F4; } /* Blue */
+  .domain-fitness { color: #DB4437; }   /* Red */
+  .domain-mind { color: #F4B400; }  /* Yellow */
+  .domain-spirit { color: #0F9D58; } /* Green */
+
+  /* General SVG Styling */
+  .svg-canvas {
+      width: 100%;
+      height: 250px;
+      display: block;
+      margin: 0 auto;
+      background-color: #fcfcfc;
+      border: 1px solid #e9ecef;
+      border-radius: 5px;
+  }
+
+  /* Mood specific colors/emojis */
+  .mood-1 { color: #dc3545; } /* Red - 😞 */
+  .mood-2 { color: #ffc107; } /* Yellow - 😐 */
+  .mood-3 { color: #28a745; } /* Green - 🙂 */
+  .mood-4 { color: #007bff; } /* Blue - 😁 */
+  .mood-emoji-1::after { content: '😞'; }
+  .mood-emoji-2::after { content: '😐'; }
+  .mood-emoji-3::after { content: '🙂'; }
+  .mood-emoji-4::after { content: '😁'; }
+
+
+  /* --- 1) Daily Flow Map --- */
+  #daily-flow-map-svg .flow-segment {
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  #daily-flow-map-svg .flow-segment:hover {
+      opacity: 0.8;
+      transform: translateY(-2px);
+  }
+  #daily-flow-map-svg .flow-segment text {
+      font-size: 10px;
+      fill: #fff;
+      pointer-events: none;
+      text-anchor: middle;
+      font-weight: 500;
+  }
+
+
+  /* --- 2) Domain Ring Tracker --- */
+  #domain-ring-tracker-svg .domain-arc-group {
+      cursor: pointer;
+  }
+  #domain-ring-tracker-svg .domain-arc-group:hover .domain-arc {
+      stroke-width: 12;
+  }
+  #domain-ring-tracker-svg .domain-arc {
+      fill: none;
+      stroke-width: 10;
+      transition: stroke-width 0.2s ease, opacity 0.2s ease;
+  }
+  #domain-ring-tracker-svg .aspect-segment {
+      fill: none;
+      stroke-width: 6;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  #domain-ring-tracker-svg .mood-dot {
+      transition: fill 0.3s ease;
+  }
+  #domain-ring-tracker-svg .center-text {
+      text-anchor: middle;
+      dominant-baseline: central;
+  }
+  #domain-ring-tracker-svg .center-mood {
+      font-size: 2.5em;
+      fill: #212529;
+  }
+  #domain-ring-tracker-svg .center-date {
+      font-size: 0.8em;
+      fill: #6c757d;
+  }
+
+  /* --- 3) Mood Terrain --- */
+  #mood-terrain-svg .terrain-path {
+      fill: none;
+      stroke-width: 2px;
+      transition: stroke-width 0.3s ease, stroke 0.3s ease;
+  }
+  #mood-terrain-svg .terrain-area {
+      fill: transparent;
+      opacity: 0.15;
+      transition: fill 0.3s ease, opacity 0.3s ease;
+  }
+  #mood-terrain-svg .streak-indicator {
+      fill: #adb5bd;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+  }
+  #mood-terrain-svg .mood-label {
+      font-size: 10px;
+      text-anchor: middle;
+      fill: #495057;
+  }
+  #mood-terrain-svg .date-label {
+      font-size: 9px;
+      fill: #6c757d;
+      text-anchor: middle;
+  }
+
+  /* --- 4) Aspect Matrix Calendar --- */
+  #aspect-matrix-calendar-svg .day-cell {
+      fill: #e9ecef; /* Default empty/incomplete */
+      stroke: #ffffff;
+      stroke-width: 1px;
+      cursor: pointer;
+      transition: fill 0.2s ease;
+  }
+  #aspect-matrix-calendar-svg .day-cell.completed {
+      fill: #28a745; /* Green for completed */
+  }
+  #aspect-matrix-calendar-svg .day-cell:hover {
+      opacity: 0.8;
+  }
+  #aspect-matrix-calendar-svg .aspect-label {
+      font-size: 10px;
+      fill: #495057;
+      dominant-baseline: middle;
+      text-anchor: end;
+  }
+  #aspect-matrix-calendar-svg .date-label {
+      font-size: 10px;
+      fill: #6c757d;
+      text-anchor: middle;
+  }
+  #aspect-matrix-calendar-svg .mood-icon-matrix {
+      font-size: 10px;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+  }
+
+  /* --- 5) Domain Balance Treemap --- */
+  #domain-balance-treemap-svg .domain-rect {
+      fill: #f0f2f5;
+      stroke: #adb5bd;
+      stroke-width: 2px;
+      cursor: pointer;
+      transition: fill 0.2s ease, stroke-width 0.2s ease;
+  }
+  #domain-balance-treemap-svg .domain-rect:hover {
+      fill: #e9ecef;
+      stroke-width: 3px;
+  }
+  #domain-balance-treemap-svg .aspect-rect {
+      stroke: #fff;
+      stroke-width: 1px;
+      opacity: 0.9;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+  }
+  #domain-balance-treemap-svg .aspect-rect:hover {
+      opacity: 0.7;
+  }
+  #domain-balance-treemap-svg text {
+      font-size: 12px;
+      fill: #343a40;
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: central;
+  }
+  #domain-balance-treemap-svg .domain-label {
+      font-size: 16px;
+      font-weight: bold;
+      fill: #212529;
+  }
+
+
+  /* --- 6) Progress Arc Cascade --- */
+  #progress-arc-cascade-svg .arc-track {
+      stroke: #e9ecef;
+      stroke-width: 8;
+      fill: none;
+  }
+  #progress-arc-cascade-svg .arc-progress {
+      stroke-width: 8;
+      fill: none;
+      transition: stroke-dashoffset 0.5s ease;
+  }
+  #progress-arc-cascade-svg .streak-segment {
+      stroke-width: 12;
+      transition: stroke-dashoffset 0.5s ease, stroke-width 0.3s ease;
+  }
+  #progress-arc-cascade-svg .arc-label {
+      font-size: 12px;
+      fill: #495057;
+      text-anchor: middle;
+      dominant-baseline: central;
+  }
+  #progress-arc-cascade-svg .arc-mood {
+      font-size: 14px;
+      text-anchor: middle;
+      dominant-baseline: central;
+      transition: fill 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<!-- Concept 1: Daily Flow Map -->
+<div class="concept-container">
+  <h2>1. Daily Flow Map <br><small>(Sankey / Alluvial inspired)</small></h2>
+  <p class="concept-description">Visualizes the sequence of completed aspects and their associated mood for a single day, showing the flow of your daily activities.</p>
+  <div class="concept-header">
+      <span id="flow-map-date">September 23, 2025</span>
+      <span>Total Activities: <span id="flow-map-total">8</span></span>
+  </div>
+  <svg class="svg-canvas" id="daily-flow-map-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer" id="flow-map-legend">
+    <span class="domain-sleep">Sleep</span>
+    <span class="domain-fitness">Fitness</span>
+    <span class="domain-mind">Mind</span>
+    <span class="domain-spirit">Spirit</span>
+  </div>
+</div>
+
+<!-- Concept 2: Domain Ring Tracker -->
+<div class="concept-container">
+  <h2>2. Domain Ring Tracker <br><small>(Radial Bar / Donut inspired)</small></h2>
+  <p class="concept-description">A compact summary of daily progress, showing completion and mood across all domains and their aspects in concentric rings.</p>
+  <div class="concept-header">
+      <span id="ring-tracker-date">September 23, 2025</span>
+      <span>Overall Mood: <span id="ring-tracker-overall-mood" class="mood-icon"></span></span>
+  </div>
+  <svg class="svg-canvas" id="domain-ring-tracker-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer">
+    <span>Completed: <span id="ring-tracker-completed-count">0</span></span>
+    <span>Streaks: <span id="ring-tracker-avg-streak">0</span></span>
+  </div>
+</div>
+
+<!-- Concept 3: Mood Terrain -->
+<div class="concept-container">
+  <h2>3. Mood Terrain <br><small>(Multi-line/Area Chart inspired)</small></h2>
+  <p class="concept-description">Visualizes mood trends over time for each domain, with line thickness indicating streak continuity and background washes for aspect patterns.</p>
+  <div class="concept-header">
+      <span id="mood-terrain-period">Past 7 Days</span>
+      <span>Avg Mood: <span id="mood-terrain-avg-mood" class="mood-icon"></span></span>
+  </div>
+  <svg class="svg-canvas" id="mood-terrain-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer" id="mood-terrain-legend">
+    <span class="domain-sleep">Sleep Mood</span>
+    <span class="domain-fitness">Fitness Mood</span>
+    <span class="domain-mind">Mind Mood</span>
+    <span class="domain-spirit">Spirit Mood</span>
+  </div>
+</div>
+
+<!-- Concept 4: Aspect Matrix Calendar -->
+<div class="concept-container">
+  <h2>4. Aspect Matrix Calendar <br><small>(Heatmap / Calendar inspired)</small></h2>
+  <p class="concept-description">A granular grid view of aspect completion over a month, with each cell colored by status and overlaid with a small mood indicator.</p>
+  <div class="concept-header">
+      <span id="matrix-calendar-month">September 2025</span>
+      <span>Completed: <span id="matrix-calendar-total-completed">0</span></span>
+  </div>
+  <svg class="svg-canvas" id="aspect-matrix-calendar-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer" id="matrix-calendar-mood-legend">
+      <span class="mood-1 mood-icon"></span><span class="mood-2 mood-icon"></span><span class="mood-3 mood-icon"></span><span class="mood-4 mood-icon"></span>
+  </div>
+</div>
+
+<!-- Concept 5: Domain Balance Treemap -->
+<div class="concept-container">
+  <h2>5. Domain Balance Treemap <br><small>(Treemap / Sunburst inspired)</small></h2>
+  <p class="concept-description">Displays the proportional allocation of completed activities across domains and their specific aspects for a chosen period.</p>
+  <div class="concept-header">
+      <span id="treemap-period">Today's Balance</span>
+      <span>Total: <span id="treemap-total-count">0</span> activities</span>
+  </div>
+  <svg class="svg-canvas" id="domain-balance-treemap-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer" id="treemap-mood-legend">
+      <span class="mood-1">😞</span> <span class="mood-2">😐</span> <span class="mood-3">🙂</span> <span class="mood-4">😁</span> (Avg Mood)
+  </div>
+</div>
+
+<!-- Concept 6: Progress Arc Cascade -->
+<div class="concept-container">
+  <h2>6. Progress Arc Cascade <br><small>(Bullet / Progress Bar inspired)</small></h2>
+  <p class="concept-description">A series of cascading semi-circular arcs visualizing the streak and completion status for each individual aspect.</p>
+  <div class="concept-header">
+      <span id="arc-cascade-date">September 23, 2025</span>
+      <span>Daily Status</span>
+  </div>
+  <svg class="svg-canvas" id="progress-arc-cascade-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer" id="arc-cascade-streak-info">
+      <span>Avg Streak: <span id="arc-cascade-avg-streak">0</span></span>
+      <span>Highest Streak: <span id="arc-cascade-max-streak">0</span></span>
+  </div>
+</div>
+
+<script>
+    // --- Global Data & Utilities ---
+    const DOMAINS = {
+        sleep: { color: '#4285F4', aspects: ['wake', 'rest'] },
+        fitness: { color: '#DB4437', aspects: ['run', 'strength', 'skill'] },
+        mind: { color: '#F4B400', aspects: ['read', 'write', 'learn'] }, // Added 'learn' for variety
+        spirit: { color: '#0F9D58', aspects: ['meditation', 'stress', 'reflection'] } // Added 'reflection'
+    };
+
+    const MOOD_EMOJIS = {
+        1: '😞', 2: '😐', 3: '🙂', 4: '😁'
+    };
+
+    /**
+     * Generates a random integer between min and max (inclusive).
+     */
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
+     * Generates mock practice entries for a given date.
+     * @param {string} dateString - "YYYY-MM-DD"
+     * @returns {Array} An array of mock practice entries.
+     */
+    function generateDailyMockData(dateString) {
+        const dailyEntries = [];
+        const date = new Date(dateString);
+
+        for (const domainKey in DOMAINS) {
+            const domain = DOMAINS[domainKey];
+            for (const aspect of domain.aspects) {
+                const completed = Math.random() > 0.3; // 70% chance of completion
+                dailyEntries.push({
+                    id: `${dateString}-${domainKey}-${aspect}`,
+                    date: dateString,
+                    domain: domainKey,
+                    aspect: aspect,
+                    completed: completed,
+                    streak: completed ? getRandomInt(1, 15) : 0, // Simulate streak
+                    mood: completed ? getRandomInt(2, 4) : getRandomInt(1, 2), // Higher mood if completed
+                    note: completed ? "Good session!" : "Missed it.",
+                    timestamp: date.getTime(),
+                    synced: true
+                });
+            }
+        }
+        return dailyEntries;
+    }
+
+    /**
+     * Generates mock data for the last N days.
+     * @param {number} numDays - Number of days to generate data for.
+     * @returns {Object} An object where keys are date strings ("YYYY-MM-DD") and values are arrays of entries.
+     */
+    function generatePastDaysData(numDays) {
+        const data = {};
+        for (let i = 0; i < numDays; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateString = d.toISOString().split('T')[0];
+            data[dateString] = generateDailyMockData(dateString);
+        }
+        return data;
+    }
+
+    // --- Current Data State (Simulated) ---
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0];
+    let currentDayData = generateDailyMockData(todayString);
+    let past7DaysData = generatePastDaysData(7);
+    let past30DaysData = generatePastDaysData(30);
+
+
+    // Helper for SVG path d attribute for arcs (for radial charts)
+    function describeArc(x, y, radius, startAngle, endAngle) {
+        const start = polarToCartesian(x, y, radius, endAngle);
+        const end = polarToCartesian(x, y, radius, startAngle);
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+        return [
+            "M", start.x, start.y,
+            "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
+        ].join(" ");
+    }
+    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+        return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY + (radius * Math.sin(angleInRadians))
+        };
+    }
+
+
+    // --- 1) Daily Flow Map ---
+    function updateDailyFlowMap() {
+        const svg = document.getElementById('daily-flow-map-svg');
+        svg.innerHTML = ''; // Clear previous
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+
+        const completedEntries = currentDayData.filter(entry => entry.completed);
+        const numSegments = completedEntries.length;
+        if (numSegments === 0) {
+            svg.innerHTML = `<text x="${width / 2}" y="${height / 2}" fill="#6c757d" text-anchor="middle">No completed activities today.</text>`;
+            document.getElementById('flow-map-total').textContent = '0';
+            return;
+        }
+
+        const segmentWidth = (width - 40) / numSegments; // Leave some padding
+        const startY = height / 2;
+        const segmentHeight = 40; // Max height
+        const moodHeightModifier = 10; // For mood variation
+
+        let currentX = 20;
+
+        completedEntries.forEach((entry, i) => {
+            const moodAdjust = (entry.mood - 1) * moodHeightModifier / 2; // Mood 1-4
+            const yOffset = (i % 2 === 0) ? moodAdjust : -moodAdjust; // Alternate high/low
+            const effectiveY = startY + yOffset;
+
+            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rect.setAttribute('x', currentX);
+            rect.setAttribute('y', effectiveY - segmentHeight / 2);
+            rect.setAttribute('width', segmentWidth - 5); // Gap between segments
+            rect.setAttribute('height', segmentHeight);
+            rect.setAttribute('rx', 5);
+            rect.setAttribute('ry', 5);
+            rect.setAttribute('fill', DOMAINS[entry.domain].color);
+            rect.classList.add('flow-segment');
+            svg.appendChild(rect);
+
+            // Aspect label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', currentX + (segmentWidth - 5) / 2);
+            text.setAttribute('y', effectiveY + 5);
+            text.textContent = entry.aspect;
+            svg.appendChild(text);
+
+            // Mood icon
+            const moodText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            moodText.setAttribute('x', currentX + (segmentWidth - 5) / 2);
+            moodText.setAttribute('y', effectiveY + segmentHeight / 2 + 15);
+            moodText.textContent = MOOD_EMOJIS[entry.mood];
+            moodText.setAttribute('fill', getMoodColor(entry.mood));
+            moodText.setAttribute('font-size', '14px');
+            moodText.classList.add('mood-icon');
+            svg.appendChild(moodText);
+
+            currentX += segmentWidth;
+        });
+
+        document.getElementById('flow-map-date').textContent = new Date(todayString).toDateString();
+        document.getElementById('flow-map-total').textContent = completedEntries.length;
+    }
+
+
+    // --- 2) Domain Ring Tracker ---
+    function updateDomainRingTracker() {
+        const svg = document.getElementById('domain-ring-tracker-svg');
+        svg.innerHTML = '';
+        const centerX = svg.viewBox.baseVal.width / 2;
+        const centerY = svg.viewBox.baseVal.height / 2;
+        const baseRadius = 60;
+        const ringSpacing = 20;
+
+        const allAspects = Object.values(DOMAINS).flatMap(d => d.aspects);
+        const domainSegments = 360 / Object.keys(DOMAINS).length; // e.g., 90 degrees per domain
+
+        let currentOverallMoods = [];
+
+        Object.keys(DOMAINS).forEach((domainKey, domainIndex) => {
+            const domainColor = DOMAINS[domainKey].color;
+            const domainEntries = currentDayData.filter(e => e.domain === domainKey);
+            const completedAspects = domainEntries.filter(e => e.completed);
+
+            let moodSum = 0;
+            completedAspects.forEach(e => {
+                moodSum += e.mood;
+                currentOverallMoods.push(e.mood);
+            });
+
+            // Domain Arc (outer ring)
+            const domainRadius = baseRadius + ringSpacing;
+            const domainArcStart = domainIndex * domainSegments;
+            const domainArcEnd = domainArcStart + domainSegments;
+            const domainPath = describeArc(centerX, centerY, domainRadius, domainArcStart, domainArcEnd);
+
+            const domainGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            domainGroup.classList.add('domain-arc-group');
+            svg.appendChild(domainGroup);
+
+            const domainArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            domainArc.setAttribute('d', domainPath);
+            domainArc.setAttribute('stroke', domainColor);
+            domainArc.classList.add('domain-arc');
+            domainGroup.appendChild(domainArc);
+
+            // Aspect Segments (inner ring)
+            const aspectRadius = baseRadius;
+            const aspectArcStart = domainArcStart + 5; // Small offset for visual separation
+            const aspectArcSegmentAngle = (domainSegments - 10) / DOMAINS[domainKey].aspects.length;
+
+            DOMAINS[domainKey].aspects.forEach((aspect, aspectIndex) => {
+                const entry = domainEntries.find(e => e.aspect === aspect);
+                if (entry && entry.completed) {
+                    const aspectArcEnd = aspectArcStart + (aspectIndex + 1) * aspectArcSegmentAngle;
+                    const aspectPath = describeArc(centerX, centerY, aspectRadius, aspectArcStart + (aspectIndex * aspectArcSegmentAngle), aspectArcEnd);
+                    const aspectSegment = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    aspectSegment.setAttribute('d', aspectPath);
+                    aspectSegment.setAttribute('stroke', domainColor);
+                    aspectSegment.setAttribute('opacity', 0.8);
+                    aspectSegment.classList.add('aspect-segment');
+                    domainGroup.appendChild(aspectSegment);
+
+                    // Mood dot at the end of the aspect segment
+                    const moodDotRadius = aspectRadius - 3;
+                    const moodDotCoord = polarToCartesian(centerX, centerY, moodDotRadius, aspectArcEnd);
+                    const moodCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    moodCircle.setAttribute('cx', moodDotCoord.x);
+                    moodCircle.setAttribute('cy', moodDotCoord.y);
+                    moodCircle.setAttribute('r', 3);
+                    moodCircle.setAttribute('fill', getMoodColor(entry.mood));
+                    moodCircle.classList.add('mood-dot');
+                    domainGroup.appendChild(moodCircle);
+                }
+            });
+        });
+
+        // Center label (Date & Overall Mood)
+        const avgMood = currentOverallMoods.length > 0 ? Math.round(currentOverallMoods.reduce((a, b) => a + b, 0) / currentOverallMoods.length) : 2; // Default 😐
+        const centerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        centerGroup.classList.add('center-text');
+        svg.appendChild(centerGroup);
+
+        const moodText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        moodText.setAttribute('x', centerX);
+        moodText.setAttribute('y', centerY - 15);
+        moodText.textContent = MOOD_EMOJIS[avgMood];
+        moodText.classList.add('center-mood', `mood-${avgMood}`);
+        centerGroup.appendChild(moodText);
+
+        const dateText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        dateText.setAttribute('x', centerX);
+        dateText.setAttribute('y', centerY + 15);
+        dateText.textContent = new Date(todayString).toLocaleDateString();
+        dateText.classList.add('center-date');
+        centerGroup.appendChild(dateText);
+
+        document.getElementById('ring-tracker-date').textContent = new Date(todayString).toDateString();
+        document.getElementById('ring-tracker-overall-mood').className = `mood-icon mood-emoji-${avgMood}`;
+        document.getElementById('ring-tracker-completed-count').textContent = currentDayData.filter(e => e.completed).length;
+        document.getElementById('ring-tracker-avg-streak').textContent =
+            (currentDayData.filter(e => e.streak > 0).reduce((sum, e) => sum + e.streak, 0) / (currentDayData.filter(e => e.streak > 0).length || 1)).toFixed(1);
+    }
+
+
+    // --- 3) Mood Terrain ---
+    function updateMoodTerrain() {
+        const svg = document.getElementById('mood-terrain-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const padding = 30;
+        const chartHeight = height - padding * 2;
+        const chartWidth = width - padding * 2;
+
+        const days = Object.keys(past7DaysData).sort(); // Sort by date
+        const dayStep = chartWidth / (days.length - 1);
+
+        const moodScale = (mood) => height - padding - (mood - 1) * (chartHeight / 3); // Mood 1-4 to Y coordinate
+
+        let allMoods = [];
+
+        Object.keys(DOMAINS).forEach(domainKey => {
+            let pathD = `M ${padding} ${moodScale(2.5)}`; // Start at a neutral mood
+            let areaD = `M ${padding} ${height - padding}`; // For area filling
+            let lastY = moodScale(2.5);
+
+            days.forEach((dateString, i) => {
+                const entries = past7DaysData[dateString].filter(e => e.domain === domainKey);
+                const moodSum = entries.reduce((sum, e) => sum + e.mood, 0);
+                const avgMood = entries.length > 0 ? moodSum / entries.length : 2.5; // Default neutral if no entries
+                const currentX = padding + i * dayStep;
+                const currentY = moodScale(avgMood);
+
+                // For line chart
+                pathD += ` L ${currentX} ${currentY}`;
+                // For area chart
+                areaD += ` L ${currentX} ${currentY}`;
+
+                // Streak indicator (thicker line or subtle rectangle)
+                const completedEntry = entries.find(e => e.completed && e.streak > 0);
+                if (completedEntry && completedEntry.streak > 1) { // Show if streak is ongoing
+                    const streakRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    streakRect.setAttribute('x', currentX - (dayStep / 2) + 5);
+                    streakRect.setAttribute('y', height - padding - completedEntry.streak * 2); // Height based on streak
+                    streakRect.setAttribute('width', dayStep - 10);
+                    streakRect.setAttribute('height', completedEntry.streak * 2);
+                    streakRect.setAttribute('fill', DOMAINS[domainKey].color);
+                    streakRect.setAttribute('opacity', 0.2);
+                    streakRect.classList.add('streak-indicator');
+                    svg.appendChild(streakRect);
+                }
+
+                // Mood label for each point (can be toggled off)
+                const moodLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                moodLabel.setAttribute('x', currentX);
+                moodLabel.setAttribute('y', currentY - 10);
+                moodLabel.textContent = MOOD_EMOJIS[Math.round(avgMood)];
+                moodLabel.classList.add('mood-label', `mood-${Math.round(avgMood)}`);
+                svg.appendChild(moodLabel);
+
+                allMoods.push(avgMood);
+                lastY = currentY;
+            });
+
+            // Close area path
+            areaD += ` L ${padding + chartWidth} ${height - padding} L ${padding} ${height - padding} Z`;
+
+            // Draw area
+            const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            area.setAttribute('d', areaD);
+            area.setAttribute('fill', DOMAINS[domainKey].color);
+            area.classList.add('terrain-area');
+            svg.appendChild(area);
+
+            // Draw line
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathD);
+            path.setAttribute('stroke', DOMAINS[domainKey].color);
+            path.classList.add('terrain-path');
+            svg.appendChild(path);
+        });
+
+        // Date labels on x-axis
+        days.forEach((dateString, i) => {
+            const currentX = padding + i * dayStep;
+            const dateLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            dateLabel.setAttribute('x', currentX);
+            dateLabel.setAttribute('y', height - padding + 15);
+            dateLabel.textContent = new Date(dateString).getDate(); // Just day number
+            dateLabel.classList.add('date-label');
+            svg.appendChild(dateLabel);
+        });
+
+        const overallAvgMood = allMoods.length > 0 ? Math.round(allMoods.reduce((a, b) => a + b, 0) / allMoods.length) : 2;
+        document.getElementById('mood-terrain-avg-mood').className = `mood-icon mood-emoji-${overallAvgMood}`;
+    }
+
+
+    // --- 4) Aspect Matrix Calendar ---
+    function updateAspectMatrixCalendar() {
+        const svg = document.getElementById('aspect-matrix-calendar-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const paddingLeft = 100; // For aspect labels
+        const paddingTop = 40; // For date labels
+        const cellGap = 1;
+
+        const allAspects = Object.values(DOMAINS).flatMap(d => d.aspects);
+        const aspectsMap = {};
+        allAspects.forEach((aspect, i) => aspectsMap[aspect] = i);
+
+        const numDaysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const numRows = allAspects.length;
+        const numCols = numDaysInMonth;
+
+        const cellWidth = (width - paddingLeft - (numCols - 1) * cellGap) / numCols;
+        const cellHeight = (height - paddingTop - (numRows - 1) * cellGap) / numRows;
+
+        let totalCompleted = 0;
+
+        for (let r = 0; r < numRows; r++) {
+            const aspect = allAspects[r];
+            const aspectY = paddingTop + r * (cellHeight + cellGap);
+
+            // Aspect Label
+            const aspectLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            aspectLabel.setAttribute('x', paddingLeft - 5);
+            aspectLabel.setAttribute('y', aspectY + cellHeight / 2);
+            aspectLabel.textContent = aspect;
+            aspectLabel.classList.add('aspect-label');
+            svg.appendChild(aspectLabel);
+
+            for (let c = 0; c < numCols; c++) {
+                const dayOfMonth = c + 1;
+                const date = new Date(today.getFullYear(), today.getMonth(), dayOfMonth);
+                const dateString = date.toISOString().split('T')[0];
+
+                const dayData = past30DaysData[dateString] || []; // Use past30DaysData for a month view
+                const entry = dayData.find(e => e.aspect === aspect);
+
+                const cellX = paddingLeft + c * (cellWidth + cellGap);
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', cellX);
+                rect.setAttribute('y', aspectY);
+                rect.setAttribute('width', cellWidth);
+                rect.setAttribute('height', cellHeight);
+                rect.classList.add('day-cell');
+                if (entry && entry.completed) {
+                    rect.classList.add('completed');
+                    totalCompleted++;
+                }
+                svg.appendChild(rect);
+
+                // Mood icon in cell if completed
+                if (entry && entry.completed) {
+                    const moodText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    moodText.setAttribute('x', cellX + cellWidth / 2);
+                    moodText.setAttribute('y', aspectY + cellHeight / 2);
+                    moodText.textContent = MOOD_EMOJIS[entry.mood];
+                    moodText.classList.add('mood-icon-matrix', `mood-${entry.mood}`);
+                    svg.appendChild(moodText);
+                }
+
+                // Date label on top row
+                if (r === 0) {
+                    const dateLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    dateLabel.setAttribute('x', cellX + cellWidth / 2);
+                    dateLabel.setAttribute('y', paddingTop - 10);
+                    dateLabel.textContent = dayOfMonth;
+                    dateLabel.classList.add('date-label');
+                    svg.appendChild(dateLabel);
+                }
+            }
+        }
+        document.getElementById('matrix-calendar-month').textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+        document.getElementById('matrix-calendar-total-completed').textContent = totalCompleted;
+    }
+
+
+    // --- 5) Domain Balance Treemap ---
+    function updateDomainBalanceTreemap() {
+        const svg = document.getElementById('domain-balance-treemap-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const totalActivities = currentDayData.filter(e => e.completed).length;
+
+        if (totalActivities === 0) {
+            svg.innerHTML = `<text x="${width / 2}" y="${height / 2}" fill="#6c757d" text-anchor="middle">No completed activities today for treemap.</text>`;
+            document.getElementById('treemap-total-count').textContent = '0';
+            return;
+        }
+
+        const dataForTreemap = Object.keys(DOMAINS).map(domainKey => {
+            const domainEntries = currentDayData.filter(e => e.domain === domainKey && e.completed);
+            const aspectCounts = {};
+            let domainMoodSum = 0;
+            domainEntries.forEach(entry => {
+                aspectCounts[entry.aspect] = (aspectCounts[entry.aspect] || 0) + 1;
+                domainMoodSum += entry.mood;
+            });
+            return {
+                domain: domainKey,
+                value: domainEntries.length,
+                avgMood: domainEntries.length > 0 ? Math.round(domainMoodSum / domainEntries.length) : 2,
+                aspects: Object.keys(aspectCounts).map(aspect => ({
+                    aspect: aspect,
+                    value: aspectCounts[aspect],
+                    mood: domainEntries.find(e => e.aspect === aspect).mood // Simplified: uses first entry's mood
+                }))
+            };
+        }).filter(d => d.value > 0);
+
+        // Simple squarified treemap algorithm (or a more basic tiling)
+        // For this demo, we'll do a basic horizontal split for domains.
+        // Then vertical splits for aspects within domains.
+
+        let currentX = 0;
+        const totalDomainValue = dataForTreemap.reduce((sum, d) => sum + d.value, 0);
+
+        dataForTreemap.forEach(domainData => {
+            const domainWidth = (domainData.value / totalDomainValue) * width;
+            const domainRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            domainRect.setAttribute('x', currentX);
+            domainRect.setAttribute('y', 0);
+            domainRect.setAttribute('width', domainWidth);
+            domainRect.setAttribute('height', height);
+            domainRect.setAttribute('fill', DOMAINS[domainData.domain].color);
+            domainRect.setAttribute('opacity', 0.1);
+            domainRect.classList.add('domain-rect');
+            svg.appendChild(domainRect);
+
+            const domainLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            domainLabel.setAttribute('x', currentX + domainWidth / 2);
+            domainLabel.setAttribute('y', 20);
+            domainLabel.textContent = domainData.domain.toUpperCase();
+            domainLabel.classList.add('domain-label');
+            svg.appendChild(domainLabel);
+
+            let currentY = 0;
+            const totalAspectValue = domainData.aspects.reduce((sum, a) => sum + a.value, 0);
+
+            domainData.aspects.forEach(aspectData => {
+                const aspectHeight = (aspectData.value / totalAspectValue) * height;
+                const aspectRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                aspectRect.setAttribute('x', currentX);
+                aspectRect.setAttribute('y', currentY);
+                aspectRect.setAttribute('width', domainWidth);
+                aspectRect.setAttribute('height', aspectHeight);
+                aspectRect.setAttribute('fill', getMoodColor(aspectData.mood));
+                aspectRect.classList.add('aspect-rect');
+                svg.appendChild(aspectRect);
+
+                const aspectLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                aspectLabel.setAttribute('x', currentX + domainWidth / 2);
+                aspectLabel.setAttribute('y', currentY + aspectHeight / 2);
+                aspectLabel.textContent = `${aspectData.aspect} (${aspectData.value})`;
+                aspectLabel.setAttribute('fill', (aspectData.mood > 2) ? '#fff' : '#333'); // Text color contrast
+                svg.appendChild(aspectLabel);
+
+                currentY += aspectHeight;
+            });
+            currentX += domainWidth;
+        });
+        document.getElementById('treemap-total-count').textContent = totalActivities;
+    }
+
+    // --- 6) Progress Arc Cascade ---
+    function updateProgressArcCascade() {
+        const svg = document.getElementById('progress-arc-cascade-svg');
+        svg.innerHTML = '';
+        const centerX = svg.viewBox.baseVal.width / 2;
+        const centerY = svg.viewBox.baseVal.height / 2;
+        const startRadius = 40;
+        const arcSpacing = 20; // Space between arcs
+        const arcLength = 180; // Degrees for semi-circle
+        const circumference = 2 * Math.PI * startRadius; // For stroke-dasharray
+
+        let currentRadius = startRadius;
+        let aspectCount = 0;
+        let totalStreaks = 0;
+        let maxStreak = 0;
+
+        const allAspectEntries = Object.values(DOMAINS).flatMap(domainKey => {
+            return currentDayData.filter(e => e.domain === domainKey.aspects[0] || e.domain === domainKey.aspects[1] || e.domain === domainKey.aspects[2] || e.domain === domainKey.aspects[3]);
+        });
+        const completedAspects = currentDayData.filter(e => e.completed);
+
+        completedAspects.sort((a, b) => a.domain.localeCompare(b.domain) || a.aspect.localeCompare(b.aspect)); // Consistent order
+
+        completedAspects.forEach(entry => {
+            aspectCount++;
+            currentRadius = startRadius + (aspectCount - 1) * arcSpacing;
+            totalStreaks += entry.streak;
+            if (entry.streak > maxStreak) maxStreak = entry.streak;
+
+            const domainColor = DOMAINS[entry.domain].color;
+
+            // Arc Track (background)
+            const trackPathD = describeArc(centerX, centerY, currentRadius, 0, arcLength);
+            const trackArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            trackArc.setAttribute('d', trackPathD);
+            trackArc.classList.add('arc-track');
+            svg.appendChild(trackArc);
+
+            // Progress Arc (filled if completed - for this, it's always completed, so just draw)
+            const progressArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            progressArc.setAttribute('d', trackPathD); // Full arc for completed
+            progressArc.setAttribute('stroke', domainColor);
+            progressArc.classList.add('arc-progress');
+            svg.appendChild(progressArc);
+
+            // Streak Segment (on top of progress arc, slightly thicker)
+            if (entry.streak > 0) {
+                const streakAngle = Math.min(arcLength, entry.streak * (arcLength / 20)); // Streak fills up to 20 days max angle
+                const streakPathD = describeArc(centerX, centerY, currentRadius, 0, streakAngle);
+                const streakArc = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                streakArc.setAttribute('d', streakPathD);
+                streakArc.setAttribute('stroke', domainColor);
+                streakArc.setAttribute('opacity', 0.7);
+                streakArc.classList.add('streak-segment');
+                svg.appendChild(streakArc);
+            }
+
+            // Aspect Label at arc midpoint
+            const labelAngle = arcLength / 2;
+            const labelCoords = polarToCartesian(centerX, centerY, currentRadius + 5, labelAngle);
+            const labelText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            labelText.setAttribute('x', labelCoords.x);
+            labelText.setAttribute('y', labelCoords.y);
+            labelText.textContent = entry.aspect;
+            labelText.classList.add('arc-label');
+            labelText.setAttribute('fill', domainColor);
+            svg.appendChild(labelText);
+
+            // Mood Icon at end of arc
+            const moodCoords = polarToCartesian(centerX, centerY, currentRadius, arcLength);
+            const moodText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            moodText.setAttribute('x', moodCoords.x + 10); // Offset from arc end
+            moodText.setAttribute('y', moodCoords.y);
+            moodText.textContent = MOOD_EMOJIS[entry.mood];
+            moodText.classList.add('arc-mood', `mood-${entry.mood}`);
+            svg.appendChild(moodText);
+        });
+
+        document.getElementById('arc-cascade-date').textContent = new Date(todayString).toDateString();
+        document.getElementById('arc-cascade-avg-streak').textContent = (totalStreaks / (completedAspects.length || 1)).toFixed(1);
+        document.getElementById('arc-cascade-max-streak').textContent = maxStreak;
+    }
+
+
+    // --- General Utilities ---
+    function getMoodColor(mood) {
+        switch (mood) {
+            case 1: return '#dc3545'; // Sad/Red
+            case 2: return '#ffc107'; // Neutral/Yellow
+            case 3: return '#28a745'; // Happy/Green
+            case 4: return '#007bff'; // Joyful/Blue
+            default: return '#adb5bd'; // Default grey
+        }
+    }
+
+    // --- Initialization and Update Loop ---
+    function initializeAllVisualizations() {
+        updateDailyFlowMap();
+        updateDomainRingTracker();
+        updateMoodTerrain();
+        updateAspectMatrixCalendar();
+        updateDomainBalanceTreemap();
+        updateProgressArcCascade();
+    }
+
+    // Simulate daily update for the demo
+    // In a real app, these would be called when new data arrives or on a timer.
+    setInterval(() => {
+        // Generate new data for "today"
+        const nextDay = new Date(today);
+        nextDay.setDate(nextDay.getDate() + 1); // Advance one day
+        const nextDayString = nextDay.toISOString().split('T')[0];
+        currentDayData = generateDailyMockData(nextDayString);
+        past7DaysData = generatePastDaysData(7); // Regenerate all for consistency
+        past30DaysData = generatePastDaysData(30);
+
+        // Re-run all visualizations
+        initializeAllVisualizations();
+    }, 10000); // Update every 10 seconds for a "new day" simulation
+
+    // Initial call
+    initializeAllVisualizations();
+
+</script>
+</body>
+</html>

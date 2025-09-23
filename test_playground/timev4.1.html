@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discipline Dashboard: Novel Visualizations</title>
+<style>
+  /* --- Design System: Global Styles --- */
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    padding: 40px;
+    background-color: #070707; /* Background */
+    color: #e6e6e6; /* Text */
+    line-height: 1.5;
+  }
+
+  .concept-container {
+    width: 500px;
+    padding: 25px;
+    border: 1px solid #0f0f12; /* Surface border */
+    border-radius: 6px;
+    background-color: #0f0f12; /* Surface */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    transition: all 0.3s ease-in-out;
+    position: relative;
+  }
+  .concept-container:hover {
+      box-shadow: 0 6px 15px rgba(0,0,0,0.6);
+      transform: translateY(-2px);
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #8a8a8a; /* Muted */
+    padding-bottom: 15px;
+    color: #e6e6e6; /* Text */
+  }
+  h2 small {
+      font-size: 16px;
+      font-weight: normal;
+      color: #8a8a8a; /* Muted */
+      display: block;
+      margin-top: 5px;
+  }
+
+  .concept-description {
+      font-size: 13px; /* Micro */
+      color: #8a8a8a; /* Muted */
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.4;
+  }
+
+  .concept-header-metrics {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      font-weight: 500; /* Medium weight */
+      color: #e6e6e6; /* Text */
+      font-size: 16px; /* Body */
+  }
+  .concept-header-metrics span {
+      font-size: 16px;
+  }
+  .concept-footer-info {
+      margin-top: 20px;
+      font-size: 13px; /* Micro */
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding-top: 10px;
+      border-top: 1px dashed #8a8a8a; /* Muted */
+      color: #8a8a8a; /* Muted */
+  }
+
+  /* --- Design System: Color Tokens --- */
+  .color-text { color: #e6e6e6; }
+  .color-muted { color: #8a8a8a; }
+  .domain-sleep { color: #1e90ff; }
+  .domain-fitness { color: #ff3b30; }
+  .domain-mind { color: #7c3aed; }
+  .domain-spirit { color: #16a34a; }
+
+  /* Mood (Numeric, no emoji) */
+  .mood-1-color { color: #ff3b30; } /* Matches Fitness (red) for lowest mood */
+  .mood-2-color { color: #ffc107; } /* A yellow, for neutral */
+  .mood-3-color { color: #16a34a; } /* Matches Spirit (green) for higher mood */
+  .mood-4-color { color: #1e90ff; } /* Matches Sleep (blue) for highest mood */
+
+
+  /* --- Shared: Quarter Reservoir Header --- */
+  .quarter-reservoir-header {
+    background-color: #070707;
+    border: 1px solid #8a8a8a;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 25px;
+    font-family: 'Courier New', monospace; /* Monospace for ledger */
+    font-size: 13px; /* Micro */
+    color: #e6e6e6;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .quarter-reservoir-header .info-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  }
+  .quarter-reservoir-header .reservoir-bar-wrapper {
+    height: 18px;
+    border: 1px solid #8a8a8a;
+    background-color: #212121; /* Darker grey for empty part */
+    position: relative;
+    overflow: hidden;
+  }
+  .quarter-reservoir-header .reservoir-fill {
+    height: 100%;
+    width: 67%; /* Initial fill */
+    background-color: #1e90ff; /* Sleep domain color as default fill */
+    transition: width 0.5s ease-in-out;
+  }
+
+  /* --- General SVG Styling --- */
+  .svg-canvas {
+      width: 100%;
+      height: 250px;
+      display: block;
+      margin: 0 auto;
+      background-color: #070707; /* Background */
+      border: 1px solid #0f0f12; /* Surface */
+      border-radius: 4px;
+  }
+  .svg-canvas text {
+      font-family: system-ui, sans-serif;
+      fill: #e6e6e6; /* Text */
+  }
+
+  /* --- Crowns --- */
+  .crown-icon {
+      font-size: 1em;
+      margin-left: 5px;
+      color: gold; /* Consistent crown color */
+  }
+  .crown-symbol::after {
+      content: '👑'; /* Use symbol for crown if needed, or SVG/character */
+  }
+
+  /* --- 1) Domain Score Panel --- */
+  .domain-panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+  }
+  .domain-panel {
+      background-color: #0f0f12; /* Surface */
+      border: 1px solid #212121;
+      padding: 15px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+  }
+  .domain-panel .domain-name {
+      font-size: 16px; /* Body */
+      font-weight: bold;
+      text-transform: uppercase;
+  }
+  .domain-panel .score {
+      font-size: 20px; /* Larger for score */
+      font-weight: bold;
+  }
+  .domain-panel .score-bar-wrapper {
+      width: 100%;
+      height: 10px;
+      background-color: #212121; /* Dark grey for empty bar */
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+  }
+  .domain-panel .score-bar-fill {
+      height: 100%;
+      width: 0%; /* Initial */
+      transition: width 0.5s ease-out;
+      background-color: currentColor; /* Use domain color */
+  }
+  .domain-panel .score-bar-target {
+      position: absolute;
+      left: 80%;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background-color: #8a8a8a; /* Muted */
+  }
+  .domain-panel .aspects-list {
+      font-size: 13px; /* Micro */
+      color: #8a8a8a; /* Muted */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 10px;
+      margin-top: 5px;
+  }
+  .domain-panel .aspect-item {
+      display: flex;
+      align-items: center;
+  }
+  .domain-panel .aspect-item .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background-color: #212121; /* Incomplete */
+  }
+  .domain-panel .aspect-item .status-indicator.completed {
+      background-color: currentColor; /* Domain color */
+  }
+
+  /* --- 2) Aspect Streak Grid --- */
+  #aspect-streak-grid-svg rect {
+      fill: #212121; /* Darker grey for incomplete */
+      stroke: #0f0f12; /* Surface border */
+      stroke-width: 1px;
+      transition: fill 0.2s ease;
+  }
+  #aspect-streak-grid-svg rect.completed {
+      fill: #8a8a8a; /* Muted for general completion */
+  }
+  #aspect-streak-grid-svg text {
+      font-size: 11px; /* Smaller micro */
+      fill: #e6e6e6; /* Text */
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: central;
+  }
+  #aspect-streak-grid-svg .aspect-label {
+      font-size: 12px; /* Micro */
+      fill: #e6e6e6; /* Text */
+      text-anchor: end;
+      dominant-baseline: central;
+      font-weight: 500;
+  }
+  #aspect-streak-grid-svg .date-label {
+      font-size: 12px; /* Micro */
+      fill: #8a8a8a; /* Muted */
+      text-anchor: middle;
+  }
+  #aspect-streak-grid-svg .domain-header-rect {
+    fill: #0f0f12; /* Surface */
+    stroke: none;
+  }
+  #aspect-streak-grid-svg .domain-header-text {
+    font-size: 13px;
+    font-weight: bold;
+    fill: #e6e6e6;
+    text-anchor: start;
+    dominant-baseline: central;
+  }
+
+
+  /* --- 3) Daily Performance Web --- */
+  #daily-performance-web-svg .web-axis {
+      stroke: #8a8a8a; /* Muted */
+      stroke-width: 1px;
+      opacity: 0.6;
+  }
+  #daily-performance-web-svg .web-ring {
+      stroke: #212121; /* Dark grey */
+      stroke-width: 1px;
+      fill: none;
+      opacity: 0.5;
+  }
+  #daily-performance-web-svg .web-domain-label {
+      font-size: 12px; /* Micro */
+      fill: #e6e6e6; /* Text */
+      text-anchor: middle;
+      dominant-baseline: central;
+  }
+  #daily-performance-web-svg .web-today-shape {
+      fill: currentColor; /* Uses domain color */
+      opacity: 0.2;
+      stroke: currentColor;
+      stroke-width: 2px;
+      transition: all 0.3s ease-out;
+  }
+  #daily-performance-web-svg .web-avg-shape {
+      fill: none;
+      stroke: #8a8a8a; /* Muted */
+      stroke-width: 1px;
+      stroke-dasharray: 4 2;
+      transition: all 0.3s ease-out;
+  }
+
+  /* --- 4) Weekly Completion Stream --- */
+  #weekly-completion-stream-svg rect.completed-block {
+      fill: currentColor; /* Uses domain color */
+      transition: fill 0.2s ease, transform 0.2s ease;
+  }
+  #weekly-completion-stream-svg rect.incomplete-block {
+      fill: #212121; /* Dark grey for incomplete */
+      transition: fill 0.2s ease;
+  }
+  #weekly-completion-stream-svg .day-label {
+      font-size: 12px; /* Micro */
+      fill: #8a8a8a; /* Muted */
+      text-anchor: middle;
+  }
+  #weekly-completion-stream-svg .daily-percent {
+      font-size: 13px; /* Micro */
+      fill: #e6e6e6; /* Text */
+      text-anchor: middle;
+      font-weight: 500;
+  }
+  #weekly-completion-stream-svg .domain-separator {
+      stroke: #212121;
+      stroke-width: 1px;
+  }
+  #weekly-completion-stream-svg .aspect-label {
+      font-size: 11px;
+      fill: #e6e6e6;
+      dominant-baseline: central;
+      text-anchor: end;
+  }
+
+
+  /* --- 5) Domain Completion Waterfall --- */
+  #domain-completion-waterfall-svg .domain-background-bar {
+      fill: #212121; /* Dark grey */
+      height: 15px;
+      rx: 2; ry: 2;
+  }
+  #domain-completion-waterfall-svg .domain-completed-bar {
+      fill: currentColor; /* Domain color */
+      height: 15px;
+      rx: 2; ry: 2;
+      transition: width 0.3s ease-out;
+  }
+  #domain-completion-waterfall-svg .domain-label {
+      font-size: 13px; /* Micro */
+      fill: #e6e6e6; /* Text */
+      dominant-baseline: central;
+  }
+  #domain-completion-waterfall-svg .completion-percent {
+      font-size: 13px; /* Micro */
+      fill: #e6e6e6; /* Text */
+      dominant-baseline: central;
+      text-anchor: end;
+      font-weight: 500;
+  }
+  #domain-completion-waterfall-svg .crown-waterfall {
+      font-size: 16px;
+      fill: gold;
+      dominant-baseline: central;
+  }
+
+
+  /* --- 6) Progress Meter Array --- */
+  #progress-meter-array-svg .meter-track {
+      fill: #212121; /* Dark grey */
+      rx: 2; ry: 2;
+  }
+  #progress-meter-array-svg .meter-fill {
+      fill: currentColor; /* Domain color */
+      rx: 2; ry: 2;
+      transition: width 0.3s ease-out;
+  }
+  #progress-meter-array-svg .meter-aspect-label {
+      font-size: 13px; /* Micro */
+      fill: #e6e6e6; /* Text */
+      dominant-baseline: central;
+  }
+  #progress-meter-array-svg .meter-streak-label {
+      font-size: 12px; /* Micro */
+      fill: #8a8a8a; /* Muted */
+      dominant-baseline: central;
+      text-anchor: end;
+  }
+  #progress-meter-array-svg .meter-today-status {
+      fill: #8a8a8a; /* Muted for incomplete */
+      stroke: none;
+      r: 6;
+      transition: fill 0.3s ease;
+  }
+  #progress-meter-array-svg .meter-today-status.completed {
+      fill: currentColor; /* Domain color */
+  }
+</style>
+</head>
+<body>
+
+<!-- Quarter Reservoir Header Component -->
+<div id="global-quarter-reservoir" class="quarter-reservoir-header">
+    <div class="info-line">
+        <span id="qr-date">SEP 23</span>
+        <span>Q<span id="qr-quarter-num">3</span> • <span id="qr-progress-percent">67</span>% • <span id="qr-days-left">28</span> days left</span>
+    </div>
+    <div class="reservoir-bar-wrapper">
+        <div class="reservoir-fill" id="qr-fill" style="width: 67%;"></div>
+    </div>
+</div>
+
+<!-- Concept 1: Domain Score Panel -->
+<div class="concept-container">
+  <h2>1. Domain Score Panel <br><small>(Performance Snapshot)</small></h2>
+  <p class="concept-description">Displays current 7-day rolling scores and today's aspect completion for each domain, with crown indicators.</p>
+  <div class="domain-panel-grid" id="domain-score-panel-grid">
+    <!-- Panels generated by JS -->
+  </div>
+</div>
+
+<!-- Concept 2: Aspect Streak Grid -->
+<div class="concept-container">
+  <h2>2. Aspect Streak Grid <br><small>(Consistency Heatmap)</small></h2>
+  <p class="concept-description">A grid showing daily completion and active streak for each aspect over the last 30 days, by domain.</p>
+  <div class="concept-header-metrics">
+      <span id="streak-grid-month">September 2025</span>
+      <span>Avg Streak: <span id="streak-grid-avg-streak">0</span></span>
+  </div>
+  <svg class="svg-canvas" id="aspect-streak-grid-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer-info">
+      <span>Completed: <span style="background-color: #8a8a8a; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span></span>
+      <span>Incomplete: <span style="background-color: #212121; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span></span>
+  </div>
+</div>
+
+<!-- Concept 3: Daily Performance Web -->
+<div class="concept-container">
+  <h2>3. Daily Performance Web <br><small>(Balance Radar)</small></h2>
+  <p class="concept-description">A radar chart visualizing today's domain completion against the 7-day rolling average, highlighting daily balance.</p>
+  <div class="concept-header-metrics">
+      <span id="performance-web-date">September 23, 2025</span>
+      <span>Daily vs. Avg</span>
+  </div>
+  <svg class="svg-canvas" id="daily-performance-web-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer-info">
+      <span class="domain-sleep">Sleep</span>
+      <span class="domain-fitness">Fitness</span>
+      <span class="domain-mind">Mind</span>
+      <span class="domain-spirit">Spirit</span>
+  </div>
+</div>
+
+<!-- Concept 4: Weekly Completion Stream -->
+<div class="concept-container">
+  <h2>4. Weekly Completion Stream <br><small>(Timeline Flow)</small></h2>
+  <p class="concept-description">A horizontal timeline showing completion status for all aspects over the past 7 days, with daily completion percentages.</p>
+  <div class="concept-header-metrics">
+      <span>Last 7 Days</span>
+      <span>Overall % Complete: <span id="weekly-stream-overall-percent">0</span>%</span>
+  </div>
+  <svg class="svg-canvas" id="weekly-completion-stream-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer-info">
+      <span>Completed: <span style="background-color: #1e90ff; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span> (example)</span>
+      <span>Incomplete: <span style="background-color: #212121; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span></span>
+  </div>
+</div>
+
+<!-- Concept 5: Domain Completion Waterfall -->
+<div class="concept-container">
+  <h2>5. Domain Completion Waterfall <br><small>(Proportional Metrics)</small></h2>
+  <p class="concept-description">Horizontal bars showing completed vs. total possible aspects for each domain over the last 7 days, with scores.</p>
+  <div class="concept-header-metrics">
+      <span>Last 7 Days Summary</span>
+      <span>Total Aspects: <span id="waterfall-total-possible">0</span></span>
+  </div>
+  <svg class="svg-canvas" id="domain-completion-waterfall-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer-info">
+      <span>Crowns ≥ 80: <span style="color: gold;">👑</span></span>
+  </div>
+</div>
+
+<!-- Concept 6: Progress Meter Array -->
+<div class="concept-container">
+  <h2>6. Progress Meter Array <br><small>(Aspect Streaks & Status)</small></h2>
+  <p class="concept-description">Individual progress meters for each aspect, showing current streak and today's completion status at a glance.</p>
+  <div class="concept-header-metrics">
+      <span id="meter-array-date">September 23, 2025</span>
+      <span>Highest Streak: <span id="meter-array-max-streak">0</span></span>
+  </div>
+  <svg class="svg-canvas" id="progress-meter-array-svg" viewBox="0 0 500 250"></svg>
+  <div class="concept-footer-info">
+      <span>Completed Today: <span style="background-color: #1e90ff; display: inline-block; width: 10px; height: 10px; border-radius: 50%;"></span> (example)</span>
+      <span>Incomplete Today: <span style="background-color: #8a8a8a; display: inline-block; width: 10px; height: 10px; border-radius: 50%;"></span></span>
+  </div>
+</div>
+
+<script>
+    // --- Global Data, Config & Utilities ---
+    const DOMAINS_AND_ASPECTS = {
+        sleep: { color: '#1e90ff', aspects: ['wake', 'rest'] },
+        fitness: { color: '#ff3b30', aspects: ['run', 'strength', 'skill'] },
+        mind: { color: '#7c3aed', aspects: ['read', 'write'] },
+        spirit: { color: '#16a34a', aspects: ['stress', 'meditation'] }
+    };
+
+    const MOOD_COLORS = {
+        1: '#ff3b30', // Lowest mood: red
+        2: '#ffc107', // Neutral mood: yellow
+        3: '#16a34a', // Higher mood: green
+        4: '#1e90ff'  // Highest mood: blue
+    };
+
+    const QUARTER_LENGTH_DAYS = 90;
+    const CROWN_THRESHOLD = 80;
+
+    /**
+     * Generates a random integer between min and max (inclusive).
+     */
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
+     * Generates mock practice entries for a given date.
+     * @param {string} dateString - "YYYY-MM-DD"
+     * @returns {Array} An array of mock practice entries.
+     */
+    function generateDailyMockData(dateString) {
+        const dailyEntries = [];
+        const date = new Date(dateString);
+
+        for (const domainKey in DOMAINS_AND_ASPECTS) {
+            const domain = DOMAINS_AND_ASPECTS[domainKey];
+            for (const aspect of domain.aspects) {
+                const completed = Math.random() > 0.3; // 70% chance of completion
+                dailyEntries.push({
+                    id: `${dateString}-${domainKey}-${aspect}`,
+                    date: dateString,
+                    domain: domainKey,
+                    aspect: aspect,
+                    completed: completed,
+                    streak: completed ? getRandomInt(1, 15) : 0, // Simulate streak
+                    mood: completed ? getRandomInt(2, 4) : getRandomInt(1, 2), // Higher mood if completed
+                    note: '', // No notes in log, but in model
+                    timestamp: date.getTime(),
+                    synced: true
+                });
+            }
+        }
+        return dailyEntries;
+    }
+
+    /**
+     * Generates mock data for the last N days.
+     * @param {number} numDays - Number of days to generate data for.
+     * @returns {Object} An object where keys are date strings ("YYYY-MM-DD") and values are arrays of entries.
+     */
+    function generatePastDaysData(numDays) {
+        const data = {};
+        for (let i = 0; i < numDays; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateString = d.toISOString().split('T')[0];
+            data[dateString] = generateDailyMockData(dateString);
+        }
+        return data;
+    }
+
+    /**
+     * Calculates domain scores (7-day rolling average)
+     * @param {Object} allData - Object with date keys and array of entries.
+     * @param {string} latestDateString - The "today" date to calculate scores up to.
+     * @returns {Object} Scores for each domain.
+     */
+    function calculateDomainScores(allData, latestDateString) {
+        const scores = {};
+        const dates = Object.keys(allData).sort().filter(d => d <= latestDateString);
+        const last7Dates = dates.slice(Math.max(0, dates.length - 7));
+
+        for (const domainKey in DOMAINS_AND_ASPECTS) {
+            let completedCount = 0;
+            let possibleCount = 0;
+
+            for (const date of last7Dates) {
+                const dailyEntries = allData[date] || [];
+                const domainEntries = dailyEntries.filter(e => e.domain === domainKey);
+                completedCount += domainEntries.filter(e => e.completed).length;
+                possibleCount += domainEntries.length;
+            }
+            scores[domainKey] = possibleCount > 0 ? Math.round((completedCount / possibleCount) * 100) : 0;
+        }
+        return scores;
+    }
+
+    // --- Current Data State (Simulated) ---
+    let today = new Date();
+    let todayString = today.toISOString().split('T')[0];
+    let allHistoricalData = generatePastDaysData(QUARTER_LENGTH_DAYS); // Generate for a full quarter to get context
+
+    // Helper for SVG path d attribute for arcs
+    function describeArc(x, y, radius, startAngle, endAngle) {
+        const start = polarToCartesian(x, y, radius, endAngle);
+        const end = polarToCartesian(x, y, radius, startAngle);
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+        return [
+            "M", start.x, start.y,
+            "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y
+        ].join(" ");
+    }
+    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+        const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+        return {
+            x: centerX + (radius * Math.cos(angleInRadians)),
+            y: centerY + (radius * Math.sin(angleInRadians))
+        };
+    }
+
+    // --- Quarter Reservoir Header Component ---
+    function updateQuarterReservoirHeader() {
+        const quarterStart = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3, 1);
+        const quarterEnd = new Date(today.getFullYear(), Math.floor(today.getMonth() / 3) * 3 + 3, 0);
+        const totalQuarterDays = (quarterEnd.getTime() - quarterStart.getTime()) / (1000 * 60 * 60 * 24) + 1;
+        const daysPassed = (today.getTime() - quarterStart.getTime()) / (1000 * 60 * 60 * 24);
+        const progress = Math.min(1, daysPassed / totalQuarterDays);
+
+        const progressPercent = Math.round(progress * 100);
+        const daysLeft = Math.max(0, totalQuarterDays - Math.round(daysPassed));
+
+        document.getElementById('qr-date').textContent = today.toLocaleString('default', { month: 'short', day: 'numeric' }).toUpperCase();
+        document.getElementById('qr-quarter-num').textContent = Math.floor(today.getMonth() / 3) + 1;
+        document.getElementById('qr-progress-percent').textContent = progressPercent;
+        document.getElementById('qr-days-left').textContent = daysLeft;
+        document.getElementById('qr-fill').style.width = `${progressPercent}%`;
+    }
+
+    // --- 1) Domain Score Panel ---
+    function updateDomainScorePanel() {
+        const container = document.getElementById('domain-score-panel-grid');
+        container.innerHTML = ''; // Clear previous
+        const domainScores = calculateDomainScores(allHistoricalData, todayString);
+        const todayEntries = allHistoricalData[todayString] || [];
+
+        for (const domainKey in DOMAINS_AND_ASPECTS) {
+            const domainColor = DOMAINS_AND_ASPECTS[domainKey].color;
+            const score = domainScores[domainKey];
+            const hasCrown = score >= CROWN_THRESHOLD;
+
+            const panel = document.createElement('div');
+            panel.classList.add('domain-panel');
+            panel.style.borderColor = domainColor; // Use domain color for subtle accent
+            panel.innerHTML = `
+                <div class="domain-name" style="color: ${domainColor}">${domainKey.toUpperCase()}</div>
+                <div class="score">${score}${hasCrown ? '<span class="crown-icon">👑</span>' : ''}</div>
+                <div class="score-bar-wrapper">
+                    <div class="score-bar-fill" style="width: ${score}%; background-color: ${domainColor};"></div>
+                    <div class="score-bar-target"></div>
+                </div>
+                <div class="aspects-list" id="aspects-${domainKey}"></div>
+            `;
+            container.appendChild(panel);
+
+            const aspectsList = panel.querySelector(`#aspects-${domainKey}`);
+            DOMAINS_AND_ASPECTS[domainKey].aspects.forEach(aspect => {
+                const entry = todayEntries.find(e => e.aspect === aspect);
+                const isCompleted = entry ? entry.completed : false;
+                const aspectItem = document.createElement('div');
+                aspectItem.classList.add('aspect-item');
+                aspectItem.innerHTML = `
+                    <span class="status-indicator ${isCompleted ? 'completed' : ''}" style="color: ${domainColor};"></span>
+                    <span>${aspect}</span>
+                `;
+                aspectsList.appendChild(aspectItem);
+            });
+        }
+    }
+
+
+    // --- 2) Aspect Streak Grid ---
+    function updateAspectStreakGrid() {
+        const svg = document.getElementById('aspect-streak-grid-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const paddingLeft = 90; // For aspect labels
+        const paddingTop = 45; // For date labels and domain headers
+        const cellGap = 1;
+
+        const numDays = 30; // Display last 30 days
+        const dates = Object.keys(allHistoricalData).sort().filter(d => d <= todayString).slice(-numDays);
+
+        const allAspectsOrdered = [];
+        for(const dk in DOMAINS_AND_ASPECTS) {
+            DOMAINS_AND_ASPECTS[dk].aspects.forEach(a => allAspectsOrdered.push({domain: dk, aspect: a}));
+        }
+
+        const numRows = allAspectsOrdered.length;
+        const numCols = numDays;
+
+        const cellWidth = (width - paddingLeft - (numCols - 1) * cellGap) / numCols;
+        const cellHeight = (height - paddingTop - (numRows - 1) * cellGap) / numRows;
+
+        let currentYOffset = paddingTop;
+        let avgStreakTotal = 0;
+        let streakCount = 0;
+
+        let domainHeaderY = 0; // Tracks Y for domain headers
+
+        Object.keys(DOMAINS_AND_ASPECTS).forEach(domainKey => {
+            const domainAspects = DOMAINS_AND_ASPECTS[domainKey].aspects.length;
+            const domainHeight = domainAspects * (cellHeight + cellGap);
+
+            // Domain Header Background
+            const domainHeaderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            domainHeaderRect.setAttribute('x', 0);
+            domainHeaderRect.setAttribute('y', domainHeaderY);
+            domainHeaderRect.setAttribute('width', paddingLeft - 5);
+            domainHeaderRect.setAttribute('height', domainHeight);
+            domainHeaderRect.classList.add('domain-header-rect');
+            svg.appendChild(domainHeaderRect);
+
+            // Domain Header Text
+            const domainHeaderText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            domainHeaderText.setAttribute('x', 5);
+            domainHeaderText.setAttribute('y', domainHeaderY + domainHeight / 2);
+            domainHeaderText.textContent = domainKey.toUpperCase();
+            domainHeaderText.classList.add('domain-header-text');
+            svg.appendChild(domainHeaderText);
+
+            domainHeaderY += domainHeight + 5; // Extra gap between domain groups
+
+            DOMAINS_AND_ASPECTS[domainKey].aspects.forEach((aspect, rIdx) => {
+                const aspectY = paddingTop + allAspectsOrdered.findIndex(a => a.aspect === aspect) * (cellHeight + cellGap);
+
+                // Aspect Label
+                const aspectLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                aspectLabel.setAttribute('x', paddingLeft - 5);
+                aspectLabel.setAttribute('y', aspectY + cellHeight / 2);
+                aspectLabel.textContent = aspect;
+                aspectLabel.classList.add('aspect-label');
+                svg.appendChild(aspectLabel);
+
+                dates.forEach((dateString, cIdx) => {
+                    const dailyEntries = allHistoricalData[dateString] || [];
+                    const entry = dailyEntries.find(e => e.aspect === aspect);
+                    const cellX = paddingLeft + cIdx * (cellWidth + cellGap);
+
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', cellX);
+                    rect.setAttribute('y', aspectY);
+                    rect.setAttribute('width', cellWidth);
+                    rect.setAttribute('height', cellHeight);
+                    if (entry && entry.completed) {
+                        rect.classList.add('completed');
+                    }
+                    svg.appendChild(rect);
+
+                    // Display current streak for today's cell (or last day)
+                    if (cIdx === numCols - 1 && entry && entry.completed && entry.streak > 0) {
+                        const streakText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        streakText.setAttribute('x', cellX + cellWidth / 2);
+                        streakText.setAttribute('y', aspectY + cellHeight / 2);
+                        streakText.textContent = `S:${entry.streak}`;
+                        streakText.setAttribute('fill', DOMAINS_AND_ASPECTS[domainKey].color); // Domain color for streak
+                        svg.appendChild(streakText);
+                        avgStreakTotal += entry.streak;
+                        streakCount++;
+                    }
+
+                    // Date label on top row
+                    if (rIdx === 0) { // Only for the first aspect of each domain group
+                        const dateLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        dateLabel.setAttribute('x', cellX + cellWidth / 2);
+                        dateLabel.setAttribute('y', paddingTop - 15);
+                        dateLabel.textContent = new Date(dateString).getDate();
+                        dateLabel.classList.add('date-label');
+                        svg.appendChild(dateLabel);
+                    }
+                });
+            });
+        });
+
+        document.getElementById('streak-grid-month').textContent = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+        document.getElementById('streak-grid-avg-streak').textContent = (streakCount > 0 ? (avgStreakTotal / streakCount).toFixed(1) : '0');
+    }
+
+
+    // --- 3) Daily Performance Web ---
+    function updateDailyPerformanceWeb() {
+        const svg = document.getElementById('daily-performance-web-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const maxRadius = (Math.min(width, height) / 2) - 40; // Max size of radar
+        const numAxes = Object.keys(DOMAINS_AND_ASPECTS).length;
+        const angleStep = (2 * Math.PI) / numAxes;
+
+        const todayEntries = allHistoricalData[todayString] || [];
+        const domainScores = calculateDomainScores(allHistoricalData, todayString);
+
+        // Draw background rings
+        for (let i = 0; i < 3; i++) {
+            const r = maxRadius * ((i + 1) / 3);
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', centerX);
+            circle.setAttribute('cy', centerY);
+            circle.setAttribute('r', r);
+            circle.classList.add('web-ring');
+            svg.appendChild(circle);
+        }
+
+        let todayPoints = [];
+        let avgPoints = [];
+
+        Object.keys(DOMAINS_AND_ASPECTS).forEach((domainKey, i) => {
+            const domainColor = DOMAINS_AND_ASPECTS[domainKey].color;
+            const currentAngle = i * angleStep;
+            const x = centerX + maxRadius * Math.sin(currentAngle);
+            const y = centerY - maxRadius * Math.cos(currentAngle);
+
+            // Draw axis line
+            const axis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            axis.setAttribute('x1', centerX);
+            axis.setAttribute('y1', centerY);
+            axis.setAttribute('x2', x);
+            axis.setAttribute('y2', y);
+            axis.classList.add('web-axis');
+            svg.appendChild(axis);
+
+            // Domain Label
+            const labelX = centerX + (maxRadius + 20) * Math.sin(currentAngle);
+            const labelY = centerY - (maxRadius + 20) * Math.cos(currentAngle);
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', labelX);
+            label.setAttribute('y', labelY);
+            label.textContent = domainKey.toUpperCase();
+            label.classList.add('web-domain-label');
+            label.setAttribute('fill', domainColor);
+            svg.appendChild(label);
+
+            // Calculate Today's completion percentage for this domain
+            const domainTodayEntries = todayEntries.filter(e => e.domain === domainKey);
+            const todayCompleted = domainTodayEntries.filter(e => e.completed).length;
+            const todayPossible = domainTodayEntries.length;
+            const todayPercent = todayPossible > 0 ? (todayCompleted / todayPossible) * 100 : 0;
+            const todayRadius = (todayPercent / 100) * maxRadius;
+            todayPoints.push(polarToCartesian(centerX, centerY, todayRadius, i * (360 / numAxes)));
+
+            // Calculate Average (7-day score) for this domain
+            const avgPercent = domainScores[domainKey];
+            const avgRadius = (avgPercent / 100) * maxRadius;
+            avgPoints.push(polarToCartesian(centerX, centerY, avgRadius, i * (360 / numAxes)));
+        });
+
+        // Draw Today's Shape
+        if (todayPoints.length > 0) {
+            let todayPathD = `M ${todayPoints[0].x} ${todayPoints[0].y}`;
+            for (let i = 1; i < todayPoints.length; i++) {
+                todayPathD += ` L ${todayPoints[i].x} ${todayPoints[i].y}`;
+            }
+            todayPathD += ' Z';
+            const todayShape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            todayShape.setAttribute('d', todayPathD);
+            todayShape.classList.add('web-today-shape');
+            todayShape.setAttribute('stroke', DOMAINS_AND_ASPECTS.fitness.color); // Example color for today
+            todayShape.setAttribute('fill', DOMAINS_AND_ASPECTS.fitness.color);
+            svg.appendChild(todayShape);
+        }
+
+        // Draw Average Shape
+        if (avgPoints.length > 0) {
+            let avgPathD = `M ${avgPoints[0].x} ${avgPoints[0].y}`;
+            for (let i = 1; i < avgPoints.length; i++) {
+                avgPathD += ` L ${avgPoints[i].x} ${avgPoints[i].y}`;
+            }
+            avgPathD += ' Z';
+            const avgShape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            avgShape.setAttribute('d', avgPathD);
+            avgShape.classList.add('web-avg-shape');
+            svg.appendChild(avgShape);
+        }
+
+        document.getElementById('performance-web-date').textContent = new Date(todayString).toDateString();
+    }
+
+
+    // --- 4) Weekly Completion Stream ---
+    function updateWeeklyCompletionStream() {
+        const svg = document.getElementById('weekly-completion-stream-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const paddingLeft = 80; // For aspect labels
+        const paddingBottom = 30; // For daily percent
+        const numDays = 7;
+        const dates = Object.keys(allHistoricalData).sort().filter(d => d <= todayString).slice(-numDays);
+
+        const allAspectsOrdered = [];
+        for(const dk in DOMAINS_AND_ASPECTS) {
+            DOMAINS_AND_ASPECTS[dk].aspects.forEach(a => allAspectsOrdered.push({domain: dk, aspect: a}));
+        }
+
+        const numAspects = allAspectsOrdered.length;
+        const dailyColumnWidth = (width - paddingLeft - (numDays - 1)) / numDays; // Daily column width
+        const aspectRowHeight = (height - paddingBottom) / numAspects; // Height per aspect row
+
+        let totalOverallCompleted = 0;
+        let totalOverallPossible = 0;
+
+        allAspectsOrdered.forEach((aspectInfo, rIdx) => {
+            const aspectY = rIdx * aspectRowHeight;
+
+            // Aspect Label
+            const aspectLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            aspectLabel.setAttribute('x', paddingLeft - 5);
+            aspectLabel.setAttribute('y', aspectY + aspectRowHeight / 2);
+            aspectLabel.textContent = aspectInfo.aspect;
+            aspectLabel.classList.add('aspect-label');
+            svg.appendChild(aspectLabel);
+
+            dates.forEach((dateString, cIdx) => {
+                const dailyEntries = allHistoricalData[dateString] || [];
+                const entry = dailyEntries.find(e => e.aspect === aspectInfo.aspect);
+                const blockX = paddingLeft + cIdx * (dailyColumnWidth + 1); // +1 for gap
+
+                const block = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                block.setAttribute('x', blockX);
+                block.setAttribute('y', aspectY);
+                block.setAttribute('width', dailyColumnWidth);
+                block.setAttribute('height', aspectRowHeight - 1); // Small gap between rows
+                block.setAttribute('rx', 2); // Rounded corners
+                block.setAttribute('ry', 2); // Rounded corners
+
+                if (entry && entry.completed) {
+                    block.classList.add('completed-block');
+                    block.setAttribute('fill', DOMAINS_AND_ASPECTS[aspectInfo.domain].color);
+                    totalOverallCompleted++;
+                } else {
+                    block.classList.add('incomplete-block');
+                }
+                svg.appendChild(block);
+                totalOverallPossible++;
+
+                // Day Label (on first aspect row)
+                if (rIdx === 0) {
+                    const dayLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    dayLabel.setAttribute('x', blockX + dailyColumnWidth / 2);
+                    dayLabel.setAttribute('y', height - paddingBottom + 15);
+                    dayLabel.textContent = new Date(dateString).getDate();
+                    dayLabel.classList.add('day-label');
+                    svg.appendChild(dayLabel);
+                }
+            });
+
+            // Horizontal separators between domains
+            if (rIdx < numAspects - 1 && DOMAINS_AND_ASPECTS[allAspectsOrdered[rIdx+1].domain].aspects[0] === allAspectsOrdered[rIdx+1].aspect) { // If next aspect starts a new domain
+                const separator = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                separator.setAttribute('x1', paddingLeft);
+                separator.setAttribute('y1', aspectY + aspectRowHeight + cellGap / 2);
+                separator.setAttribute('x2', width);
+                separator.setAttribute('y2', aspectY + aspectRowHeight + cellGap / 2);
+                separator.classList.add('domain-separator');
+                svg.appendChild(separator);
+            }
+        });
+
+        // Daily Completion Percentage at bottom
+        dates.forEach((dateString, cIdx) => {
+            const dailyEntries = allHistoricalData[dateString] || [];
+            const completedToday = dailyEntries.filter(e => e.completed).length;
+            const possibleToday = dailyEntries.length;
+            const percentToday = possibleToday > 0 ? Math.round((completedToday / possibleToday) * 100) : 0;
+
+            const percentText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            percentText.setAttribute('x', paddingLeft + cIdx * (dailyColumnWidth + 1) + dailyColumnWidth / 2);
+            percentText.setAttribute('y', height - paddingBottom - 5);
+            percentText.textContent = `${percentToday}%`;
+            percentText.classList.add('daily-percent');
+            svg.appendChild(percentText);
+        });
+
+        document.getElementById('weekly-stream-overall-percent').textContent =
+            totalOverallPossible > 0 ? Math.round((totalOverallCompleted / totalOverallPossible) * 100) : 0;
+    }
+
+
+    // --- 5) Domain Completion Waterfall ---
+    function updateDomainCompletionWaterfall() {
+        const svg = document.getElementById('domain-completion-waterfall-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const padding = 20;
+        const barHeight = 20;
+        const barGap = 15;
+        const labelXOffset = 10;
+        const percentXOffset = width - padding - 10;
+
+        const domainScores = calculateDomainScores(allHistoricalData, todayString);
+        const last7Dates = Object.keys(allHistoricalData).sort().filter(d => d <= todayString).slice(-7);
+
+        let totalPossibleAspectsInPeriod = 0;
+        let yPos = padding;
+
+        for (const domainKey in DOMAINS_AND_ASPECTS) {
+            const domainColor = DOMAINS_AND_ASPECTS[domainKey].color;
+            let completedInPeriod = 0;
+            let possibleInPeriod = 0;
+
+            last7Dates.forEach(date => {
+                const dailyEntries = allHistoricalData[date] || [];
+                const domainEntries = dailyEntries.filter(e => e.domain === domainKey);
+                completedInPeriod += domainEntries.filter(e => e.completed).length;
+                possibleInPeriod += domainEntries.length;
+            });
+            totalPossibleAspectsInPeriod += possibleInPeriod;
+
+            const completionPercent = possibleInPeriod > 0 ? (completedInPeriod / possibleInPeriod) * 100 : 0;
+            const barFillWidth = (completionPercent / 100) * (width - 2 * padding - 70); // Max width of bar
+
+            // Background bar
+            const bgBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bgBar.setAttribute('x', padding + 60); // Offset for label
+            bgBar.setAttribute('y', yPos);
+            bgBar.setAttribute('width', width - 2 * padding - 70);
+            bgBar.setAttribute('height', barHeight);
+            bgBar.classList.add('domain-background-bar');
+            svg.appendChild(bgBar);
+
+            // Completed bar
+            const completedBar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            completedBar.setAttribute('x', padding + 60);
+            completedBar.setAttribute('y', yPos);
+            completedBar.setAttribute('width', barFillWidth);
+            completedBar.setAttribute('height', barHeight);
+            completedBar.setAttribute('fill', domainColor);
+            completedBar.classList.add('domain-completed-bar');
+            svg.appendChild(completedBar);
+
+            // Domain Label
+            const domainLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            domainLabel.setAttribute('x', padding + labelXOffset);
+            domainLabel.setAttribute('y', yPos + barHeight / 2);
+            domainLabel.textContent = domainKey.toUpperCase();
+            domainLabel.setAttribute('fill', domainColor);
+            domainLabel.classList.add('domain-label');
+            svg.appendChild(domainLabel);
+
+            // Completion Percentage / Score
+            const score = domainScores[domainKey]; // Use 7-day rolling score here
+            const scoreText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            scoreText.setAttribute('x', percentXOffset);
+            scoreText.setAttribute('y', yPos + barHeight / 2);
+            scoreText.textContent = `${score}%`;
+            scoreText.classList.add('completion-percent');
+            svg.appendChild(scoreText);
+
+            // Crown
+            if (score >= CROWN_THRESHOLD) {
+                const crown = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                crown.setAttribute('x', percentXOffset + 25);
+                crown.setAttribute('y', yPos + barHeight / 2);
+                crown.textContent = '👑';
+                crown.classList.add('crown-waterfall');
+                svg.appendChild(crown);
+            }
+
+            yPos += barHeight + barGap;
+        }
+
+        document.getElementById('waterfall-total-possible').textContent = totalPossibleAspectsInPeriod;
+    }
+
+
+    // --- 6) Progress Meter Array ---
+    function updateProgressMeterArray() {
+        const svg = document.getElementById('progress-meter-array-svg');
+        svg.innerHTML = '';
+        const width = svg.viewBox.baseVal.width;
+        const height = svg.viewBox.baseVal.height;
+        const padding = 20;
+        const meterHeight = 12;
+        const meterGap = 15;
+        const maxStreakTarget = 20; // Visual max streak for meter length
+        const labelXOffset = 10;
+        const statusDotXOffset = width - padding - 15;
+
+        const todayEntries = allHistoricalData[todayString] || [];
+        let yPos = padding;
+        let maxOverallStreak = 0;
+
+        const allAspectsOrdered = [];
+        for(const dk in DOMAINS_AND_ASPECTS) {
+            DOMAINS_AND_ASPECTS[dk].aspects.forEach(a => allAspectsOrdered.push({domain: dk, aspect: a}));
+        }
+
+        allAspectsOrdered.forEach(aspectInfo => {
+            const domainColor = DOMAINS_AND_ASPECTS[aspectInfo.domain].color;
+            const entry = todayEntries.find(e => e.aspect === aspectInfo.aspect);
+            const currentStreak = entry ? entry.streak : 0;
+            const isCompletedToday = entry ? entry.completed : false;
+
+            if (currentStreak > maxOverallStreak) maxOverallStreak = currentStreak;
+
+            const meterFillWidth = (currentStreak / maxStreakTarget) * (width - 2 * padding - 120); // Width of fill based on streak
+            const meterTrackWidth = width - 2 * padding - 120;
+
+            // Meter Track
+            const track = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            track.setAttribute('x', padding + 80); // Offset for label
+            track.setAttribute('y', yPos);
+            track.setAttribute('width', meterTrackWidth);
+            track.setAttribute('height', meterHeight);
+            track.classList.add('meter-track');
+            svg.appendChild(track);
+
+            // Meter Fill
+            const fill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            fill.setAttribute('x', padding + 80);
+            fill.setAttribute('y', yPos);
+            fill.setAttribute('width', meterFillWidth);
+            fill.setAttribute('height', meterHeight);
+            fill.setAttribute('fill', domainColor);
+            fill.classList.add('meter-fill');
+            svg.appendChild(fill);
+
+            // Aspect Label
+            const aspectLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            aspectLabel.setAttribute('x', padding + labelXOffset);
+            aspectLabel.setAttribute('y', yPos + meterHeight / 2);
+            aspectLabel.textContent = aspectInfo.aspect;
+            aspectLabel.setAttribute('fill', domainColor);
+            aspectLabel.classList.add('meter-aspect-label');
+            svg.appendChild(aspectLabel);
+
+            // Streak Label
+            const streakLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            streakLabel.setAttribute('x', padding + 80 + meterTrackWidth + 5);
+            streakLabel.setAttribute('y', yPos + meterHeight / 2);
+            streakLabel.textContent = `S:${currentStreak}`;
+            streakLabel.classList.add('meter-streak-label');
+            svg.appendChild(streakLabel);
+
+            // Today's Status Dot
+            const statusDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            statusDot.setAttribute('cx', statusDotXOffset);
+            statusDot.setAttribute('cy', yPos + meterHeight / 2);
+            statusDot.classList.add('meter-today-status');
+            if (isCompletedToday) {
+                statusDot.classList.add('completed');
+                statusDot.setAttribute('fill', domainColor);
+            }
+            svg.appendChild(statusDot);
+
+            yPos += meterHeight + meterGap;
+        });
+
+        document.getElementById('meter-array-date').textContent = new Date(todayString).toDateString();
+        document.getElementById('meter-array-max-streak').textContent = maxOverallStreak;
+    }
+
+
+    // --- Initialization and Update Loop ---
+    function initializeAllVisualizations() {
+        updateQuarterReservoirHeader();
+        updateDomainScorePanel();
+        updateAspectStreakGrid();
+        updateDailyPerformanceWeb();
+        updateWeeklyCompletionStream();
+        updateDomainCompletionWaterfall();
+        updateProgressMeterArray();
+    }
+
+    // Simulate daily update for the demo
+    setInterval(() => {
+        // Advance "today" by one day
+        today.setDate(today.getDate() + 1);
+        todayString = today.toISOString().split('T')[0];
+
+        // Generate data for the new day and add to historical data
+        allHistoricalData[todayString] = generateDailyMockData(todayString);
+        
+        // Trim historical data to avoid excessive growth, e.g., keep last 100 days
+        const sortedDates = Object.keys(allHistoricalData).sort();
+        if (sortedDates.length > 100) {
+            delete allHistoricalData[sortedDates[0]];
+        }
+
+        // Re-run all visualizations
+        initializeAllVisualizations();
+    }, 10000); // Update every 10 seconds for a "new day" simulation
+
+    // Initial call
+    initializeAllVisualizations();
+
+</script>
+</body>
+</html>
