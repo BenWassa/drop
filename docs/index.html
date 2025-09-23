@@ -175,6 +175,11 @@
           <span class="mic-icon" aria-hidden="true"></span>
           <span>RECORD AUDIO NOTE</span>
         </button>
+        <div class="recording-indicator hidden" id="recordingIndicator" aria-live="polite">
+          <span class="recording-indicator__dot" aria-hidden="true"></span>
+          <span class="recording-indicator__label">Recording</span>
+          <span class="recording-indicator__timer" id="recordingTimer">0:00</span>
+        </div>
         <div class="voice-status hidden" id="voiceStatus" role="status" aria-live="polite"></div>
         <section class="transcription-preview hidden" id="transcriptionPreview" aria-live="polite">
           <header class="transcription-preview__header">

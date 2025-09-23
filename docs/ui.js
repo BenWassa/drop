@@ -494,10 +494,90 @@ const voiceState = {
   isRecording: false,
   finalTranscript: '',
   interimTranscript: '',
+  transcriptionPromise: Promise.resolve(''),
+  resolveTranscriptionPromise: null,
+  recordingStartedAt: 0,
+  recordingTimerId: null,
 };
 
 function supportsSpeechRecognition() {
   return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+}
+
+function getCurrentTranscript() {
+  return `${voiceState.finalTranscript} ${voiceState.interimTranscript}`.trim();
+}
+
+function prepareTranscriptionCapture() {
+  if (voiceState.resolveTranscriptionPromise) {
+    voiceState.resolveTranscriptionPromise(getCurrentTranscript());
+  }
+  voiceState.transcriptionPromise = new Promise(resolve => {
+    voiceState.resolveTranscriptionPromise = resolve;
+  });
+}
+
+function resolveTranscriptionCapture(value = getCurrentTranscript()) {
+  const text = typeof value === 'string' ? value : getCurrentTranscript();
+  if (voiceState.resolveTranscriptionPromise) {
+    voiceState.resolveTranscriptionPromise(text);
+    voiceState.resolveTranscriptionPromise = null;
+  }
+  voiceState.transcriptionPromise = Promise.resolve(text);
+  return text;
+}
+
+async function waitForFinalTranscript() {
+  try {
+    const result = await voiceState.transcriptionPromise;
+    return typeof result === 'string' ? result.trim() : '';
+  } catch (error) {
+    console.warn('Transcription wait failed', error);
+    return getCurrentTranscript();
+  }
+}
+
+function formatRecordingDuration(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function showRecordingIndicator() {
+  const indicator = $('recordingIndicator');
+  const timer = $('recordingTimer');
+  if (!indicator || !timer) {
+    return;
+  }
+
+  voiceState.recordingStartedAt = Date.now();
+  timer.textContent = '0:00';
+  indicator.classList.remove('hidden');
+
+  if (voiceState.recordingTimerId) {
+    clearInterval(voiceState.recordingTimerId);
+  }
+
+  voiceState.recordingTimerId = setInterval(() => {
+    timer.textContent = formatRecordingDuration(Date.now() - voiceState.recordingStartedAt);
+  }, 250);
+}
+
+function hideRecordingIndicator() {
+  const indicator = $('recordingIndicator');
+  const timer = $('recordingTimer');
+  if (voiceState.recordingTimerId) {
+    clearInterval(voiceState.recordingTimerId);
+    voiceState.recordingTimerId = null;
+  }
+  if (timer && voiceState.recordingStartedAt) {
+    timer.textContent = formatRecordingDuration(Date.now() - voiceState.recordingStartedAt);
+  }
+  voiceState.recordingStartedAt = 0;
+  if (indicator) {
+    indicator.classList.add('hidden');
+  }
 }
 
 const setVoiceStatus = (() => {
@@ -552,7 +632,7 @@ function updateTranscriptionPreview() {
     return;
   }
 
-  const transcript = `${voiceState.finalTranscript} ${voiceState.interimTranscript}`.trim();
+  const transcript = getCurrentTranscript();
   if (transcript) {
     content.textContent = transcript;
     preview.classList.remove('hidden');
@@ -659,6 +739,7 @@ function initializeVoiceControls() {
     voiceState.chunks = [];
     stopRecognition();
     stopStream();
+    hideRecordingIndicator();
 
     voiceButton.classList.remove('recording', 'processing');
     voiceButton.disabled = false;
@@ -676,6 +757,7 @@ function initializeVoiceControls() {
 
   const stopRecognition = () => {
     if (!voiceState.recognition) {
+      resolveTranscriptionCapture();
       return;
     }
     try {
@@ -683,11 +765,13 @@ function initializeVoiceControls() {
       voiceState.recognition.stop();
     } catch (error) {
       console.warn('Failed to stop recognition', error);
+      resolveTranscriptionCapture();
     }
   };
 
   const startSpeechRecognition = () => {
     if (!supportsSpeechRecognition()) {
+      resolveTranscriptionCapture('');
       resetTranscriptState();
       clearTranscriptionPreview({ hide: false });
       updateTranscriptionPreview();
@@ -697,6 +781,7 @@ function initializeVoiceControls() {
 
     const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     try {
+      prepareTranscriptionCapture();
       const recognition = new RecognitionCtor();
       voiceState.recognition = recognition;
       voiceState.recognitionShouldRestart = true;
@@ -737,6 +822,7 @@ function initializeVoiceControls() {
           return;
         }
         voiceState.recognitionShouldRestart = false;
+        resolveTranscriptionCapture();
         setVoiceStatus('Speech recognition stopped. You can edit transcription manually.', { tone: 'warning', persist: true });
         try {
           recognition.stop();
@@ -755,9 +841,11 @@ function initializeVoiceControls() {
             console.warn('Failed to restart recognition', error);
             voiceState.recognitionShouldRestart = false;
             voiceState.recognition = null;
+            resolveTranscriptionCapture();
           }
         } else {
           voiceState.recognition = null;
+          resolveTranscriptionCapture();
         }
       };
 
@@ -765,6 +853,7 @@ function initializeVoiceControls() {
       setVoiceStatus('Recording… live transcription active.', { tone: 'muted' });
     } catch (error) {
       console.warn('Speech recognition initialization failed', error);
+      resolveTranscriptionCapture('');
       resetTranscriptState();
       clearTranscriptionPreview({ hide: false });
       updateTranscriptionPreview();
@@ -813,7 +902,10 @@ function initializeVoiceControls() {
           setVoiceStatus('Encoding audio…', { tone: 'muted' });
           const mp3Blob = await encodeToMP3(blob);
           const today = new Date().toISOString().split('T')[0];
-          const transcript = `${voiceState.finalTranscript} ${voiceState.interimTranscript}`.trim();
+          const transcript = await waitForFinalTranscript();
+          voiceState.finalTranscript = transcript;
+          voiceState.interimTranscript = '';
+          updateTranscriptionPreview();
           await window.saveAudioNote(today, mp3Blob, transcript);
           if (transcript) {
             setVoiceStatus('Audio note saved with transcription.', { tone: 'success' });
@@ -838,6 +930,7 @@ function initializeVoiceControls() {
       clearTranscriptionPreview({ hide: true });
       updateTranscriptionPreview();
       startSpeechRecognition();
+      showRecordingIndicator();
     } catch (error) {
       console.error('Microphone access failed', error);
       setVoiceStatus('Microphone access denied or unavailable.', { tone: 'error', persist: true });
@@ -853,6 +946,7 @@ function initializeVoiceControls() {
     voiceButton.classList.remove('recording');
     voiceButton.classList.add('processing');
     voiceButton.disabled = true;
+    hideRecordingIndicator();
     setVoiceStatus('Processing audio note…', { tone: 'muted' });
     stopRecognition();
     try {
