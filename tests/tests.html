@@ -250,76 +250,11 @@
 
         window.dbp = Promise.resolve(mockDB);
 
-        // Include the actual functions we want to test
-        // Copy getClientId function
-        function getClientId() {
-            let id = localStorage.getItem('drop_client_id');
-            if (!id) {
-                const arr = new Uint8Array(16);
-                crypto.getRandomValues(arr);
-                id = Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
-                localStorage.setItem('drop_client_id', id);
-            }
-            return id;
-        }
-
-        // Simplified saveReflection for testing
-        async function saveReflection() {
-            const note = $('reflectionNote')?.value.trim() || '';
-            const sanitizedNote = note.replace(/[<>\"']/g, '').substring(0, 500);
-            const today = new Date().toISOString().split('T')[0];
-            const entry = {
-                id: `${today}-reflection`,
-                clientId: getClientId(),
-                date: today,
-                type: 'reflection',
-                mood: Math.max(1, Math.min(5, appState.mood)),
-                note: sanitizedNote,
-                timestamp: Date.now(),
-                synced: false
-            };
-
-            const db = await dbp;
-            const tx = db.transaction(['entries', 'outbox'], 'readwrite');
-            tx.objectStore('entries').put(entry);
-            tx.objectStore('outbox').add({ type: 'REFLECTION', payload: entry, ts: Date.now() });
-
-            const noteField = $('reflectionNote');
-            if (noteField) {
-                noteField.value = '';
-            }
-
-            return entry; // Return for testing
-        }
-
-        // Simplified exportToCSV for testing
-        async function exportToCSV() {
-            const db = await dbp;
-            const tx = db.transaction('entries', 'readonly');
-            const store = tx.objectStore('entries');
-            const entries = await new Promise((resolve, reject) => {
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result || []);
-                request.onerror = () => reject(request.error);
-            });
-
-            const header = ['id', 'date', 'domain', 'aspect', 'completed', 'streak', 'type', 'mood', 'note', 'timestamp', 'synced'];
-            const rows = entries.map((entry) =>
-                header
-                    .map((key) => {
-                        const value = entry[key];
-                        if (value === undefined || value === null) {
-                            return '';
-                        }
-                        const text = String(value).replace(/"/g, '""');
-                        return `"${text}"`;
-                    })
-                    .join(',')
-            );
-
-            const csvContent = [header.join(','), ...rows].join('\n');
-            return csvContent; // Return for testing instead of downloading
-        }
+        // The real app implementations of getClientId, saveReflection, and exportToCSV
+        // are provided by the included app scripts (data.js). We intentionally
+        // do NOT define them here so tests exercise the up-to-date app code.
+        // Mocks (localStorage, crypto, dbp) are still applied above so the
+        // app functions will operate against deterministic test doubles.
 
         // If the app's initializeUI is available from ui.js, run it to attach handlers
         if (typeof initializeUI === 'function') {
