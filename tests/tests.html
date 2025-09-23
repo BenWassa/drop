@@ -215,11 +215,16 @@
         const $ = (id) => document.getElementById(id);
         const $$ = (selector) => document.querySelectorAll(selector);
 
-        // Mock localStorage
-        const mockLocalStorage = {
-            getItem: () => null,
-            setItem: () => {}
-        };
+        // Mock localStorage (in-memory) so getClientId persists between calls
+        const mockLocalStorage = (function() {
+            let store = {};
+            return {
+                getItem: function(key) { return store.hasOwnProperty(key) ? store[key] : null; },
+                setItem: function(key, value) { store[key] = String(value); },
+                removeItem: function(key) { delete store[key]; },
+                clear: function() { store = {}; }
+            };
+        })();
         Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
 
         // Mock crypto
@@ -314,6 +319,14 @@
 
             const csvContent = [header.join(','), ...rows].join('\n');
             return csvContent; // Return for testing instead of downloading
+        }
+
+        // If the app's initializeUI is available from ui.js, run it to attach handlers
+        if (typeof initializeUI === 'function') {
+            // call on next tick so DOM is fully parsed
+            setTimeout(() => {
+                try { initializeUI(); } catch (e) { /* ignore errors in test environment */ }
+            }, 0);
         }
 
         // Test suite
