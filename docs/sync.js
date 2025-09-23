@@ -27,7 +27,7 @@ async function trySync() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Client-ID': getClientId(),
+        'X-Client-ID': window.getClientId(),
       },
       body: JSON.stringify({ entries: outbox.map(item => item.payload) }),
     });
@@ -92,3 +92,5 @@ async function updateOutboxCount() {
     console.error('Failed to update outbox count:', error);
   }
 }
+
+window.updateOutboxCount = updateOutboxCount;

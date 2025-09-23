@@ -74,9 +74,9 @@ async function saveEntry(domain, aspect, completed) {
   tx.objectStore('outbox').add({ type: 'ENTRY', payload: entry, ts: Date.now() });
 
   await calculateStreaks();
-  renderAspectsManager();
-  updateProgress();
-  await updateOutboxCount();
+  window.renderAspectsManager();
+  window.updateProgress();
+  await window.updateOutboxCount();
 }
 
 function updateStreaks(domain, aspect, completed) {

@@ -453,7 +453,7 @@ function initializeUI() {
 
   const exportBtn = $('exportCSV');
   if (exportBtn) {
-    exportBtn.addEventListener('click', exportToCSV);
+    exportBtn.addEventListener('click', window.exportToCSV);
   }
 
   const syncBtn = $('syncNow');
@@ -481,5 +481,7 @@ function initializeUI() {
   showScreen('todayScreen');
 }
 
-// Expose for testing
+// Expose for testing and cross-script usage
 window.initializeUI = initializeUI;
+window.renderAspectsManager = renderAspectsManager;
+window.updateProgress = updateProgress;
