@@ -33,7 +33,7 @@ function getClientId() {
 }
 
 const dbp = window.dbp || new Promise((resolve, reject) => {
-  const req = indexedDB.open('drop-tracker', 1);
+  const req = indexedDB.open('drop-tracker', 2);
   req.onupgradeneeded = () => {
     const db = req.result;
     if (!db.objectStoreNames.contains('entries')) {
@@ -49,7 +49,11 @@ const dbp = window.dbp || new Promise((resolve, reject) => {
     }
   };
   req.onsuccess = () => resolve(req.result);
-  req.onerror = () => reject(req.error);
+  req.onerror = (e) => {
+    // If the upgrade fails because an older tab has the DB open, provide a helpful message
+    console.error('IndexedDB open error', e);
+    reject(req.error || e);
+  };
 });
 
 async function saveEntry(domain, aspect, completed) {

@@ -944,6 +944,24 @@ body {
   display: none;
 }
 
+.save-reflection {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(8, 12, 22, 0.6);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.save-reflection:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
 @media (max-width: 520px) {
   .app {
     max-width: 100%;
