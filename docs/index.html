@@ -171,10 +171,18 @@
       </div>
 
       <div class="voice-log">
-        <button class="voice-button" type="button" id="voiceButton">
+        <button class="voice-button" type="button" id="voiceButton" aria-pressed="false">
           <span class="mic-icon" aria-hidden="true"></span>
           <span>RECORD AUDIO NOTE</span>
         </button>
+        <div class="voice-status hidden" id="voiceStatus" role="status" aria-live="polite"></div>
+        <section class="transcription-preview hidden" id="transcriptionPreview" aria-live="polite">
+          <header class="transcription-preview__header">
+            <span class="transcription-preview__title">Live transcription</span>
+            <button type="button" class="transcription-preview__copy" id="copyTranscription" disabled>Copy</button>
+          </header>
+          <div class="transcription-preview__content" id="transcriptionContent"></div>
+        </section>
       </div>
 
       <button class="save-reflection" id="saveReflection">LOG REFLECTION</button>
