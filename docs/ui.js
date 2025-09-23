@@ -471,6 +471,8 @@ function initializeUI() {
     voiceButton.addEventListener('click', async () => {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
+        voiceButton.classList.remove('recording');
+        voiceButton.classList.add('processing');
         voiceButton.querySelector('span:last-child').textContent = 'PROCESSING...';
       } else {
         try {
@@ -484,10 +486,12 @@ function initializeUI() {
             const today = new Date().toISOString().split('T')[0];
             await window.saveAudioNote(today, mp3Blob);
             voiceButton.querySelector('span:last-child').textContent = 'RECORD AUDIO NOTE';
+            voiceButton.classList.remove('processing');
             stream.getTracks().forEach(track => track.stop());
             renderAudioNotes();
           };
           mediaRecorder.start();
+          voiceButton.classList.add('recording');
           voiceButton.querySelector('span:last-child').textContent = 'STOP RECORDING';
         } catch (err) {
           console.error('Recording failed', err);

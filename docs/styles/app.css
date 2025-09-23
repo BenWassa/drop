@@ -710,121 +710,130 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: rgba(8, 12, 22, 0.6);
-  border: 1px dashed var(--border-subtle);
-  border-radius: 12px;
-  padding: 16px;
+  background: linear-gradient(135deg, rgba(8, 12, 22, 0.8), rgba(18, 22, 32, 0.8));
+  border: 2px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 18px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  cursor: default;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-button:hover {
+  border-color: var(--accent-primary);
+  background: linear-gradient(135deg, rgba(18, 22, 32, 0.9), rgba(28, 32, 42, 0.9));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.voice-button.recording {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(185, 28, 28, 0.9));
+  border-color: #dc2626;
+  color: #ffffff;
+  animation: pulse 1.5s infinite;
+}
+
+.voice-button.processing {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9));
+  border-color: #f59e0b;
+  color: #ffffff;
+}
+
+.voice-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .mic-icon {
-  width: 10px;
-  height: 18px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 6px;
+  width: 12px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
   position: relative;
+  transition: all 0.3s ease;
 }
 
-.mic-icon::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  width: 8px;
-  height: 6px;
-  border-radius: 4px 4px 0 0;
-  border: 1px solid var(--border-subtle);
-  border-top: none;
-  transform: translateX(-50%);
+.voice-button.recording .mic-icon {
+  background-color: currentColor;
+  animation: blink 0.5s infinite alternate;
 }
 
-.save-reflection {
-  width: 100%;
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px solid var(--border-strong);
-  background: rgba(148, 163, 184, 0.14);
-  color: var(--text-primary);
-  font-family: var(--font-mono);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s ease, border 0.2s ease;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
-.save-reflection:hover {
-  background: rgba(148, 163, 184, 0.2);
+@keyframes blink {
+  0% { opacity: 1; }
+  100% { opacity: 0.3; }
 }
 
-.save-reflection.saved {
-  background: rgba(148, 163, 184, 0.28);
+.audio-notes-list {
+  margin-top: 20px;
 }
 
-.aspect-domain {
-  background: var(--bg-panel);
+.audio-note {
+  background: rgba(8, 12, 22, 0.6);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-elevated);
-}
-
-.aspect-domain-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: var(--font-mono);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
   margin-bottom: 12px;
-}
-
-.aspect-domain-header h3 {
-  margin: 0;
-  font-size: 11px;
-  color: var(--text-primary);
-}
-
-.toggle-domain {
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 6px 12px;
-  background: rgba(8, 12, 22, 0.6);
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: border 0.2s ease, color 0.2s ease;
-}
-
-.toggle-domain:hover {
-  border-color: var(--border-strong);
-  color: var(--text-primary);
-}
-
-.aspect-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.aspect-item {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  color: var(--text-secondary);
+.audio-note audio {
+  width: 100%;
+  border-radius: 8px;
 }
 
-.aspect-streak {
-  color: var(--text-muted);
+.audio-note textarea {
+  background: rgba(18, 22, 32, 0.8);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  resize: vertical;
+  min-height: 60px;
+}
+
+.audio-note button {
+  align-self: flex-start;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.3s ease;
+}
+
+.audio-note button:hover {
+  background: var(--accent-secondary);
+}
+
+.audio-note a {
+  align-self: flex-start;
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-size: 0.9em;
+  padding: 6px 12px;
+  border: 1px solid var(--accent-primary);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.audio-note a:hover {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
 }
 
 .settings-section {
