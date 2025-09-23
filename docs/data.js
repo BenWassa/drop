@@ -210,7 +210,11 @@ async function saveReflection() {
       saveButton.classList.remove('saved');
     }, 2000);
   }
+
+  // Return the saved entry for tests and callers that need the created object
+  return entry;
 }
+
 
 async function exportToCSV() {
   try {
@@ -248,8 +252,11 @@ async function exportToCSV() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+    // Return CSV content for testing/inspection
+    return csvContent;
   } catch (error) {
     console.error('Export failed:', error);
+    return null;
   }
 }
 
