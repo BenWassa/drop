@@ -705,6 +705,30 @@
 
         // Update button states based on results
         QUnit.on('runStart', function() {
+            // Clear any previous run's collected results so UI stays in sync
+            allTestResults = [];
+            failedTests = [];
+            const textarea = document.getElementById('failedTestsTextarea');
+            if (textarea) textarea.value = '';
+            const outputPanel = document.getElementById('failedTestsOutput');
+            if (outputPanel) outputPanel.style.display = 'none';
+            const copyStatus = document.getElementById('copyStatus');
+            if (copyStatus) copyStatus.textContent = '';
+
+            // Reset copy buttons to disabled state for a fresh run
+            const copyFailedBtn = document.getElementById('copyFailedTests');
+            const copyAllBtn = document.getElementById('copyAllTests');
+            if (copyFailedBtn) {
+                copyFailedBtn.disabled = true;
+                copyFailedBtn.className = '';
+                copyFailedBtn.textContent = '📋 Failed Tests';
+            }
+            if (copyAllBtn) {
+                copyAllBtn.disabled = true;
+                copyAllBtn.className = '';
+                copyAllBtn.textContent = '📋 All Results';
+            }
+
             document.getElementById('testStatus').textContent = 'Running tests...';
             document.getElementById('testStatus').style.color = '#fbbf24';
         });
