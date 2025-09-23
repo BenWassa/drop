@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-  <title>Drop - Daily Performance</title>
+  <title>Drop - Daily Tracker</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles/app.css" />
   <script src="config.js" defer></script>
@@ -17,156 +17,213 @@
     <!-- Header -->
     <header class="header">
       <div class="header-top">
-        <div class="day-counter">DAY <span id="dayCount">1</span> / 90</div>
+        <div class="day-counter">Day <span id="dayCount">1</span> of 90</div>
         <div class="sync-status" id="syncStatus">
           <span class="sync-dot"></span>
-          <span id="syncText">ONLINE</span>
+          <span id="syncText">Online</span>
         </div>
       </div>
 
-      <!-- Domain Scores -->
-      <div class="domain-scores" id="domainScores">
-        <div class="domain-score" data-domain="sleep">
-          <div class="score-circle">
-            <span class="score-value" id="scoreSleep">--</span>
-            <span class="crown" id="crownSleep">👑</span>
+      <div class="progress-container">
+        <div class="progress-ring">
+          <svg>
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#4ecdc4;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="progress-ring-bg" cx="60" cy="60" r="50"></circle>
+            <circle class="progress-ring-fill" id="progressRing" cx="60" cy="60" r="50"></circle>
+          </svg>
+          <div class="progress-text">
+            <div class="progress-count"><span id="completedCount">0</span>/<span id="totalCount">0</span></div>
+            <div class="progress-label">Today</div>
           </div>
-          <div class="domain-label">SLEEP</div>
-        </div>
-        <div class="domain-score" data-domain="fitness">
-          <div class="score-circle">
-            <span class="score-value" id="scoreFitness">--</span>
-            <span class="crown" id="crownFitness">👑</span>
-          </div>
-          <div class="domain-label">FITNESS</div>
-        </div>
-        <div class="domain-score" data-domain="mind">
-          <div class="score-circle">
-            <span class="score-value" id="scoreMind">--</span>
-            <span class="crown" id="crownMind">👑</span>
-          </div>
-          <div class="domain-label">MIND</div>
-        </div>
-        <div class="domain-score" data-domain="spirit">
-          <div class="score-circle">
-            <span class="score-value" id="scoreSpirit">--</span>
-            <span class="crown" id="crownSpirit">👑</span>
-          </div>
-          <div class="domain-label">SPIRIT</div>
         </div>
       </div>
+
+      <nav class="nav">
+        <div class="nav-item active" data-screen="today">Today</div>
+        <div class="nav-item" data-screen="review">Review</div>
+        <div class="nav-item" data-screen="reflect">Reflect</div>
+        <div class="nav-item" data-screen="settings">Settings</div>
+      </nav>
     </header>
 
     <!-- Today Screen -->
     <div class="screen active" id="todayScreen">
-      <!-- Quick Entry Aspects -->
+      <!-- Sleep Domain -->
       <div class="domain-card sleep">
         <div class="domain-header">
           <span class="domain-icon">🌙</span>
-          <span class="domain-name">SLEEP</span>
+          <span class="domain-name">Sleep</span>
           <span class="domain-status">0/2</span>
         </div>
         <div class="aspects">
-          <div class="aspect-toggle" data-domain="sleep" data-aspect="wake">Wake</div>
-          <div class="aspect-toggle" data-domain="sleep" data-aspect="rest">Rest</div>
+          <div class="aspect-toggle" data-domain="sleep" data-aspect="wake">
+            <span>Wake</span>
+            <span class="aspect-check">✓</span>
+          </div>
+          <div class="aspect-toggle" data-domain="sleep" data-aspect="rest">
+            <span>Rest</span>
+            <span class="aspect-check">✓</span>
+          </div>
         </div>
       </div>
 
+      <!-- Fitness Domain -->
       <div class="domain-card fitness">
         <div class="domain-header">
           <span class="domain-icon">🏃</span>
-          <span class="domain-name">FITNESS</span>
+          <span class="domain-name">Fitness</span>
           <span class="domain-status">0/3</span>
         </div>
         <div class="aspects">
-          <div class="aspect-toggle" data-domain="fitness" data-aspect="run">Run</div>
-          <div class="aspect-toggle" data-domain="fitness" data-aspect="strength">Strength</div>
-          <div class="aspect-toggle" data-domain="fitness" data-aspect="skill">Skill</div>
+          <div class="aspect-toggle" data-domain="fitness" data-aspect="run">
+            <span>Run</span>
+            <span class="aspect-check">✓</span>
+          </div>
+          <div class="aspect-toggle" data-domain="fitness" data-aspect="strength">
+            <span>Strength</span>
+            <span class="aspect-check">✓</span>
+          </div>
+          <div class="aspect-toggle" data-domain="fitness" data-aspect="skill">
+            <span>Skill</span>
+            <span class="aspect-check">✓</span>
+          </div>
         </div>
       </div>
 
+      <!-- Mind Domain -->
       <div class="domain-card mind">
         <div class="domain-header">
           <span class="domain-icon">📚</span>
-          <span class="domain-name">MIND</span>
+          <span class="domain-name">Mind</span>
           <span class="domain-status">0/2</span>
         </div>
         <div class="aspects">
-          <div class="aspect-toggle" data-domain="mind" data-aspect="read">Read</div>
-          <div class="aspect-toggle" data-domain="mind" data-aspect="write">Write</div>
+          <div class="aspect-toggle" data-domain="mind" data-aspect="read">
+            <span>Read</span>
+            <span class="aspect-check">✓</span>
+          </div>
+          <div class="aspect-toggle" data-domain="mind" data-aspect="write">
+            <span>Write</span>
+            <span class="aspect-check">✓</span>
+          </div>
         </div>
       </div>
 
+      <!-- Spirit Domain -->
       <div class="domain-card spirit">
         <div class="domain-header">
           <span class="domain-icon">🧘</span>
-          <span class="domain-name">SPIRIT</span>
+          <span class="domain-name">Spirit</span>
           <span class="domain-status">0/2</span>
         </div>
         <div class="aspects">
-          <div class="aspect-toggle" data-domain="spirit" data-aspect="stress">Stress</div>
-          <div class="aspect-toggle" data-domain="spirit" data-aspect="meditation">Meditation</div>
+          <div class="aspect-toggle" data-domain="spirit" data-aspect="stress">
+            <span>Stress</span>
+            <span class="aspect-check">✓</span>
+          </div>
+          <div class="aspect-toggle" data-domain="spirit" data-aspect="meditation">
+            <span>Meditation</span>
+            <span class="aspect-check">✓</span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Review Screen -->
     <div class="screen" id="reviewScreen">
-      <h3>WEEKLY PERFORMANCE</h3>
-      <div id="weekGrid"></div>
-      <h3>CURRENT STREAKS</h3>
-      <div id="streaksContainer"></div>
-      <div id="weeklyCompletion"></div>
+      <div class="week-grid">
+        <div class="week-header">
+          <div></div>
+          <div>M</div>
+          <div>T</div>
+          <div>W</div>
+          <div>T</div>
+          <div>F</div>
+          <div>S</div>
+          <div>S</div>
+        </div>
+        <div id="weekGrid"></div>
+      </div>
+
+      <h3 class="streaks-title">Current Streaks</h3>
+      <div class="streaks" id="streaksContainer"></div>
+
+      <div class="weekly-completion" id="weeklyCompletion"></div>
     </div>
 
     <!-- Reflect Screen -->
     <div class="screen" id="reflectScreen">
-      <h3>DAILY LOG</h3>
-      <div class="mood-scale">
-        <label>ENERGY LEVEL</label>
-        <div class="mood-options">
-          <button class="mood-btn" data-mood="1">1</button>
-          <button class="mood-btn" data-mood="2">2</button>
-          <button class="mood-btn" data-mood="3">3</button>
-          <button class="mood-btn" data-mood="4">4</button>
-          <button class="mood-btn" data-mood="5">5</button>
+      <div class="mood-selector">
+        <div class="mood-label">How are you feeling?</div>
+        <div class="mood-emojis">
+          <span class="mood-emoji" data-mood="1">😞</span>
+          <span class="mood-emoji" data-mood="2">😕</span>
+          <span class="mood-emoji" data-mood="3"></span>
+          <span class="mood-emoji selected" data-mood="4">😁</span>
         </div>
+        <input type="range" class="mood-slider" id="moodSlider" min="1" max="4" value="4" />
       </div>
-      <div class="voice-log">
-        <button id="voiceLogBtn">🎤 Voice Log (Coming Soon)</button>
+
+      <div class="note-input">
+        <textarea class="note-textarea" id="reflectionNote" rows="4" placeholder="Optional: What's on your mind?"></textarea>
       </div>
+
+      <button class="save-reflection" id="saveReflection">Save Reflection</button>
     </div>
 
     <!-- Settings Screen -->
     <div class="screen" id="settingsScreen">
       <div class="settings-section">
-        <div class="settings-title">SYNC</div>
+        <div class="settings-title">Data &amp; Sync</div>
         <div class="setting-item">
-          <span>Last sync:</span>
-          <span id="lastSyncTime">--</span>
+          <span>Last sync</span>
+          <span id="lastSyncTime" class="setting-subtle">2 min ago</span>
         </div>
-        <button id="syncNow">Sync Now</button>
+        <div class="setting-item">
+          <span>Sync now</span>
+          <button id="syncNow" class="setting-action">Sync</button>
+        </div>
       </div>
 
       <div class="settings-section">
-        <div class="settings-title">DATA</div>
-        <button id="exportCSV">Export CSV</button>
+        <div class="settings-title">Export</div>
+        <div class="setting-item">
+          <span>Export to CSV</span>
+          <button id="exportCSV" class="setting-action">Export</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Manage Aspects</div>
+        <div id="aspectsManager"></div>
       </div>
     </div>
+
+    <!-- FAB for quick note -->
+    <button class="fab" id="fabNote">📝</button>
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
       <div class="bottom-nav-item active" data-screen="today">
-        <span>📅</span><div>Today</div>
+        <span class="bottom-nav-icon">📅</span>
+        <span class="bottom-nav-label">Today</span>
       </div>
       <div class="bottom-nav-item" data-screen="review">
-        <span>📊</span><div>Review</div>
+        <span class="bottom-nav-icon">📊</span>
+        <span class="bottom-nav-label">Review</span>
       </div>
       <div class="bottom-nav-item" data-screen="reflect">
-        <span>📝</span><div>Log</div>
+        <span class="bottom-nav-icon">✨</span>
+        <span class="bottom-nav-label">Reflect</span>
       </div>
       <div class="bottom-nav-item" data-screen="settings">
-        <span>⚙️</span><div>Settings</div>
+        <span class="bottom-nav-icon">⚙️</span>
+        <span class="bottom-nav-label">Settings</span>
       </div>
     </div>
   </div>
