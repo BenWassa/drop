@@ -43,6 +43,10 @@ const dbp = window.dbp || new Promise((resolve, reject) => {
     if (!db.objectStoreNames.contains('outbox')) {
       db.createObjectStore('outbox', { keyPath: 'id', autoIncrement: true });
     }
+    if (!db.objectStoreNames.contains('audio_notes')) {
+      const store = db.createObjectStore('audio_notes', { keyPath: 'id' });
+      store.createIndex('by_date', 'date');
+    }
   };
   req.onsuccess = () => resolve(req.result);
   req.onerror = () => reject(req.error);
@@ -299,9 +303,57 @@ async function loadTodayData() {
   renderAspectsManager();
   updateProgress();
   updateVisibleAspects();
+  renderAudioNotes();
+}
+
+// Audio notes functions
+async function saveAudioNote(date, blob, transcription = '') {
+  const db = await dbp;
+  const id = `${date}-audio-${Date.now()}`;
+  const entry = { id, date, blob, transcription, timestamp: new Date() };
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('audio_notes', 'readwrite');
+    const store = tx.objectStore('audio_notes');
+    const req = store.add(entry);
+    req.onsuccess = () => resolve(id);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAudioNotes(date) {
+  const db = await dbp;
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('audio_notes', 'readonly');
+    const store = tx.objectStore('audio_notes');
+    const index = store.index('by_date');
+    const req = index.getAll(date);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function updateAudioTranscription(id, transcription) {
+  const db = await dbp;
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('audio_notes', 'readwrite');
+    const store = tx.objectStore('audio_notes');
+    const req = store.get(id);
+    req.onsuccess = () => {
+      const entry = req.result;
+      if (entry) {
+        entry.transcription = transcription;
+        store.put(entry);
+      }
+      resolve();
+    };
+    req.onerror = () => reject(req.error);
+  });
 }
 
 // Expose functions for testing
 window.getClientId = getClientId;
 window.saveReflection = saveReflection;
 window.exportToCSV = exportToCSV;
+window.saveAudioNote = saveAudioNote;
+window.getAudioNotes = getAudioNotes;
+window.updateAudioTranscription = updateAudioTranscription;

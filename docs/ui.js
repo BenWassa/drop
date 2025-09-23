@@ -463,6 +463,40 @@ function initializeUI() {
     });
   }
 
+  // Audio recording
+  const voiceButton = $('voiceButton');
+  let mediaRecorder;
+  let audioChunks = [];
+  if (voiceButton) {
+    voiceButton.addEventListener('click', async () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        voiceButton.querySelector('span:last-child').textContent = 'PROCESSING...';
+      } else {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const mp3Blob = await encodeToMP3(audioBlob);
+            const today = new Date().toISOString().split('T')[0];
+            await window.saveAudioNote(today, mp3Blob);
+            voiceButton.querySelector('span:last-child').textContent = 'RECORD AUDIO NOTE';
+            stream.getTracks().forEach(track => track.stop());
+            renderAudioNotes();
+          };
+          mediaRecorder.start();
+          voiceButton.querySelector('span:last-child').textContent = 'STOP RECORDING';
+        } catch (err) {
+          console.error('Recording failed', err);
+          alert('Microphone access denied or not available.');
+        }
+      }
+    });
+  }
+
   document.addEventListener('click', e => {
     if (e.target.classList.contains('toggle-domain')) {
       const domain = e.target.dataset.domain;
@@ -481,7 +515,60 @@ function initializeUI() {
   showScreen('todayScreen');
 }
 
+// Audio recording functions
+function encodeToMP3(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result;
+      const audioContext = new AudioContext();
+      audioContext.decodeAudioData(arrayBuffer, buffer => {
+        const mp3encoder = new lamejs.Mp3Encoder(1, buffer.sampleRate, 128); // mono, sampleRate, bitrate
+        const samples = buffer.getChannelData(0); // left channel
+        const mp3Data = [];
+        const sampleBlockSize = 1152;
+        for (let i = 0; i < samples.length; i += sampleBlockSize) {
+          const sampleChunk = samples.subarray(i, i + sampleBlockSize);
+          const intSamples = sampleChunk.map(s => s * 32767); // to 16-bit
+          const mp3buf = mp3encoder.encodeBuffer(intSamples);
+          if (mp3buf.length > 0) mp3Data.push(mp3buf);
+        }
+        const mp3buf = mp3encoder.flush();
+        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+        const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+        resolve(blob);
+      });
+    };
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+// Render audio notes for today
+function renderAudioNotes() {
+  const list = $('audioNotesList');
+  if (!list) return;
+  const today = new Date().toISOString().split('T')[0];
+  window.getAudioNotes(today).then(notes => {
+    list.innerHTML = notes.map(note => `
+      <div class="audio-note">
+        <audio controls src="${URL.createObjectURL(note.blob)}"></audio>
+        <textarea placeholder="Transcription">${note.transcription}</textarea>
+        <button onclick="updateTranscription('${note.id}', this.previousElementSibling.value)">Save Transcription</button>
+        <a href="${URL.createObjectURL(note.blob)}" download="audio-${note.id}.mp3">Download MP3</a>
+      </div>
+    `).join('');
+  });
+}
+
+function updateTranscription(id, text) {
+  window.updateAudioTranscription(id, text).then(() => {
+    alert('Transcription saved');
+  });
+}
+
 // Expose for testing and cross-script usage
 window.initializeUI = initializeUI;
 window.renderAspectsManager = renderAspectsManager;
 window.updateProgress = updateProgress;
+window.renderAudioNotes = renderAudioNotes;
+window.updateTranscription = updateTranscription;

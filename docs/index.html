@@ -6,6 +6,7 @@
   <title>Discipline Dashboard</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles/app.css" />
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
   <script src="config.js" defer></script>
   <script src="data.js" defer></script>
   <script src="sync.js" defer></script>
@@ -170,13 +171,15 @@
       </div>
 
       <div class="voice-log">
-        <button class="voice-button" type="button">
+        <button class="voice-button" type="button" id="voiceButton">
           <span class="mic-icon" aria-hidden="true"></span>
-          <span>VOICE LOG PLACEHOLDER</span>
+          <span>RECORD AUDIO NOTE</span>
         </button>
       </div>
 
       <button class="save-reflection" id="saveReflection">LOG REFLECTION</button>
+
+      <div id="audioNotesList" class="audio-notes-list"></div>
     </div>
 
     <!-- Settings Screen -->
