@@ -1,4 +1,24 @@
-// sync.js - Sync layer: Background sync and API communication
+// sync.js - Sync layer:  try {
+    const clientId = window.getClientId();
+    const url = 'https://script.googleapis.com/v1/scripts/' + CONFIG.SCRIPT_ID + ':run';
+    const body = JSON.stringify({
+      function: 'doPost',
+      parameters: [{
+        postData: {
+          contents: JSON.stringify({ clientId, ops })
+        },
+        parameter: {}
+      }],
+      devMode: true
+    });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + window.accessToken,
+      },
+      body: body,
+    });d sync and API communication
 
 async function trySync() {
   if (!navigator.onLine) {
