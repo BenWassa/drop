@@ -1,13 +1,19 @@
-# 🌊 Drop - Daily Practice Journal UX Documentation
+# � Discipline ## Suggested Revamp to UX Vision
+
+🎯 Shift the philosophy
+
+- From "Habit Tracker" → to "Discipline Dashboard." The frame is not just "did I check a box?" but "what are my domain scores?"
+- From Generic Personas → to You. You're the only user — Pixel 8, offline-first, single Google Sheet. All design decisions should optimize for your ritual, not hypothetical users.
+- From Full-Feature App → to Minimal Core Loop. Every interaction should answer one question: "Did I live today according to my Sleep, Fitness, Mind, Spirit practices?"rd UX Documentation
 
 ## 📋 Overview
 
-**Drop** is a mobile-first Progressive Web App (PWA) designed for personal quarterly identity practice. It helps users build and maintain daily habits across four life domains: Sleep, Fitness, Mind, and Spirit. The app emphasizes frictionless input, joyful feedback, and offline-first functionality.
+**Discipline Dashboard** is a mobile-first Progressive Web App (PWA) designed for personal quarterly identity practice. It helps users build and maintain daily habits across four life domains: Sleep, Fitness, Mind, and Spirit. The app emphasizes clear metrics, numeric domain scores, and offline-first functionality.
 
 ### 🎯 Core Philosophy
-- **Personal & Private**: Single-user, device-specific experience
-- **Identity-Centered**: Habits organized by life domains rather than generic tasks
-- **Joyful & Supportive**: Positive reinforcement with celebrations and streaks
+- **Performance-Focused**: Clear numeric scores and progress metrics
+- **Identity-Centered**: Habits organized by life domains for comprehensive discipline tracking
+- **Direct & Factual**: Straightforward feedback without decorative language
 - **Offline-First**: Full functionality without internet connectivity
 - **Mobile-Native**: Optimized for touch interaction and PWA installation
 

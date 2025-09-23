@@ -51,11 +51,10 @@ function showScreen(screenId) {
   }
 
   // Update navigation
-  $$('.nav-item').forEach(item => item.classList.remove('active'));
-  const navItem = document.querySelector(`.nav-item[data-screen="${screenId}"]`);
-  if (navItem) {
-    navItem.classList.add('active');
-  }
+  $$('.nav-item, .bottom-nav-item').forEach(item => item.classList.remove('active'));
+  const screenName = screenId.replace('Screen', '');
+  const navItems = document.querySelectorAll(`[data-screen="${screenName}"]`);
+  navItems.forEach(item => item.classList.add('active'));
 
   // Special handling for review screen
   if (screenId === 'reviewScreen') {
@@ -72,6 +71,8 @@ function showScreen(screenId) {
       emoji.classList.toggle('selected', Number(emoji.dataset.mood) === appState.mood);
     });
   }
+
+  appState.currentScreen = screenName;
 }
 
 async function renderReview() {
@@ -103,7 +104,7 @@ async function renderReview() {
     dates.push(date.toISOString().split('T')[0]);
   }
 
-  const reviewContainer = $('reviewContainer');
+  const reviewContainer = $('weekGrid');
   if (!reviewContainer) return;
 
   reviewContainer.innerHTML = '';
@@ -160,7 +161,50 @@ async function renderReview() {
 
     reviewContainer.appendChild(dayDiv);
   });
-}
+
+  // Render streaks
+  const streaksContainer = $('streaksContainer');
+  if (streaksContainer) {
+    streaksContainer.innerHTML = '';
+    Object.entries(DOMAINS).forEach(([domain, aspects]) => {
+      const domainDiv = document.createElement('div');
+      domainDiv.className = 'streak-domain';
+      domainDiv.innerHTML = `
+        <h4>${domain.charAt(0).toUpperCase() + domain.slice(1)}</h4>
+        <div class="streak-list">
+          ${aspects.map(aspect => {
+            const streak = appState.streaks[`${domain}-${aspect}`] || 0;
+            return `<div class="streak-item">🔥 ${ASPECT_LABELS[aspect]}: ${streak}</div>`;
+          }).join('')}
+        </div>
+      `;
+      streaksContainer.appendChild(domainDiv);
+    });
+  }
+
+  // Render weekly completion
+  const weeklyCompletion = $('weeklyCompletion');
+  if (weeklyCompletion) {
+    const totalPossible = dates.length * TOTAL_ASPECTS;
+    const totalCompleted = dates.reduce((sum, date) => {
+      const dayEntries = entriesByDate[date] || [];
+      return sum + dayEntries.filter(entry => entry.completed).length;
+    }, 0);
+    const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+    
+    weeklyCompletion.innerHTML = `
+      <div class="weekly-stats">
+        <div class="weekly-stat">
+          <div class="weekly-stat-value">${completionRate}%</div>
+          <div class="weekly-stat-label">Weekly Completion</div>
+        </div>
+        <div class="weekly-stat">
+          <div class="weekly-stat-value">${totalCompleted}/${totalPossible}</div>
+          <div class="weekly-stat-label">Total Tasks</div>
+        </div>
+      </div>
+    `;
+  }
 
 function renderAspectsManager() {
   const managerContainer = $('aspectsManager');
@@ -225,10 +269,10 @@ function initializeUI() {
   });
 
   // Set up navigation
-  $$('.nav-item').forEach(item => {
+  $$('.nav-item, .bottom-nav-item').forEach(item => {
     item.addEventListener('click', () => {
       const screen = item.dataset.screen;
-      showScreen(screen);
+      showScreen(screen + 'Screen');
     });
   });
 
@@ -265,9 +309,17 @@ function initializeUI() {
   }
 
   // Set up export button
-  const exportBtn = $('exportData');
+  const exportBtn = $('exportCSV');
   if (exportBtn) {
     exportBtn.addEventListener('click', exportToCSV);
+  }
+
+  // Set up sync button
+  const syncBtn = $('syncNow');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', () => {
+      trySync();
+    });
   }
 
   // Set up aspect manager toggles

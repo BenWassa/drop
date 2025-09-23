@@ -1,7 +1,7 @@
 // drop-lite sw.js — cache static assets + background sync flush
 const CACHE = 'drop-lite-static-v1';
 const STATIC_ASSETS = [
-  '/', '/index.html', '/main.js', '/config.js', '/manifest.json'
+  '/', '/index.html', '/main.js', '/config.js', '/data.js', '/sync.js', '/ui.js', '/manifest.json', '/manifest.webmanifest', '/styles/app.css'
 ];
 
 const CONFIG = {
@@ -11,7 +11,7 @@ const CONFIG = {
 
 // Minimal IndexedDB mirror for outbox flushing
 const dbp = new Promise((resolve, reject) => {
-  const req = indexedDB.open('drop-lite', 1);
+  const req = indexedDB.open('drop-tracker', 1);
   req.onupgradeneeded = () => {
     const db = req.result;
     if (!db.objectStoreNames.contains('entries')) {
