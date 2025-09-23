@@ -399,13 +399,14 @@
                 assert.notOk(todayNav.classList.contains('active'), 'Today nav is not active');
             });
 
-            QUnit.test('Aspect toggle changes state', function(assert) {
+            QUnit.test('Aspect toggle changes state', async function(assert) {
                 window.initializeUI();
                 const toggle = document.querySelector('.aspect-toggle');
 
                 const initialState = toggle.classList.contains('completed');
                 toggle.click();
-
+                // Small delay to allow async handler to complete
+                await new Promise(resolve => setTimeout(resolve, 10));
                 const newState = toggle.classList.contains('completed');
                 assert.notEqual(initialState, newState, 'Toggle state changed');
             });
@@ -456,9 +457,8 @@
                                     Object.defineProperty(req, 'onsuccess', {
                                         set: function(fn) {
                                             this._onsuccess = fn;
-                                            setTimeout(() => {
-                                                if (this._onsuccess) this._onsuccess({ target: this });
-                                            }, 0);
+                                            // Call immediately to resolve the promise
+                                            if (this._onsuccess) this._onsuccess({ target: this });
                                         },
                                         get: function() {
                                             return this._onsuccess;
