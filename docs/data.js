@@ -32,7 +32,7 @@ function getClientId() {
   return id;
 }
 
-const dbp = new Promise((resolve, reject) => {
+const dbp = window.dbp || new Promise((resolve, reject) => {
   const req = indexedDB.open('drop-tracker', 1);
   req.onupgradeneeded = () => {
     const db = req.result;
