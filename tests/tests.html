@@ -348,8 +348,8 @@
 
         QUnit.module('Data Functions', function() {
             QUnit.test('getClientId returns consistent ID', function(assert) {
-                const id1 = getClientId();
-                const id2 = getClientId();
+                const id1 = window.getClientId();
+                const id2 = window.getClientId();
                 assert.ok(id1, 'Client ID is generated');
                 assert.equal(id1, id2, 'Client ID is consistent');
                 assert.equal(typeof id1, 'string', 'Client ID is string');
@@ -361,7 +361,7 @@
                 const noteField = document.getElementById('reflectionNote');
                 noteField.value = 'Test reflection note';
 
-                const entry = await saveReflection();
+                const entry = await window.saveReflection();
 
                 assert.ok(entry, 'Entry was created');
                 assert.equal(entry.type, 'reflection', 'Entry type is reflection');
@@ -374,7 +374,7 @@
 
         QUnit.module('UI Interactions', function() {
             QUnit.test('Navigation switching works', function(assert) {
-                initializeUI();
+                window.initializeUI();
                 const todayNav = document.querySelector('[data-screen="today"]');
                 const reviewNav = document.querySelector('[data-screen="review"]');
 
@@ -387,7 +387,7 @@
             });
 
             QUnit.test('Aspect toggle changes state', function(assert) {
-                initializeUI();
+                window.initializeUI();
                 const toggle = document.querySelector('.aspect-toggle');
 
                 const initialState = toggle.classList.contains('completed');
@@ -398,7 +398,7 @@
             });
 
             QUnit.test('Mood selection works', function(assert) {
-                initializeUI();
+                window.initializeUI();
                 const mood1 = document.querySelector('[data-mood="1"]');
                 const mood3 = document.querySelector('[data-mood="3"]');
 
@@ -449,7 +449,7 @@
                     };
                 };
 
-                const csv = await exportToCSV();
+                const csv = await window.exportToCSV();
                 const lines = csv.split('\n');
                 assert.equal(lines[0], 'id,date,domain,aspect,completed,streak,type,mood,note,timestamp,synced', 'Header is correct');
                 assert.ok(lines[1].includes('2024-01-01-sleep-wake'), 'Entry data is included');
