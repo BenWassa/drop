@@ -289,3 +289,8 @@ async function loadTodayData() {
   updateProgress();
   updateVisibleAspects();
 }
+
+// Expose functions for testing
+window.getClientId = getClientId;
+window.saveReflection = saveReflection;
+window.exportToCSV = exportToCSV;

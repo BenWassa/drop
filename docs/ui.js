@@ -480,3 +480,6 @@ function initializeUI() {
   loadTodayData();
   showScreen('todayScreen');
 }
+
+// Expose for testing
+window.initializeUI = initializeUI;
