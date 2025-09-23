@@ -285,6 +285,18 @@
                                     if (idx >= 0) stores[name][idx] = val; else stores[name].push(val);
                                 },
                                 add: function(val) { stores[name].push(val); },
+                                index: function(indexName) {
+                                    return {
+                                        getAll: function(key) {
+                                            const req = {};
+                                            setTimeout(() => {
+                                                req.result = stores[name].filter(e => e.date === key);
+                                                if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
+                                            }, 0);
+                                            return req;
+                                        }
+                                    };
+                                },
                                 getAll: function() {
                                     const req = {};
                                     // emulate async IDB behavior
