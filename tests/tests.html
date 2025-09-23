@@ -392,7 +392,7 @@
                 const toggle = document.querySelector('.aspect-toggle');
 
                 const initialState = toggle.classList.contains('completed');
-                toggle.dispatchEvent(new Event('click'));
+                toggle.click();
 
                 const newState = toggle.classList.contains('completed');
                 assert.notEqual(initialState, newState, 'Toggle state changed');
@@ -439,12 +439,19 @@
                                     const req = {
                                         onsuccess: null,
                                         onerror: null,
-                                        result: null
+                                        result: mockEntries
                                     };
-                                    setTimeout(() => {
-                                        req.result = mockEntries;
-                                        if (req.onsuccess) req.onsuccess({ target: req });
-                                    }, 0);
+                                    Object.defineProperty(req, 'onsuccess', {
+                                        set: function(fn) {
+                                            this._onsuccess = fn;
+                                            setTimeout(() => {
+                                                if (this._onsuccess) this._onsuccess({ target: this });
+                                            }, 0);
+                                        },
+                                        get: function() {
+                                            return this._onsuccess;
+                                        }
+                                    });
                                     return req;
                                 }
                             };
