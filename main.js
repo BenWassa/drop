@@ -83,7 +83,7 @@ async function saveEntry(domain, aspect, completed) {
   tx.objectStore('entries').put(entry);
   tx.objectStore('outbox').add({ type: 'ENTRY', payload: entry, ts: Date.now() });
 
-  updateStreaks(domain, aspect, completed);
+  await calculateStreaks();
   updateProgress();
 }
 
@@ -97,6 +97,59 @@ function updateStreaks(domain, aspect, completed) {
   } else {
     appState.streaks[key] = 0;
   }
+}
+
+async function calculateStreaks() {
+  const db = await dbp;
+  const tx = db.transaction('entries', 'readonly');
+  const store = tx.objectStore('entries');
+  const allEntries = await new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+
+  // Group entries by aspect
+  const aspectData = {};
+  allEntries.forEach(entry => {
+    if (entry.domain && entry.aspect && entry.completed) {
+      const key = `${entry.domain}-${entry.aspect}`;
+      if (!aspectData[key]) {
+        aspectData[key] = [];
+      }
+      aspectData[key].push(entry.date);
+    }
+  });
+
+  // Calculate current streaks
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  Object.keys(aspectData).forEach(key => {
+    const dates = aspectData[key].sort();
+    let streak = 0;
+    let currentDate = today;
+
+    // Check if completed today or yesterday to continue streak
+    while (dates.includes(currentDate) || (currentDate === yesterday && dates.includes(today))) {
+      streak++;
+      const prevDate = new Date(currentDate);
+      prevDate.setDate(prevDate.getDate() - 1);
+      currentDate = prevDate.toISOString().split('T')[0];
+    }
+
+    appState.streaks[key] = streak;
+  });
+
+  // Initialize streaks for aspects with no data
+  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
+    aspects.forEach(aspect => {
+      const key = `${domain}-${aspect}`;
+      if (!(key in appState.streaks)) {
+        appState.streaks[key] = 0;
+      }
+    });
+  });
 }
 
 function updateProgress() {
@@ -156,7 +209,7 @@ function triggerConfetti() {
   setTimeout(() => confettiContainer.remove(), 1500);
 }
 
-function showScreen(screenName) {
+async function showScreen(screenName) {
   $$('.screen').forEach((screen) => screen.classList.remove('active'));
   $$('.nav-item').forEach((nav) => nav.classList.remove('active'));
   $$('.bottom-nav-item').forEach((nav) => nav.classList.remove('active'));
@@ -170,30 +223,52 @@ function showScreen(screenName) {
   appState.currentScreen = screenName;
 
   if (screenName === 'review') {
-    renderReview();
+    await renderReview();
   }
 }
 
-function renderReview() {
+async function renderReview() {
   const grid = $('weekGrid');
   if (grid) {
+    // Load entries for past 7 days
+    const db = await dbp;
+    const tx = db.transaction('entries', 'readonly');
+    const store = tx.objectStore('entries');
+    const allEntries = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+
+    // Group by date and aspect
+    const dateAspectMap = {};
+    allEntries.forEach(entry => {
+      if (entry.domain && entry.aspect && entry.completed) {
+        const key = `${entry.date}-${entry.domain}-${entry.aspect}`;
+        dateAspectMap[key] = true;
+      }
+    });
+
+    const today = new Date();
     const rows = Object.entries(DOMAINS)
       .flatMap(([domain, aspects]) => aspects.map((aspect) => ({ domain, aspect })));
 
     grid.innerHTML = rows
-      .map(({ aspect }) => `
+      .map(({ domain, aspect }) => `
         <div class="week-row">
           <div class="aspect-label">${ASPECT_LABELS[aspect] || aspect}</div>
-          ${new Array(7)
-            .fill('')
-            .map(
-              () => `
-                <div class="day-check ${Math.random() > 0.3 ? 'done' : ''}">
-                  ${Math.random() > 0.3 ? '✓' : ''}
-                </div>
-              `
-            )
-            .join('')}
+          ${Array.from({ length: 7 }, (_, i) => {
+            const date = new Date(today);
+            date.setDate(today.getDate() - (6 - i));
+            const dateStr = date.toISOString().split('T')[0];
+            const key = `${dateStr}-${domain}-${aspect}`;
+            const isDone = dateAspectMap[key];
+            return `
+              <div class="day-check ${isDone ? 'done' : ''}">
+                ${isDone ? '✓' : ''}
+              </div>
+            `;
+          }).join('')}
         </div>
       `)
       .join('');
@@ -201,14 +276,26 @@ function renderReview() {
 
   const streaksContainer = $('streaksContainer');
   if (streaksContainer) {
-    const streakData = [
-      { icon: '🔥', aspect: 'Run', count: 12 },
-      { icon: '📚', aspect: 'Read', count: 8 },
-      { icon: '🧘', aspect: 'Meditation', count: 5 },
-      { icon: '💪', aspect: 'Strength', count: 3 }
-    ];
+    const streakItems = Object.entries(appState.streaks)
+      .filter(([key, count]) => count > 0)
+      .map(([key, count]) => {
+        const [domain, aspect] = key.split('-');
+        const icon = {
+          sleep: '🌙',
+          fitness: '🏃',
+          mind: '📚',
+          spirit: '🧘'
+        }[domain] || '🔥';
+        return {
+          icon,
+          aspect: ASPECT_LABELS[aspect] || aspect,
+          count
+        };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4); // Top 4 streaks
 
-    streaksContainer.innerHTML = streakData
+    streaksContainer.innerHTML = streakItems
       .map(
         (streak) => `
           <div class="streak-item">
@@ -406,10 +493,11 @@ async function loadTodayData() {
     emoji.classList.toggle('selected', Number(emoji.dataset.mood) === appState.mood);
   });
 
+  await calculateStreaks();
   updateProgress();
 }
 
-function initializeUI() {
+async function initializeUI() {
   if ($('totalCount')) {
     $('totalCount').textContent = TOTAL_ASPECTS;
   }
@@ -478,12 +566,33 @@ function initializeUI() {
     exportToCSV();
   });
 
-  const startDate = new Date('2024-01-01');
+  const startDateStr = localStorage.getItem('user_start_date');
+  let startDate;
+  if (startDateStr) {
+    startDate = new Date(startDateStr);
+  } else {
+    // Set start date to today or earliest entry
+    const db = await dbp;
+    const tx = db.transaction('entries', 'readonly');
+    const store = tx.objectStore('entries');
+    const allEntries = await new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+    if (allEntries.length > 0) {
+      const dates = allEntries.map(e => e.date).sort();
+      startDate = new Date(dates[0]);
+    } else {
+      startDate = new Date();
+    }
+    localStorage.setItem('user_start_date', startDate.toISOString().split('T')[0]);
+  }
   const today = new Date();
   const dayCount = Math.floor((today - startDate) / (1000 * 60 * 60 * 24)) + 1;
   const dayCounter = $('dayCount');
   if (dayCounter) {
-    dayCounter.textContent = String(Math.min(dayCount, 90));
+    dayCounter.textContent = String(dayCount);
   }
 
   window.addEventListener('online', () => {
@@ -498,19 +607,21 @@ function initializeUI() {
   });
 }
 
-initializeUI();
-updateProgress();
-loadTodayData();
-updateSyncStatus();
+(async () => {
+  await initializeUI();
+  updateProgress();
+  await loadTodayData();
+  updateSyncStatus();
 
-if (Number.isFinite(CONFIG.SYNC_INTERVAL_MS) && CONFIG.SYNC_INTERVAL_MS > 0) {
-  setInterval(() => {
-    trySync();
-  }, CONFIG.SYNC_INTERVAL_MS);
-}
+  if (Number.isFinite(CONFIG.SYNC_INTERVAL_MS) && CONFIG.SYNC_INTERVAL_MS > 0) {
+    setInterval(() => {
+      trySync();
+    }, CONFIG.SYNC_INTERVAL_MS);
+  }
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('sw.js')
-    .catch((error) => console.warn('SW register failed', error));
-}
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('sw.js')
+      .catch((error) => console.warn('SW register failed', error));
+  }
+})();
