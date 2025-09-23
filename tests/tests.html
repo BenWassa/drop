@@ -28,11 +28,101 @@
         }
         .pass { color: #4ade80; }
         .fail { color: #ef4444; }
+        .test-controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .test-controls h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+            font-size: 18px;
+        }
+        .test-controls p {
+            margin: 0 0 15px 0;
+            color: #ccc;
+            font-size: 14px;
+        }
+        .test-controls button {
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .test-controls button:hover {
+            background: #3a3a3a;
+        }
+        .test-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .failed-tests-output {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+        .failed-tests-output textarea {
+            width: 100%;
+            min-height: 200px;
+            background: #0a0a0a;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .failed-tests-output .copy-status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #4ade80;
+        }
     </style>
 </head>
 <body>
     <div id="qunit"></div>
-    <div id="qunit-fixture"></div>
+
+    <div class="test-controls">
+        <h3>Test Results Tools</h3>
+        <p>Run tests first, then use these buttons to copy results for sharing/debugging:</p>
+        <button id="copyFailedTests" disabled>📋 Copy Failed Tests</button>
+        <button id="copyAllTests" disabled>📋 Copy All Test Results</button>
+        <button id="clearResults">🗑️ Clear Results</button>
+    </div>
+
+    <div class="failed-tests-output" id="failedTestsOutput">
+        <h3>Test Results Output</h3>
+        <textarea id="failedTestsTextarea" readonly placeholder="Test results will appear here after clicking copy buttons above..."></textarea>
+        <div class="copy-status" id="copyStatus"></div>
+    </div>
+
+    <div id="qunit-fixture">
+        <div class="app">
+            <nav class="nav">
+                <div class="nav-item active" data-screen="today">TODAY</div>
+                <div class="nav-item" data-screen="review">REVIEW</div>
+            </nav>
+            <div class="domain-card" data-domain="sleep">
+                <div class="aspect-toggle" data-domain="sleep" data-aspect="wake">Wake</div>
+            </div>
+            <div class="mood-options">
+                <button class="mood-option" data-mood="1">1</button>
+                <button class="mood-option" data-mood="3">3</button>
+            </div>
+            <button id="saveReflection">LOG REFLECTION</button>
+            <button id="exportCSV">Export</button>
+            <button id="syncNow">Sync</button>
+            <textarea id="reflectionNote"></textarea>
+        </div>
+    </div>
 
     <!-- Load app scripts -->
     <script src="config.js"></script>
@@ -306,6 +396,165 @@
                 // Restore mock
                 mockDB.transaction = originalTransaction;
             });
+        });
+
+        // Test results collection
+        let allTestResults = [];
+        let failedTests = [];
+
+        // QUnit hooks to collect results
+        QUnit.on('testEnd', function(details) {
+            const result = {
+                module: details.module,
+                name: details.name,
+                passed: details.passed,
+                failed: details.failed,
+                total: details.total,
+                runtime: details.runtime,
+                assertions: details.assertions
+            };
+            allTestResults.push(result);
+
+            if (details.failed > 0) {
+                failedTests.push(result);
+            }
+        });
+
+        // Function to format test results for copying
+        function formatTestResults(results, title) {
+            let output = `${title}\n${'='.repeat(50)}\n\n`;
+
+            results.forEach((test, index) => {
+                output += `${index + 1}. ${test.module} > ${test.name}\n`;
+                output += `   Status: ${test.passed === test.total ? 'PASSED' : 'FAILED'}\n`;
+                output += `   Assertions: ${test.passed}/${test.total} passed\n`;
+
+                if (test.assertions && test.assertions.length > 0) {
+                    test.assertions.forEach((assertion, assertIndex) => {
+                        if (!assertion.passed) {
+                            output += `   ✗ Assertion ${assertIndex + 1}: ${assertion.message}\n`;
+                            if (assertion.actual !== undefined && assertion.expected !== undefined) {
+                                output += `     Expected: ${JSON.stringify(assertion.expected)}\n`;
+                                output += `     Actual: ${JSON.stringify(assertion.actual)}\n`;
+                            }
+                        }
+                    });
+                }
+                output += '\n';
+            });
+
+            output += `Summary: ${results.length} test${results.length !== 1 ? 's' : ''}\n`;
+            return output;
+        }
+
+        // Copy to clipboard function - improved reliability
+        async function copyToClipboard(text) {
+            // Method 1: Modern Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (err) {
+                    console.warn('Clipboard API failed:', err);
+                }
+            }
+
+            // Method 2: Fallback using textarea and execCommand
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                if (successful) {
+                    return true;
+                }
+            } catch (err) {
+                console.warn('execCommand fallback failed:', err);
+            }
+
+            // Method 3: Last resort - prompt user to copy manually
+            return false;
+        }
+
+        // Event listeners for buttons
+        document.getElementById('copyFailedTests').addEventListener('click', async function() {
+            if (failedTests.length === 0) {
+                alert('No failed tests to copy.');
+                return;
+            }
+
+            const output = formatTestResults(failedTests, 'FAILED TESTS');
+            const success = await copyToClipboard(output);
+
+            const status = document.getElementById('copyStatus');
+            const textarea = document.getElementById('failedTestsTextarea');
+
+            textarea.value = output;
+            document.getElementById('failedTestsOutput').style.display = 'block';
+
+            if (success) {
+                status.textContent = '✓ Failed tests copied to clipboard!';
+                status.style.color = '#4ade80';
+            } else {
+                status.textContent = '⚠ Copy failed - text shown above. Please copy manually.';
+                status.style.color = '#fbbf24';
+                // Auto-select the text for manual copying
+                textarea.focus();
+                textarea.select();
+            }
+        });
+
+        document.getElementById('copyAllTests').addEventListener('click', async function() {
+            if (allTestResults.length === 0) {
+                alert('No test results to copy yet. Run tests first.');
+                return;
+            }
+
+            const output = formatTestResults(allTestResults, 'ALL TEST RESULTS');
+            const success = await copyToClipboard(output);
+
+            const status = document.getElementById('copyStatus');
+            const textarea = document.getElementById('failedTestsTextarea');
+
+            textarea.value = output;
+            document.getElementById('failedTestsOutput').style.display = 'block';
+
+            if (success) {
+                status.textContent = '✓ All test results copied to clipboard!';
+                status.style.color = '#4ade80';
+            } else {
+                status.textContent = '⚠ Copy failed - text shown above. Please copy manually.';
+                status.style.color = '#fbbf24';
+                // Auto-select the text for manual copying
+                textarea.focus();
+                textarea.select();
+            }
+        });
+
+        document.getElementById('clearResults').addEventListener('click', function() {
+            allTestResults = [];
+            failedTests = [];
+            document.getElementById('failedTestsTextarea').value = '';
+            document.getElementById('failedTestsOutput').style.display = 'none';
+            document.getElementById('copyStatus').textContent = '';
+
+            // Re-enable buttons
+            document.getElementById('copyFailedTests').disabled = false;
+            document.getElementById('copyAllTests').disabled = false;
+        });
+
+        // Update button states based on results
+        QUnit.on('runEnd', function() {
+            document.getElementById('copyFailedTests').disabled = failedTests.length === 0;
+            document.getElementById('copyAllTests').disabled = allTestResults.length === 0;
         });
 
         // Start QUnit

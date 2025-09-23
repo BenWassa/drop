@@ -361,6 +361,7 @@ async function renderReview() {
     const activeStreaks = Object.values(appState.streaks || {}).filter(count => count > 0).length;
     weeklyCompletion.textContent = `${totalCompleted} / ${totalPossible} · ${completionRate}% · ${activeStreaks} ACTIVE STREAKS`;
   }
+}
 
 function renderAspectsManager() {
   const managerContainer = $('aspectsManager');
