@@ -67,21 +67,22 @@
       margin-bottom: 15px;
       font-weight: 500; /* Medium weight */
       color: #e6e6e6; /* Text */
-      font-size: 16px; /* Body */
+      font-size: 14px; /* Consistent body size */
   }
   .concept-header-metrics span {
       font-size: 16px;
   }
   .concept-footer-info {
       margin-top: 20px;
-      font-size: 13px; /* Micro */
+      font-size: 12px; /* Consistent micro size */
       display: flex;
       justify-content: space-around;
       flex-wrap: wrap;
-      gap: 5px;
-      padding-top: 10px;
+      gap: 10px;
+      padding-top: 15px;
       border-top: 1px dashed #8a8a8a; /* Muted */
       color: #8a8a8a; /* Muted */
+      font-weight: 500;
   }
 
   /* --- Design System: Color Tokens --- */
@@ -138,7 +139,7 @@
       height: 250px;
       display: block;
       margin: 0 auto;
-      background-color: #070707; /* Background */
+      background-color: #1a1a1a; /* Slightly lighter background for better contrast */
       border: 1px solid #0f0f12; /* Surface */
       border-radius: 4px;
   }
@@ -228,23 +229,25 @@
 
   /* --- 2) Aspect Streak Grid --- */
   #aspect-streak-grid-svg rect {
-      fill: #212121; /* Darker grey for incomplete */
+      fill: #333333; /* Consistent with other dark elements */
       stroke: #0f0f12; /* Surface border */
       stroke-width: 1px;
       transition: fill 0.2s ease;
+      rx: 2; ry: 2; /* Consistent rounded corners */
   }
   #aspect-streak-grid-svg rect.completed {
-      fill: #8a8a8a; /* Muted for general completion */
+      fill: currentColor; /* Use domain color */
   }
   #aspect-streak-grid-svg text {
-      font-size: 11px; /* Smaller micro */
+      font-size: 12px; /* Micro size */
       fill: #e6e6e6; /* Text */
       pointer-events: none;
       text-anchor: middle;
       dominant-baseline: central;
+      font-weight: 500; /* Medium weight */
   }
   #aspect-streak-grid-svg .aspect-label {
-      font-size: 12px; /* Micro */
+      font-size: 13px; /* Micro */
       fill: #e6e6e6; /* Text */
       text-anchor: end;
       dominant-baseline: central;
@@ -254,13 +257,15 @@
       font-size: 12px; /* Micro */
       fill: #8a8a8a; /* Muted */
       text-anchor: middle;
+      font-weight: 500;
   }
   #aspect-streak-grid-svg .domain-header-rect {
     fill: #0f0f12; /* Surface */
     stroke: none;
+    rx: 4; ry: 4; /* Consistent rounding */
   }
   #aspect-streak-grid-svg .domain-header-text {
-    font-size: 13px;
+    font-size: 14px; /* Slightly larger for headers */
     font-weight: bold;
     fill: #e6e6e6;
     text-anchor: start;
@@ -275,16 +280,17 @@
       opacity: 0.6;
   }
   #daily-performance-web-svg .web-ring {
-      stroke: #212121; /* Dark grey */
+      stroke: #333333; /* Consistent dark grey */
       stroke-width: 1px;
       fill: none;
       opacity: 0.5;
   }
   #daily-performance-web-svg .web-domain-label {
-      font-size: 12px; /* Micro */
+      font-size: 13px; /* Micro */
       fill: #e6e6e6; /* Text */
       text-anchor: middle;
       dominant-baseline: central;
+      font-weight: 500;
   }
   #daily-performance-web-svg .web-today-shape {
       fill: currentColor; /* Uses domain color */
@@ -305,15 +311,18 @@
   #weekly-completion-stream-svg rect.completed-block {
       fill: currentColor; /* Uses domain color */
       transition: fill 0.2s ease, transform 0.2s ease;
+      rx: 2; ry: 2; /* Consistent rounding */
   }
   #weekly-completion-stream-svg rect.incomplete-block {
-      fill: #212121; /* Dark grey for incomplete */
+      fill: #333333; /* Consistent dark grey */
       transition: fill 0.2s ease;
+      rx: 2; ry: 2; /* Consistent rounding */
   }
   #weekly-completion-stream-svg .day-label {
       font-size: 12px; /* Micro */
       fill: #8a8a8a; /* Muted */
       text-anchor: middle;
+      font-weight: 500;
   }
   #weekly-completion-stream-svg .daily-percent {
       font-size: 13px; /* Micro */
@@ -322,36 +331,38 @@
       font-weight: 500;
   }
   #weekly-completion-stream-svg .domain-separator {
-      stroke: #212121;
+      stroke: #333333;
       stroke-width: 1px;
   }
   #weekly-completion-stream-svg .aspect-label {
-      font-size: 11px;
+      font-size: 13px;
       fill: #e6e6e6;
       dominant-baseline: central;
       text-anchor: end;
+      font-weight: 500;
   }
 
 
   /* --- 5) Domain Completion Waterfall --- */
   #domain-completion-waterfall-svg .domain-background-bar {
-      fill: #212121; /* Dark grey */
-      height: 15px;
+      fill: #333333; /* Consistent dark grey */
+      height: 20px; /* Match JS barHeight */
       rx: 2; ry: 2;
   }
   #domain-completion-waterfall-svg .domain-completed-bar {
       fill: currentColor; /* Domain color */
-      height: 15px;
+      height: 20px; /* Match JS barHeight */
       rx: 2; ry: 2;
       transition: width 0.3s ease-out;
   }
   #domain-completion-waterfall-svg .domain-label {
-      font-size: 13px; /* Micro */
+      font-size: 14px; /* Slightly larger for readability */
       fill: #e6e6e6; /* Text */
       dominant-baseline: central;
+      font-weight: 500;
   }
   #domain-completion-waterfall-svg .completion-percent {
-      font-size: 13px; /* Micro */
+      font-size: 14px; /* Match label size */
       fill: #e6e6e6; /* Text */
       dominant-baseline: central;
       text-anchor: end;
@@ -366,7 +377,7 @@
 
   /* --- 6) Progress Meter Array --- */
   #progress-meter-array-svg .meter-track {
-      fill: #212121; /* Dark grey */
+      fill: #333333; /* Consistent dark grey */
       rx: 2; ry: 2;
   }
   #progress-meter-array-svg .meter-fill {
@@ -378,12 +389,14 @@
       font-size: 13px; /* Micro */
       fill: #e6e6e6; /* Text */
       dominant-baseline: central;
+      font-weight: 500;
   }
   #progress-meter-array-svg .meter-streak-label {
       font-size: 12px; /* Micro */
       fill: #8a8a8a; /* Muted */
       dominant-baseline: central;
       text-anchor: end;
+      font-weight: 500;
   }
   #progress-meter-array-svg .meter-today-status {
       fill: #8a8a8a; /* Muted for incomplete */
@@ -428,8 +441,11 @@
   </div>
   <svg class="svg-canvas" id="aspect-streak-grid-svg" viewBox="0 0 500 250"></svg>
   <div class="concept-footer-info">
-      <span>Completed: <span style="background-color: #8a8a8a; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span></span>
-      <span>Incomplete: <span style="background-color: #212121; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span></span>
+      <span class="domain-sleep">Sleep</span>
+      <span class="domain-fitness">Fitness</span>
+      <span class="domain-mind">Mind</span>
+      <span class="domain-spirit">Spirit</span>
+      <span>Crowns ≥ 80</span>
   </div>
 </div>
 
@@ -447,6 +463,7 @@
       <span class="domain-fitness">Fitness</span>
       <span class="domain-mind">Mind</span>
       <span class="domain-spirit">Spirit</span>
+      <span>7-Day Rolling Avg</span>
   </div>
 </div>
 
@@ -460,8 +477,9 @@
   </div>
   <svg class="svg-canvas" id="weekly-completion-stream-svg" viewBox="0 0 500 250"></svg>
   <div class="concept-footer-info">
-      <span>Completed: <span style="background-color: #1e90ff; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span> (example)</span>
-      <span>Incomplete: <span style="background-color: #212121; display: inline-block; width: 10px; height: 10px; border-radius: 2px;"></span></span>
+      <span>Completed: <span style="color: #1e90ff;">●</span></span>
+      <span>Incomplete: <span style="color: #333333;">●</span></span>
+      <span>Daily % Complete</span>
   </div>
 </div>
 
@@ -489,8 +507,9 @@
   </div>
   <svg class="svg-canvas" id="progress-meter-array-svg" viewBox="0 0 500 250"></svg>
   <div class="concept-footer-info">
-      <span>Completed Today: <span style="background-color: #1e90ff; display: inline-block; width: 10px; height: 10px; border-radius: 50%;"></span> (example)</span>
-      <span>Incomplete Today: <span style="background-color: #8a8a8a; display: inline-block; width: 10px; height: 10px; border-radius: 50%;"></span></span>
+      <span>Completed Today: <span style="color: #1e90ff;">●</span></span>
+      <span>Incomplete Today: <span style="color: #8a8a8a;">●</span></span>
+      <span>Streak Meters</span>
   </div>
 </div>
 
@@ -751,6 +770,7 @@
                     rect.setAttribute('height', cellHeight);
                     if (entry && entry.completed) {
                         rect.classList.add('completed');
+                        rect.style.fill = DOMAINS_AND_ASPECTS[domainKey].color; // Use domain color
                     }
                     svg.appendChild(rect);
 
@@ -863,8 +883,8 @@
             const todayShape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             todayShape.setAttribute('d', todayPathD);
             todayShape.classList.add('web-today-shape');
-            todayShape.setAttribute('stroke', DOMAINS_AND_ASPECTS.fitness.color); // Example color for today
-            todayShape.setAttribute('fill', DOMAINS_AND_ASPECTS.fitness.color);
+            todayShape.style.stroke = DOMAINS_AND_ASPECTS.fitness.color; // Use consistent domain color
+            todayShape.style.fill = DOMAINS_AND_ASPECTS.fitness.color;
             svg.appendChild(todayShape);
         }
 
@@ -893,6 +913,7 @@
         const height = svg.viewBox.baseVal.height;
         const paddingLeft = 80; // For aspect labels
         const paddingBottom = 30; // For daily percent
+        const cellGap = 1; // Gap between elements
         const numDays = 7;
         const dates = Object.keys(allHistoricalData).sort().filter(d => d <= todayString).slice(-numDays);
 
@@ -902,7 +923,7 @@
         }
 
         const numAspects = allAspectsOrdered.length;
-        const dailyColumnWidth = (width - paddingLeft - (numDays - 1)) / numDays; // Daily column width
+        const dailyColumnWidth = (width - paddingLeft - (numDays - 1) * cellGap) / numDays; // Daily column width
         const aspectRowHeight = (height - paddingBottom) / numAspects; // Height per aspect row
 
         let totalOverallCompleted = 0;
@@ -922,19 +943,19 @@
             dates.forEach((dateString, cIdx) => {
                 const dailyEntries = allHistoricalData[dateString] || [];
                 const entry = dailyEntries.find(e => e.aspect === aspectInfo.aspect);
-                const blockX = paddingLeft + cIdx * (dailyColumnWidth + 1); // +1 for gap
+                const blockX = paddingLeft + cIdx * (dailyColumnWidth + cellGap); // +1 for gap
 
                 const block = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 block.setAttribute('x', blockX);
                 block.setAttribute('y', aspectY);
                 block.setAttribute('width', dailyColumnWidth);
-                block.setAttribute('height', aspectRowHeight - 1); // Small gap between rows
+                block.setAttribute('height', aspectRowHeight - cellGap); // Small gap between rows
                 block.setAttribute('rx', 2); // Rounded corners
                 block.setAttribute('ry', 2); // Rounded corners
 
                 if (entry && entry.completed) {
                     block.classList.add('completed-block');
-                    block.setAttribute('fill', DOMAINS_AND_ASPECTS[aspectInfo.domain].color);
+                    block.style.fill = DOMAINS_AND_ASPECTS[aspectInfo.domain].color; // Use domain color
                     totalOverallCompleted++;
                 } else {
                     block.classList.add('incomplete-block');
@@ -973,7 +994,7 @@
             const percentToday = possibleToday > 0 ? Math.round((completedToday / possibleToday) * 100) : 0;
 
             const percentText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            percentText.setAttribute('x', paddingLeft + cIdx * (dailyColumnWidth + 1) + dailyColumnWidth / 2);
+            percentText.setAttribute('x', paddingLeft + cIdx * (dailyColumnWidth + cellGap) + dailyColumnWidth / 2);
             percentText.setAttribute('y', height - paddingBottom - 5);
             percentText.textContent = `${percentToday}%`;
             percentText.classList.add('daily-percent');
@@ -1034,7 +1055,7 @@
             completedBar.setAttribute('y', yPos);
             completedBar.setAttribute('width', barFillWidth);
             completedBar.setAttribute('height', barHeight);
-            completedBar.setAttribute('fill', domainColor);
+            completedBar.style.fill = domainColor; // Use domain color
             completedBar.classList.add('domain-completed-bar');
             svg.appendChild(completedBar);
 
@@ -1121,7 +1142,7 @@
             fill.setAttribute('y', yPos);
             fill.setAttribute('width', meterFillWidth);
             fill.setAttribute('height', meterHeight);
-            fill.setAttribute('fill', domainColor);
+            fill.style.fill = domainColor; // Use domain color
             fill.classList.add('meter-fill');
             svg.appendChild(fill);
 
@@ -1134,15 +1155,14 @@
             aspectLabel.classList.add('meter-aspect-label');
             svg.appendChild(aspectLabel);
 
-            // Streak Label
-            const streakLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            streakLabel.setAttribute('x', padding + 80 + meterTrackWidth + 5);
-            streakLabel.setAttribute('y', yPos + meterHeight / 2);
-            streakLabel.textContent = `S:${currentStreak}`;
-            streakLabel.classList.add('meter-streak-label');
-            svg.appendChild(streakLabel);
-
-            // Today's Status Dot
+        // Streak Label
+        const streakLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        streakLabel.setAttribute('x', padding + 80 + meterTrackWidth + 5);
+        streakLabel.setAttribute('y', yPos + meterHeight / 2);
+        streakLabel.textContent = `S:${currentStreak}`;
+        streakLabel.classList.add('meter-streak-label');
+        streakLabel.setAttribute('fill', '#e6e6e6'); // Ensure text is visible
+        svg.appendChild(streakLabel);            // Today's Status Dot
             const statusDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             statusDot.setAttribute('cx', statusDotXOffset);
             statusDot.setAttribute('cy', yPos + meterHeight / 2);
