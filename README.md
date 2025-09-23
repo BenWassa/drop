@@ -36,11 +36,29 @@ A mobile-first Progressive Web App (PWA) that measures daily execution across fo
 
 ## 🧪 Testing
 
-The app includes a browser-run test suite using QUnit to verify functionality without external dependencies.
+Run tests manually:
+1. Serve the app locally (e.g., `python -m http.server 8080`).
+2. Open `http://localhost:8080/tests/tests.html` in a browser.
+3. Check the QUnit results for passing tests.
 
-- **Run Tests**: Start a local HTTP server in the project root (e.g., `python -m http.server 8000`) and open `http://localhost:8000/tests/tests.html` in a browser.
-- **Test Coverage**: Smoke tests for UI elements, data functions (getClientId, saveReflection, exportToCSV), UI interactions (navigation, toggles, mood selection), and CSV export.
-- **Mocking**: Tests use in-memory mocks for localStorage, IndexedDB, and crypto to run deterministically without affecting browser state.
+Tests cover smoke tests, data functions, UI interactions, and CSV export.
+
+### CI/CD
+- No automated CI due to no Node.js usage.
+- Manually verify tests pass before considering a version stable.
+- Pull requests should include test results.
+
+## 🔢 Versioning
+
+- **Stable Version:** Latest tagged release on `main` branch (e.g., `v1.0.0`).
+- **Development Version:** Latest commit on `dev` branch.
+- **Version File:** Update `VERSION` file manually (e.g., `1.0.1`) before tagging releases.
+
+To create a stable release:
+1. Merge `dev` to `main` (after manual testing).
+2. Update `VERSION` file.
+3. Commit and push.
+4. Create a Git tag: `git tag v1.0.1 && git push origin v1.0.1`.
 
 ## 🗂️ Files
 
