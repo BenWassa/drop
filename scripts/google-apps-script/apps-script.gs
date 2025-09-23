@@ -10,7 +10,7 @@ function sheet() {
   if (!sh) sh = ss.insertSheet(SHEET_NAME);
   // Ensure headers
   if (sh.getLastRow() === 0) {
-    sh.appendRow(['Timestamp', 'LocalId', 'ClientId', 'Title', 'Note']);
+    sh.appendRow(['Timestamp', 'LocalId', 'ClientId', 'Date', 'Domain', 'Aspect', 'Completed', 'Streak', 'Type', 'Mood', 'Note']);
   }
   return sh;
 }
@@ -34,8 +34,20 @@ function doGet(e) {
     const sh = sheet();
     const last = Math.min(200, Math.max(0, Number(params.limit || 100)));
     const lr = sh.getLastRow();
-    const data = lr > 1 ? sh.getRange(Math.max(2, lr - last + 1), 1, Math.min(last, lr - 1), 5).getValues() : [];
-    const rows = data.map(r => ({ timestamp: r[0], localId: r[1], clientId: r[2], title: r[3], note: r[4] }));
+    const data = lr > 1 ? sh.getRange(Math.max(2, lr - last + 1), 1, Math.min(last, lr - 1), 11).getValues() : [];
+    const rows = data.map(r => ({
+      timestamp: r[0],
+      localId: r[1],
+      clientId: r[2],
+      date: r[3],
+      domain: r[4],
+      aspect: r[5],
+      completed: r[6],
+      streak: r[7],
+      type: r[8],
+      mood: r[9],
+      note: r[10]
+    }));
     return ContentService.createTextOutput(JSON.stringify({ rows }))
       .setMimeType(ContentService.MimeType.JSON);
   }
@@ -60,15 +72,27 @@ function doPost(e) {
     const body = e.postData && e.postData.contents ? JSON.parse(e.postData.contents) : {};
 
     if (action === 'append') {
-      const ops = body.ops || [];
-      if (!Array.isArray(ops) || !ops.length) throw new Error('no ops');
+      const entries = body.entries || [];
+      if (!Array.isArray(entries) || !entries.length) throw new Error('no entries');
       const sh = sheet();
       const now = new Date();
-      const rows = ops.map(op => [new Date(op.payload.createdAt || now), op.payload.id, op.payload.clientId, op.payload.title || '', op.payload.note || '']);
+      const rows = entries.map(entry => [
+        new Date(entry.timestamp || now),
+        entry.id,
+        entry.clientId,
+        entry.date,
+        entry.domain || '',
+        entry.aspect || '',
+        entry.completed || false,
+        entry.streak || 0,
+        entry.type || 'practice',
+        entry.mood || '',
+        entry.note || ''
+      ]);
       if (rows.length) sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
       // Return the inserted row numbers so client can mark "synced"
       const startRow = sh.getLastRow() - rows.length + 1;
-      const results = ops.map((op, i) => ({ localId: op.payload.id, row: startRow + i }));
+      const results = entries.map((entry, i) => ({ localId: entry.id, row: startRow + i }));
       return ContentService.createTextOutput(
         JSON.stringify({ ok: true, results })
       ).setMimeType(ContentService.MimeType.JSON);
