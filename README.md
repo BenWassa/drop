@@ -10,7 +10,8 @@ A mobile-first Progressive Web App (PWA) that measures daily execution across fo
 - Crowns: domains with scores ≥ 80 earn a crown for the current period
 - Streaks: per-aspect streak counters for momentum tracking
 - Weekly Review: pattern grid with domain scores and streaks
-- Reflections: optional end-of-day mood + one-line note
+- Reflections: optional end-of-day mood + one-line note + audio notes
+- Audio Notes: Record voice thoughts, compressed MP3 storage, transcription editing, organized per day with today prominence
 - Offline-First: local-first operation with optional sync
 
 ## 📱 Quick Start
