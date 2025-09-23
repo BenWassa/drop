@@ -187,6 +187,31 @@
          These run before the app scripts so the app initializes against
          deterministic test doubles and seeded sample data. -->
     <script>
+        // Initialize minimal app state for testing (before app scripts so main.js uses this)
+        window.appState = {
+            currentScreen: 'today',
+            todayData: {},
+            streaks: {},
+            mood: 4,
+            online: true,
+            syncing: false,
+            disabledAspects: [],
+            lastSyncTime: 'Never',
+            syncError: null,
+            syncRetryCount: 0,
+            transitioning: false,
+            outboxCount: 0,
+            visibleAspects: {}
+        };
+
+        // Initialize DOMAINS
+        const DOMAINS = {
+            sleep: ['wake', 'rest'],
+            fitness: ['run', 'strength', 'skill'],
+            mind: ['read', 'write'],
+            spirit: ['stress', 'meditation']
+        };
+
         // Minimal helpers
         const $ = (id) => document.getElementById(id);
         const $$ = (selector) => document.querySelectorAll(selector);
@@ -279,23 +304,6 @@
     <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
 
     <script>
-        // Initialize minimal app state for testing
-        window.appState = {
-            todayData: {},
-            visibleAspects: {},
-            streaks: {},
-            mood: 3,
-            currentScreen: 'todayScreen'
-        };
-
-        // Initialize DOMAINS
-        const DOMAINS = {
-            sleep: ['wake', 'rest'],
-            fitness: ['run', 'strength', 'skill'],
-            mind: ['read', 'write'],
-            spirit: ['stress', 'meditation']
-        };
-
         // ...mocks moved above so app scripts initialize against them
 
         // The real app implementations of getClientId, saveReflection, and exportToCSV
@@ -304,13 +312,7 @@
         // Mocks (localStorage, crypto, dbp) are still applied above so the
         // app functions will operate against deterministic test doubles.
 
-        // If the app's initializeUI is available from ui.js, run it to attach handlers
-        if (typeof initializeUI === 'function') {
-            // call on next tick so DOM is fully parsed
-            setTimeout(() => {
-                try { initializeUI(); } catch (e) { /* ignore errors in test environment */ }
-            }, 0);
-        }
+        // main.js calls initializeUI() at load time, so handlers are attached.
 
         // Test suite
         QUnit.module('Smoke Tests', function() {
