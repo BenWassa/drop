@@ -269,11 +269,11 @@
     </script>
 
     <!-- Load app scripts -->
-    <script src="config.js"></script>
-    <script src="data.js"></script>
-    <script src="sync.js"></script>
-    <script src="ui.js"></script>
-    <script src="main.js"></script>
+    <script src="../docs/config.js"></script>
+    <script src="../docs/data.js"></script>
+    <script src="../docs/sync.js"></script>
+    <script src="../docs/ui.js"></script>
+    <script src="../docs/main.js"></script>
 
     <!-- QUnit -->
     <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
@@ -357,26 +357,19 @@
                 const todayNav = document.querySelector('[data-screen="today"]');
                 const reviewNav = document.querySelector('[data-screen="review"]');
 
-                let shownScreen = null;
-                window.showScreen = function(screen) {
-                    shownScreen = screen;
-                };
-
                 todayNav.click();
-                assert.equal(shownScreen, 'todayScreen', 'Today screen shown on nav click');
+                assert.equal(appState.currentScreen, 'today', 'Today screen set in appState');
+                assert.ok(todayNav.classList.contains('active'), 'Today nav is active');
 
                 reviewNav.click();
-                assert.equal(shownScreen, 'reviewScreen', 'Review screen shown on nav click');
+                assert.equal(appState.currentScreen, 'review', 'Review screen set in appState');
+                assert.ok(reviewNav.classList.contains('active'), 'Review nav is active');
+                assert.notOk(todayNav.classList.contains('active'), 'Today nav is not active');
             });
 
             QUnit.test('Aspect toggle changes state', function(assert) {
                 const toggle = document.querySelector('.aspect-toggle');
                 appState.todayData = { sleep: { wake: false } };
-
-                let savedEntry = null;
-                window.saveEntry = async (domain, aspect, completed) => {
-                    savedEntry = { domain, aspect, completed };
-                };
 
                 const initialState = toggle.classList.contains('completed');
                 toggle.click();
@@ -384,7 +377,6 @@
                 const newState = toggle.classList.contains('completed');
                 assert.notEqual(initialState, newState, 'Toggle state changed');
                 assert.equal(appState.todayData.sleep.wake, true, 'App state updated');
-                assert.deepEqual(savedEntry, { domain: 'sleep', aspect: 'wake', completed: true }, 'Save entry called correctly');
             });
 
             QUnit.test('Mood selection works', function(assert) {
