@@ -27,6 +27,7 @@ async function trySync() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Api-Key': CONFIG.API_KEY,
         'X-Client-ID': window.getClientId(),
       },
       body: JSON.stringify({ entries: outbox.map(item => item.payload) }),
