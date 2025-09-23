@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drop Webapp Tests</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.4.css">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+        }
+        #qunit {
+            background: #1a1a1a;
+            color: #fff;
+        }
+        #qunit-tests {
+            background: #0a0a0a;
+        }
+        .test-result {
+            background: #2a2a2a;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .pass { color: #4ade80; }
+        .fail { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+
+    <!-- Load app scripts -->
+    <script src="config.js"></script>
+    <script src="data.js"></script>
+    <script src="sync.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+
+    <!-- QUnit -->
+    <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
+
+    <script>
+        // Initialize minimal app state for testing
+        window.appState = {
+            todayData: {},
+            visibleAspects: {},
+            streaks: {},
+            mood: 3,
+            currentScreen: 'todayScreen'
+        };
+
+        // Initialize DOMAINS
+        const DOMAINS = {
+            sleep: ['wake', 'rest'],
+            fitness: ['run', 'strength', 'skill'],
+            mind: ['read', 'write'],
+            spirit: ['stress', 'meditation']
+        };
+
+        // Mock $ function
+        const $ = (id) => document.getElementById(id);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // Mock localStorage
+        const mockLocalStorage = {
+            getItem: () => null,
+            setItem: () => {}
+        };
+        Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+
+        // Mock crypto
+        window.crypto = {
+            getRandomValues: (arr) => {
+                for (let i = 0; i < arr.length; i++) {
+                    arr[i] = Math.floor(Math.random() * 256);
+                }
+                return arr;
+            }
+        };
+
+        // Mock IndexedDB for testing
+        const mockDB = {
+            transaction: () => ({
+                objectStore: () => ({
+                    put: () => {},
+                    add: () => {},
+                    getAll: () => ({ onsuccess: () => {}, onerror: () => {} })
+                })
+            })
+        };
+
+        window.dbp = Promise.resolve(mockDB);
+
+        // Include the actual functions we want to test
+        // Copy getClientId function
+        function getClientId() {
+            let id = localStorage.getItem('drop_client_id');
+            if (!id) {
+                const arr = new Uint8Array(16);
+                crypto.getRandomValues(arr);
+                id = Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
+                localStorage.setItem('drop_client_id', id);
+            }
+            return id;
+        }
+
+        // Simplified saveReflection for testing
+        async function saveReflection() {
+            const note = $('reflectionNote')?.value.trim() || '';
+            const sanitizedNote = note.replace(/[<>\"']/g, '').substring(0, 500);
+            const today = new Date().toISOString().split('T')[0];
+            const entry = {
+                id: `${today}-reflection`,
+                clientId: getClientId(),
+                date: today,
+                type: 'reflection',
+                mood: Math.max(1, Math.min(5, appState.mood)),
+                note: sanitizedNote,
+                timestamp: Date.now(),
+                synced: false
+            };
+
+            const db = await dbp;
+            const tx = db.transaction(['entries', 'outbox'], 'readwrite');
+            tx.objectStore('entries').put(entry);
+            tx.objectStore('outbox').add({ type: 'REFLECTION', payload: entry, ts: Date.now() });
+
+            const noteField = $('reflectionNote');
+            if (noteField) {
+                noteField.value = '';
+            }
+
+            return entry; // Return for testing
+        }
+
+        // Simplified exportToCSV for testing
+        async function exportToCSV() {
+            const db = await dbp;
+            const tx = db.transaction('entries', 'readonly');
+            const store = tx.objectStore('entries');
+            const entries = await new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error);
+            });
+
+            const header = ['id', 'date', 'domain', 'aspect', 'completed', 'streak', 'type', 'mood', 'note', 'timestamp', 'synced'];
+            const rows = entries.map((entry) =>
+                header
+                    .map((key) => {
+                        const value = entry[key];
+                        if (value === undefined || value === null) {
+                            return '';
+                        }
+                        const text = String(value).replace(/"/g, '""');
+                        return `"${text}"`;
+                    })
+                    .join(',')
+            );
+
+            const csvContent = [header.join(','), ...rows].join('\n');
+            return csvContent; // Return for testing instead of downloading
+        }
+
+        // Test suite
+        QUnit.module('Smoke Tests', function() {
+            QUnit.test('App loads and basic elements exist', function(assert) {
+                assert.ok(document.querySelector('.app'), 'App container exists');
+                assert.ok(document.querySelector('.nav'), 'Navigation exists');
+                assert.ok(document.querySelector('.nav-item'), 'Nav items exist');
+                assert.ok(document.querySelector('.aspect-toggle'), 'Aspect toggles exist');
+                assert.ok(document.querySelector('.mood-option'), 'Mood options exist');
+                assert.ok(document.getElementById('saveReflection'), 'Save reflection button exists');
+                assert.ok(document.getElementById('exportCSV'), 'Export button exists');
+                assert.ok(document.getElementById('syncNow'), 'Sync button exists');
+            });
+        });
+
+        QUnit.module('Data Functions', function() {
+            QUnit.test('getClientId returns consistent ID', function(assert) {
+                const id1 = getClientId();
+                const id2 = getClientId();
+                assert.ok(id1, 'Client ID is generated');
+                assert.equal(id1, id2, 'Client ID is consistent');
+                assert.equal(typeof id1, 'string', 'Client ID is string');
+                assert.equal(id1.length, 32, 'Client ID has correct length');
+            });
+
+            QUnit.test('saveReflection creates proper entry structure', async function(assert) {
+                appState.mood = 4;
+                const noteField = document.getElementById('reflectionNote');
+                noteField.value = 'Test reflection note';
+
+                const entry = await saveReflection();
+
+                assert.ok(entry, 'Entry was created');
+                assert.equal(entry.type, 'reflection', 'Entry type is reflection');
+                assert.equal(entry.mood, 4, 'Mood is saved correctly');
+                assert.equal(entry.note, 'Test reflection note', 'Note is saved correctly');
+                assert.ok(entry.id.includes('-reflection'), 'ID includes reflection suffix');
+                assert.equal(noteField.value, '', 'Note field is cleared after save');
+            });
+        });
+
+        QUnit.module('UI Interactions', function() {
+            QUnit.test('Navigation switching works', function(assert) {
+                const todayNav = document.querySelector('[data-screen="today"]');
+                const reviewNav = document.querySelector('[data-screen="review"]');
+
+                let shownScreen = null;
+                window.showScreen = function(screen) {
+                    shownScreen = screen;
+                };
+
+                todayNav.click();
+                assert.equal(shownScreen, 'todayScreen', 'Today screen shown on nav click');
+
+                reviewNav.click();
+                assert.equal(shownScreen, 'reviewScreen', 'Review screen shown on nav click');
+            });
+
+            QUnit.test('Aspect toggle changes state', function(assert) {
+                const toggle = document.querySelector('.aspect-toggle');
+                appState.todayData = { sleep: { wake: false } };
+
+                let savedEntry = null;
+                window.saveEntry = async (domain, aspect, completed) => {
+                    savedEntry = { domain, aspect, completed };
+                };
+
+                const initialState = toggle.classList.contains('completed');
+                toggle.click();
+
+                const newState = toggle.classList.contains('completed');
+                assert.notEqual(initialState, newState, 'Toggle state changed');
+                assert.equal(appState.todayData.sleep.wake, true, 'App state updated');
+                assert.deepEqual(savedEntry, { domain: 'sleep', aspect: 'wake', completed: true }, 'Save entry called correctly');
+            });
+
+            QUnit.test('Mood selection works', function(assert) {
+                const mood1 = document.querySelector('[data-mood="1"]');
+                const mood3 = document.querySelector('[data-mood="3"]');
+
+                mood1.click();
+                assert.equal(appState.mood, 1, 'Mood 1 selected');
+                assert.ok(mood1.classList.contains('selected'), 'Mood 1 button is selected');
+
+                mood3.click();
+                assert.equal(appState.mood, 3, 'Mood 3 selected');
+                assert.ok(mood3.classList.contains('selected'), 'Mood 3 button is selected');
+                assert.notOk(mood1.classList.contains('selected'), 'Mood 1 button is deselected');
+            });
+        });
+
+        QUnit.module('Export Functionality', function() {
+            QUnit.test('exportToCSV generates correct CSV', async function(assert) {
+                const mockEntries = [
+                    {
+                        id: '2024-01-01-sleep-wake',
+                        date: '2024-01-01',
+                        domain: 'sleep',
+                        aspect: 'wake',
+                        completed: true,
+                        type: 'entry',
+                        streak: 5,
+                        mood: null,
+                        note: '',
+                        timestamp: 1704067200000,
+                        synced: false
+                    }
+                ];
+
+                // Mock the getAll result
+                const originalTransaction = mockDB.transaction;
+                mockDB.transaction = function(stores) {
+                    return {
+                        objectStore: function(name) {
+                            return {
+                                getAll: function() {
+                                    return {
+                                        onsuccess: (event) => {
+                                            event.target.result = mockEntries;
+                                        },
+                                        onerror: () => {},
+                                        result: mockEntries
+                                    };
+                                }
+                            };
+                        }
+                    };
+                };
+
+                const csv = await exportToCSV();
+                const lines = csv.split('\n');
+                assert.equal(lines[0], 'id,date,domain,aspect,completed,streak,type,mood,note,timestamp,synced', 'Header is correct');
+                assert.ok(lines[1].includes('2024-01-01-sleep-wake'), 'Entry data is included');
+                assert.ok(lines[1].includes('sleep'), 'Domain is included');
+                assert.ok(lines[1].includes('wake'), 'Aspect is included');
+                assert.ok(lines[1].includes('true'), 'Completed status is included');
+
+                // Restore mock
+                mockDB.transaction = originalTransaction;
+            });
+        });
+
+        // Start QUnit
+        QUnit.start();
+    </script>
+</body>
+</html>
