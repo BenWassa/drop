@@ -216,7 +216,7 @@ async function saveReflection() {
 }
 
 
-async function exportToCSV() {
+async function exportToCSV(download = true) {
   try {
     const db = await dbp;
     const tx = db.transaction('entries', 'readonly');
@@ -242,16 +242,20 @@ async function exportToCSV() {
     );
 
     const csvContent = [header.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    const today = new Date().toISOString().split('T')[0];
-    link.href = url;
-    link.download = `drop-entries-${today}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+
+    if (download) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const today = new Date().toISOString().split('T')[0];
+      link.href = url;
+      link.download = `drop-entries-${today}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
     // Return CSV content for testing/inspection
     return csvContent;
   } catch (error) {

@@ -450,7 +450,7 @@
                     };
                 };
 
-                const csv = await window.exportToCSV();
+                const csv = await window.exportToCSV(false);
                 const lines = csv.split('\n');
                 assert.equal(lines[0], 'id,date,domain,aspect,completed,streak,type,mood,note,timestamp,synced', 'Header is correct');
                 assert.ok(lines[1].includes('2024-01-01-sleep-wake'), 'Entry data is included');
