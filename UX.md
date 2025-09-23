@@ -1,4 +1,4 @@
-# 🌊 Drop - Habit Tracker UX Documentation
+# 🌊 Drop - Daily Practice Journal UX Documentation
 
 ## 📋 Overview
 
@@ -13,25 +13,95 @@
 
 ---
 
-## 👥 User Personas
+## Suggested Revamp to UX Vision
 
-### Primary User: Alex (25-35)
-- **Background**: Young professional focused on personal growth
-- **Goals**: Build sustainable habits, track progress, maintain work-life balance
-- **Tech Savvy**: Comfortable with mobile apps, prefers native-feeling experiences
-- **Usage Pattern**: Daily check-ins, weekly reviews, quarterly reflections
+🎯 Shift the philosophy
 
-### Secondary User: Jordan (35-50)
-- **Background**: Mid-career professional with established routines
-- **Goals**: Maintain consistency, identify patterns, optimize habits
-- **Tech Comfort**: Prefers simple, reliable tools over complex features
-- **Usage Pattern**: Consistent daily logging, occasional deep dives into data
+- From “Habit Tracker” → to “Daily Practice Journal.” The frame is not just “did I check a box?” but “did I live my identity today?”
+- From Generic Personas → to You. You’re the only user — Pixel 8, offline-first, single Google Sheet. All design decisions should optimize for your ritual, not hypothetical users.
+- From Full-Feature App → to Minimal Core Loop. Every interaction should answer one question: “Did I live today according to my Sleep, Fitness, Mind, Spirit practices?”
 
-### Edge Case User: Taylor (18-24)
-- **Background**: Student or early-career with variable schedules
-- **Goals**: Establish foundational habits, build momentum
-- **Tech Preferences**: Modern, gamified experiences with social elements (though Drop is intentionally solo-focused)
-- **Usage Pattern**: Sporadic engagement, needs gentle reminders and encouragement
+🌱 Domains & Aspects (fixed for V1)
+
+Keep these 8 daily practices fixed — no customization in V1. This keeps the ritual tight and the app minimal.
+
+- Sleep → Wake, Rest
+- Fitness → Run, Strength, Skill
+- Mind → Read, Write
+- Spirit → Stress, Meditation
+
+🏠 Daily Flow (Today Screen)
+
+Open app → “Day X of 90” + progress ring.
+
+4 Domain cards, each with its aspects as toggles.
+
+Tapping a toggle = ✓ + animation + haptic.
+
+End of day: quick mood slider + optional note.
+
+Engagement hook: All 8 complete = confetti + “Tiny wins compound” message.
+
+📈 Review Flow (Weekly)
+
+Grid: 7 days × 8 aspects → see patterns.
+
+Streak indicators under each aspect 🔥.
+
+✨ Reflection Flow
+
+Mood slider (😞 😐 🙂 😁).
+
+One-line note field.
+
+“Save reflection” → subtle animation, app returns to Today.
+
+🎨 Design Feel
+
+Dark mode default. Matte black with colorful domain accents.
+
+Playful + identity-driven. Icons + emojis: 🌙 🏃 📚 🧘.
+
+Micro-interactions: bounce, scale, confetti for wins.
+
+Copy tone: supportive, non-judgmental, energizing.
+
+"Nice rep logged 💪"
+
+"Day 12 streak, you’re on fire 🔥"
+
+🛠 Technical Constraints
+
+Static PWA (HTML/CSS/JS).
+
+IndexedDB + Service Worker outbox → sync to Google Sheet.
+
+No Node, no build tools.
+
+Pixel 8 target (Chrome, PWA installable).
+
+✅ Priorities
+
+Engaging Today screen → frictionless toggles + joyful feedback.
+
+Streak visibility → daily motivation.
+
+Reflection ritual → lightweight but meaningful.
+
+Sync clarity → show when entries are “local” vs “synced.”
+
+
+## 👤 Single-User Focus
+
+This project is optimized for a single user: you.
+
+- Device: Pixel 8 (Chrome, PWA installable)
+- Offline-first: Local-first UX with sync to a single Google Sheet for backup
+- Design goal: Optimize every interaction for your daily ritual. Remove personalization complexity in V1 and surface only the minimal core loop that answers: “Did I live my practice today?”
+
+Notes:
+- Because this is single-user, prioritize immediate, celebratory feedback and a frictionless path back to the Today screen after reflections.
+- Assume one-person, one-device workflows — simplify sync and conflict handling accordingly.
 
 ---
 
@@ -342,5 +412,5 @@ All aspects done → Confetti burst → Ring completes → Success feedback
 
 ---
 
-*This UX documentation serves as the comprehensive guide for understanding, maintaining, and evolving the Drop habit tracker experience. Regular updates should reflect user feedback, technical capabilities, and design system refinements.*</content>
+*This UX documentation serves as the comprehensive guide for understanding, maintaining, and evolving the Drop daily practice journal experience. Regular updates should reflect user feedback, technical capabilities, and design system refinements.*</content>
 <parameter name="filePath">c:\Users\benjamin.haddon\Documents\drop\UX.md
