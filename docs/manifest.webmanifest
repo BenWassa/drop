@@ -1,6 +1,6 @@
 {
-  "name": "drop-lite",
-  "short_name": "drop",
+  "name": "Discipline Dashboard",
+  "short_name": "DisciplineDash",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0b0b",

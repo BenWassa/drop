@@ -372,7 +372,7 @@
     const DOMAINS_AND_ASPECTS = {
         sleep: { color: '#1e90ff', aspects: ['wake', 'rest'] },
         fitness: { color: '#ff3b30', aspects: ['run', 'strength', 'skill'] },
-        mind: { color: '#7c3aed', aspects: ['read', 'write'] },
+        mind: { color: '#ffd700', aspects: ['read', 'write'] },
         spirit: { color: '#16a34a', aspects: ['stress', 'meditation'] }
     };
 
@@ -727,7 +727,91 @@
             avgPoints.push(polarToCartesian(centerX, centerY, avgRadius, i * (360 / numAxes)));
         });
 
-        // Draw Today's Shape
+        // Add metallic radial gradients + small specular highlight filter
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+        // Create a tiny blur filter used for softening highlights
+        const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+        filter.setAttribute('id', 'metal-blur');
+        filter.setAttribute('x', '-20%');
+        filter.setAttribute('y', '-20%');
+        filter.setAttribute('width', '140%');
+        filter.setAttribute('height', '140%');
+        const blur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+        blur.setAttribute('in', 'SourceGraphic');
+    blur.setAttribute('stdDeviation', '0.4');
+        blur.setAttribute('result', 'b');
+        filter.appendChild(blur);
+        defs.appendChild(filter);
+
+        // Metallic radial gradients per domain
+        Object.keys(DOMAINS_AND_ASPECTS).forEach(domainKey => {
+            const domainColor = DOMAINS_AND_ASPECTS[domainKey].color;
+            const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+            grad.setAttribute('id', `metal-${domainKey}`);
+            grad.setAttribute('cx', '30%');
+            grad.setAttribute('cy', '30%');
+            grad.setAttribute('r', '75%');
+
+            const stopA = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stopA.setAttribute('offset', '0%');
+            stopA.setAttribute('stop-color', '#ffffff');
+            stopA.setAttribute('stop-opacity', '0.5');
+
+            const stopB = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stopB.setAttribute('offset', '45%');
+            stopB.setAttribute('stop-color', domainColor);
+            stopB.setAttribute('stop-opacity', '0.9');
+
+            const stopC = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stopC.setAttribute('offset', '100%');
+            stopC.setAttribute('stop-color', '#000000');
+            stopC.setAttribute('stop-opacity', '0.35');
+
+            grad.appendChild(stopA);
+            grad.appendChild(stopB);
+            grad.appendChild(stopC);
+            defs.appendChild(grad);
+        });
+
+        svg.appendChild(defs);
+
+        // Draw Today's Shape - separate colored sections for each domain
+        Object.keys(DOMAINS_AND_ASPECTS).forEach((domainKey, i) => {
+            const domainColor = DOMAINS_AND_ASPECTS[domainKey].color;
+            const nextIndex = (i + 1) % numAxes;
+            const currentPoint = todayPoints[i];
+            const nextPoint = todayPoints[nextIndex];
+
+            // Create triangular section from center to current point to next point
+            const sectionPathD = `M ${centerX} ${centerY} L ${currentPoint.x} ${currentPoint.y} L ${nextPoint.x} ${nextPoint.y} Z`;
+            const sectionShape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            sectionShape.setAttribute('d', sectionPathD);
+            // Use metallic radial gradient fill for a shiny look
+            sectionShape.setAttribute('fill', `url(#metal-${domainKey})`);
+            sectionShape.setAttribute('stroke', domainColor);
+            sectionShape.setAttribute('stroke-opacity', '0.45');
+            sectionShape.setAttribute('stroke-width', '0.4');
+            svg.appendChild(sectionShape);
+
+            // Add a small specular highlight polygon near the inner edge of the section
+            // compute inner points at 55% of radius for a subtle highlight
+            const angleA = i * (360 / numAxes);
+            const angleB = ((i + 1) % numAxes) * (360 / numAxes);
+            const innerRadiusA = Math.hypot(currentPoint.x - centerX, currentPoint.y - centerY) * 0.55;
+            const innerRadiusB = Math.hypot(nextPoint.x - centerX, nextPoint.y - centerY) * 0.55;
+            const innerA = polarToCartesian(centerX, centerY, innerRadiusA, angleA);
+            const innerB = polarToCartesian(centerX, centerY, innerRadiusB, angleB);
+            const highlightPathD = `M ${innerA.x} ${innerA.y} L ${innerB.x} ${innerB.y} L ${centerX} ${centerY} Z`;
+            const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            highlight.setAttribute('d', highlightPathD);
+            highlight.setAttribute('fill', '#ffffff');
+            highlight.setAttribute('fill-opacity', '0.18');
+            highlight.setAttribute('filter', 'url(#metal-blur)');
+            svg.appendChild(highlight);
+        });
+
+        // Draw Today's outline shape (neutral)
         if (todayPoints.length > 0) {
             let todayPathD = `M ${todayPoints[0].x} ${todayPoints[0].y}`;
             for (let i = 1; i < todayPoints.length; i++) {
@@ -737,8 +821,8 @@
             const todayShape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             todayShape.setAttribute('d', todayPathD);
             todayShape.classList.add('web-today-shape');
-            todayShape.style.stroke = DOMAINS_AND_ASPECTS.fitness.color; // Use consistent domain color
-            todayShape.style.fill = DOMAINS_AND_ASPECTS.fitness.color;
+            todayShape.style.stroke = '#e6e6e6';
+            todayShape.style.fill = 'none';
             svg.appendChild(todayShape);
         }
 

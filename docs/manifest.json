@@ -1,9 +1,9 @@
 {
-  "name": "Drop - Simple Goals",
-  "short_name": "DropSimple",
+  "name": "Discipline Dashboard",
+  "short_name": "DisciplineDash",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "description": "Simple offline-first goals editor that syncs with Google Sheets.",
+  "description": "Performance-focused app that tracks daily execution across four life domains with clear numeric scores.",
   "icons": []
 }

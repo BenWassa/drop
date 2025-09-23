@@ -31,6 +31,7 @@ A mobile-first Progressive Web App (PWA) that measures daily execution across fo
 
 4. **Install & Use**:
    - Open `index.html` locally or host on GitHub Pages
+   - For GitHub Pages: Go to repository Settings → Pages → Source: "Deploy from a branch" → Branch: main → Folder: /docs
    - Install as PWA on your device
 
 ## 🗂️ Files
