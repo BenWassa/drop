@@ -149,6 +149,8 @@
 
       <h3 class="streaks-title">Current Streaks</h3>
       <div class="streaks" id="streaksContainer"></div>
+
+      <div class="weekly-completion" id="weeklyCompletion"></div>
     </div>
 
     <!-- Reflect Screen -->
@@ -158,11 +160,10 @@
         <div class="mood-emojis">
           <span class="mood-emoji" data-mood="1">😞</span>
           <span class="mood-emoji" data-mood="2">😕</span>
-          <span class="mood-emoji" data-mood="3">😐</span>
-          <span class="mood-emoji" data-mood="4">🙂</span>
-          <span class="mood-emoji selected" data-mood="5">😁</span>
+          <span class="mood-emoji" data-mood="3"></span>
+          <span class="mood-emoji selected" data-mood="4">😁</span>
         </div>
-        <input type="range" class="mood-slider" id="moodSlider" min="1" max="5" value="5" />
+        <input type="range" class="mood-slider" id="moodSlider" min="1" max="4" value="4" />
       </div>
 
       <div class="note-input">
@@ -192,6 +193,11 @@
           <span>Export to CSV</span>
           <button id="exportCSV" class="setting-action">Export</button>
         </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-title">Manage Aspects</div>
+        <div id="aspectsManager"></div>
       </div>
     </div>
 

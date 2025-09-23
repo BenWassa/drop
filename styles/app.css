@@ -661,6 +661,96 @@ body {
   }
 }
 
+.weekly-completion {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.weekly-completion h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.completion-percent {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--success);
+  margin-bottom: 5px;
+}
+
+.completion-details {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.domain-manage {
+  margin-bottom: 20px;
+}
+
+.domain-manage h4 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.aspect-manage {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bg-active);
+}
+
+.aspect-manage:last-child {
+  border-bottom: none;
+}
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-card);
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-secondary);
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: var(--success);
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+  background-color: white;
+}
+
 @media (max-width: 480px) {
   .app {
     max-width: 100%;

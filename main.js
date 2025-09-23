@@ -32,9 +32,11 @@ const appState = {
     ])
   ),
   streaks: {},
-  mood: 5,
+  mood: 4,
   online: navigator.onLine,
-  syncing: false
+  syncing: false,
+  disabledAspects: JSON.parse(localStorage.getItem('disabled_aspects') || '[]'),
+  lastSyncTime: localStorage.getItem('last_sync_time') || 'Never'
 };
 
 function getClientId() {
@@ -67,6 +69,7 @@ const dbp = new Promise((resolve, reject) => {
 async function saveEntry(domain, aspect, completed) {
   const today = new Date().toISOString().split('T')[0];
   const id = `${today}-${domain}-${aspect}`;
+  const streak = completed ? await getCurrentStreak(domain, aspect) : 0;
   const entry = {
     id,
     clientId: getClientId(),
@@ -74,6 +77,7 @@ async function saveEntry(domain, aspect, completed) {
     domain,
     aspect,
     completed,
+    streak,
     timestamp: Date.now(),
     synced: false
   };
@@ -152,6 +156,38 @@ async function calculateStreaks() {
   });
 }
 
+async function getCurrentStreak(domain, aspect) {
+  const db = await dbp;
+  const tx = db.transaction('entries', 'readonly');
+  const store = tx.objectStore('entries');
+  const allEntries = await new Promise((resolve, reject) => {
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+
+  const key = `${domain}-${aspect}`;
+  const dates = allEntries
+    .filter(entry => entry.domain === domain && entry.aspect === aspect && entry.completed)
+    .map(entry => entry.date)
+    .sort();
+
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  let streak = 0;
+  let currentDate = today;
+
+  while (dates.includes(currentDate) || (currentDate === yesterday && dates.includes(today))) {
+    streak++;
+    const prevDate = new Date(currentDate);
+    prevDate.setDate(prevDate.getDate() - 1);
+    currentDate = prevDate.toISOString().split('T')[0];
+  }
+
+  return streak;
+}
+
 function updateProgress() {
   let completed = 0;
 
@@ -224,6 +260,12 @@ async function showScreen(screenName) {
 
   if (screenName === 'review') {
     await renderReview();
+  } else if (screenName === 'settings') {
+    renderAspectsManager();
+    const lastSyncTime = $('lastSyncTime');
+    if (lastSyncTime) {
+      lastSyncTime.textContent = appState.lastSyncTime === 'Never' ? 'Never' : `Last sync at ${appState.lastSyncTime}`;
+    }
   }
 }
 
@@ -308,7 +350,83 @@ async function renderReview() {
         `
       )
       .join('');
+
+    // Calculate weekly completion
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(today.getDate() - 6); // last 7 days including today
+    const weekStart = weekAgo.toISOString().split('T')[0];
+    const weekEnd = today.toISOString().split('T')[0];
+
+    const weekEntries = allEntries.filter(entry =>
+      entry.date >= weekStart && entry.date <= weekEnd && entry.completed
+    );
+
+    const totalAspects = Object.values(DOMAINS).reduce((sum, aspects) => sum + aspects.length, 0);
+    const totalDays = 7;
+    const totalPossible = totalAspects * totalDays;
+
+    const completedCount = weekEntries.length; // assuming no duplicates
+    const completionPercent = totalPossible > 0 ? Math.round((completedCount / totalPossible) * 100) : 0;
+
+    const weeklyCompletion = $('weeklyCompletion');
+    if (weeklyCompletion) {
+      weeklyCompletion.innerHTML = `
+        <h3>Weekly Completion</h3>
+        <div class="completion-percent">${completionPercent}%</div>
+        <div class="completion-details">${completedCount}/${totalPossible} aspects</div>
+      `;
+    }
   }
+}
+
+function renderAspectsManager() {
+  const container = $('aspectsManager');
+  if (!container) return;
+
+  container.innerHTML = Object.entries(DOMAINS).map(([domain, aspects]) => `
+    <div class="domain-manage">
+      <h4>${domain.charAt(0).toUpperCase() + domain.slice(1)}</h4>
+      ${aspects.map(aspect => {
+        const key = `${domain}-${aspect}`;
+        const isDisabled = appState.disabledAspects.includes(key);
+        return `
+          <div class="aspect-manage">
+            <span>${ASPECT_LABELS[aspect] || aspect}</span>
+            <label class="toggle">
+              <input type="checkbox" ${!isDisabled ? 'checked' : ''} data-aspect="${key}">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `).join('');
+
+  // Add event listeners
+  container.querySelectorAll('input[type="checkbox"]').forEach(input => {
+    input.addEventListener('change', function() {
+      const key = this.dataset.aspect;
+      if (this.checked) {
+        appState.disabledAspects = appState.disabledAspects.filter(k => k !== key);
+      } else {
+        if (!appState.disabledAspects.includes(key)) {
+          appState.disabledAspects.push(key);
+        }
+      }
+      localStorage.setItem('disabled_aspects', JSON.stringify(appState.disabledAspects));
+      updateVisibleAspects();
+    });
+  });
+}
+
+function updateVisibleAspects() {
+  $$('.aspect-toggle').forEach(toggle => {
+    const { domain, aspect } = toggle.dataset;
+    const key = `${domain}-${aspect}`;
+    const isDisabled = appState.disabledAspects.includes(key);
+    toggle.style.display = isDisabled ? 'none' : '';
+  });
 }
 
 function updateSyncStatus() {
@@ -369,9 +487,12 @@ async function trySync() {
       store.delete(item.id);
     });
 
+    appState.lastSyncTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    localStorage.setItem('last_sync_time', appState.lastSyncTime);
+
     const lastSyncTime = $('lastSyncTime');
     if (lastSyncTime) {
-      lastSyncTime.textContent = 'just now';
+      lastSyncTime.textContent = `Last sync at ${appState.lastSyncTime}`;
     }
   } catch (error) {
     console.error('Sync failed:', error);
@@ -428,7 +549,7 @@ async function exportToCSV() {
       request.onerror = () => reject(request.error);
     });
 
-    const header = ['id', 'date', 'domain', 'aspect', 'completed', 'type', 'mood', 'note', 'timestamp', 'synced'];
+    const header = ['id', 'date', 'domain', 'aspect', 'completed', 'streak', 'type', 'mood', 'note', 'timestamp', 'synced'];
     const rows = entries.map((entry) =>
       header
         .map((key) => {
@@ -495,6 +616,7 @@ async function loadTodayData() {
 
   await calculateStreaks();
   updateProgress();
+  updateVisibleAspects();
 }
 
 async function initializeUI() {
@@ -516,6 +638,8 @@ async function initializeUI() {
       }
     });
   });
+
+  updateVisibleAspects();
 
   $$('.nav-item, .bottom-nav-item').forEach((item) => {
     item.addEventListener('click', function handleNav() {
