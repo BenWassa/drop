@@ -1,53 +1,56 @@
-# 🌊 drop Vision Document
+# 🌊 Drop - Daily Practice Journal Vision
 
 ## 📌 Purpose
 
-drop is a **personal, mobile-first PWA** for **quarterly identity practice**:
+Drop is your **personal daily practice journal** - a mobile-first PWA that helps you answer one question every day: **"Did I live today according to my Sleep, Fitness, Mind, Spirit practices?"**
 
-* Tracking small daily reps across 4 domains (Sleep, Fitness, Mind, Spirit).
-* Building streaks and celebrating progress.
-* Logging quick reflections (mood + notes).
-* Working entirely **offline**, syncing to a personal Google Sheet for safekeeping.
+* **8 Fixed Practices**: Wake, Rest, Run, Strength, Skill, Read, Write, Stress, Meditation
+* **Daily Ritual**: Quick toggles with joyful feedback and celebrations
+* **Identity-Centered**: Practices organized by life domains, not generic habits
+* **Offline-First**: Full functionality without internet, syncs to personal Google Sheet
+* **Single-User Focus**: Optimized for you (Pixel 8), not hypothetical users
 
-This is **not** a social platform. It’s for **one user, one device (Pixel)**. Lightweight, joyful, frictionless.
-
----
-
-## 🎯 UX Goals
-
-* **Frictionless input**: 1 tap to mark an aspect complete.
-* **Joyful feedback**: haptics + animations for tiny wins.
-* **Identity-centered**: group actions under the 4 domains.
-* **Engaging daily ritual**: progress ring + streak flames.
-* **Supportive tone**: positive microcopy, no shaming.
-* **Offline-first**: app works fully in airplane mode, syncs when online.
+This is **not** a social platform or generic habit tracker. It's your private daily practice journal - lightweight, joyful, and frictionless.
 
 ---
 
-## 🗂️ Data Model
+## 🎯 Core Philosophy
 
-Each entry (row in Google Sheet) contains:
+* **Daily Practice Journal**: Frame is "did I live my identity today?" not "did I check a box?"
+* **Minimal Core Loop**: Fixed 8 practices, no customization in V1 - keeps ritual tight
+* **Single-User Optimization**: Pixel 8 focus, offline-first, one Google Sheet
+* **Joyful Feedback**: Celebrations, streaks, supportive microcopy
+* **Identity-Driven**: Life domains over generic task management
+
+---
+
+## � Data Model
+
+Each practice entry contains:
 
 ```js
 {
-  id: string,
-  date: string (ISO),          // "2025-09-23"
-  domain: "Sleep"|"Fitness"|"Mind"|"Spirit",
-  aspect: string,              // e.g. "Run", "Meditation"
+  id: string,           // "2025-09-23-sleep-wake"
+  date: string,         // "2025-09-23"
+  domain: string,       // "sleep"|"fitness"|"mind"|"spirit"
+  aspect: string,       // "wake"|"rest"|"run"|"strength"|"skill"|"read"|"write"|"stress"|"meditation"
   completed: boolean,
-  streak: number,               // consecutive completions
-  mood?: number (1–5),
+  streak: number,
+  mood?: number,        // 1-4 (😞 😐 🙂 😁)
   note?: string,
+  timestamp: number,
   synced: boolean
 }
 ```
 
-Domains & aspects tracked:
+## 🌱 Fixed Domains & Aspects (V1)
 
-* Sleep → Wake, Rest
-* Fitness → Run, Strength, Skill
-* Mind → Read, Write
-* Spirit → Stress, Meditation
+Keep these 8 daily practices fixed — no customization in V1. This keeps the ritual tight and the app minimal.
+
+* **Sleep** 🌙 → Wake, Rest
+* **Fitness** 🏃 → Run, Strength, Skill
+* **Mind** 📚 → Read, Write
+* **Spirit** 🧘 → Stress, Meditation
 
 ---
 
@@ -97,46 +100,47 @@ Domains & aspects tracked:
 
 ## 📱 Screen Flows
 
-### Today
+### Today (Daily Ritual)
 
-* Progress ring + “Day X of 90”
-* Four domain cards (expand/collapse) → aspect toggles inside
-* FAB → quick note/reflection
+* Open app → "Day X of 90" + progress ring
+* 4 Domain cards with fixed aspect toggles
+* Tapping toggle = ✓ + animation + haptic feedback
+* End of day: quick mood slider + optional note
+* **Engagement hook**: All 8 complete = confetti + "Tiny wins compound" message
 
-### Review
+### Review (Weekly Patterns)
 
-* Weekly grid (7 × 8 aspects) with ✓ history
-* Streak highlights
-* Weekly completion %
+* Grid: 7 days × 8 aspects → see completion patterns
+* Streak indicators under each aspect 🔥
+* Weekly summary: % complete + longest streak
 
-### Reflection
+### Reflect (End-of-Day)
 
-* Mood slider
-* Short text input
-* Save → celebratory micro-animation
+* Mood slider (😞 😐 🙂 😁)
+* One-line note field
+* "Save reflection" → subtle animation, returns to Today
 
-### Settings
+### Settings (Minimal)
 
-* Manage aspects (toggle off unused)
-* Sync status (“Last sync at 12:32”)
-* Export/backup
+* Sync status ("Last sync at 12:32" / "Local only")
+* Export to CSV
+* No aspect management (fixed in V1)
 
 ---
 
 ## 🛠️ Technical Constraints
 
-* **Static only**: `index.html`, `styles.css`, `main.js`, `sw.js`, `config.js`, `manifest.json`
-* **No Node.js, no build tools**
-* **Offline-first**: Service Worker caches static files + IndexedDB outbox
-* **Sync**: Google Apps Script Web App (append rows to Sheet)
-* **Device target**: Pixel 8, Chrome, PWA installable
+* **Static PWA**: HTML/CSS/JS only, no build tools
+* **Offline-First**: IndexedDB + Service Worker outbox
+* **Sync**: Google Apps Script → single Google Sheet
+* **Target**: Pixel 8 (Chrome), PWA installable
+* **Single-User**: One device, one Sheet focus
 
 ---
 
-## ✅ Priorities
+## ✅ Priorities (V1)
 
-1. Daily **Today screen** is the core loop → fast, fun, positive.
-2. Visualize **streaks** and **progress** to build momentum.
-3. Keep reflection lightweight → don’t block logging.
-4. Data durability via **Google Sheets sync**.
-5. Must always work offline.
+1. **Engaging Today screen** → frictionless toggles + joyful feedback
+2. **Streak visibility** → daily motivation through progress
+3. **Reflection ritual** → lightweight but meaningful end-of-day practice
+4. **Sync clarity** → show when entries are "local" vs "synced"

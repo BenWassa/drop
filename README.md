@@ -1,92 +1,103 @@
-# Simple GSheets Offline App
+# 🌊 Drop - Daily Practice Journal
 
-This small static app lets you create simple "goals" entries offline and sync them to a Google Sheet via a Google Apps Script web endpoint.
+A mobile-first Progressive Web App (PWA) for tracking your daily identity practices across four life domains: Sleep, Fitness, Mind, and Spirit. Works entirely offline with background sync to a personal Google Sheet.
 
-Files:
-- `index.html` — UI
-- `main.js` — offline queue and sync logic
-- `config.js` — set `GSA_ENDPOINT` after deploying the Apps Script
-- `sw.js` — service worker to cache app assets
-- `apps-script.gs` — Apps Script to deploy as web app
+## 🎯 What It Does
+
+Drop helps you answer one question every day: **"Did I live today according to my Sleep, Fitness, Mind, Spirit practices?"**
+
+- **8 Fixed Practices**: Wake, Rest, Run, Strength, Skill, Read, Write, Stress, Meditation
+- **Daily Ritual**: Quick toggles with joyful feedback and celebrations
+- **Weekly Review**: See patterns and streak progress
+- **Reflections**: End-of-day mood logging and notes
+- **Offline-First**: Full functionality without internet, syncs when connected
+
+## 📱 Quick Start
+
+1. **Set up Google Sheet**:
+   - Create a new Google Sheet
+   - Add sheet named `entries` with headers: `id`, `date`, `domain`, `aspect`, `completed`, `streak`, `mood`, `note`, `timestamp`, `synced`
+
+2. **Deploy Apps Script**:
+   - Open script editor (Extensions → Apps Script)
+   - Paste contents of `apps-script.gs`
+   - Replace `SPREADSHEET_ID` and `API_KEY` with your values
+   - Deploy as web app, copy the URL
+
+3. **Configure App**:
+   - Edit `config.js` and set `APP_CONFIG.SCRIPT_URL` to your Apps Script URL
+   - Set `APP_CONFIG.API_KEY` to match your Apps Script API key
+
+4. **Install & Use**:
+   - Open `index.html` locally or host on GitHub Pages/Vercel
+   - Install as PWA on your Pixel 8
+   - Start your daily practice ritual!
+
+## 🗂️ Files
+
+- `index.html` — Main UI with Today/Review/Reflect/Settings screens
+- `main.js` — App orchestration and initialization
+- `data.js` — IndexedDB operations and data models
+- `sync.js` — Background sync and API communication
+- `ui.js` — DOM manipulation and rendering
+- `config.js` — API endpoints and configuration
+- `sw.js` — Service worker for offline caching
+- `apps-script.gs` — Google Apps Script for Sheet sync
 - `manifest.json` — PWA manifest
+- `styles/app.css` — Dark theme styling and animations
+- `UX.md` — Comprehensive UX documentation
 
-Quick setup:
+## 🔧 Technical Stack
 
-1. Create a Google Sheet and add a sheet named `goals` with headers in row 1: `title`, `note`, `ts`.
-2. Open the script editor (Extensions → Apps Script), paste the contents of `apps-script.gs` and save.
-3. Deploy → New deployment → Select "Web app". Set "Execute as" to "Me" and "Who has access" to "Anyone" (or as you prefer). Copy the Web App URL.
-4. Edit `config.js` and set `APP_CONFIG.GSA_ENDPOINT` to the Web App URL.
-5. Host the static folder `simple/gsheets-offline/` on Vercel/GitHub Pages or open `index.html` locally (CORS will block sync if the endpoint requires cross-origin unless Apps Script is deployed to allow it).
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+- **Storage**: IndexedDB for local data, Service Worker outbox
+- **Sync**: Google Apps Script → Google Sheets
+- **PWA**: Offline-first, installable, background sync
+- **Target**: Pixel 8 (Chrome), mobile-optimized
 
-Notes on offline behavior:
-- New items are stored in `localStorage` until synced.
-- When the browser regains network connectivity the app will attempt to sync automatically.
-- The service worker caches app files for offline loading.
+## 📊 Data Model
 
-Note: this folder now contains the fuller "drop-lite" scaffold (IndexedDB outbox, Background Sync, richer Apps Script `Code.gs`).
-Quick mapping of filenames:
-- `main.js` — IndexedDB-based client with `entries` + `outbox` stores and batch sync logic.
-- `sw.js` — service worker with cache and `sync-outbox` background sync handler.
-- `apps-script.gs` — full `Code.gs` (replace `SPREADSHEET_ID` and `API_KEY` before deploying).
+Each practice entry contains:
 
-Update `config.js`:
+```js
+{
+  id: string,           // "2025-09-23-sleep-wake"
+  date: string,         // "2025-09-23"
+  domain: string,       // "sleep"|"fitness"|"mind"|"spirit"
+  aspect: string,       // "wake"|"rest"|"run"|etc.
+  completed: boolean,
+  streak: number,
+  mood?: number,        // 1-4 (😞 😐 🙂 😁)
+  note?: string,
+  timestamp: number,
+  synced: boolean
+}
+```
 
- - Set `APP_CONFIG.SCRIPT_URL` to your Apps Script Web App URL.
- - Set `APP_CONFIG.API_KEY` to match `API_KEY` in `apps-script.gs`.
+## 🎨 Design Philosophy
 
+- **Dark Mode Default**: Matte black with colorful domain accents
+- **Identity-Driven**: Practices organized by life domains, not generic habits
+- **Joyful Feedback**: Micro-interactions, confetti celebrations, supportive copy
+- **Minimal Core Loop**: Fixed 8 practices, no customization in V1
+- **Mobile-Native**: Touch-optimized, PWA installable
 
-Security & permissions:
-- Apps Script deployments with "Anyone" allow unauthenticated POSTs. If your sheet is sensitive, consider adding an API key check or restricting access.
+## 🚀 Development
 
-Next steps:
-- Add pull/fetch logic to display remote rows.
-- Add simple conflict resolution and sync status UI.
-- Add export/import functionality for backups.
+This is a static PWA with no build tools or Node.js dependencies. Edit the files directly and test in Chrome.
 
-Publishing to GitHub Pages
--------------------------
+### Key Principles
+- Single-user, single-device focus (Pixel 8)
+- Offline-first with local-first UX
+- Frictionless daily ritual over feature complexity
+- Identity-centered framing over generic habit tracking
 
-There are two easy ways to publish this static folder with GitHub Pages.
+## 📈 Roadmap
 
-1) Publish from the `docs/` folder on the `main` branch
-	- Copy the contents of `simple/gsheets-offline/` into a top-level `docs/` folder.
-	- Commit and push to `main`.
-	- In your repository Settings → Pages, set the source to `main` branch and `/docs` folder.
-	- The site will be available at `https://<your-user>.github.io/<repo>/`.
+- **V1**: Core daily practice loop with fixed domains
+- **Future**: Habit customization, advanced analytics, calendar integration
 
-	Example commands (run from repository root):
+---
 
-	```bash
-	rm -rf docs
-	mkdir -p docs
-	cp -R simple/gsheets-offline/* docs/
-	git add docs
-	git commit -m "chore: publish simple/gsheets-offline to docs for GitHub Pages" || true
-	git push
-	```
-
-2) Publish with `gh-pages` npm package (branch-based)
-	- Useful if you want the published site on a separate `gh-pages` branch.
-	- Install and run from project root:
-
-	```bash
-	npm install --no-save gh-pages
-	npx gh-pages -d simple/gsheets-offline -b gh-pages
-	```
-
-Local testing and CORS notes
----------------------------
-- To test locally, use a static server rather than opening the file directly. Example:
-
-  ```bash
-  # Python 3
-  cd simple/gsheets-offline
-  python3 -m http.server 8000
-  # or with node
-  npx http-server -c-1
-  ```
-
-- Apps Script CORS: when you deploy the Apps Script web app, it will allow cross-origin requests from pages served by GitHub Pages. If you encounter CORS errors for POSTs, double-check your Apps Script deployment settings and that you're using the Web App URL in `config.js`.
-
-- If you want me to publish the folder to `docs/` and push a commit for you, say "Please publish to GitHub Pages" and I'll create the `docs/` copy and commit it.
+*Drop: Your daily practice journal. Did you live your identity today?*
 
