@@ -204,17 +204,10 @@
             visibleAspects: {}
         };
 
-        // Initialize DOMAINS
-        const DOMAINS = {
-            sleep: ['wake', 'rest'],
-            fitness: ['run', 'strength', 'skill'],
-            mind: ['read', 'write'],
-            spirit: ['stress', 'meditation']
-        };
-
-        // Minimal helpers
-        const $ = (id) => document.getElementById(id);
-        const $$ = (selector) => document.querySelectorAll(selector);
+        // Note: do NOT declare global helpers or DOMAINS here.
+        // The real app scripts define `DOMAINS`, `$`, and `$$`.
+        // Keep mocks isolated and avoid polluting the global scope to prevent
+        // duplicate-declaration SyntaxErrors when the app scripts load.
 
         // Mock localStorage (in-memory) so getClientId persists between calls
         const mockLocalStorage = (function() {
@@ -320,6 +313,14 @@
 
     <!-- QUnit -->
     <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
+
+    <script>
+        // Disable QUnit autostart so we start it manually after app readiness checks
+        if (window.QUnit) {
+            window.QUnit.config = window.QUnit.config || {};
+            window.QUnit.config.autostart = false;
+        }
+    </script>
 
     <script>
         // ...mocks moved above so app scripts initialize against them
