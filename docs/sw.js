@@ -1,7 +1,15 @@
 // drop-lite sw.js — cache static assets + background sync flush
 const CACHE = 'drop-lite-static-v2';
 const STATIC_ASSETS = [
-  '/', '/index.html', '/docs/main.js', '/docs/config.js', '/docs/data.js', '/docs/sync.js', '/docs/ui.js', '/docs/manifest.webmanifest', '/docs/styles/app.css'
+  './',
+  'index.html',
+  'main.js',
+  'config.js',
+  'data.js',
+  'sync.js',
+  'ui.js',
+  'manifest.webmanifest',
+  'styles/app.css'
 ];
 
 const CONFIG = {
