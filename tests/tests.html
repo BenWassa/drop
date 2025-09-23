@@ -457,26 +457,61 @@
             });
         });
 
-        // Test results collection
+        // Test results collection (capture assertions and per-test details)
         let allTestResults = [];
         let failedTests = [];
+        let assertionsByTest = Object.create(null);
+        let currentTestKey = null;
 
-        // QUnit hooks to collect results
-        QUnit.on('testEnd', function(details) {
+        // Create a stable key for a test
+        function testKey(module, name) {
+            return `${module || '<no-module>'}::${name}`;
+        }
+
+        // Capture start of each test so we can collect assertions
+        QUnit.testStart(function(details) {
+            const key = testKey(details.module, details.name);
+            assertionsByTest[key] = [];
+            currentTestKey = key;
+        });
+
+        // Capture each assertion (QUnit.log) and push into current test's assertions
+        QUnit.log(function(details) {
+            // details: { result, actual, expected, message, source }
+            if (!currentTestKey) return;
+            const arr = assertionsByTest[currentTestKey] || [];
+            arr.push({
+                passed: Boolean(details.result),
+                message: details.message || '',
+                actual: details.actual,
+                expected: details.expected,
+                source: details.source || ''
+            });
+            assertionsByTest[currentTestKey] = arr;
+        });
+
+        // On test end, build the test result object from testDone details + captured assertions
+        QUnit.testDone(function(details) {
+            const key = testKey(details.module, details.name);
+            const assertions = assertionsByTest[key] || [];
             const result = {
-                module: details.module,
+                module: details.module || '<no-module>',
                 name: details.name,
-                passed: details.passed,
-                failed: details.failed,
-                total: details.total,
-                runtime: details.runtime,
-                assertions: details.assertions
+                passed: (details.total || 0) - (details.failed || 0),
+                failed: details.failed || 0,
+                total: details.total || 0,
+                runtime: details.runtime || 0,
+                assertions
             };
-            allTestResults.push(result);
 
-            if (details.failed > 0) {
+            allTestResults.push(result);
+            if (result.failed > 0) {
                 failedTests.push(result);
             }
+
+            // cleanup
+            delete assertionsByTest[key];
+            currentTestKey = null;
         });
 
         // Function to format test results for copying
