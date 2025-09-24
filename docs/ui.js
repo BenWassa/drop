@@ -28,6 +28,12 @@ async function inlineSvgFromFile(name) {
   }
 }
 
+// Return a small inline SVG (fallback) for use inside compact UI elements (rings).
+function renderDomainIconInline(domain) {
+  // Use the fallback inline SVGs which are stroke-only and styleable via currentColor
+  return DOMAIN_ICONS_FALLBACK[domain] || '';
+}
+
 function renderDomainIcon(domain) {
   // Use CSS background-image to load the canonical SVG for GitHub Pages friendliness.
   // Return a span with domain classes only; CSS will set background-image:url('images/<domain>.svg').
@@ -210,11 +216,12 @@ async function refreshDomainScorePanel() {
       value.textContent = String(score);
       ringContainer.appendChild(value);
 
-      // Small icon overlapping bottom gap of ring
-      const iconWrap = document.createElement('div');
-      iconWrap.className = 'lean-ring-icon';
-      iconWrap.innerHTML = renderDomainIcon(domain);
-      ringContainer.appendChild(iconWrap);
+  // Small icon overlapping bottom gap of ring — use inline SVG so it can be colored
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'lean-ring-icon';
+  // inject inline SVG markup directly so CSS rules like stroke:currentColor apply
+  iconWrap.innerHTML = renderDomainIconInline(domain);
+  ringContainer.appendChild(iconWrap);
 
       const label = document.createElement('div');
       label.className = 'lean-domain-label';

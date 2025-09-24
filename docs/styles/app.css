@@ -81,6 +81,21 @@
   background: transparent;
 }
 
+/* Ensure inline SVG inside the small ring is sized and strokes follow currentColor */
+.lean-ring-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none !important;
+  stroke: currentColor !important;
+  vector-effect: non-scaling-stroke;
+}
+
+/* If a background-image based .domain-icon exists inside the small ring, hide it */
+.lean-ring-icon .domain-icon {
+  background-image: none !important;
+}
+
 .domain-icon {
   width: 100%;
   height: 100%;
