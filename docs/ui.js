@@ -1515,14 +1515,13 @@ function renderReview() {
   } catch (e) { /* ignore */ }
 }
 
-async function initializeUI() {
+function initializeUI() {
   if (document.readyState === 'loading') {
-    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-  }
-  try {
-    await refreshDomainScorePanel();
-  } catch (e) {
-    console.error('initializeUI failed', e);
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshDomainScorePanel().catch(e => console.error('initializeUI failed', e));
+    });
+  } else {
+    refreshDomainScorePanel().catch(e => console.error('initializeUI failed', e));
   }
 }
 
