@@ -101,24 +101,14 @@ async function refreshDomainScorePanel() {
   }
 
   try {
-    const db = await dbp;
-    const tx = db.transaction('entries', 'readonly');
-    const store = tx.objectStore('entries');
-    let allEntries = await new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
-
-    if (appState.useMock && typeof window.getMockEntries === 'function') {
-      try {
-        const mockEntries = await window.getMockEntries();
-        if (Array.isArray(mockEntries) && mockEntries.length) {
-          allEntries = allEntries.concat(mockEntries);
-        }
-      } catch (e) {
-        console.warn('Could not load mock entries for score panel', e);
+    // Use mock-aware helper which will return mock or real entries depending on flag
+    let allEntries = [];
+    try {
+      if (typeof window.getAllEntries === 'function') {
+        allEntries = await window.getAllEntries();
       }
+    } catch (e) {
+      console.warn('Failed to load entries for score panel', e);
     }
 
     const today = new Date();
@@ -253,24 +243,13 @@ function showScreen(screenId) {
 }
 
 async function renderReview() {
-  const db = await dbp;
-  const tx = db.transaction('entries', 'readonly');
-  const store = tx.objectStore('entries');
-  let allEntries = await new Promise((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
-
-  if (appState.useMock && typeof window.getMockEntries === 'function') {
-    try {
-      const mockEntries = await window.getMockEntries();
-      if (Array.isArray(mockEntries) && mockEntries.length) {
-        allEntries = allEntries.concat(mockEntries);
-      }
-    } catch (e) {
-      console.warn('Could not load mock entries for review', e);
+  let allEntries = [];
+  try {
+    if (typeof window.getAllEntries === 'function') {
+      allEntries = await window.getAllEntries();
     }
+  } catch (e) {
+    console.warn('Could not load entries for review', e);
   }
 
   const today = new Date().toISOString().split('T')[0];

@@ -1,6 +1,15 @@
 // sync.js - Sync layer: Background sync and API communication
 
 async function trySync() {
+  // If running in mock mode, do not attempt to sync sandboxed data
+  try {
+    if (typeof window.isUsingMock === 'function' && window.isUsingMock()) {
+      console.log('Mock mode enabled - skipping sync to avoid touching real backend');
+      return;
+    }
+  } catch (e) {
+    // ignore and continue
+  }
   if (!navigator.onLine) {
     console.log('Offline, skipping sync');
     return;
@@ -77,8 +86,10 @@ function updateSyncStatus(message) {
 async function updateOutboxCount() {
   try {
     const db = await dbp;
-    const tx = db.transaction('outbox', 'readonly');
-    const store = tx.objectStore('outbox');
+    const useMock = (typeof window.isUsingMock === 'function' && window.isUsingMock());
+    const storeName = useMock ? 'mock_outbox' : 'outbox';
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
     const count = await new Promise((resolve, reject) => {
       const request = store.count();
       request.onsuccess = () => resolve(request.result);

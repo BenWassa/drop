@@ -32,6 +32,10 @@ function getClientId() {
   return id;
 }
 
+function isUsingMock() {
+  return localStorage.getItem('use_mock_data') === '1';
+}
+
 const dbp = window.dbp || new Promise((resolve, reject) => {
   const req = indexedDB.open('drop-tracker', 2);
   req.onupgradeneeded = () => {
@@ -85,14 +89,20 @@ async function saveEntry(domain, aspect, completed) {
   };
 
   const db = await dbp;
-  const tx = db.transaction(['entries', 'outbox'], 'readwrite');
-  tx.objectStore('entries').put(entry);
-  tx.objectStore('outbox').add({ type: 'ENTRY', payload: entry, ts: Date.now() });
+  const useMock = isUsingMock();
+  const entriesStoreName = useMock ? 'mock_entries' : 'entries';
+  const outboxStoreName = useMock ? 'mock_outbox' : 'outbox';
+  const tx = db.transaction([entriesStoreName, outboxStoreName], 'readwrite');
+  tx.objectStore(entriesStoreName).put(entry);
+  // mark outbox payload as mock if writing to mock outbox
+  tx.objectStore(outboxStoreName).add({ type: 'ENTRY', payload: entry, ts: Date.now(), __mock: useMock });
 
   await calculateStreaks();
   window.renderAspectsManager();
   window.updateProgress();
-  await window.updateOutboxCount();
+  if (typeof window.updateOutboxCount === 'function') {
+    await window.updateOutboxCount();
+  }
 }
 
 function updateStreaks(domain, aspect, completed) {
@@ -108,14 +118,7 @@ function updateStreaks(domain, aspect, completed) {
 }
 
 async function calculateStreaks() {
-  const db = await dbp;
-  const tx = db.transaction('entries', 'readonly');
-  const store = tx.objectStore('entries');
-  const allEntries = await new Promise((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
+  const allEntries = await getAllEntries();
 
   // Group entries by aspect
   const aspectData = {};
@@ -161,15 +164,7 @@ async function calculateStreaks() {
 }
 
 async function getCurrentStreak(domain, aspect) {
-  const db = await dbp;
-  const tx = db.transaction('entries', 'readonly');
-  const store = tx.objectStore('entries');
-  const allEntries = await new Promise((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
-
+  const allEntries = await getAllEntries();
   const key = `${domain}-${aspect}`;
   const dates = allEntries
     .filter(entry => entry.domain === domain && entry.aspect === aspect && entry.completed)
@@ -208,9 +203,12 @@ async function saveReflection() {
   };
 
   const db = await dbp;
-  const tx = db.transaction(['entries', 'outbox'], 'readwrite');
-  tx.objectStore('entries').put(entry);
-  tx.objectStore('outbox').add({ type: 'REFLECTION', payload: entry, ts: Date.now() });
+  const useMock = isUsingMock();
+  const entriesStoreName = useMock ? 'mock_entries' : 'entries';
+  const outboxStoreName = useMock ? 'mock_outbox' : 'outbox';
+  const tx = db.transaction([entriesStoreName, outboxStoreName], 'readwrite');
+  tx.objectStore(entriesStoreName).put(entry);
+  tx.objectStore(outboxStoreName).add({ type: 'REFLECTION', payload: entry, ts: Date.now(), __mock: useMock });
   const noteField = $('reflectionNote');
   if (noteField) {
     noteField.value = '';
@@ -234,14 +232,7 @@ async function saveReflection() {
 
 async function exportToCSV(download = true) {
   try {
-    const db = await dbp;
-    const tx = db.transaction('entries', 'readonly');
-    const store = tx.objectStore('entries');
-    const entries = await new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
+    const entries = await getAllEntries();
 
     const header = ['id', 'date', 'domain', 'aspect', 'completed', 'streak', 'type', 'mood', 'note', 'timestamp', 'synced'];
     const rows = entries.map((entry) =>
@@ -282,28 +273,7 @@ async function exportToCSV(download = true) {
 
 async function loadTodayData() {
   const today = new Date().toISOString().split('T')[0];
-  const db = await dbp;
-  const tx = db.transaction('entries', 'readonly');
-  const index = tx.objectStore('entries').index('by_date');
-
-  const entries = await new Promise((resolve, reject) => {
-    const request = index.getAll(today);
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
-
-  // If mock mode is enabled, merge mock entries for today from sandbox store
-  try {
-    const useMock = localStorage.getItem('use_mock_data') === '1';
-    if (useMock && typeof window.getMockEntries === 'function') {
-      const mockToday = await window.getMockEntries(today);
-      if (Array.isArray(mockToday) && mockToday.length) {
-        entries.push(...mockToday);
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to merge mock entries for today', e);
-  }
+  const entries = await getEntriesByDate(today);
 
   entries.forEach((entry) => {
     if (entry && entry.domain && DOMAINS[entry.domain] && DOMAINS[entry.domain].includes(entry.aspect) && typeof entry.completed === 'boolean') {
@@ -507,7 +477,38 @@ async function getMockOutbox() {
   });
 }
 
+// Data access helpers that respect mock mode
+async function getAllEntries() {
+  const db = await dbp;
+  const useMock = isUsingMock();
+  const storeName = useMock ? 'mock_entries' : 'entries';
+  const tx = db.transaction(storeName, 'readonly');
+  const store = tx.objectStore(storeName);
+  return new Promise((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getEntriesByDate(date) {
+  const db = await dbp;
+  const useMock = isUsingMock();
+  const storeName = useMock ? 'mock_entries' : 'entries';
+  const tx = db.transaction(storeName, 'readonly');
+  const store = tx.objectStore(storeName);
+  const index = store.index('by_date');
+  return new Promise((resolve, reject) => {
+    const req = index.getAll(date);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 window.seedMockData = seedMockData;
 window.clearMockData = clearMockData;
 window.getMockEntries = getMockEntries;
 window.getMockOutbox = getMockOutbox;
+window.getAllEntries = getAllEntries;
+window.getEntriesByDate = getEntriesByDate;
+window.isUsingMock = isUsingMock;
