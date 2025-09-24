@@ -88,7 +88,21 @@
 .domain-icon svg {
   width: 100%;
   height: 100%;
-  background: transparent;
+  background: transparent !important;
+  display: block;
+}
+
+/* Force SVG internals to be stroke-only and transparent to override embedded fills
+   (some SVGs include hard-coded fill attributes from external sources). */
+.domain-icon svg * {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* Ensure small inline icons used in rings inherit color and don't scale stroke width */
+.lean-ring-icon svg,
+.domain-icon svg {
+  vector-effect: non-scaling-stroke;
 }
 
 /* App icon used inline in header - rounded corners */
