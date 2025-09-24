@@ -165,10 +165,10 @@
 
     <div id="qunit-fixture">
         <div class="app">
-            <nav class="nav">
-                <div class="nav-item active" data-screen="today">TODAY</div>
-                <div class="nav-item" data-screen="review">REVIEW</div>
-            </nav>
+            <div class="bottom-nav">
+                <div class="bottom-nav-item active" data-screen="today">TODAY</div>
+                <div class="bottom-nav-item" data-screen="review">REVIEW</div>
+            </div>
             <div class="domain-card" data-domain="sleep">
                 <div class="aspect-toggle" data-domain="sleep" data-aspect="wake">Wake</div>
             </div>
@@ -460,8 +460,7 @@
         QUnit.module('Smoke Tests', function() {
             QUnit.test('App loads and basic elements exist', function(assert) {
                 assert.ok(document.querySelector('.app'), 'App container exists');
-                assert.ok(document.querySelector('.nav'), 'Navigation exists');
-                assert.ok(document.querySelector('.nav-item'), 'Nav items exist');
+                assert.ok(document.querySelector('.bottom-nav-item'), 'Nav items exist');
                 assert.ok(document.querySelector('.aspect-toggle'), 'Aspect toggles exist');
                 assert.ok(document.querySelector('.mood-option'), 'Mood options exist');
                 assert.ok(document.getElementById('saveReflection'), 'Save reflection button exists');
@@ -496,37 +495,55 @@
             });
         });
 
-        QUnit.module('UI Interactions', function() {
-            QUnit.test('Navigation switching works', async function(assert) {
-                await initializeUI();
-                const todayNav = document.querySelector('[data-nav="today"]');
-                todayNav.click();
-                assert.ok(todayNav.classList.contains('active'), 'Today nav is active');
-                const reviewNav = document.querySelector('[data-nav="review"]');
-                reviewNav.click();
-                assert.ok(reviewNav.classList.contains('active'), 'Review nav is active');
-                assert.ok(!todayNav.classList.contains('active'), 'Today nav is not active');
+        QUnit.module('UI Interactions', function(hooks) {
+            // This hook runs before each test in this module.
+            hooks.beforeEach(async function() {
+                // 1. Reset the listener guard flag. This allows event listeners to be re-attached
+                //    to the new DOM elements that QUnit creates for each test.
+                window.listenersAreBound = false;
+
+                // 2. Re-initialize the UI. This will now correctly call initializeEventListeners.
+                await window.initializeUI();
+
+                // 3. Ensure data state is clean for the test.
+                if (window.appState && window.appState.todayData.sleep) {
+                    window.appState.todayData.sleep.wake = false;
+                }
             });
 
-            QUnit.test('Aspect toggle changes state', async function(assert) {
-                await initializeUI();
+            QUnit.test('Navigation switching works', function(assert) {
+                const todayNav = document.querySelector('.bottom-nav-item[data-screen="today"]');
+                const reviewNav = document.querySelector('.bottom-nav-item[data-screen="review"]');
+
+                // Initial state
+                assert.ok(todayNav.classList.contains('active'), 'Initially, Today nav is active');
+
+                // Click Review
+                reviewNav.click();
+                assert.ok(reviewNav.classList.contains('active'), 'After click, Review nav is active');
+                assert.notOk(todayNav.classList.contains('active'), 'After click, Today nav is not active');
+            });
+
+            QUnit.test('Aspect toggle changes state', function(assert) {
                 const toggle = document.querySelector('.aspect-toggle');
                 const initialState = toggle.classList.contains('completed');
                 toggle.click();
                 const newState = toggle.classList.contains('completed');
-                assert.notEqual(initialState, newState, 'Toggle state changed');
+                assert.notEqual(initialState, newState, 'Toggle state changed after click');
             });
 
-            QUnit.test('Mood selection works', async function(assert) {
-                await initializeUI();
-                window.appState.mood = 1;
+            QUnit.test('Mood selection works', function(assert) {
                 const mood1 = document.querySelector('[data-mood="1"]');
-                mood1.click();
-                assert.ok(mood1.classList.contains('selected'), 'Mood 1 button is selected');
                 const mood3 = document.querySelector('[data-mood="3"]');
+
+                // Click mood 1
+                mood1.click();
+                assert.ok(mood1.classList.contains('selected'), 'Mood 1 button is selected after click');
+
+                // Click mood 3
                 mood3.click();
-                assert.ok(mood3.classList.contains('selected'), 'Mood 3 button is selected');
-                assert.ok(!mood1.classList.contains('selected'), 'Mood 1 button is deselected');
+                assert.ok(mood3.classList.contains('selected'), 'Mood 3 button is selected after click');
+                assert.notOk(mood1.classList.contains('selected'), 'Mood 1 button is deselected after clicking mood 3');
             });
         });
 

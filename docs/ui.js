@@ -10,7 +10,7 @@ const DOMAIN_ICONS_FALLBACK = {
 
 // Ensure $ and $$ are available (defined in main.js but not global)
 if (!window.$) window.$ = (id) => document.getElementById(id);
-if (!window.$$) window.$$ = (selector) => Array.from(document.querySelectorAll(selector));
+if (!window.$$) window.$$ = (selector) => document.querySelectorAll(selector);
 
 // Simple cache for fetched SVG files
 const SVG_CACHE = {};
@@ -140,107 +140,12 @@ function logInit(message) {
   console.log('[init]', message);
 }
 
+// This function binds all event listeners that should only be attached once.
 function initializeEventListeners() {
-  // Attach event listeners that should be bound only once
-
-  // Aspect toggles
-  $$('.aspect-toggle').forEach(toggle => {
-    toggle.addEventListener('click', async () => {
-      const domain = toggle.dataset.domain;
-      const aspect = toggle.dataset.aspect;
-      const currentlyCompleted = appState.todayData[domain][aspect] || false;
-      const newCompleted = !currentlyCompleted;
-
-      appState.todayData[domain][aspect] = newCompleted;
-      toggle.classList.toggle('completed', newCompleted);
-
-      await saveEntry(domain, aspect, newCompleted);
-    });
-  });
-
-  // Navigation
-  $$('.nav-item, .bottom-nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const screen = item.dataset.screen;
-      showScreen(screen + 'Screen');
-      // Update nav active state
-      Array.from(document.querySelectorAll('.nav-item, .bottom-nav-item')).forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-    });
-  });
-
-  // Mood options
-  $$('.mood-option').forEach(option => {
-    option.addEventListener('click', () => {
-      const mood = Number(option.dataset.mood);
-      appState.mood = mood;
-      $$('.mood-option').forEach(btn => btn.classList.remove('selected'));
-      option.classList.add('selected');
-    });
-  });
-
-  // Other static listeners can be added here if needed
-}
-
-async function refreshDomainScorePanel() {
-  // Render a compact, lean overview: four circular score rings with single integer scores
-  const grid = $('domainScoreGrid');
-  if (!grid) return;
-
-  // Clear and render four domain slots in a single row. Scores are taken from
-  // appState.overviewScores if available, otherwise show an em dash.
-  const domains = ['sleep', 'fitness', 'mind', 'spirit'];
-  grid.innerHTML = '';
-  domains.forEach(domain => {
-    const item = document.createElement('div');
-    item.className = 'lean-domain-item';
-
-    const inner = document.createElement('div');
-    inner.className = 'lean-domain-inner';
-
-    const iconWrap = document.createElement('div');
-    iconWrap.className = 'lean-ring-icon';
-    const icon = document.createElement('span');
-    icon.className = `domain-icon ${domain}`;
-    icon.setAttribute('role', 'img');
-    icon.setAttribute('aria-label', `${domain} icon`);
-    iconWrap.appendChild(icon);
-
-    const score = document.createElement('div');
-    score.className = 'lean-score-value';
-    const value = (appState && appState.overviewScores && typeof appState.overviewScores[domain] !== 'undefined') ? String(appState.overviewScores[domain]) : '—';
-    score.textContent = value;
-
-    const label = document.createElement('div');
-    label.className = 'lean-domain-label';
-    label.textContent = domain.toUpperCase();
-
-    inner.appendChild(iconWrap);
-    inner.appendChild(score);
-    inner.appendChild(label);
-    item.appendChild(inner);
-    grid.appendChild(item);
-  });
-
-  function showSafe(fn, ...args) {
-    return (async () => {
-      try {
-        logInit('running ' + (fn.name || 'anonymous'));
-        await fn(...args);
-        logInit('completed ' + (fn.name || 'anonymous'));
-      } catch (err) {
-        try {
-          const panel = $('runtimeErrorContent');
-          if (panel) panel.textContent = `${err && err.stack ? err.stack : String(err)}`;
-          const container = $('runtimeErrorPanel');
-          if (container) container.classList.remove('hidden');
-          // also mirror to diagAppState for a quick trace when dev-only hidden
-          const diag = $('diagAppState'); if (diag) diag.textContent = 'INIT ERROR: ' + (err && err.message ? err.message : String(err));
-        } catch (e) {}
-        console.error('Safe wrapper caught error', err);
-      }
-    })();
+  if (window.listenersAreBound) {
+    return;
   }
+
   // Global error handlers (dev-only panel)
   window.addEventListener('error', (ev) => {
     try {
@@ -266,58 +171,47 @@ async function refreshDomainScorePanel() {
     const container = $('runtimeErrorPanel');
     if (container) container.classList.add('hidden');
   });
-  initializeParticles();
-  logInit('particles initialized');
-  updateQuarterReservoir();
-  setInterval(updateQuarterReservoir, 60 * 1000);
 
-  // Replace static domain icon placeholders (emoji text) with configured SVGs where available
-  function replaceStaticDomainIcons() {
-    Object.keys(DOMAINS).forEach(domain => {
-      try {
-        const container = document.querySelector(`.domain[data-domain="${domain}"] .domain-icon`);
-        if (!container) return;
-        const iconHtml = renderDomainIcon(domain);
-        // If renderDomainIcon returned an SVG <img> or text, replace the container's innerHTML
-        container.innerHTML = iconHtml;
-      } catch (e) {
-        // ignore
-      }
-    });
-  }
-  replaceStaticDomainIcons();
+  // Aspect Toggles
+  $$('.aspect-toggle').forEach(toggle => {
+    toggle.addEventListener('click', async () => {
+      const domain = toggle.dataset.domain;
+      const aspect = toggle.dataset.aspect;
+      const currentlyCompleted = appState.todayData[domain][aspect] || false;
+      const newCompleted = !currentlyCompleted;
 
-  // Initialize todayData and visibleAspects. Load persisted visibleAspects from localStorage
-  // so toggling dev/mock or reloading doesn't unexpectedly hide domains.
-  let persistedVisible = {};
-  try {
-    const raw = localStorage.getItem('visibleAspects');
-    if (raw) persistedVisible = JSON.parse(raw) || {};
-  } catch (e) {
-    // ignore parse errors and fall back to defaults
-    persistedVisible = {};
-  }
+      appState.todayData[domain][aspect] = newCompleted;
+      toggle.classList.toggle('completed', newCompleted);
 
-  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
-    appState.todayData[domain] = {};
-    // Use persisted value if present, otherwise default to true
-    appState.visibleAspects[domain] = (typeof persistedVisible[domain] !== 'undefined') ? Boolean(persistedVisible[domain]) : true;
-    aspects.forEach(aspect => {
-      appState.todayData[domain][aspect] = false;
+      await saveEntry(domain, aspect, newCompleted);
     });
   });
 
-  // Set initial mood selection
-  Array.from(document.querySelectorAll('.mood-option')).forEach(option => {
-    const mood = Number(option.dataset.mood);
-    option.classList.toggle('selected', mood === appState.mood);
+  // Navigation
+  $$('.nav-item, .bottom-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const screen = item.dataset.screen;
+      showScreen(screen + 'Screen');
+      document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
   });
 
-  // Developer / Mock toggles
+  // Mood Selection
+  $$('.mood-option').forEach(option => {
+    option.addEventListener('click', () => {
+      const mood = Number(option.dataset.mood);
+      appState.mood = mood;
+      $$('.mood-option').forEach(btn => btn.classList.remove('selected'));
+      option.classList.add('selected');
+    });
+  });
+
+  // Developer / Mock Toggles
   const devToggle = $('devModeToggle');
   const mockToggle = $('mockDataToggle');
-  // Clear storage button (dev troubleshooting)
   const clearStorageBtn = $('clearStorageBtn');
+
   if (clearStorageBtn) {
     clearStorageBtn.addEventListener('click', async () => {
       try {
@@ -326,7 +220,6 @@ async function refreshDomainScorePanel() {
         if (window.storageUtils && typeof window.storageUtils.clearAllAppStorage === 'function') {
           await window.storageUtils.clearAllAppStorage({ clearIndexedDB: true });
         }
-        // show a small ephemeral banner
         const b = document.createElement('div');
         b.className = 'ephemeral-banner';
         b.textContent = 'Cleared local data and caches. Reloading...';
@@ -340,28 +233,17 @@ async function refreshDomainScorePanel() {
       }
     });
   }
-  const devControls = $('devControls');
-
-  // Initialize from localStorage
-  const devMode = localStorage.getItem('dev_mode') === '1';
-  const useMock = localStorage.getItem('use_mock_data') === '1';
-  appState.devMode = devMode;
-  appState.useMock = useMock;
 
   if (devToggle) {
-    devToggle.checked = devMode;
     devToggle.addEventListener('change', () => {
       appState.devMode = devToggle.checked;
       localStorage.setItem('dev_mode', devToggle.checked ? '1' : '0');
-      // Show/hide all dev-only elements
       document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devToggle.checked));
     });
   }
 
   if (mockToggle) {
-    mockToggle.checked = useMock;
     mockToggle.addEventListener('change', async () => {
-      // If turning ON mock mode, offer to backup current data first
       if (mockToggle.checked) {
         const proceed = confirm('Enable mock mode will switch to sandboxed data and prevent syncing. Create a JSON backup of both real and mock data before switching? Click OK to create backup and enable mock mode, Cancel to abort.');
         if (!proceed) {
@@ -392,97 +274,69 @@ async function refreshDomainScorePanel() {
 
       appState.useMock = mockToggle.checked;
       localStorage.setItem('use_mock_data', mockToggle.checked ? '1' : '0');
-      // After switching mode, reload today's data and UI to ensure consistent data source
       try {
         await loadTodayData();
-        refreshDomainScorePanel();
         renderReview();
-        setMockBanner(appState.useMock);
+        $('mockBanner').classList.toggle('hidden', !appState.useMock);
       } catch (e) {
         console.warn('Reload after mock mode switch failed', e);
       }
     });
   }
 
-  // Initialize dev-only elements
-  document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devMode));
-  logInit('dev mode ' + (devMode ? 'ON' : 'OFF') + ', mock ' + (useMock ? 'ON' : 'OFF'));
-
-  // Mock mode banner elements
-  const mockBanner = $('mockBanner');
-  const mockSeedQuick = $('mockSeedQuick');
-  const mockClearQuick = $('mockClearQuick');
-
-  function setMockBanner(visible) {
-    if (!mockBanner) return;
-    mockBanner.classList.toggle('hidden', !visible);
-  }
-
-  // Dev control buttons
+  // Dev Control Buttons
   const seedBtn = $('seedMockData');
+  if (seedBtn) seedBtn.addEventListener('click', async () => { if (typeof window.seedMockData === 'function') try { await window.seedMockData(); await loadTodayData(); } catch (e) { console.error('seedMockData error', e); } });
+
   const clearBtn = $('clearMockData');
-  if (seedBtn) {
-    seedBtn.addEventListener('click', async () => {
-      if (typeof window.seedMockData === 'function') {
-        try {
-          await window.seedMockData();
-          await loadTodayData();
-        } catch (e) {
-          console.error('seedMockData error', e);
-        }
-      }
-    });
-  }
+  if (clearBtn) clearBtn.addEventListener('click', async () => { if (typeof window.clearMockData === 'function') try { await window.clearMockData(); await loadTodayData(); } catch (e) { console.error('clearMockData error', e); } });
 
-  if (clearBtn) {
-    clearBtn.addEventListener('click', async () => {
-      if (typeof window.clearMockData === 'function') {
-        try {
-          await window.clearMockData();
-          await loadTodayData();
-        } catch (e) {
-          console.error('clearMockData error', e);
-        }
-      }
-    });
-  }
+  const mockSeedQuick = $('mockSeedQuick');
+  if (mockSeedQuick) mockSeedQuick.addEventListener('click', async () => { if (!confirm('Seed mock data into sandbox? This will not affect real data.')) return; try { await window.seedMockData(); await loadTodayData(); $('mockBanner').classList.remove('hidden'); } catch (e) { console.error('seedMockData error', e); alert('Seeding mock data failed. See console.'); } });
 
-  // Quick banner actions
-  if (mockSeedQuick) {
-    mockSeedQuick.addEventListener('click', async () => {
-      if (!confirm('Seed mock data into sandbox? This will not affect real data.')) return;
-      try {
-        await window.seedMockData();
-        await loadTodayData();
-        setMockBanner(true);
-      } catch (e) {
-        console.error('seedMockData error', e);
-        alert('Seeding mock data failed. See console.');
-      }
-    });
-  }
+  const mockClearQuick = $('mockClearQuick');
+  if (mockClearQuick) mockClearQuick.addEventListener('click', async () => { if (!confirm('Clear mock sandbox data? This will remove mock entries and outbox.')) return; try { await window.clearMockData(); await loadTodayData(); $('mockBanner').classList.remove('hidden'); } catch (e) { console.error('clearMockData error', e); alert('Clearing mock data failed. See console.'); } });
 
-  if (mockClearQuick) {
-    mockClearQuick.addEventListener('click', async () => {
-      if (!confirm('Clear mock sandbox data? This will remove mock entries and outbox.')) return;
-      try {
-        await window.clearMockData();
-        await loadTodayData();
-        setMockBanner(true);
-      } catch (e) {
-        console.error('clearMockData error', e);
-        alert('Clearing mock data failed. See console.');
-      }
-    });
-  }
+  // Other Buttons
+  const saveReflectionBtn = $('saveReflection');
+  if (saveReflectionBtn) saveReflectionBtn.addEventListener('click', saveReflection);
 
-  // Diagnostics panel (dev-only)
-  const diagStoresEl = $('diagStores');
-  const diagAppStateEl = $('diagAppState');
+  const exportBtn = $('exportCSV');
+  if (exportBtn) exportBtn.addEventListener('click', window.exportToCSV);
+
+  const syncBtn = $('syncNow');
+  if (syncBtn) syncBtn.addEventListener('click', () => { trySync(); });
+
+  // Diagnostics Panel
   const diagRefreshBtn = $('diagRefresh');
-  const diagEnsureBtn = $('diagEnsureStores');
+  if(diagRefreshBtn) diagRefreshBtn.addEventListener('click', renderDiagnostics);
+  
+  const dumpBtn = $('dumpStorageBtn');
+  if (dumpBtn) dumpBtn.addEventListener('click', async () => { try { await dumpAppState(); alert('Storage dumped to console and diagnostics panel.'); } catch (e) { console.error('dump failed', e); alert('Dump failed; see console.'); } });
 
-  async function renderDiagnostics() {
+  const diagEnsureBtn = $('diagEnsureStores');
+  if (diagEnsureBtn) diagEnsureBtn.addEventListener('click', async () => { if (typeof window.ensureStoresExist === 'function') try { await window.ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']); await renderDiagnostics(); alert('Ensure stores: complete'); } catch (e) { console.error('ensureStoresExist failed', e); alert('Ensure stores failed. Check console.'); } });
+
+  // Manage Aspects Toggles
+  document.addEventListener('click', e => {
+    if (e.target.classList.contains('toggle-domain')) {
+      const domain = e.target.dataset.domain;
+      appState.visibleAspects[domain] = !appState.visibleAspects[domain];
+      e.target.textContent = appState.visibleAspects[domain] ? 'HIDE' : 'SHOW';
+      updateVisibleAspects();
+      renderAspectsManager();
+      try {
+        localStorage.setItem('visibleAspects', JSON.stringify(appState.visibleAspects));
+      } catch (e) {}
+    }
+  });
+
+  window.listenersAreBound = true;
+}
+
+async function renderDiagnostics() {
+    const diagStoresEl = $('diagStores');
+    const diagAppStateEl = $('diagAppState');
     try {
       const db = await dbp;
       const names = Array.from(db.objectStoreNames || []);
@@ -491,59 +345,28 @@ async function refreshDomainScorePanel() {
         try {
           const tx = db.transaction(n, 'readonly');
           const store = tx.objectStore(n);
-          const count = await new Promise((res, rej) => {
-            const r = store.count();
-            r.onsuccess = () => res(r.result);
-            r.onerror = () => rej(r.error);
-          });
+          const count = await new Promise((res, rej) => { const r = store.count(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
           parts.push(`${n}: ${count}`);
-        } catch (e) {
-          parts.push(`${n}: (error)`);
-        }
+        } catch (e) { parts.push(`${n}: (error)`); }
       }
       if (diagStoresEl) diagStoresEl.textContent = parts.join(' · ') || 'No stores';
-    } catch (e) {
-      if (diagStoresEl) diagStoresEl.textContent = 'DB unavailable';
-    }
-
+    } catch (e) { if (diagStoresEl) diagStoresEl.textContent = 'DB unavailable'; }
     if (diagAppStateEl) {
       try {
-        diagAppStateEl.textContent = JSON.stringify({
-          devMode: appState.devMode,
-          useMock: appState.useMock,
-          currentScreen: appState.currentScreen,
-          mood: appState.mood,
-          visibleAspects: appState.visibleAspects
-        }, null, 0);
-      } catch (e) {
-        diagAppStateEl.textContent = 'error';
-      }
+        diagAppStateEl.textContent = JSON.stringify({ devMode: appState.devMode, useMock: appState.useMock, currentScreen: appState.currentScreen, mood: appState.mood, visibleAspects: appState.visibleAspects }, null, 0);
+      } catch (e) { diagAppStateEl.textContent = 'error'; }
     }
-  }
+}
 
-  // Dump app state and storage for debugging
-  async function dumpAppState() {
+async function dumpAppState() {
     try {
       const snapshot = {
         timestamp: new Date().toISOString(),
-        appState: {
-          currentScreen: appState.currentScreen,
-          visibleAspects: appState.visibleAspects,
-          streaks: appState.streaks,
-          mood: appState.mood,
-          devMode: appState.devMode,
-          useMock: appState.useMock
-        },
+        appState: { currentScreen: appState.currentScreen, visibleAspects: appState.visibleAspects, streaks: appState.streaks, mood: appState.mood, devMode: appState.devMode, useMock: appState.useMock },
         localStorage: {},
         indexedDB: {}
       };
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          snapshot.localStorage[k] = localStorage.getItem(k);
-        }
-      } catch (e) { snapshot.localStorage_error = String(e); }
-
+      try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); snapshot.localStorage[k] = localStorage.getItem(k); } } catch (e) { snapshot.localStorage_error = String(e); }
       try {
         const db = await dbp;
         for (const name of Array.from(db.objectStoreNames || [])) {
@@ -555,108 +378,97 @@ async function refreshDomainScorePanel() {
           } catch (e) { snapshot.indexedDB[name] = { error: String(e) }; }
         }
       } catch (e) { snapshot.indexedDB_error = String(e); }
-
       console.group('[diagnostic] dumpAppState');
       console.log(snapshot);
       console.groupEnd();
-
-      if (diagAppStateEl) {
-        diagAppStateEl.textContent = JSON.stringify({ lastDump: snapshot.timestamp, appState: snapshot.appState }, null, 0);
-      }
+      const diagAppStateEl = $('diagAppState');
+      if (diagAppStateEl) { diagAppStateEl.textContent = JSON.stringify({ lastDump: snapshot.timestamp, appState: snapshot.appState }, null, 0); }
       return snapshot;
-    } catch (err) {
-      console.error('dumpAppState failed', err);
-      throw err;
-    }
+    } catch (err) { console.error('dumpAppState failed', err); throw err; }
+}
+
+async function refreshDomainScorePanel() {
+  const grid = $('domainScoreGrid');
+  if (!grid) return;
+  const domains = ['sleep', 'fitness', 'mind', 'spirit'];
+  grid.innerHTML = domains.map(domain => {
+    const value = (appState && appState.overviewScores && typeof appState.overviewScores[domain] !== 'undefined') ? String(appState.overviewScores[domain]) : '—';
+    return `
+      <div class="lean-domain-item">
+        <div class="lean-domain-inner">
+          <div class="lean-ring-icon">
+            <span class="domain-icon ${domain}" role="img" aria-label="${domain} icon"></span>
+          </div>
+          <div class="lean-score-value">${value}</div>
+          <div class="lean-domain-label">${domain.toUpperCase()}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Main UI initialization function
+async function initializeUI() {
+  if (document.readyState === 'loading') {
+    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
   }
 
-  if (diagRefreshBtn) {
-    diagRefreshBtn.addEventListener('click', async () => {
-      await renderDiagnostics();
-    });
-  }
+  // Bind all event listeners once.
+  initializeEventListeners();
 
-  // Dump storage button (dev-only)
-  const dumpBtn = $('dumpStorageBtn');
-  if (dumpBtn) {
-    dumpBtn.addEventListener('click', async () => {
+  // Perform initial UI setup that doesn't involve listeners.
+  initializeParticles();
+  logInit('particles initialized');
+  updateQuarterReservoir();
+  setInterval(updateQuarterReservoir, 60 * 1000);
+
+  function replaceStaticDomainIcons() {
+    Object.keys(DOMAINS).forEach(domain => {
       try {
-        await dumpAppState();
-        alert('Storage dumped to console and diagnostics panel.');
-      } catch (e) {
-        console.error('dump failed', e);
-        alert('Dump failed; see console.');
-      }
+        const container = document.querySelector(`.domain[data-domain="${domain}"] .domain-icon`);
+        if (container) container.innerHTML = renderDomainIcon(domain);
+      } catch (e) {}
     });
   }
+  replaceStaticDomainIcons();
 
-  if (diagEnsureBtn) {
-    diagEnsureBtn.addEventListener('click', async () => {
-      if (typeof window.ensureStoresExist === 'function') {
-        try {
-          await window.ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']);
-          await renderDiagnostics();
-          alert('Ensure stores: complete');
-        } catch (e) {
-          console.error('ensureStoresExist failed', e);
-          alert('Ensure stores failed. Check console.');
-        }
-      }
-    });
-  }
+  let persistedVisible = {};
+  try {
+    const raw = localStorage.getItem('visibleAspects');
+    if (raw) persistedVisible = JSON.parse(raw) || {};
+  } catch (e) { persistedVisible = {}; }
 
-  // Render diagnostics once at init
-  renderDiagnostics().catch((e) => { console.warn('renderDiagnostics failed', e); });
-
-  const saveReflectionBtn = $('saveReflection');
-  if (saveReflectionBtn) {
-    saveReflectionBtn.addEventListener('click', saveReflection);
-  }
-
-  const exportBtn = $('exportCSV');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', window.exportToCSV);
-  }
-
-  const syncBtn = $('syncNow');
-  if (syncBtn) {
-    syncBtn.addEventListener('click', () => {
-      trySync();
-    });
-  }
-
-  // Voice button removed from DOM — do not initialize voice controls.
-
-  document.addEventListener('click', e => {
-    if (e.target.classList.contains('toggle-domain')) {
-      const domain = e.target.dataset.domain;
-      appState.visibleAspects[domain] = !appState.visibleAspects[domain];
-      e.target.textContent = appState.visibleAspects[domain] ? 'HIDE' : 'SHOW';
-      updateVisibleAspects();
-      renderAspectsManager();
-      try {
-        localStorage.setItem('visibleAspects', JSON.stringify(appState.visibleAspects));
-      } catch (e) {
-        // ignore quota errors
-      }
-    }
+  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
+    appState.todayData[domain] = {};
+    appState.visibleAspects[domain] = (typeof persistedVisible[domain] !== 'undefined') ? Boolean(persistedVisible[domain]) : true;
+    aspects.forEach(aspect => { appState.todayData[domain][aspect] = false; });
   });
 
-  await showSafe(refreshDomainScorePanel);
+  // Initialize state from localStorage
+  const devMode = localStorage.getItem('dev_mode') === '1';
+  const useMock = localStorage.getItem('use_mock_data') === '1';
+  appState.devMode = devMode;
+  appState.useMock = useMock;
+  if ($('devModeToggle')) $('devModeToggle').checked = devMode;
+  if ($('mockDataToggle')) $('mockDataToggle').checked = useMock;
+  document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devMode));
+  logInit('dev mode ' + (devMode ? 'ON' : 'OFF') + ', mock ' + (useMock ? 'ON' : 'OFF'));
+  if ($('mockBanner')) $('mockBanner').classList.toggle('hidden', !useMock);
 
-  await showSafe(renderAspectsManager);
-
-  await showSafe(initializeAudioNotesList);
+  // Initial render calls
+  await refreshDomainScorePanel();
+  await renderAspectsManager();
+  await initializeAudioNotesList();
+  await renderDiagnostics();
 
   // If mock data flag is set, load or seed mock data before loading
   if (appState.useMock && typeof window.seedMockData === 'function') {
     try {
       logInit('seeding mock data');
-      await window.seedMockData();
+      const mockEntries = await getMockEntries();
+      if(mockEntries.length === 0) await window.seedMockData();
       logInit('mock data seeded');
-    } catch (e) {
-      console.warn('seedMockData failed', e);
-    }
+    } catch (e) { console.warn('seedMockData failed', e); }
   }
 
   try {
@@ -1428,9 +1240,6 @@ function updateVisibleAspects() {
   });
 }
 
-// Expose for testing and cross-script usage
-// Minimal UI helpers restored: these were accidentally removed during edits.
-// They provide the small API surface `main.js` and other modules expect.
 function showScreen(screenId) {
   try {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1478,7 +1287,6 @@ function updateProgress() {
       if (el) el.textContent = `${completed}/${total}`;
     });
 
-    // Update quarter fill percentage if present
     try {
       const allCompleted = Object.values(appState.todayData || {}).reduce((acc, byAspect) => acc + Object.values(byAspect).filter(Boolean).length, 0);
       const percent = TOTAL_ASPECTS ? Math.round((allCompleted / TOTAL_ASPECTS) * 100) : 0;
@@ -1498,15 +1306,23 @@ function renderReview() {
   } catch (e) { /* ignore */ }
 }
 
-async function initializeUI() {
-  if (document.readyState === 'loading') {
-    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-  }
-  if (!window.listenersAreBound) {
-    initializeEventListeners();
-    window.listenersAreBound = true;
-  }
-  await refreshDomainScorePanel();
+async function updateTranscription(noteId, newValue, { button, textarea }) {
+    if (!button || !textarea) return;
+    try {
+      await window.updateAudioTranscription(noteId, newValue);
+      textarea.dataset.originalValue = encodeURIComponent(newValue);
+      button.textContent = 'Saved';
+      button.disabled = true;
+      setTimeout(() => {
+        if (button.textContent === 'Saved') {
+          button.textContent = 'Save';
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to update transcription:', error);
+      button.textContent = 'Retry';
+      button.disabled = false;
+    }
 }
 
 window.initializeUI = initializeUI;
