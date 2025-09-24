@@ -226,6 +226,21 @@
         <div class="settings-title">Manage Aspects</div>
         <div id="aspectsManager"></div>
       </div>
+      <div class="settings-section dev-only hidden" id="diagnosticsSection">
+        <div class="settings-title">Diagnostics</div>
+        <div class="setting-item">
+          <span>IndexedDB Stores</span>
+          <div id="diagStores" class="setting-subtle">Loading…</div>
+        </div>
+        <div class="setting-item">
+          <span>App state</span>
+          <div id="diagAppState" class="setting-subtle">Loading…</div>
+        </div>
+        <div class="setting-item">
+          <button id="diagRefresh" class="setting-action">Refresh</button>
+          <button id="diagEnsureStores" class="setting-action">Ensure Mock Stores</button>
+        </div>
+      </div>
       
       <div class="settings-section">
         <div class="settings-title">Developer</div>

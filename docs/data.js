@@ -608,3 +608,4 @@ window.getMockOutbox = getMockOutbox;
 window.getAllEntries = getAllEntries;
 window.getEntriesByDate = getEntriesByDate;
 window.isUsingMock = isUsingMock;
+window.ensureStoresExist = ensureStoresExist;

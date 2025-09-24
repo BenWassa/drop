@@ -557,6 +557,75 @@ async function initializeUI() {
     });
   }
 
+  // Diagnostics panel (dev-only)
+  const diagStoresEl = $('diagStores');
+  const diagAppStateEl = $('diagAppState');
+  const diagRefreshBtn = $('diagRefresh');
+  const diagEnsureBtn = $('diagEnsureStores');
+
+  async function renderDiagnostics() {
+    try {
+      const db = await dbp;
+      const names = Array.from(db.objectStoreNames || []);
+      const parts = [];
+      for (const n of names) {
+        try {
+          const tx = db.transaction(n, 'readonly');
+          const store = tx.objectStore(n);
+          const count = await new Promise((res, rej) => {
+            const r = store.count();
+            r.onsuccess = () => res(r.result);
+            r.onerror = () => rej(r.error);
+          });
+          parts.push(`${n}: ${count}`);
+        } catch (e) {
+          parts.push(`${n}: (error)`);
+        }
+      }
+      if (diagStoresEl) diagStoresEl.textContent = parts.join(' · ') || 'No stores';
+    } catch (e) {
+      if (diagStoresEl) diagStoresEl.textContent = 'DB unavailable';
+    }
+
+    if (diagAppStateEl) {
+      try {
+        diagAppStateEl.textContent = JSON.stringify({
+          devMode: appState.devMode,
+          useMock: appState.useMock,
+          currentScreen: appState.currentScreen,
+          mood: appState.mood,
+          visibleAspects: appState.visibleAspects
+        }, null, 0);
+      } catch (e) {
+        diagAppStateEl.textContent = 'error';
+      }
+    }
+  }
+
+  if (diagRefreshBtn) {
+    diagRefreshBtn.addEventListener('click', async () => {
+      await renderDiagnostics();
+    });
+  }
+
+  if (diagEnsureBtn) {
+    diagEnsureBtn.addEventListener('click', async () => {
+      if (typeof window.ensureStoresExist === 'function') {
+        try {
+          await window.ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']);
+          await renderDiagnostics();
+          alert('Ensure stores: complete');
+        } catch (e) {
+          console.error('ensureStoresExist failed', e);
+          alert('Ensure stores failed. Check console.');
+        }
+      }
+    });
+  }
+
+  // Render diagnostics once at init
+  renderDiagnostics().catch(() => {});
+
   const saveReflectionBtn = $('saveReflection');
   if (saveReflectionBtn) {
     saveReflectionBtn.addEventListener('click', saveReflection);
