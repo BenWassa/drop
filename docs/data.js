@@ -622,7 +622,8 @@ async function seedMockData(days = 7) {
       try {
         const audioStore = db.transaction('mock_audio_notes', 'readwrite').objectStore('mock_audio_notes');
         const audioId = `${dateStr}-audio-mock`;
-        const blob = new Blob([''], { type: 'audio/mpeg' });
+        // Create a minimal non-empty blob to avoid range request errors in some browsers
+        const blob = new Blob(['\0'], { type: 'audio/mpeg' });
         const audioEntry = { id: audioId, date: dateStr, blob, transcription: 'Mock audio note', timestamp: Date.now(), __mock: true };
         audioStore.put(audioEntry);
       } catch (e) {
