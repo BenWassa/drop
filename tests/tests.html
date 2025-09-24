@@ -319,10 +319,28 @@
                 transaction: function(storeNames, mode) {
                     // normalize storeNames parameter
                     const names = Array.isArray(storeNames) ? storeNames : [storeNames];
-                    const tx = {
-                        oncomplete: null,
-                        onerror: null,
-                        objectStore: function(name) {
+                    const tx = (function() {
+                        let _oncomplete = null;
+                        let _onerror = null;
+                        let _completed = false;
+                        let _errored = false;
+
+                        function callComplete(evt) {
+                            _completed = true;
+                            if (typeof _oncomplete === 'function') {
+                                try { _oncomplete(evt || {}); } catch (e) { console.error('mock tx oncomplete handler failed', e); }
+                            }
+                        }
+
+                        function callError(err) {
+                            _errored = true;
+                            if (typeof _onerror === 'function') {
+                                try { _onerror(err); } catch (e) { console.error('mock tx onerror handler failed', e); }
+                            }
+                        }
+
+                        const obj = {
+                            objectStore: function(name) {
                             ensureStore(name);
                             return {
                                 put: function(val) {
@@ -360,20 +378,45 @@
                                     setTimeout(() => { req.result = (stores[name] || []).length; if (typeof req.onsuccess === 'function') req.onsuccess({ target: req }); }, 0);
                                     return req;
                                 }
-                            };
-                        }
-                    };
+                            }
+                        };
 
-                    // Simulate async transaction completion
-                    setTimeout(() => {
-                        try {
-                            if (typeof tx.oncomplete === 'function') tx.oncomplete({});
-                        } catch (e) {
-                            if (typeof tx.onerror === 'function') tx.onerror(e);
-                        }
-                    }, 0);
+                        Object.defineProperty(obj, 'oncomplete', {
+                            get() { return _oncomplete; },
+                            set(fn) {
+                                _oncomplete = fn;
+                                // If transaction already completed, call handler asynchronously
+                                if (_completed && typeof _oncomplete === 'function') {
+                                    setTimeout(() => { try { _oncomplete({}); } catch (e) {} }, 0);
+                                }
+                            },
+                            configurable: true
+                        });
 
+                        Object.defineProperty(obj, 'onerror', {
+                            get() { return _onerror; },
+                            set(fn) {
+                                _onerror = fn;
+                                if (_errored && typeof _onerror === 'function') {
+                                    setTimeout(() => { try { _onerror({}); } catch (e) {} }, 0);
+                                }
+                            },
+                            configurable: true
+                        });
+
+                        // Simulate async transaction completion
+                        setTimeout(() => {
+                            try {
+                                callComplete({});
+                            } catch (e) {
+                                callError(e);
+                            }
+                        }, 20);
+
+                        return obj;
+                    })();
                     return tx;
+
                 }
             };
         })();
@@ -503,14 +546,22 @@
                     try { await window.ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']); } catch (e) {}
                 }
 
-                // If seedMockData is available, use it; otherwise directly insert into mockDB
-                if (typeof window.seedMockData === 'function') {
-                    await window.seedMockData(2);
-                } else if (window.mockDB && window.mockDB.transaction) {
+                // Prefer a fast, deterministic mock insert to avoid long seeding
+                if (window.mockDB && window.mockDB.transaction) {
                     const today = new Date().toISOString().split('T')[0];
-                    const entry = { id: `${today}-sleep-wake`, date: today, domain: 'sleep', aspect: 'wake', completed: true, type: 'entry', timestamp: Date.now() };
+                    const entry = { id: `${today}-sleep-wake`, date: today, domain: 'sleep', aspect: 'wake', completed: true, type: 'entry', timestamp: Date.now(), __mock: true };
                     const tx = window.mockDB.transaction(['mock_entries', 'mock_outbox'], 'readwrite');
-                    tx.objectStore('mock_entries').add(entry);
+                    try {
+                        tx.objectStore('mock_entries').put(entry);
+                        tx.objectStore('mock_outbox').add({ type: 'ENTRY', payload: entry, ts: Date.now(), __mock: true });
+                    } catch (e) {
+                        // ignore
+                    }
+                    // wait briefly for transaction completion
+                    await new Promise(r => setTimeout(r, 50));
+                } else if (typeof window.seedMockData === 'function') {
+                    // fallback: seed minimal data
+                    await window.seedMockData(1);
                 }
 
                 // Reload today's data and render
