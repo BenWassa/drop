@@ -158,14 +158,24 @@ async function refreshDomainScorePanel() {
       ringContainer.className = 'lean-score-ring-container';
 
       const radius = 30;
-      const circumference = 2 * Math.PI * radius;
-      const progressLength = (score / 100) * circumference;
-      const gapLength = circumference - progressLength;
+      const centerX = 34;
+      const centerY = 34;
+      const startAngle = 30; // start 30 degrees from top
+      const endAngle = 330; // end at 330 degrees, creating 60 degree gap at bottom
+      const startX = centerX + radius * Math.sin(startAngle * Math.PI / 180);
+      const startY = centerY - radius * Math.cos(startAngle * Math.PI / 180);
+      const endX = centerX + radius * Math.sin(endAngle * Math.PI / 180);
+      const endY = centerY - radius * Math.cos(endAngle * Math.PI / 180);
+      const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
+      const pathData = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+      const arcLength = (endAngle / 360) * 2 * Math.PI * radius;
+      const progressLength = (score / 100) * arcLength;
+      const gapLength = arcLength - progressLength;
       const accentColor = { sleep: '#1e90ff', fitness: '#ff3b30', mind: '#7c3aed', spirit: '#16a34a' }[domain] || '#94a3b8';
 
       const svg = `<svg width="68" height="68" viewBox="0 0 68 68" class="lean-score-ring-svg">
-        <circle cx="34" cy="34" r="${radius}" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="4" />
-        <circle cx="34" cy="34" r="${radius}" fill="none" stroke="${accentColor}" stroke-width="4" stroke-dasharray="${progressLength} ${gapLength}" stroke-dashoffset="0" transform="rotate(-90 34 34)" />
+        <path d="${pathData}" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="4" />
+        <path d="${pathData}" fill="none" stroke="${accentColor}" stroke-width="4" stroke-dasharray="${progressLength} ${gapLength}" stroke-dashoffset="0" />
       </svg>`;
 
       ringContainer.innerHTML = svg;
