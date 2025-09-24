@@ -1,11 +1,23 @@
 // ui.js - UI layer: DOM manipulation and rendering
 
 const DOMAIN_ICONS = {
-  sleep: '🌙',
-  fitness: '🏃',
-  mind: '📚',
-  spirit: '🧘',
+  // Values can be an emoji/string or a relative SVG filename in `docs/images/`
+  sleep: 'images/sleep.svg',
+  fitness: 'images/fitness.svg',
+  mind: 'images/mind.svg',
+  spirit: 'images/meditation.svg',
 };
+
+function renderDomainIcon(domain) {
+  const v = DOMAIN_ICONS[domain];
+  if (!v) return '';
+  if (typeof v === 'string' && v.toLowerCase().endsWith('.svg')) {
+    // Use an img tag referencing the SVG asset
+    return `<img src="${v}" alt="${domain} icon" class="domain-icon-svg"/>`;
+  }
+  // fallback to text/emoji
+  return `<span class="domain-icon-text">${escapeHTML(String(v))}</span>`;
+}
 
 function getISOWeek(date) {
   const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -172,7 +184,7 @@ async function refreshDomainScorePanel() {
 
       card.innerHTML = `
         <div class="domain-score-header">
-          <div class="domain-score-title">${DOMAIN_ICONS[domain] ? `${DOMAIN_ICONS[domain]} ` : ''}${domain.toUpperCase()}</div>
+          <div class="domain-score-title">${renderDomainIcon(domain)} ${domain.toUpperCase()}</div>
           <div class="domain-score-score">${score}<span class="unit">%</span>${
         hasCrown ? '<span class="crown-icon" aria-label="High performer">👑</span>' : ''
       }</div>
@@ -492,6 +504,22 @@ async function initializeUI() {
   logInit('particles initialized');
   updateQuarterReservoir();
   setInterval(updateQuarterReservoir, 60 * 1000);
+
+  // Replace static domain icon placeholders (emoji text) with configured SVGs where available
+  function replaceStaticDomainIcons() {
+    Object.keys(DOMAINS).forEach(domain => {
+      try {
+        const container = document.querySelector(`.domain[data-domain="${domain}"] .domain-icon`);
+        if (!container) return;
+        const iconHtml = renderDomainIcon(domain);
+        // If renderDomainIcon returned an SVG <img> or text, replace the container's innerHTML
+        container.innerHTML = iconHtml;
+      } catch (e) {
+        // ignore
+      }
+    });
+  }
+  replaceStaticDomainIcons();
 
   // Initialize todayData and visibleAspects. Load persisted visibleAspects from localStorage
   // so toggling dev/mock or reloading doesn't unexpectedly hide domains.
