@@ -284,8 +284,8 @@
         } catch (e) {}
 
         // Simple in-memory mock DB with seeded sample entries
-        const mockDB = (function() {
-            const stores = {
+        var mockDB = (function() {
+            var stores = {
                 entries: [
                     {
                         id: '2024-01-01-sleep-wake',
@@ -305,55 +305,59 @@
             };
 
             // objectStoreNames: array-like with contains method (IDBCompatibility)
-            const objectStoreNames = Object.keys(stores);
-            objectStoreNames.contains = function(name) { return this.indexOf(name) !== -1; };
-            objectStoreNames[Symbol.iterator] = function* () { yield* Array.from(this); };
+            var objectStoreNames = Object.keys(stores);
+            objectStoreNames.contains = function(name) { return objectStoreNames.indexOf(name) !== -1; };
 
             function ensureStore(name) { if (!stores[name]) { stores[name] = []; objectStoreNames.push(name); } }
 
             return {
                 version: 1,
-                objectStoreNames,
+                objectStoreNames: objectStoreNames,
                 close: function() {},
                 createObjectStore: function(name, opts) { ensureStore(name); return { createIndex: function(){} }; },
                 transaction: function(storeNames, mode) {
                     // normalize storeNames parameter
-                    const names = Array.isArray(storeNames) ? storeNames : [storeNames];
-                    const tx = (function() {
-                        let _oncomplete = null;
-                        let _onerror = null;
-                        let _completed = false;
-                        let _errored = false;
+                    var names = Array.isArray(storeNames) ? storeNames : [storeNames];
 
-                        function callComplete(evt) {
-                            _completed = true;
-                            if (typeof _oncomplete === 'function') {
-                                try { _oncomplete(evt || {}); } catch (e) { console.error('mock tx oncomplete handler failed', e); }
-                            }
+                    var _oncomplete = null;
+                    var _onerror = null;
+                    var _completed = false;
+                    var _errored = false;
+
+                    function callComplete(evt) {
+                        _completed = true;
+                        if (typeof _oncomplete === 'function') {
+                            try { _oncomplete(evt || {}); } catch (e) { if (console && console.error) console.error('mock tx oncomplete handler failed', e); }
                         }
+                    }
 
-                        function callError(err) {
-                            _errored = true;
-                            if (typeof _onerror === 'function') {
-                                try { _onerror(err); } catch (e) { console.error('mock tx onerror handler failed', e); }
-                            }
+                    function callError(err) {
+                        _errored = true;
+                        if (typeof _onerror === 'function') {
+                            try { _onerror(err); } catch (e) { if (console && console.error) console.error('mock tx onerror handler failed', e); }
                         }
+                    }
 
-                        const obj = {
-                            objectStore: function(name) {
+                    var obj = {
+                        objectStore: function(name) {
                             ensureStore(name);
                             return {
                                 put: function(val) {
-                                    const idx = stores[name].findIndex(e => e && e.id === val.id);
-                                    if (idx >= 0) stores[name][idx] = val; else stores[name].push(val);
+                                    var idx = -1;
+                                    var list = stores[name] || [];
+                                    for (var i = 0; i < list.length; i++) { if (list[i] && list[i].id === val.id) { idx = i; break; } }
+                                    if (idx >= 0) list[idx] = val; else list.push(val);
                                 },
-                                add: function(val) { stores[name].push(val); },
+                                add: function(val) { (stores[name] = stores[name] || []).push(val); },
                                 index: function(indexName) {
                                     return {
                                         getAll: function(key) {
-                                            const req = {};
-                                            setTimeout(() => {
-                                                req.result = (stores[name] || []).filter(e => e && e.date === key);
+                                            var req = {};
+                                            setTimeout(function() {
+                                                var list = (stores[name] || []).slice();
+                                                var out = [];
+                                                for (var j = 0; j < list.length; j++) { var e = list[j]; if (e && e.date === key) out.push(e); }
+                                                req.result = out;
                                                 if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
                                             }, 0);
                                             return req;
@@ -361,62 +365,61 @@
                                     };
                                 },
                                 getAll: function() {
-                                    const req = {};
-                                    // emulate async IDB behavior
-                                    setTimeout(() => {
+                                    var req = {};
+                                    setTimeout(function() {
                                         req.result = (stores[name] || []).slice();
                                         if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
                                     }, 0);
                                     return req;
                                 },
-                                delete: function(id) {
-                                    const idx = (stores[name] || []).findIndex(e => e && e.id === id);
-                                    if (idx >= 0) stores[name].splice(idx, 1);
+                                "delete": function(id) {
+                                    var list = stores[name] || [];
+                                    var idx = -1;
+                                    for (var k = 0; k < list.length; k++) { if (list[k] && list[k].id === id) { idx = k; break; } }
+                                    if (idx >= 0) list.splice(idx, 1);
                                 },
                                 count: function() {
-                                    const req = {};
-                                    setTimeout(() => { req.result = (stores[name] || []).length; if (typeof req.onsuccess === 'function') req.onsuccess({ target: req }); }, 0);
+                                    var req = {};
+                                    setTimeout(function() { req.result = (stores[name] || []).length; if (typeof req.onsuccess === 'function') req.onsuccess({ target: req }); }, 0);
                                     return req;
                                 }
+                            };
+                        }
+                    };
+
+                    Object.defineProperty(obj, 'oncomplete', {
+                        get: function() { return _oncomplete; },
+                        set: function(fn) {
+                            _oncomplete = fn;
+                            // If transaction already completed, call handler asynchronously
+                            if (_completed && typeof _oncomplete === 'function') {
+                                setTimeout(function() { try { _oncomplete({}); } catch (e) {} }, 0);
                             }
-                        };
+                        },
+                        configurable: true
+                    });
 
-                        Object.defineProperty(obj, 'oncomplete', {
-                            get() { return _oncomplete; },
-                            set(fn) {
-                                _oncomplete = fn;
-                                // If transaction already completed, call handler asynchronously
-                                if (_completed && typeof _oncomplete === 'function') {
-                                    setTimeout(() => { try { _oncomplete({}); } catch (e) {} }, 0);
-                                }
-                            },
-                            configurable: true
-                        });
-
-                        Object.defineProperty(obj, 'onerror', {
-                            get() { return _onerror; },
-                            set(fn) {
-                                _onerror = fn;
-                                if (_errored && typeof _onerror === 'function') {
-                                    setTimeout(() => { try { _onerror({}); } catch (e) {} }, 0);
-                                }
-                            },
-                            configurable: true
-                        });
-
-                        // Simulate async transaction completion
-                        setTimeout(() => {
-                            try {
-                                callComplete({});
-                            } catch (e) {
-                                callError(e);
+                    Object.defineProperty(obj, 'onerror', {
+                        get: function() { return _onerror; },
+                        set: function(fn) {
+                            _onerror = fn;
+                            if (_errored && typeof _onerror === 'function') {
+                                setTimeout(function() { try { _onerror({}); } catch (e) {} }, 0);
                             }
-                        }, 20);
+                        },
+                        configurable: true
+                    });
 
-                        return obj;
-                    })();
-                    return tx;
+                    // Simulate async transaction completion
+                    setTimeout(function() {
+                        try {
+                            callComplete({});
+                        } catch (e) {
+                            callError(e);
+                        }
+                    }, 20);
 
+                    return obj;
                 }
             };
         })();
