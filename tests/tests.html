@@ -240,8 +240,15 @@
                     onerror: null,
                     result: null
                 };
-                // Simulate successful open
+                // Simulate successful open and upgradeneeded when version increases
                 setTimeout(() => {
+                    // If a version was passed and it's greater than mockDB.version, trigger upgrade
+                    if (typeof version === 'number' && version > (mockDB.version || 0)) {
+                        mockDB.version = version;
+                        if (typeof req.onupgradeneeded === 'function') {
+                            try { req.onupgradeneeded({ target: req }); } catch (e) { console.warn('mock onupgradeneeded handler failed', e); }
+                        }
+                    }
                     req.result = mockDB;
                     if (req.onsuccess) req.onsuccess({ target: req });
                 }, 0);
@@ -270,9 +277,18 @@
                 outbox: []
             };
 
-            function ensureStore(name) { if (!stores[name]) stores[name] = []; }
+            // objectStoreNames: array-like with contains method (IDBCompatibility)
+            const objectStoreNames = Object.keys(stores);
+            objectStoreNames.contains = function(name) { return this.indexOf(name) !== -1; };
+            objectStoreNames[Symbol.iterator] = function* () { yield* Array.from(this); };
+
+            function ensureStore(name) { if (!stores[name]) { stores[name] = []; objectStoreNames.push(name); } }
 
             return {
+                version: 1,
+                objectStoreNames,
+                close: function() {},
+                createObjectStore: function(name, opts) { ensureStore(name); return { createIndex: function(){} }; },
                 transaction: function(storeNames, mode) {
                     // normalize storeNames parameter
                     const names = Array.isArray(storeNames) ? storeNames : [storeNames];
@@ -290,7 +306,7 @@
                                         getAll: function(key) {
                                             const req = {};
                                             setTimeout(() => {
-                                                req.result = stores[name].filter(e => e.date === key);
+                                                req.result = (stores[name] || []).filter(e => e && e.date === key);
                                                 if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
                                             }, 0);
                                             return req;
@@ -304,6 +320,15 @@
                                         req.result = (stores[name] || []).slice();
                                         if (typeof req.onsuccess === 'function') req.onsuccess({ target: req });
                                     }, 0);
+                                    return req;
+                                },
+                                delete: function(id) {
+                                    const idx = (stores[name] || []).findIndex(e => e && e.id === id);
+                                    if (idx >= 0) stores[name].splice(idx, 1);
+                                },
+                                count: function() {
+                                    const req = {};
+                                    setTimeout(() => { req.result = (stores[name] || []).length; if (typeof req.onsuccess === 'function') req.onsuccess({ target: req }); }, 0);
                                     return req;
                                 }
                             };
@@ -392,22 +417,22 @@
                 const reviewNav = document.querySelector('[data-screen="review"]');
 
                 todayNav.click();
-                assert.ok(todayNav.classList.contains('active'), 'Today nav is active');
+                assert.ok(todayNav && todayNav.classList && todayNav.classList.contains('active'), 'Today nav is active');
 
                 reviewNav.click();
-                assert.ok(reviewNav.classList.contains('active'), 'Review nav is active');
-                assert.notOk(todayNav.classList.contains('active'), 'Today nav is not active');
+                assert.ok(reviewNav && reviewNav.classList && reviewNav.classList.contains('active'), 'Review nav is active');
+                assert.notOk(todayNav && todayNav.classList && todayNav.classList.contains('active'), 'Today nav is not active');
             });
 
             QUnit.test('Aspect toggle changes state', async function(assert) {
                 window.initializeUI();
                 const toggle = document.querySelector('.aspect-toggle');
 
-                const initialState = toggle.classList.contains('completed');
+                const initialState = toggle && toggle.classList && toggle.classList.contains('completed');
                 toggle.click();
                 // Small delay to allow async handler to complete
                 await new Promise(resolve => setTimeout(resolve, 10));
-                const newState = toggle.classList.contains('completed');
+                const newState = toggle && toggle.classList && toggle.classList.contains('completed');
                 assert.notEqual(initialState, newState, 'Toggle state changed');
             });
 
@@ -417,11 +442,11 @@
                 const mood3 = document.querySelector('[data-mood="3"]');
 
                 mood1.click();
-                assert.ok(mood1.classList.contains('selected'), 'Mood 1 button is selected');
+                assert.ok(mood1 && mood1.classList && mood1.classList.contains('selected'), 'Mood 1 button is selected');
 
                 mood3.click();
-                assert.ok(mood3.classList.contains('selected'), 'Mood 3 button is selected');
-                assert.notOk(mood1.classList.contains('selected'), 'Mood 1 button is deselected');
+                assert.ok(mood3 && mood3.classList && mood3.classList.contains('selected'), 'Mood 3 button is selected');
+                assert.notOk(mood1 && mood1.classList && mood1.classList.contains('selected'), 'Mood 1 button is deselected');
             });
         });
 
@@ -456,7 +481,9 @@
 
                 const toggle = document.querySelector('.aspect-toggle[data-domain="sleep"][data-aspect="wake"]');
                 assert.ok(toggle, 'Aspect toggle exists');
-                assert.ok(toggle.classList.contains('completed') || (window.appState && window.appState.todayData && window.appState.todayData.sleep && window.appState.todayData.sleep.wake), 'Toggle shows completed state from mock data');
+                const toggleCompleted = toggle && toggle.classList && toggle.classList.contains('completed');
+                const stateCompleted = (window.appState && window.appState.todayData && window.appState.todayData.sleep && window.appState.todayData.sleep.wake);
+                assert.ok(toggleCompleted || stateCompleted, 'Toggle shows completed state from mock data');
 
                 // Cleanup: clear mock flag and clear mock data if available
                 if (window.localStorage && typeof window.localStorage.setItem === 'function') {
@@ -518,16 +545,20 @@
                     };
                 };
 
-                const csv = await window.exportToCSV(false);
-                const lines = csv.split('\n');
-                assert.equal(lines[0], 'id,date,domain,aspect,completed,streak,type,mood,note,timestamp,synced', 'Header is correct');
-                assert.ok(lines[1].includes('2024-01-01-sleep-wake'), 'Entry data is included');
-                assert.ok(lines[1].includes('sleep'), 'Domain is included');
-                assert.ok(lines[1].includes('wake'), 'Aspect is included');
-                assert.ok(lines[1].includes('true'), 'Completed status is included');
-
-                // Restore mock
-                mockDB.transaction = originalTransaction;
+                let csv = null;
+                try {
+                    csv = await window.exportToCSV(false);
+                    assert.ok(csv !== null, 'CSV was returned (not null)');
+                    const lines = csv ? csv.split('\n') : [];
+                    assert.equal(lines[0], 'id,date,domain,aspect,completed,streak,type,mood,note,timestamp,synced', 'Header is correct');
+                    assert.ok(lines[1] && lines[1].includes('2024-01-01-sleep-wake'), 'Entry data is included');
+                    assert.ok(lines[1] && lines[1].includes('sleep'), 'Domain is included');
+                    assert.ok(lines[1] && lines[1].includes('wake'), 'Aspect is included');
+                    assert.ok(lines[1] && lines[1].includes('true'), 'Completed status is included');
+                } finally {
+                    // Restore mock
+                    mockDB.transaction = originalTransaction;
+                }
             });
 
         // Test results collection (capture assertions and per-test details)
