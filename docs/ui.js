@@ -107,13 +107,11 @@ function initializeParticles() {
 }
 
 async function refreshDomainScorePanel() {
+  // Render a compact, lean overview: four circular score rings with single integer scores
   const grid = $('domainScoreGrid');
-  if (!grid) {
-    return;
-  }
+  if (!grid) return;
 
   try {
-    // Use mock-aware helper which will return mock or real entries depending on flag
     let allEntries = [];
     try {
       if (typeof window.getAllEntries === 'function') {
@@ -123,6 +121,7 @@ async function refreshDomainScorePanel() {
       console.warn('Failed to load entries for score panel', e);
     }
 
+    // Build rolling 7-day date strings
     const today = new Date();
     const targetDates = [];
     for (let i = 0; i < 7; i++) {
@@ -131,85 +130,53 @@ async function refreshDomainScorePanel() {
       targetDates.push(d.toISOString().split('T')[0]);
     }
     const dateSet = new Set(targetDates);
-    const entriesByDate = new Map();
+
+    // Group entries by domain and date
+    const domainCounts = {};
+    Object.keys(DOMAINS).forEach(d => domainCounts[d] = { completed: 0, possible: 0 });
 
     allEntries.forEach(entry => {
-      if (!entry || !entry.date || !entry.domain || !dateSet.has(entry.date)) {
-        return;
-      }
-      if (!entriesByDate.has(entry.date)) {
-        entriesByDate.set(entry.date, []);
-      }
-      entriesByDate.get(entry.date).push(entry);
+      if (!entry || !entry.date || !entry.domain || !dateSet.has(entry.date)) return;
+      if (!domainCounts[entry.domain]) return;
+      domainCounts[entry.domain].possible += 1;
+      if (entry.completed) domainCounts[entry.domain].completed += 1;
     });
 
-    const styles = getComputedStyle(document.documentElement);
     grid.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'lean-domain-overview';
 
-    Object.entries(DOMAINS).forEach(([domain, aspects]) => {
-      const domainColor = styles.getPropertyValue(`--${domain}`).trim() || '#94a3b8';
-      let completed = 0;
-      let possible = 0;
+    Object.entries(DOMAINS).forEach(([domain]) => {
+      const counts = domainCounts[domain] || { completed: 0, possible: 0 };
+      const score = counts.possible > 0 ? Math.round((counts.completed / counts.possible) * 100) : 0;
 
-      targetDates.forEach(dateStr => {
-        const dayEntries = entriesByDate.get(dateStr) || [];
-        aspects.forEach(aspect => {
-          possible += 1;
-          const entry = dayEntries.find(e => e.domain === domain && e.aspect === aspect);
-          if (entry && entry.completed) {
-            completed += 1;
-          }
-        });
-      });
+      const item = document.createElement('div');
+      item.className = `lean-domain-item ${domain}`;
 
-      const score = possible > 0 ? Math.round((completed / possible) * 100) : 0;
-      const hasCrown = score >= 80;
-      const todayCompleted = aspects.reduce((sum, aspect) => {
-        return sum + (appState.todayData?.[domain]?.[aspect] ? 1 : 0);
-      }, 0);
-      const activeStreaks = aspects.reduce((sum, aspect) => {
-        return sum + ((appState.streaks?.[`${domain}-${aspect}`] || 0) > 0 ? 1 : 0);
-      }, 0);
+      // ring + value
+      const ring = document.createElement('div');
+      ring.className = 'lean-score-ring';
+      const value = document.createElement('div');
+      value.className = 'lean-score-value';
+      value.textContent = String(score);
+      ring.appendChild(value);
 
-      const card = document.createElement('div');
-      card.className = 'domain-score-card';
-      card.style.setProperty('--accent-color', domainColor);
+      // small icon overlapping bottom of ring
+      const iconWrap = document.createElement('div');
+      iconWrap.className = 'lean-ring-icon';
+      iconWrap.innerHTML = renderDomainIcon(domain);
+      ring.appendChild(iconWrap);
 
-      const aspectsMarkup = aspects
-        .map(aspect => {
-          const completedToday = Boolean(appState.todayData?.[domain]?.[aspect]);
-          return `<span class="domain-score-aspect ${completedToday ? 'complete' : ''}">${aspect.toUpperCase()}<span class="status">${completedToday ? '✓' : '—'}</span></span>`;
-        })
-        .join('');
+      const label = document.createElement('div');
+      label.className = 'lean-domain-label';
+      label.textContent = domain.toUpperCase();
 
-      card.innerHTML = `
-        <div class="domain-score-header">
-          <div class="domain-score-title">${renderDomainIcon(domain)} ${domain.toUpperCase()}</div>
-          <div class="domain-score-score">${score}<span class="unit">%</span>${
-        hasCrown ? '<span class="crown-icon" aria-label="High performer">👑</span>' : ''
-      }</div>
-        </div>
-        <div class="domain-score-metrics">
-          <div class="domain-score-metric">
-            <div class="domain-score-metric-label">ROLLING 7D</div>
-            <div class="domain-score-metric-value">${score}%</div>
-          </div>
-          <div class="domain-score-metric">
-            <div class="domain-score-metric-label">ACTIVE STREAKS</div>
-            <div class="domain-score-metric-value">${activeStreaks}</div>
-          </div>
-          <div class="domain-score-metric">
-            <div class="domain-score-metric-label">TODAY</div>
-            <div class="domain-score-metric-value">${todayCompleted}/${aspects.length}</div>
-          </div>
-        </div>
-        <div class="domain-score-aspects">
-          ${aspectsMarkup}
-        </div>
-      `;
-
-      grid.appendChild(card);
+      item.appendChild(ring);
+      item.appendChild(label);
+      container.appendChild(item);
     });
+
+    grid.appendChild(container);
   } catch (error) {
     console.error('Failed to refresh domain score panel', error);
   }
