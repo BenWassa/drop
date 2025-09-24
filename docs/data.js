@@ -437,17 +437,41 @@ async function saveAudioNote(date, blob, transcription = '') {
 }
 
 async function getAudioNotes(date) {
-  const db = await dbp;
-  const useMock = isUsingMock();
-  const storeName = useMock ? 'mock_audio_notes' : 'audio_notes';
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readonly');
-    const store = tx.objectStore(storeName);
-    const index = store.index('by_date');
-    const req = index.getAll(date);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+  try {
+    const useMock = isUsingMock();
+    const storeName = useMock ? 'mock_audio_notes' : 'audio_notes';
+    // Ensure store exists (best-effort). If it still doesn't exist, return empty list.
+    try { await ensureStoresExist([storeName]); } catch (e) { /* ignore upgrade failures */ }
+    const db = await dbp;
+    if (!db.objectStoreNames.contains(storeName)) {
+      return [];
+    }
+    return await new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        // Some stores may lack the index on older installs; guard against that
+        let index;
+        try { index = store.index('by_date'); } catch (e) { index = null; }
+        if (!index) {
+          // Fallback: return all and filter by date in JS
+          const req = store.getAll();
+          req.onsuccess = () => resolve((req.result || []).filter(r => r.date === date));
+          req.onerror = () => resolve([]);
+          return;
+        }
+        const req = index.getAll(date);
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => resolve([]);
+      } catch (err) {
+        console.warn('getAudioNotes failed', err);
+        resolve([]);
+      }
+    });
+  } catch (err) {
+    console.warn('getAudioNotes outer failure', err);
+    return [];
+  }
 }
 
 async function updateAudioTranscription(id, transcription) {
@@ -572,6 +596,18 @@ async function seedMockData(days = 7) {
     };
     entriesStore.put(reflection);
     outbox.add({ type: 'REFLECTION', payload: reflection, ts: Date.now(), __mock: true });
+    // Add a small mock audio note for today (first day only)
+    if (d === 0) {
+      try {
+        const audioStore = db.transaction('mock_audio_notes', 'readwrite').objectStore('mock_audio_notes');
+        const audioId = `${dateStr}-audio-mock`;
+        const blob = new Blob([''], { type: 'audio/mpeg' });
+        const audioEntry = { id: audioId, date: dateStr, blob, transcription: 'Mock audio note', timestamp: Date.now(), __mock: true };
+        audioStore.put(audioEntry);
+      } catch (e) {
+        // ignore audio seed failures
+      }
+    }
   }
 
   return new Promise((resolve, reject) => {
