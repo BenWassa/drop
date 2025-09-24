@@ -325,8 +325,8 @@ body {
 /* Slightly larger icon in domain cards header to improve legibility */
 .domain-card .domain-icon-svg,
 .domain-score-card .domain-icon-svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 }
 
 /* Ensure icon containers don't collapse and align nicely with title text */
@@ -415,22 +415,20 @@ body {
   gap: 8px;
 }
 
-.lean-score-ring {
+.lean-score-ring-container {
   width: 68px;
   height: 68px;
-  border-radius: 50%;
+  position: relative;
   display: inline-grid;
   place-items: center;
-  position: relative;
 }
 
-/* Thin circular ring, stroke is controlled via box-shadow trick to keep it subtle */
-.lean-score-ring::before {
-  content: '';
+.lean-score-ring-svg {
+  width: 100%;
+  height: 100%;
   position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(255,255,255,0.04) inset;
+  top: 0;
+  left: 0;
 }
 
 .lean-score-value {
@@ -438,6 +436,11 @@ body {
   font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 
 .lean-domain-label {
@@ -448,29 +451,30 @@ body {
   text-transform: uppercase;
 }
 
-/* Icon sits at the bottom of the ring, overlapping slightly */
+/* Icon sits at the bottom gap of the ring */
 .lean-ring-icon {
   position: absolute;
-  bottom: -8px;
+  bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
   background: rgba(0,0,0,0.2);
   backdrop-filter: blur(2px);
+  z-index: 2;
 }
 
-/* Per-domain colored accents for ring and icon background */
-.lean-domain-item.sleep .lean-score-ring::before { box-shadow: 0 0 0 4px rgba(30,144,255,0.10) inset; }
-.lean-domain-item.fitness .lean-score-ring::before { box-shadow: 0 0 0 4px rgba(255,59,48,0.10) inset; }
-.lean-domain-item.mind .lean-score-ring::before { box-shadow: 0 0 0 4px rgba(124,58,237,0.10) inset; }
-.lean-domain-item.spirit .lean-score-ring::before { box-shadow: 0 0 0 4px rgba(22,163,74,0.10) inset; }
+.lean-domain-item .lean-ring-icon img { width: 18px; height: 18px; }
 
-.lean-domain-item .lean-ring-icon img { width: 16px; height: 16px; }
+/* Per-domain colored accents for ring stroke (done in JS) and icon background */
+.lean-domain-item.sleep .lean-ring-icon { background: rgba(30,144,255,0.3); }
+.lean-domain-item.fitness .lean-ring-icon { background: rgba(255,59,48,0.3); }
+.lean-domain-item.mind .lean-ring-icon { background: rgba(124,58,237,0.3); }
+.lean-domain-item.spirit .lean-ring-icon { background: rgba(22,163,74,0.3); }
 
 /* Compact the domain input sections: smaller aspect buttons, remove extra numbers */
 .aspect-toggle { padding: 10px 12px; font-size: 11px; }

@@ -153,25 +153,45 @@ async function refreshDomainScorePanel() {
       const item = document.createElement('div');
       item.className = `lean-domain-item ${domain}`;
 
-      // ring + value
-      const ring = document.createElement('div');
-      ring.className = 'lean-score-ring';
+      // Ring container with SVG progress arc
+      const ringContainer = document.createElement('div');
+      ringContainer.className = 'lean-score-ring-container';
+
+      const radius = 30;
+      const circumference = 2 * Math.PI * radius;
+      const progressLength = (score / 100) * circumference;
+      const gapLength = circumference - progressLength;
+      const accentColor = { sleep: '#1e90ff', fitness: '#ff3b30', mind: '#7c3aed', spirit: '#16a34a' }[domain] || '#94a3b8';
+
+      const svg = `<svg width="68" height="68" viewBox="0 0 68 68" class="lean-score-ring-svg">
+        <circle cx="34" cy="34" r="${radius}" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="4" />
+        <circle cx="34" cy="34" r="${radius}" fill="none" stroke="${accentColor}" stroke-width="4" stroke-dasharray="${progressLength} ${gapLength}" stroke-dashoffset="0" transform="rotate(-90 34 34)" />
+      </svg>`;
+
+      ringContainer.innerHTML = svg;
+
+      // Add accessibility: tooltip and aria-label
+      const title = `${counts.completed} of ${counts.possible} completed — ${score}%`;
+      ringContainer.title = title;
+      ringContainer.setAttribute('aria-label', title);
+
+      // Score value centered in ring
       const value = document.createElement('div');
       value.className = 'lean-score-value';
       value.textContent = String(score);
-      ring.appendChild(value);
+      ringContainer.appendChild(value);
 
-      // small icon overlapping bottom of ring
+      // Small icon overlapping bottom gap of ring
       const iconWrap = document.createElement('div');
       iconWrap.className = 'lean-ring-icon';
       iconWrap.innerHTML = renderDomainIcon(domain);
-      ring.appendChild(iconWrap);
+      ringContainer.appendChild(iconWrap);
 
       const label = document.createElement('div');
       label.className = 'lean-domain-label';
       label.textContent = domain.toUpperCase();
 
-      item.appendChild(ring);
+      item.appendChild(ringContainer);
       item.appendChild(label);
       container.appendChild(item);
     });
