@@ -18,6 +18,90 @@
   --spirit: #16a34a;
 }
 
+/* Domain icon colors */
+.domain-icon.sleep { color: var(--sleep); }
+.domain-icon.fitness { color: var(--fitness); }
+.domain-icon.mind { color: var(--mind); }
+.domain-icon.spirit { color: var(--spirit); }
+
+/* Lean domain overview styles */
+.lean-domain-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.lean-domain-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.lean-score-ring-container {
+  position: relative;
+  width: 68px;
+  height: 68px;
+}
+
+.lean-score-ring-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.lean-score-value {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.lean-ring-icon {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.domain-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.domain-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.lean-domain-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Domain score grid */
+.domain-score-grid {
+  padding: 20px 0;
+}
+
 /* Banners used by storage-clear helpers */
 .ephemeral-banner {
   position: fixed;
