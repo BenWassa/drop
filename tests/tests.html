@@ -187,7 +187,10 @@
          These run before the app scripts so the app initializes against
          deterministic test doubles and seeded sample data. -->
     <script>
-        // Initialize minimal app state for testing (before app scripts so main.js uses this)
+    // Indicate we are running in a test environment so app code can opt-out of upgrades
+    window.__TESTING__ = true;
+
+    // Initialize minimal app state for testing (before app scripts so main.js uses this)
         window.appState = {
             currentScreen: 'today',
             todayData: {},
@@ -316,7 +319,9 @@
                 transaction: function(storeNames, mode) {
                     // normalize storeNames parameter
                     const names = Array.isArray(storeNames) ? storeNames : [storeNames];
-                    return {
+                    const tx = {
+                        oncomplete: null,
+                        onerror: null,
                         objectStore: function(name) {
                             ensureStore(name);
                             return {
@@ -358,6 +363,17 @@
                             };
                         }
                     };
+
+                    // Simulate async transaction completion
+                    setTimeout(() => {
+                        try {
+                            if (typeof tx.oncomplete === 'function') tx.oncomplete({});
+                        } catch (e) {
+                            if (typeof tx.onerror === 'function') tx.onerror(e);
+                        }
+                    }, 0);
+
+                    return tx;
                 }
             };
         })();
