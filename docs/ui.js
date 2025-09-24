@@ -1432,6 +1432,85 @@ function updateTranscription(id, text, { button, textarea } = {}) {
 }
 
 // Expose for testing and cross-script usage
+// Minimal UI helpers restored: these were accidentally removed during edits.
+// They provide the small API surface `main.js` and other modules expect.
+function showScreen(screenId) {
+  try {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(screenId);
+    if (el) el.classList.add('active');
+    appState.currentScreen = (screenId || appState.currentScreen).replace(/Screen$/, '') || appState.currentScreen;
+  } catch (e) {
+    console.warn('showScreen failed', e);
+  }
+}
+
+function renderAspectsManager() {
+  const container = $('aspectsManager');
+  if (!container) return;
+  try {
+    container.innerHTML = '';
+    Object.keys(DOMAINS).forEach(domain => {
+      const row = document.createElement('div');
+      row.className = 'manage-row';
+      const label = document.createElement('span');
+      label.className = 'manage-label';
+      label.textContent = domain.toUpperCase();
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toggle-domain';
+      btn.dataset.domain = domain;
+      btn.textContent = appState.visibleAspects && appState.visibleAspects[domain] ? 'HIDE' : 'SHOW';
+
+      row.appendChild(label);
+      row.appendChild(btn);
+      container.appendChild(row);
+    });
+  } catch (e) {
+    console.warn('renderAspectsManager failed', e);
+  }
+}
+
+function updateProgress() {
+  try {
+    Object.keys(DOMAINS).forEach(domain => {
+      const total = DOMAINS[domain].length;
+      const completed = Object.values(appState.todayData[domain] || {}).filter(Boolean).length;
+      const el = document.querySelector(`.domain-status[data-domain-status="${domain}"]`);
+      if (el) el.textContent = `${completed}/${total}`;
+    });
+
+    // Update quarter fill percentage if present
+    try {
+      const allCompleted = Object.values(appState.todayData || {}).reduce((acc, byAspect) => acc + Object.values(byAspect).filter(Boolean).length, 0);
+      const percent = TOTAL_ASPECTS ? Math.round((allCompleted / TOTAL_ASPECTS) * 100) : 0;
+      const fill = $('quarterFill');
+      if (fill) fill.style.width = `${percent}%`;
+    } catch (e) { /* ignore */ }
+  } catch (e) {
+    console.warn('updateProgress failed', e);
+  }
+}
+
+function renderReview() {
+  const el = $('weeklyCompletion');
+  if (!el) return;
+  try {
+    el.textContent = 'Weekly completion summary will appear here.';
+  } catch (e) { /* ignore */ }
+}
+
+async function initializeUI() {
+  // Keep initialization minimal and defer to the existing refresh flow which
+  // builds the domain score panel and wires event handlers.
+  try {
+    await refreshDomainScorePanel();
+  } catch (e) {
+    console.error('initializeUI failed', e);
+  }
+}
+
 window.initializeUI = initializeUI;
 window.renderAspectsManager = renderAspectsManager;
 window.updateProgress = updateProgress;
