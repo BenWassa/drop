@@ -516,22 +516,16 @@ body {
 /* Ensure icon containers don't collapse and align nicely with title text */
 .domain .domain-icon,
 .domain-score-title .domain-icon {
+  /* Keep layout and size only; do not add visual tints or rounded backgrounds so
+     the authored SVGs render exactly as provided in docs/images/. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: rgba(0,0,0,0.2);
-  backdrop-filter: blur(2px);
-  border-radius: 8px;
 }
 
-/* Provide a subtle tinted circular background for svg icons in domain cards */
-.domain-card .domain-icon,
-.domain-score-card .domain-score-title .domain-icon {
-  border-radius: 8px;
-  background: rgba(255,255,255,0.02);
-}
+/* Decorative tinting removed — icons are authored SVGs and should be displayed as provided. */
 
 .domain-score-score {
   font-family: var(--font-mono);
