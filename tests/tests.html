@@ -256,6 +256,30 @@
             }
         };
 
+        // Prevent the app from registering a real Service Worker during tests
+        try {
+            if (!('serviceWorker' in navigator)) {
+                navigator.serviceWorker = {
+                    register: function() { return Promise.resolve({}); },
+                    ready: Promise.resolve({})
+                };
+            } else {
+                // If serviceWorker exists, provide a no-op register during tests
+                navigator.serviceWorker.register = function() { return Promise.resolve({}); };
+                navigator.serviceWorker.ready = Promise.resolve({});
+            }
+        } catch (e) {
+            // ignore if navigator is not configurable in this environment
+        }
+
+        // Ensure navigator.onLine is true for tests and stub fetch to a noop
+        try {
+            if (typeof navigator.onLine === 'undefined') navigator.onLine = true;
+            if (typeof window.fetch !== 'function') {
+                window.fetch = function() { return Promise.resolve({ ok: true, json: async () => ({ results: [] }) }); };
+            }
+        } catch (e) {}
+
         // Simple in-memory mock DB with seeded sample entries
         const mockDB = (function() {
             const stores = {
