@@ -13,7 +13,7 @@ const STATIC_ASSETS = [
 ];
 
 const CONFIG = {
-  SCRIPT_URL: 'https://script.google.com/macros/s/YOUR_NEW_SCRIPT_ID_HERE/exec',
+  SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbyQay9hZK16ciNu6TP1-3NTiuTKOYLWsC6_9MNAl9iyiV4zETVG0B-8IMTYdjtYNMqz/exec',
   API_KEY: '1QnI2H56tNySDZjLAKsiAAvkp7RzzvAUnfs-Hcsf6Z4S1PLgX5_HXTkQk',
 };
 
