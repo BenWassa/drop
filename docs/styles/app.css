@@ -195,7 +195,23 @@
   justify-content: center; /* center the small scores row */
   gap: 20px;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap; /* explicitly prevent wrapping */
+  overflow-x: auto; /* allow horizontal scroll on narrow viewports */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure the items in the score row keep a consistent width and don't shrink so the row remains single-line */
+.domain-score-grid > .lean-domain-item {
+  flex: 0 0 110px; /* do not shrink; fixed basis for equal spacing */
+  display: flex;
+  justify-content: center;
+}
+
+/* Slightly reduce gaps on very small screens but keep single-row behavior via horizontal scroll */
+@media (max-width: 420px) {
+  .domain-score-grid {
+    gap: 12px;
+  }
 }
 
 /* Domain grid */
