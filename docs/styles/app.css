@@ -141,6 +141,9 @@
 /* Domain score grid */
 .domain-score-grid {
   padding: 20px 0;
+  display: flex;
+  justify-content: center; /* center the small scores row */
+  gap: 20px;
 }
 
 /* Domain grid */
