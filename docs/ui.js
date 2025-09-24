@@ -279,6 +279,9 @@ async function refreshDomainScorePanel() {
     item.addEventListener('click', () => {
       const screen = item.dataset.screen;
       showScreen(screen + 'Screen');
+      // Update nav active state
+      $$('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
     });
   });
 
@@ -289,6 +292,12 @@ async function refreshDomainScorePanel() {
       $$('.mood-option').forEach(btn => btn.classList.remove('selected'));
       option.classList.add('selected');
     });
+  });
+
+  // Set initial mood selection
+  $$('.mood-option').forEach(option => {
+    const mood = Number(option.dataset.mood);
+    option.classList.toggle('selected', mood === appState.mood);
   });
 
   // Developer / Mock toggles
@@ -1507,8 +1516,9 @@ function renderReview() {
 }
 
 async function initializeUI() {
-  // Keep initialization minimal and defer to the existing refresh flow which
-  // builds the domain score panel and wires event handlers.
+  if (document.readyState === 'loading') {
+    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+  }
   try {
     await refreshDomainScorePanel();
   } catch (e) {
