@@ -474,9 +474,8 @@ async function initializeUI() {
     devToggle.addEventListener('change', () => {
       appState.devMode = devToggle.checked;
       localStorage.setItem('dev_mode', devToggle.checked ? '1' : '0');
-      if (devControls) {
-        devControls.classList.toggle('hidden', !devToggle.checked);
-      }
+      // Show/hide all dev-only elements
+      document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devToggle.checked));
     });
   }
 
@@ -488,9 +487,8 @@ async function initializeUI() {
     });
   }
 
-  if (devControls) {
-    devControls.classList.toggle('hidden', !devMode);
-  }
+  // Initialize dev-only elements
+  document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devMode));
 
   // Dev control buttons
   const seedBtn = $('seedMockData');
