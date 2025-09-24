@@ -183,8 +183,6 @@
         </div>
     </div>
 
-    <iframe id="testFrame" src="../docs/index.html" style="display:none;"></iframe>
-
     <!-- Test mocks: localStorage, crypto, and an in-memory mock IndexedDB.
          These run before the app scripts so the app initializes against
          deterministic test doubles and seeded sample data. -->
@@ -498,18 +496,7 @@
             });
         });
 
-        QUnit.module('UI Interactions', {
-            beforeEach: async function() {
-                // Load app scripts in main window
-                const scripts = ['docs/main.js', 'docs/ui.js', 'docs/data.js', 'docs/config.js', 'docs/storage-utils.js', 'docs/sync.js'];
-                for (const src of scripts) {
-                    const script = document.createElement('script');
-                    script.src = src;
-                    document.head.appendChild(script);
-                    await new Promise(resolve => script.onload = resolve);
-                }
-            }
-        }, function() {
+        QUnit.module('UI Interactions', function() {
             QUnit.test('Navigation switching works', async function(assert) {
                 await initializeUI();
                 const todayNav = document.querySelector('[data-nav="today"]');
@@ -990,46 +977,21 @@
             }
         });
 
-        // Start QUnit only after the app has defined its functions to avoid
-        // race conditions where data/ui scripts haven't finished loading.
-        (function waitForAppReady() {
-            const frame = document.getElementById('testFrame');
-            const win = frame.contentWindow;
-            const ready = win && typeof win.getClientId === 'function'
-                && typeof win.saveReflection === 'function'
-                && typeof win.exportToCSV === 'function'
-                && typeof win.initializeUI === 'function';
+        // Start QUnit immediately since app scripts are loaded synchronously
+        (function startTests() {
+            const ready = typeof window.getClientId === 'function'
+                && typeof window.saveReflection === 'function'
+                && typeof window.exportToCSV === 'function'
+                && typeof window.initializeUI === 'function';
 
             if (ready) {
-                // Attach UI handlers now that functions exist (safe to call)
-                (async () => { try { await win.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
+                // Initialize UI for tests
+                (async () => { try { await window.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
                 QUnit.start();
-                return;
+            } else {
+                console.warn('App functions not available; starting QUnit anyway.');
+                QUnit.start();
             }
-
-            // Retry a few times with a small delay. After timeout, start tests
-            // anyway and let failing assertions surface so we can debug.
-            const startTime = Date.now();
-            const maxWait = 3000; // ms
-            const interval = 50; // ms
-
-            const poll = setInterval(() => {
-                const now = Date.now();
-                const ok = win && typeof win.getClientId === 'function'
-                    && typeof win.saveReflection === 'function'
-                    && typeof win.exportToCSV === 'function'
-                    && typeof win.initializeUI === 'function';
-
-                if (ok) {
-                    clearInterval(poll);
-                    (async () => { try { await win.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
-                    QUnit.start();
-                } else if (now - startTime > maxWait) {
-                    clearInterval(poll);
-                    console.warn('App functions not fully available before timeout; starting QUnit anyway.');
-                    QUnit.start();
-                }
-            }, interval);
         })();
     </script>
 </body>
