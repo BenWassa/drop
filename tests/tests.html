@@ -498,41 +498,48 @@
             });
         });
 
-        QUnit.module('UI Interactions', function() {
-            QUnit.test('Navigation switching works', function(assert) {
-                const todayNav = document.querySelector('[data-screen="today"]');
-                const reviewNav = document.querySelector('[data-screen="review"]');
-
+        QUnit.module('UI Interactions', {
+            beforeEach: async function() {
+                // Load app scripts in main window
+                const scripts = ['docs/main.js', 'docs/ui.js', 'docs/data.js', 'docs/config.js', 'docs/storage-utils.js', 'docs/sync.js'];
+                for (const src of scripts) {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    document.head.appendChild(script);
+                    await new Promise(resolve => script.onload = resolve);
+                }
+            }
+        }, function() {
+            QUnit.test('Navigation switching works', async function(assert) {
+                await initializeUI();
+                const todayNav = document.querySelector('[data-nav="today"]');
                 todayNav.click();
-                assert.ok(todayNav && todayNav.classList && todayNav.classList.contains('active'), 'Today nav is active');
-
+                assert.ok(todayNav.classList.contains('active'), 'Today nav is active');
+                const reviewNav = document.querySelector('[data-nav="review"]');
                 reviewNav.click();
-                assert.ok(reviewNav && reviewNav.classList && reviewNav.classList.contains('active'), 'Review nav is active');
-                assert.notOk(todayNav && todayNav.classList && todayNav.classList.contains('active'), 'Today nav is not active');
+                assert.ok(reviewNav.classList.contains('active'), 'Review nav is active');
+                assert.ok(!todayNav.classList.contains('active'), 'Today nav is not active');
             });
 
             QUnit.test('Aspect toggle changes state', async function(assert) {
+                await initializeUI();
                 const toggle = document.querySelector('.aspect-toggle');
-
-                const initialState = toggle && toggle.classList && toggle.classList.contains('completed');
+                const initialState = toggle.classList.contains('completed');
                 toggle.click();
-                // Small delay to allow async handler to complete
-                await new Promise(resolve => setTimeout(resolve, 10));
-                const newState = toggle && toggle.classList && toggle.classList.contains('completed');
+                const newState = toggle.classList.contains('completed');
                 assert.notEqual(initialState, newState, 'Toggle state changed');
             });
 
-            QUnit.test('Mood selection works', function(assert) {
+            QUnit.test('Mood selection works', async function(assert) {
+                await initializeUI();
                 window.appState.mood = 1;
                 const mood1 = document.querySelector('[data-mood="1"]');
-                const mood3 = document.querySelector('[data-mood="3"]');
-
                 mood1.click();
-                assert.ok(mood1 && mood1.classList && mood1.classList.contains('selected'), 'Mood 1 button is selected');
-
+                assert.ok(mood1.classList.contains('selected'), 'Mood 1 button is selected');
+                const mood3 = document.querySelector('[data-mood="3"]');
                 mood3.click();
-                assert.ok(mood3 && mood3.classList && mood3.classList.contains('selected'), 'Mood 3 button is selected');
-                assert.notOk(mood1 && mood1.classList && mood1.classList.contains('selected'), 'Mood 1 button is deselected');
+                assert.ok(mood3.classList.contains('selected'), 'Mood 3 button is selected');
+                assert.ok(!mood1.classList.contains('selected'), 'Mood 1 button is deselected');
             });
         });
 
