@@ -51,6 +51,11 @@ const dbp = window.dbp || new Promise((resolve, reject) => {
       const store = db.createObjectStore('audio_notes', { keyPath: 'id' });
       store.createIndex('by_date', 'date');
     }
+    // sandboxed audio notes for mock mode
+    if (!db.objectStoreNames.contains('mock_audio_notes')) {
+      const store = db.createObjectStore('mock_audio_notes', { keyPath: 'id' });
+      store.createIndex('by_date', 'date');
+    }
     // mock_entries is a sandbox store for developer/mock data so we don't overwrite real entries
     if (!db.objectStoreNames.contains('mock_entries')) {
       const mockStore = db.createObjectStore('mock_entries', { keyPath: 'id' });
@@ -304,11 +309,13 @@ async function loadTodayData() {
 // Audio notes functions
 async function saveAudioNote(date, blob, transcription = '') {
   const db = await dbp;
+  const useMock = isUsingMock();
+  const storeName = useMock ? 'mock_audio_notes' : 'audio_notes';
   const id = `${date}-audio-${Date.now()}`;
-  const entry = { id, date, blob, transcription, timestamp: new Date() };
+  const entry = { id, date, blob, transcription, timestamp: new Date(), __mock: useMock };
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('audio_notes', 'readwrite');
-    const store = tx.objectStore('audio_notes');
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
     const req = store.add(entry);
     req.onsuccess = () => resolve(id);
     req.onerror = () => reject(req.error);
@@ -317,9 +324,11 @@ async function saveAudioNote(date, blob, transcription = '') {
 
 async function getAudioNotes(date) {
   const db = await dbp;
+  const useMock = isUsingMock();
+  const storeName = useMock ? 'mock_audio_notes' : 'audio_notes';
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('audio_notes', 'readonly');
-    const store = tx.objectStore('audio_notes');
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
     const index = store.index('by_date');
     const req = index.getAll(date);
     req.onsuccess = () => resolve(req.result);
@@ -352,6 +361,69 @@ window.exportToCSV = exportToCSV;
 window.saveAudioNote = saveAudioNote;
 window.getAudioNotes = getAudioNotes;
 window.updateAudioTranscription = updateAudioTranscription;
+
+// Export all data (real or mock) as JSON for backup. If `mode` is 'both' returns both real and mock as separate keys.
+async function exportAllData({ mode = 'current' } = {}) {
+  const db = await dbp;
+  const result = {};
+  const wantReal = mode === 'current' ? !isUsingMock() : true;
+  const wantMock = mode === 'current' ? isUsingMock() : (mode === 'both');
+
+  if (wantReal) {
+    // entries
+    result.entries = await new Promise((resolve, reject) => {
+      const tx = db.transaction('entries', 'readonly');
+      const store = tx.objectStore('entries');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    // outbox
+    result.outbox = await new Promise((resolve, reject) => {
+      const tx = db.transaction('outbox', 'readonly');
+      const store = tx.objectStore('outbox');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    // audio_notes
+    result.audio_notes = await new Promise((resolve, reject) => {
+      const tx = db.transaction('audio_notes', 'readonly');
+      const store = tx.objectStore('audio_notes');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  if (wantMock) {
+    result.mock_entries = await new Promise((resolve, reject) => {
+      const tx = db.transaction('mock_entries', 'readonly');
+      const store = tx.objectStore('mock_entries');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    result.mock_outbox = await new Promise((resolve, reject) => {
+      const tx = db.transaction('mock_outbox', 'readonly');
+      const store = tx.objectStore('mock_outbox');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+    result.mock_audio_notes = await new Promise((resolve, reject) => {
+      const tx = db.transaction('mock_audio_notes', 'readonly');
+      const store = tx.objectStore('mock_audio_notes');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  return result;
+}
+
+window.exportAllData = exportAllData;
 
 // Developer: seed and clear mock data
 async function seedMockData(days = 7) {

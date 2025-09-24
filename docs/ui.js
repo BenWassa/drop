@@ -482,9 +482,46 @@ async function initializeUI() {
 
   if (mockToggle) {
     mockToggle.checked = useMock;
-    mockToggle.addEventListener('change', () => {
+    mockToggle.addEventListener('change', async () => {
+      // If turning ON mock mode, offer to backup current data first
+      if (mockToggle.checked) {
+        const proceed = confirm('Enable mock mode will switch to sandboxed data and prevent syncing. Create a JSON backup of both real and mock data before switching? Click OK to create backup and enable mock mode, Cancel to abort.');
+        if (!proceed) {
+          mockToggle.checked = false;
+          return;
+        }
+        try {
+          if (typeof window.exportAllData === 'function') {
+            const data = await window.exportAllData({ mode: 'both' });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const dt = new Date().toISOString().split('T')[0];
+            a.download = `drop-backup-${dt}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }
+        } catch (e) {
+          console.error('Backup failed', e);
+          alert('Backup failed — mock mode will not be enabled to avoid risk to your data.');
+          mockToggle.checked = false;
+          return;
+        }
+      }
+
       appState.useMock = mockToggle.checked;
       localStorage.setItem('use_mock_data', mockToggle.checked ? '1' : '0');
+      // After switching mode, reload today's data and UI to ensure consistent data source
+      try {
+        await loadTodayData();
+        refreshDomainScorePanel();
+        renderReview();
+      } catch (e) {
+        console.warn('Reload after mock mode switch failed', e);
+      }
     });
   }
 
