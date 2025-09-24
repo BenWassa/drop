@@ -414,6 +414,11 @@ async function loadTodayData() {
   const today = new Date().toISOString().split('T')[0];
   const entries = await getEntriesByDate(today);
 
+  // Ensure todayData is initialized
+  Object.keys(DOMAINS).forEach(domain => {
+    if (!appState.todayData[domain]) appState.todayData[domain] = {};
+  });
+
   entries.forEach((entry) => {
     if (entry && entry.domain && DOMAINS[entry.domain] && DOMAINS[entry.domain].includes(entry.aspect) && typeof entry.completed === 'boolean') {
       appState.todayData[entry.domain][entry.aspect] = Boolean(entry.completed);

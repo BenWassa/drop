@@ -8,6 +8,10 @@ const DOMAIN_ICONS_FALLBACK = {
   spirit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c3.5 3.5 6 6.5 6 10a6 6 0 0 1-12 0c0-3.5 2.5-6.5 6-10z"/></svg>`
 };
 
+// Ensure $ and $$ are available (defined in main.js but not global)
+if (!window.$) window.$ = (id) => document.getElementById(id);
+if (!window.$$) window.$$ = (selector) => Array.from(document.querySelectorAll(selector));
+
 // Simple cache for fetched SVG files
 const SVG_CACHE = {};
 
@@ -1406,43 +1410,13 @@ function renderAudioNotes() {
     });
 }
 
-function updateTranscription(id, text, { button, textarea } = {}) {
-  if (!id) {
-    return Promise.resolve();
-  }
-
-  const trimmed = (text || '').trim();
-  const savePromise = window.updateAudioTranscription(id, trimmed);
-
-  return savePromise
-    .then(() => {
-      if (textarea) {
-        textarea.dataset.originalValue = encodeURIComponent(trimmed);
-      }
-      if (button) {
-        button.textContent = 'Saved';
-        button.disabled = true;
-        setTimeout(() => {
-          if (button.dataset.action === 'save-transcription') {
-            button.textContent = 'Save';
-          }
-        }, 1800);
-      }
-      setVoiceStatus('Transcription saved.', { tone: 'success' });
-    })
-    .catch(error => {
-      if (button) {
-        button.disabled = false;
-        button.textContent = 'Retry';
-        setTimeout(() => {
-          if (button.dataset.action === 'save-transcription') {
-            button.textContent = 'Save';
-          }
-        }, 1800);
-      }
-      setVoiceStatus('Failed to save transcription. Try again.', { tone: 'error', persist: true });
-      throw error;
-    });
+function updateVisibleAspects() {
+  Object.keys(appState.visibleAspects || {}).forEach(domain => {
+    const card = document.querySelector(`.domain-card[data-domain="${domain}"]`);
+    if (card) {
+      card.style.display = appState.visibleAspects[domain] ? '' : 'none';
+    }
+  });
 }
 
 // Expose for testing and cross-script usage
@@ -1528,5 +1502,6 @@ function initializeUI() {
 window.initializeUI = initializeUI;
 window.renderAspectsManager = renderAspectsManager;
 window.updateProgress = updateProgress;
+window.updateVisibleAspects = updateVisibleAspects;
 window.renderAudioNotes = renderAudioNotes;
 window.updateTranscription = updateTranscription;
