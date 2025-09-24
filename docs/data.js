@@ -368,56 +368,36 @@ async function exportAllData({ mode = 'current' } = {}) {
   const result = {};
   const wantReal = mode === 'current' ? !isUsingMock() : true;
   const wantMock = mode === 'current' ? isUsingMock() : (mode === 'both');
-
-  if (wantReal) {
-    // entries
-    result.entries = await new Promise((resolve, reject) => {
-      const tx = db.transaction('entries', 'readonly');
-      const store = tx.objectStore('entries');
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-    // outbox
-    result.outbox = await new Promise((resolve, reject) => {
-      const tx = db.transaction('outbox', 'readonly');
-      const store = tx.objectStore('outbox');
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-    // audio_notes
-    result.audio_notes = await new Promise((resolve, reject) => {
-      const tx = db.transaction('audio_notes', 'readonly');
-      const store = tx.objectStore('audio_notes');
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
+  // helper to safely get all records from a store if it exists
+  async function safeGetAll(storeName) {
+    if (!db.objectStoreNames.contains(storeName)) {
+      return [];
+    }
+    return new Promise((resolve, reject) => {
+      try {
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      } catch (err) {
+        // If anything goes wrong, return empty array rather than throwing
+        console.warn('safeGetAll failed for', storeName, err);
+        resolve([]);
+      }
     });
   }
 
+  if (wantReal) {
+    result.entries = await safeGetAll('entries');
+    result.outbox = await safeGetAll('outbox');
+    result.audio_notes = await safeGetAll('audio_notes');
+  }
+
   if (wantMock) {
-    result.mock_entries = await new Promise((resolve, reject) => {
-      const tx = db.transaction('mock_entries', 'readonly');
-      const store = tx.objectStore('mock_entries');
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-    result.mock_outbox = await new Promise((resolve, reject) => {
-      const tx = db.transaction('mock_outbox', 'readonly');
-      const store = tx.objectStore('mock_outbox');
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-    result.mock_audio_notes = await new Promise((resolve, reject) => {
-      const tx = db.transaction('mock_audio_notes', 'readonly');
-      const store = tx.objectStore('mock_audio_notes');
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
+    result.mock_entries = await safeGetAll('mock_entries');
+    result.mock_outbox = await safeGetAll('mock_outbox');
+    result.mock_audio_notes = await safeGetAll('mock_audio_notes');
   }
 
   return result;
