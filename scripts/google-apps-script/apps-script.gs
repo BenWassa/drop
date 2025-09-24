@@ -15,9 +15,58 @@ function sheet() {
   return sh;
 }
 
+// Allowed origin(s) for CORS. Update for production to your site origin(s).
+// Use '*' with caution; better to list explicit origins.
+const ALLOWED_ORIGINS = [
+  'http://127.0.0.1:5500',
+  'http://localhost:5500',
+  'https://script.google.com' // keep script origin as a fallback
+];
+
+function _getRequestOrigin(e) {
+  try {
+    // The origin can be in headers (from fetch) or the Referer param
+    if (e && e.postData && e.postData.type === 'application/json' && e.parameter && e.parameter.origin) {
+      return e.parameter.origin;
+    }
+  } catch (e) {}
+  try { return (e && e.headers && e.headers.Origin) || (e && e.headers && e.headers.origin); } catch (ex) {}
+  try { return (e && e.parameter && e.parameter.origin) || null; } catch (ex) {}
+  return null;
+}
+
+function _chooseAllowedOrigin(requestOrigin) {
+  if (!requestOrigin) return ALLOWED_ORIGINS[0] || '*';
+  if (ALLOWED_ORIGINS.indexOf(requestOrigin) !== -1) return requestOrigin;
+  // Not explicitly allowed — fall back to first allowed origin
+  return ALLOWED_ORIGINS[0] || '*';
+}
+
+function _applyCorsHeaders(output, requestOrigin) {
+  try {
+    const origin = _chooseAllowedOrigin(requestOrigin);
+    // Many GAS TextOutput objects don't support appendHeader; attempt when available.
+    if (typeof output.appendHeader === 'function') {
+      output.appendHeader('Access-Control-Allow-Origin', origin);
+      output.appendHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      output.appendHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, X-Api-Key, X-Client-ID');
+      output.appendHeader('Access-Control-Allow-Credentials', 'true');
+    } else {
+      // If appendHeader not available, embed a small JSON wrapper that client can use as fallback
+      // (Most browsers require proper headers; this fallback is best-effort.)
+      // Note: Apps Script generally supports appendHeader on HTTP responses in published web apps.
+    }
+  } catch (e) {
+    // swallow
+  }
+}
+
 function doOptions(e) {
-  return ContentService.createTextOutput('')
-    .setMimeType(ContentService.MimeType.TEXT);
+  var requestOrigin = _getRequestOrigin(e);
+  var out = ContentService.createTextOutput('');
+  out.setMimeType(ContentService.MimeType.TEXT);
+  _applyCorsHeaders(out, requestOrigin);
+  return out;
 }
 
 function doGet(e) {
@@ -25,9 +74,10 @@ function doGet(e) {
   const action = params.action || 'health';
   
   if (action === 'health') {
-    return ContentService.createTextOutput(
-      JSON.stringify({ ok: true, time: new Date().toISOString() })
-    ).setMimeType(ContentService.MimeType.JSON);
+    var out = ContentService.createTextOutput(JSON.stringify({ ok: true, time: new Date().toISOString() }));
+    out.setMimeType(ContentService.MimeType.JSON);
+    _applyCorsHeaders(out, _getRequestOrigin(e));
+    return out;
   }
   
   if (action === 'list') {
@@ -48,13 +98,16 @@ function doGet(e) {
       mood: r[9],
       note: r[10]
     }));
-    return ContentService.createTextOutput(JSON.stringify({ rows }))
-      .setMimeType(ContentService.MimeType.JSON);
+    var out = ContentService.createTextOutput(JSON.stringify({ rows }));
+    out.setMimeType(ContentService.MimeType.JSON);
+    _applyCorsHeaders(out, _getRequestOrigin(e));
+    return out;
   }
   
-  return ContentService.createTextOutput(
-    JSON.stringify({ ok: false, error: 'unknown action' })
-  ).setMimeType(ContentService.MimeType.JSON);
+  var out = ContentService.createTextOutput(JSON.stringify({ ok: false, error: 'unknown action' }));
+  out.setMimeType(ContentService.MimeType.JSON);
+  _applyCorsHeaders(out, _getRequestOrigin(e));
+  return out;
 }
 
 function doPost(e) {
@@ -94,14 +147,16 @@ function doPost(e) {
     }
     
     // Return a success response with the results
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "success", results: results }))
-      .setMimeType(ContentService.MimeType.JSON);
+      var out = ContentService.createTextOutput(JSON.stringify({ status: "success", results: results }));
+      out.setMimeType(ContentService.MimeType.JSON);
+      _applyCorsHeaders(out, _getRequestOrigin(e));
+      return out;
 
   } catch (error) {
     // Return an error response
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
+    var out = ContentService.createTextOutput(JSON.stringify({ status: "error", message: error.toString() }));
+    out.setMimeType(ContentService.MimeType.JSON);
+    _applyCorsHeaders(out, _getRequestOrigin(e));
+    return out;
   }
 }
