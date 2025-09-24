@@ -136,353 +136,40 @@ async function refreshDomainScorePanel() {
   const grid = $('domainScoreGrid');
   if (!grid) return;
 
-  try {
-    let allEntries = [];
-    try {
-      if (typeof window.getAllEntries === 'function') {
-        allEntries = await window.getAllEntries();
-      }
-    } catch (e) {
-      console.warn('Failed to load entries for score panel', e);
-    }
+  // Clear and render four domain slots in a single row. Scores are taken from
+  // appState.overviewScores if available, otherwise show an em dash.
+  const domains = ['sleep', 'fitness', 'mind', 'spirit'];
+  grid.innerHTML = '';
+  domains.forEach(domain => {
+    const item = document.createElement('div');
+    item.className = 'lean-domain-item';
 
-    // Build rolling 7-day date strings
-    const today = new Date();
-    const targetDates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      targetDates.push(d.toISOString().split('T')[0]);
-    }
-    const dateSet = new Set(targetDates);
+    const inner = document.createElement('div');
+    inner.className = 'lean-domain-inner';
 
-    // Group entries by domain and date
-    const domainCounts = {};
-    Object.keys(DOMAINS).forEach(d => domainCounts[d] = { completed: 0, possible: 0 });
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'lean-ring-icon';
+    const icon = document.createElement('span');
+    icon.className = `domain-icon ${domain}`;
+    icon.setAttribute('role', 'img');
+    icon.setAttribute('aria-label', `${domain} icon`);
+    iconWrap.appendChild(icon);
 
-    allEntries.forEach(entry => {
-      if (!entry || !entry.date || !entry.domain || !dateSet.has(entry.date)) return;
-      if (!domainCounts[entry.domain]) return;
-      domainCounts[entry.domain].possible += 1;
-      if (entry.completed) domainCounts[entry.domain].completed += 1;
-    });
+    const score = document.createElement('div');
+    score.className = 'lean-score-value';
+    const value = (appState && appState.overviewScores && typeof appState.overviewScores[domain] !== 'undefined') ? String(appState.overviewScores[domain]) : '—';
+    score.textContent = value;
 
-    grid.innerHTML = '';
+    const label = document.createElement('div');
+    label.className = 'lean-domain-label';
+    label.textContent = domain.toUpperCase();
 
-    // Append items directly into the #domainScoreGrid (which is a flex container)
-    // This avoids an extra wrapper that could interfere with centering/alignment.
-    Object.entries(DOMAINS).forEach(([domain]) => {
-      const counts = domainCounts[domain] || { completed: 0, possible: 0 };
-      const score = counts.possible > 0 ? Math.round((counts.completed / counts.possible) * 100) : 0;
-
-      const item = document.createElement('div');
-      item.className = `lean-domain-item ${domain}`;
-
-      // Ring container with SVG progress arc
-      const ringContainer = document.createElement('div');
-      ringContainer.className = 'lean-score-ring-container';
-
-      const radius = 30;
-      const centerX = 34;
-      const centerY = 34;
-      const startAngle = 30; // start 30 degrees from top
-      const endAngle = 330; // end at 330 degrees, creating 60 degree gap at bottom
-      const startX = centerX + radius * Math.sin(startAngle * Math.PI / 180);
-      const startY = centerY - radius * Math.cos(startAngle * Math.PI / 180);
-      const endX = centerX + radius * Math.sin(endAngle * Math.PI / 180);
-      const endY = centerY - radius * Math.cos(endAngle * Math.PI / 180);
-      const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
-      const pathData = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
-      const arcLength = (endAngle / 360) * 2 * Math.PI * radius;
-      const progressLength = (score / 100) * arcLength;
-      const gapLength = arcLength - progressLength;
-      const accentColor = { sleep: '#1e90ff', fitness: '#ff3b30', mind: '#7c3aed', spirit: '#16a34a' }[domain] || '#94a3b8';
-
-      const svg = `<svg width="68" height="68" viewBox="0 0 68 68" class="lean-score-ring-svg">
-        <path d="${pathData}" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="4" />
-        <path d="${pathData}" fill="none" stroke="${accentColor}" stroke-width="4" stroke-dasharray="${progressLength} ${gapLength}" stroke-dashoffset="0" />
-      </svg>`;
-
-      ringContainer.innerHTML = svg;
-
-      // Add accessibility: tooltip and aria-label
-      const title = `${counts.completed} of ${counts.possible} completed — ${score}%`;
-      ringContainer.title = title;
-      ringContainer.setAttribute('aria-label', title);
-
-      // Score value centered in ring
-      const value = document.createElement('div');
-      value.className = 'lean-score-value';
-      value.textContent = String(score);
-      ringContainer.appendChild(value);
-
-  // Small icon overlapping bottom gap of ring — inline the authored external SVG so artwork is used
-  const iconWrap = document.createElement('div');
-  iconWrap.className = `lean-ring-icon small-icon small-icon--${domain}`;
-  // Use an <img> tag to load the authored SVG file directly so fills/styling from the file are preserved
-  const img = document.createElement('img');
-  // Some repositories use 'exercise.svg' for the fitness domain asset. Map accordingly so we load the correct file.
-  const iconFile = domain === 'fitness' ? 'exercise.svg' : `${domain}.svg`;
-  img.src = `images/${iconFile}`;
-  img.alt = `${domain} icon`;
-  img.className = `small-icon-img small-icon-img--${domain}`;
-  iconWrap.appendChild(img);
-  ringContainer.appendChild(iconWrap);
-
-      const label = document.createElement('div');
-      label.className = 'lean-domain-label';
-      label.textContent = domain.toUpperCase();
-
-      item.appendChild(ringContainer);
-      item.appendChild(label);
-      // Append directly to the grid (flex container) to ensure centering works consistently.
-      grid.appendChild(item);
-    });
-  } catch (error) {
-    console.error('Failed to refresh domain score panel', error);
-  }
-}
-
-function updateProgress() {
-  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
-    const completedCount = aspects.reduce((sum, aspect) => {
-      return sum + (appState.todayData?.[domain]?.[aspect] ? 1 : 0);
-    }, 0);
-    const statusEl = document.querySelector(`[data-domain-status="${domain}"]`);
-    if (statusEl) {
-      statusEl.textContent = `${completedCount}/${aspects.length}`;
-    }
+    inner.appendChild(iconWrap);
+    inner.appendChild(score);
+    inner.appendChild(label);
+    item.appendChild(inner);
+    grid.appendChild(item);
   });
-
-  refreshDomainScorePanel().catch(error => console.error('Domain panel update error', error));
-}
-
-function showScreen(screenId) {
-  $$('.screen').forEach(screen => screen.classList.remove('active'));
-  const targetScreen = $(screenId);
-  if (targetScreen) {
-    targetScreen.classList.add('active');
-  }
-
-  $$('.nav-item, .bottom-nav-item').forEach(item => item.classList.remove('active'));
-  const screenName = screenId.replace('Screen', '');
-  const navItems = document.querySelectorAll(`[data-screen="${screenName}"]`);
-  navItems.forEach(item => item.classList.add('active'));
-
-  if (screenId === 'reviewScreen') {
-    renderReview();
-  }
-
-  if (screenId === 'reflectScreen') {
-    $$('.mood-option').forEach(option => {
-      option.classList.toggle('selected', Number(option.dataset.mood) === appState.mood);
-    });
-  }
-
-  appState.currentScreen = screenName;
-  try {
-    if (appState.devMode) {
-      console.info('[diagnostic] showScreen', screenName, { currentScreen: appState.currentScreen, visibleAspects: appState.visibleAspects, stack: (new Error()).stack });
-    }
-  } catch (e) {}
-}
-
-async function renderReview() {
-  let allEntries = [];
-  try {
-    if (typeof window.getAllEntries === 'function') {
-      allEntries = await window.getAllEntries();
-    }
-  } catch (e) {
-    console.warn('Could not load entries for review', e);
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-
-  // Group entries by date
-  const entriesByDate = {};
-  allEntries.forEach(entry => {
-    if (!entriesByDate[entry.date]) {
-      entriesByDate[entry.date] = [];
-    }
-    entriesByDate[entry.date].push(entry);
-  });
-
-  // Get last 7 days
-  const dates = [];
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(Date.now() - i * 86400000);
-    dates.push(date.toISOString().split('T')[0]);
-  }
-
-  const reviewContainer = $('weekGrid');
-  if (!reviewContainer) return;
-
-  reviewContainer.innerHTML = '';
-
-  dates.forEach(date => {
-    const dayEntries = entriesByDate[date] || [];
-    const completedAspects = dayEntries.filter(entry => entry.completed).length;
-    const reflection = dayEntries.find(entry => entry.type === 'reflection');
-
-    const dayDiv = document.createElement('div');
-    dayDiv.className = 'review-day';
-    if (date === today) {
-      dayDiv.classList.add('today');
-    }
-
-    const dateObj = new Date(date);
-    const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-    const monthDay = dateObj
-      .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      .toUpperCase();
-
-    dayDiv.innerHTML = `
-      <div class="review-day-header">
-        <div class="review-day-date">
-          <div class="review-day-name">${dayName}</div>
-          <div class="review-day-month">${monthDay}</div>
-        </div>
-        <div class="review-day-count">${completedAspects}/${TOTAL_ASPECTS}</div>
-      </div>
-      <div class="review-day-details">
-        ${Object.entries(DOMAINS).map(([domain, aspects]) => `
-          <div class="review-domain">
-            <div class="review-domain-name">${domain.toUpperCase()}</div>
-            <div class="review-aspects">
-              ${aspects.map(aspect => {
-                const entry = dayEntries.find(e => e.domain === domain && e.aspect === aspect);
-                const completed = entry && entry.completed;
-                const streak = entry ? entry.streak : 0;
-                return `
-                  <div class="review-aspect ${completed ? 'completed' : ''}" title="${ASPECT_LABELS[aspect]} · streak ${streak}">
-                    ${aspect.charAt(0).toUpperCase()}
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `).join('')}
-        ${reflection ? `
-          <div class="review-reflection">
-            <div class="review-mood">MOOD ${reflection.mood}</div>
-            ${reflection.note ? `<div class="review-note">${reflection.note}</div>` : ''}
-          </div>
-        ` : ''}
-      </div>
-    `;
-
-    reviewContainer.appendChild(dayDiv);
-  });
-
-  // Render streaks
-  const streaksContainer = $('streaksContainer');
-  if (streaksContainer) {
-    streaksContainer.innerHTML = '';
-    Object.entries(DOMAINS).forEach(([domain, aspects]) => {
-      const domainDiv = document.createElement('div');
-      domainDiv.className = 'streak-domain';
-      domainDiv.innerHTML = `
-        <h4>${domain.toUpperCase()}</h4>
-        <div class="streak-list">
-          ${aspects.map(aspect => {
-            const streak = appState.streaks[`${domain}-${aspect}`] || 0;
-            return `<div class="streak-item">${ASPECT_LABELS[aspect].toUpperCase()} · STREAK ${streak}</div>`;
-          }).join('')}
-        </div>
-      `;
-      streaksContainer.appendChild(domainDiv);
-    });
-  }
-
-  // Render weekly completion
-  const weeklyCompletion = $('weeklyCompletion');
-  if (weeklyCompletion) {
-    const totalPossible = dates.length * TOTAL_ASPECTS;
-    const totalCompleted = dates.reduce((sum, date) => {
-      const dayEntries = entriesByDate[date] || [];
-      return sum + dayEntries.filter(entry => entry.completed).length;
-    }, 0);
-    const completionRate = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
-    const activeStreaks = Object.values(appState.streaks || {}).filter(count => count > 0).length;
-    weeklyCompletion.textContent = `${totalCompleted} / ${totalPossible} · ${completionRate}% · ${activeStreaks} ACTIVE STREAKS`;
-  }
-}
-
-function renderAspectsManager() {
-  const managerContainer = $('aspectsManager');
-  if (!managerContainer) return;
-
-  managerContainer.innerHTML = '';
-
-  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
-    const domainDiv = document.createElement('div');
-    domainDiv.className = 'aspect-domain';
-
-    // Default to visible if not yet set
-    const visible = (appState.visibleAspects && typeof appState.visibleAspects[domain] !== 'undefined')
-      ? Boolean(appState.visibleAspects[domain])
-      : true;
-
-    const buttonLabel = visible ? 'HIDE' : 'SHOW';
-
-    const aspectsHtml = aspects.map(aspect => {
-      const streakKey = `${domain}-${aspect}`;
-      const streak = (appState.streaks && typeof appState.streaks[streakKey] === 'number') ? appState.streaks[streakKey] : 0;
-      const label = ASPECT_LABELS[aspect] || aspect;
-      return `
-        <div class="aspect-item">
-          <span class="aspect-label">${label}</span>
-          <div class="aspect-streak">STREAK ${streak}</div>
-        </div>
-      `;
-    }).join('');
-
-    domainDiv.innerHTML = `
-      <div class="aspect-domain-header">
-        <h3>${domain.toUpperCase()}</h3>
-        <button class="toggle-domain" data-domain="${domain}">${buttonLabel}</button>
-      </div>
-      <div class="aspect-list ${visible ? '' : 'hidden'}">
-        ${aspectsHtml}
-      </div>
-    `;
-
-    managerContainer.appendChild(domainDiv);
-  });
-}
-
-function updateVisibleAspects() {
-  Object.entries(DOMAINS).forEach(([domain, aspects]) => {
-    const domainContainer = document.querySelector(`.domain[data-domain="${domain}"]`);
-    if (domainContainer) {
-      const shouldHide = !appState.visibleAspects[domain];
-      if (shouldHide && appState.devMode) {
-        try {
-          console.warn(`[diagnostic] Hiding domain container for ${domain}`, {
-            domain,
-            visibleAspects: appState.visibleAspects,
-            localStorageSnapshot: (function() { try { return { disabled_aspects: localStorage.getItem('disabled_aspects'), visibleAspects: localStorage.getItem('visibleAspects'), drop_client_id: localStorage.getItem('drop_client_id') }; } catch (e) { return {}; } })(),
-            stack: (new Error()).stack
-          });
-        } catch (e) {}
-      }
-      domainContainer.classList.toggle('hidden', shouldHide);
-    }
-  });
-}
-
-async function initializeUI() {
-  function logInit(msg, level = 'debug') {
-    try {
-      if (console && console[level]) console[level]('[init] ' + msg);
-      const diag = $('diagAppState');
-      if (diag) {
-        // append short status to diag area for quick visibility in dev
-        diag.textContent = (diag.textContent ? diag.textContent + ' | ' : '') + msg;
-      }
-    } catch (e) {}
-  }
 
   function showSafe(fn, ...args) {
     return (async () => {
