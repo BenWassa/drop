@@ -140,6 +140,48 @@ function logInit(message) {
   console.log('[init]', message);
 }
 
+function initializeEventListeners() {
+  // Attach event listeners that should be bound only once
+
+  // Aspect toggles
+  $$('.aspect-toggle').forEach(toggle => {
+    toggle.addEventListener('click', async () => {
+      const domain = toggle.dataset.domain;
+      const aspect = toggle.dataset.aspect;
+      const currentlyCompleted = appState.todayData[domain][aspect] || false;
+      const newCompleted = !currentlyCompleted;
+
+      appState.todayData[domain][aspect] = newCompleted;
+      toggle.classList.toggle('completed', newCompleted);
+
+      await saveEntry(domain, aspect, newCompleted);
+    });
+  });
+
+  // Navigation
+  $$('.nav-item, .bottom-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const screen = item.dataset.screen;
+      showScreen(screen + 'Screen');
+      // Update nav active state
+      document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // Mood options
+  $$('.mood-option').forEach(option => {
+    option.addEventListener('click', () => {
+      const mood = Number(option.dataset.mood);
+      appState.mood = mood;
+      $$('.mood-option').forEach(btn => btn.classList.remove('selected'));
+      option.classList.add('selected');
+    });
+  });
+
+  // Other static listeners can be added here if needed
+}
+
 async function refreshDomainScorePanel() {
   // Render a compact, lean overview: four circular score rings with single integer scores
   const grid = $('domainScoreGrid');
@@ -262,39 +304,6 @@ async function refreshDomainScorePanel() {
     appState.visibleAspects[domain] = (typeof persistedVisible[domain] !== 'undefined') ? Boolean(persistedVisible[domain]) : true;
     aspects.forEach(aspect => {
       appState.todayData[domain][aspect] = false;
-    });
-  });
-
-  $$('.aspect-toggle').forEach(toggle => {
-    toggle.addEventListener('click', async () => {
-      const domain = toggle.dataset.domain;
-      const aspect = toggle.dataset.aspect;
-      const currentlyCompleted = appState.todayData[domain][aspect] || false;
-      const newCompleted = !currentlyCompleted;
-
-      appState.todayData[domain][aspect] = newCompleted;
-      toggle.classList.toggle('completed', newCompleted);
-
-      await saveEntry(domain, aspect, newCompleted);
-    });
-  });
-
-  $$('.nav-item, .bottom-nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const screen = item.dataset.screen;
-      showScreen(screen + 'Screen');
-      // Update nav active state
-      document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-    });
-  });
-
-  $$('.mood-option').forEach(option => {
-    option.addEventListener('click', () => {
-      const mood = Number(option.dataset.mood);
-      appState.mood = mood;
-      $$('.mood-option').forEach(btn => btn.classList.remove('selected'));
-      option.classList.add('selected');
     });
   });
 
@@ -1492,6 +1501,10 @@ function renderReview() {
 async function initializeUI() {
   if (document.readyState === 'loading') {
     await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+  }
+  if (!window.listenersAreBound) {
+    initializeEventListeners();
+    window.listenersAreBound = true;
   }
   await refreshDomainScorePanel();
 }
