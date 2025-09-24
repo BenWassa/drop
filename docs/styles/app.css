@@ -135,10 +135,8 @@
 
 /* Force SVG internals to be stroke-only and transparent to override embedded fills
    (some SVGs include hard-coded fill attributes from external sources). */
-.domain-icon svg * {
-  fill: none !important;
-  stroke: currentColor !important;
-}
+/* Do not force SVG internals here — use the authored SVGs as-is. If you want to alter appearance,
+   create separate monochrome assets or override on a per-use basis instead of globally forcing fills. */
 
 /* Ensure small inline icons used in rings inherit color and don't scale stroke width */
 .lean-ring-icon svg,
