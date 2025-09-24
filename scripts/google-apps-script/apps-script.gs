@@ -63,6 +63,8 @@ function _applyCorsHeaders(output, requestOrigin) {
 
 function doOptions(e) {
   var requestOrigin = _getRequestOrigin(e);
+  try { Logger.log('doOptions request headers: %s', JSON.stringify(e && e.headers)); } catch (ex) {}
+  try { Logger.log('doOptions chosen origin: %s', requestOrigin); } catch (ex) {}
   var out = ContentService.createTextOutput('');
   out.setMimeType(ContentService.MimeType.TEXT);
   _applyCorsHeaders(out, requestOrigin);
@@ -72,6 +74,8 @@ function doOptions(e) {
 function doGet(e) {
   const params = e.parameter || {};
   const action = params.action || 'health';
+  try { Logger.log('doGet request headers: %s', JSON.stringify(e && e.headers)); } catch (ex) {}
+  try { Logger.log('doGet chosen origin: %s', _getRequestOrigin(e)); } catch (ex) {}
   
   if (action === 'health') {
     var out = ContentService.createTextOutput(JSON.stringify({ ok: true, time: new Date().toISOString() }));
@@ -111,6 +115,8 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  try { Logger.log('doPost request headers: %s', JSON.stringify(e && e.headers)); } catch (ex) {}
+  try { Logger.log('doPost chosen origin: %s', _getRequestOrigin(e)); } catch (ex) {}
   try {
     // The sheet where you want to save the data
     var sh = sheet();
