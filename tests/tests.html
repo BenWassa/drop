@@ -993,7 +993,7 @@
 
             if (ready) {
                 // Attach UI handlers now that functions exist (safe to call)
-                try { window.initializeUI(); } catch (e) { /* ignore init errors during tests */ }
+                (async () => { try { await window.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
                 QUnit.start();
                 return;
             }

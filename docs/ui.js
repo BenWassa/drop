@@ -1489,14 +1489,11 @@ function renderReview() {
   } catch (e) { /* ignore */ }
 }
 
-function initializeUI() {
+async function initializeUI() {
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      refreshDomainScorePanel().catch(e => console.error('initializeUI failed', e));
-    });
-  } else {
-    refreshDomainScorePanel().catch(e => console.error('initializeUI failed', e));
+    await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
   }
+  await refreshDomainScorePanel();
 }
 
 window.initializeUI = initializeUI;
