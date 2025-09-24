@@ -131,7 +131,7 @@ body {
 .runtime-error-actions { text-align: right; margin-top: 8px; }
 
 .mission-header {
-  padding: 32px 24px 12px;
+  padding: 24px 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -325,8 +325,8 @@ body {
 /* Slightly larger icon in domain cards header to improve legibility */
 .domain-card .domain-icon-svg,
 .domain-score-card .domain-icon-svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 /* Ensure icon containers don't collapse and align nicely with title text */
@@ -337,6 +337,9 @@ body {
   justify-content: center;
   width: 28px;
   height: 28px;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
 }
 
 /* Provide a subtle tinted circular background for svg icons in domain cards */
