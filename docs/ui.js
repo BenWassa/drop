@@ -197,14 +197,8 @@ async function refreshDomainScorePanel() {
       label.className = 'lean-domain-label';
       label.textContent = domain.toUpperCase();
 
-      // Placeholder graph
-      const graph = document.createElement('div');
-      graph.className = 'lean-domain-graph';
-      graph.textContent = 'Graph placeholder'; // TODO: Replace with actual graph
-
       item.appendChild(ringContainer);
       item.appendChild(label);
-      item.appendChild(graph);
       container.appendChild(item);
     });
 
