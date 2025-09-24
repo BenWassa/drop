@@ -10,7 +10,7 @@ const DOMAIN_ICONS_FALLBACK = {
 
 // Ensure $ and $$ are available (defined in main.js but not global)
 if (!window.$) window.$ = (id) => document.getElementById(id);
-if (!window.$$) window.$$ = (selector) => Array.from(document.querySelectorAll(selector));
+if (!window.$$) window.$$ = (selector) => document.querySelectorAll(selector);
 
 // Simple cache for fetched SVG files
 const SVG_CACHE = {};
@@ -284,7 +284,7 @@ async function refreshDomainScorePanel() {
       const screen = item.dataset.screen;
       showScreen(screen + 'Screen');
       // Update nav active state
-      $$('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(i => i.classList.remove('active'));
       item.classList.add('active');
     });
   });
@@ -299,7 +299,7 @@ async function refreshDomainScorePanel() {
   });
 
   // Set initial mood selection
-  $$('.mood-option').forEach(option => {
+  document.querySelectorAll('.mood-option').forEach(option => {
     const mood = Number(option.dataset.mood);
     option.classList.toggle('selected', mood === appState.mood);
   });
