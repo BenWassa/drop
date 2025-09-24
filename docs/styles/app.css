@@ -299,6 +299,53 @@ body {
   gap: 8px;
 }
 
+/* Domain icon styling: SVG images and text fallbacks */
+.domain-icon-svg,
+.domain-icon-text {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  vertical-align: middle;
+}
+
+.domain-icon-svg {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: none; /* allow color from SVG file */
+}
+
+.domain-icon-text {
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Slightly larger icon in domain cards header to improve legibility */
+.domain-card .domain-icon-svg,
+.domain-score-card .domain-icon-svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Ensure icon containers don't collapse and align nicely with title text */
+.domain .domain-icon,
+.domain-score-title .domain-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+/* Provide a subtle tinted circular background for svg icons in domain cards */
+.domain-card .domain-icon,
+.domain-score-card .domain-score-title .domain-icon {
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+}
+
 .domain-score-score {
   font-family: var(--font-mono);
   font-size: 32px;
