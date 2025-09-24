@@ -417,16 +417,31 @@ function updateVisibleAspects() {
 }
 
 async function initializeUI() {
+  function logInit(msg, level = 'debug') {
+    try {
+      if (console && console[level]) console[level]('[init] ' + msg);
+      const diag = $('diagAppState');
+      if (diag) {
+        // append short status to diag area for quick visibility in dev
+        diag.textContent = (diag.textContent ? diag.textContent + ' | ' : '') + msg;
+      }
+    } catch (e) {}
+  }
+
   function showSafe(fn, ...args) {
     return (async () => {
       try {
+        logInit('running ' + (fn.name || 'anonymous'));
         await fn(...args);
+        logInit('completed ' + (fn.name || 'anonymous'));
       } catch (err) {
         try {
           const panel = $('runtimeErrorContent');
           if (panel) panel.textContent = `${err && err.stack ? err.stack : String(err)}`;
           const container = $('runtimeErrorPanel');
           if (container) container.classList.remove('hidden');
+          // also mirror to diagAppState for a quick trace when dev-only hidden
+          const diag = $('diagAppState'); if (diag) diag.textContent = 'INIT ERROR: ' + (err && err.message ? err.message : String(err));
         } catch (e) {}
         console.error('Safe wrapper caught error', err);
       }
@@ -458,6 +473,7 @@ async function initializeUI() {
     if (container) container.classList.add('hidden');
   });
   initializeParticles();
+  logInit('particles initialized');
   updateQuarterReservoir();
   setInterval(updateQuarterReservoir, 60 * 1000);
 
@@ -568,6 +584,7 @@ async function initializeUI() {
 
   // Initialize dev-only elements
   document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devMode));
+  logInit('dev mode ' + (devMode ? 'ON' : 'OFF') + ', mock ' + (useMock ? 'ON' : 'OFF'));
 
   // Mock mode banner elements
   const mockBanner = $('mockBanner');
@@ -704,7 +721,7 @@ async function initializeUI() {
   }
 
   // Render diagnostics once at init
-  renderDiagnostics().catch(() => {});
+  renderDiagnostics().catch((e) => { console.warn('renderDiagnostics failed', e); });
 
   const saveReflectionBtn = $('saveReflection');
   if (saveReflectionBtn) {
@@ -744,13 +761,24 @@ async function initializeUI() {
   // If mock data flag is set, load or seed mock data before loading
   if (appState.useMock && typeof window.seedMockData === 'function') {
     try {
+      logInit('seeding mock data');
       await window.seedMockData();
+      logInit('mock data seeded');
     } catch (e) {
       console.warn('seedMockData failed', e);
     }
   }
 
-  await loadTodayData();
+  try {
+    logInit('loading today data');
+    await loadTodayData();
+    logInit('today data loaded');
+  } catch (e) {
+    console.error('loadTodayData failed', e);
+    const panel = $('runtimeErrorContent'); if (panel) panel.textContent = `loadTodayData failed: ${e && e.message ? e.message : String(e)}`;
+    const container = $('runtimeErrorPanel'); if (container) container.classList.remove('hidden');
+  }
+
   showScreen('todayScreen');
 }
 
