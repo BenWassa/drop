@@ -18,11 +18,8 @@
   --spirit: #16a34a;
 }
 
-/* Domain icon colors */
-.domain-icon.sleep { color: var(--sleep); }
-.domain-icon.fitness { color: var(--fitness); }
-.domain-icon.mind { color: var(--mind); }
-.domain-icon.spirit { color: var(--spirit); }
+/* Domain icons are provided as authored SVG files in docs/images/ and are linked via background-image.
+  Keep styling minimal here so the SVG artwork is used unchanged. */
 
 /* Lean domain overview styles */
 .lean-domain-overview {
@@ -122,14 +119,13 @@
 
 /* Domain-specific background images (relative to docs/) */
 .domain-icon.sleep { background-image: url('../images/sleep.svg'); }
-.domain-icon.fitness { background-image: url('../images/fitness.svg'); }
+.domain-icon.fitness { background-image: url('../images/exercise.svg'); }
 .domain-icon.mind { background-image: url('../images/mind.svg'); }
 .domain-icon.spirit { background-image: url('../images/spirit.svg'); }
 
 .domain-icon svg {
   width: 100%;
   height: 100%;
-  background: transparent !important;
   display: block;
 }
 
