@@ -36,6 +36,42 @@ function isUsingMock() {
   return localStorage.getItem('use_mock_data') === '1';
 }
 
+// Ensure required object stores exist. If any are missing, perform an upgrade by opening
+// the DB with version+1 and creating the missing stores. Returns the upgraded db instance.
+async function ensureStoresExist(storeNames = []) {
+  const db = await dbp;
+  const missing = storeNames.filter(name => !db.objectStoreNames.contains(name));
+  if (missing.length === 0) return db;
+
+  // Close current connection then upgrade
+  try { db.close(); } catch (e) {}
+
+  const req = indexedDB.open('drop-tracker', db.version + 1);
+  req.onupgradeneeded = () => {
+    const upg = req.result;
+    missing.forEach(name => {
+      try {
+        if (name === 'mock_entries') {
+          const s = upg.createObjectStore('mock_entries', { keyPath: 'id' });
+          s.createIndex('by_date', 'date');
+        } else if (name === 'mock_outbox') {
+          upg.createObjectStore('mock_outbox', { keyPath: 'id', autoIncrement: true });
+        } else if (name === 'mock_audio_notes') {
+          const s = upg.createObjectStore('mock_audio_notes', { keyPath: 'id' });
+          s.createIndex('by_date', 'date');
+        }
+      } catch (e) {
+        // ignore create errors if store already exists (race conditions)
+      }
+    });
+  };
+
+  return await new Promise((resolve, reject) => {
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('DB upgrade failed'));
+  });
+}
+
 const dbp = window.dbp || new Promise((resolve, reject) => {
   const req = indexedDB.open('drop-tracker', 2);
   req.onupgradeneeded = () => {
@@ -407,6 +443,8 @@ window.exportAllData = exportAllData;
 
 // Developer: seed and clear mock data
 async function seedMockData(days = 7) {
+  // Ensure mock stores exist before attempting to write
+  await ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']);
   const db = await dbp;
   const tx = db.transaction(['mock_entries', 'mock_outbox'], 'readwrite');
   const entriesStore = tx.objectStore('mock_entries');
@@ -462,6 +500,8 @@ async function seedMockData(days = 7) {
 }
 
 async function clearMockData() {
+  // Ensure mock stores exist before attempting to clear
+  await ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']);
   const db = await dbp;
   const tx = db.transaction(['mock_entries', 'mock_outbox'], 'readwrite');
   const entriesStore = tx.objectStore('mock_entries');
@@ -500,6 +540,7 @@ async function clearMockData() {
 }
 
 async function getMockEntries(date) {
+  await ensureStoresExist(['mock_entries']);
   const db = await dbp;
   const tx = db.transaction('mock_entries', 'readonly');
   const store = tx.objectStore('mock_entries');
@@ -519,6 +560,7 @@ async function getMockEntries(date) {
 }
 
 async function getMockOutbox() {
+  await ensureStoresExist(['mock_outbox']);
   const db = await dbp;
   const tx = db.transaction('mock_outbox', 'readonly');
   const store = tx.objectStore('mock_outbox');
@@ -531,6 +573,7 @@ async function getMockOutbox() {
 
 // Data access helpers that respect mock mode
 async function getAllEntries() {
+  await ensureStoresExist(['entries','mock_entries']);
   const db = await dbp;
   const useMock = isUsingMock();
   const storeName = useMock ? 'mock_entries' : 'entries';
@@ -544,6 +587,7 @@ async function getAllEntries() {
 }
 
 async function getEntriesByDate(date) {
+  await ensureStoresExist(['entries','mock_entries']);
   const db = await dbp;
   const useMock = isUsingMock();
   const storeName = useMock ? 'mock_entries' : 'entries';
