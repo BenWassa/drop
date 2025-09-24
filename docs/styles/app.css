@@ -85,6 +85,28 @@
   justify-content: center;
 }
 
+/* When using CSS background-image for icons (GitHub Pages friendly) */
+.domain-icon {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Small icon variant used inside score rings */
+.lean-ring-icon .domain-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-size: contain;
+}
+
+/* Domain-specific background images (relative to docs/) */
+.domain-icon.sleep { background-image: url('images/sleep.svg'); }
+.domain-icon.fitness { background-image: url('images/fitness.svg'); }
+.domain-icon.mind { background-image: url('images/mind.svg'); }
+.domain-icon.spirit { background-image: url('images/spirit.svg'); }
+
 .domain-icon svg {
   width: 100%;
   height: 100%;

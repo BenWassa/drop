@@ -29,25 +29,12 @@ async function inlineSvgFromFile(name) {
 }
 
 function renderDomainIcon(domain) {
-  // Return a span wrapper with the fallback SVG immediately so layout is stable.
-  const fallback = DOMAIN_ICONS_FALLBACK[domain] || '';
+  // Use CSS background-image to load the canonical SVG for GitHub Pages friendliness.
+  // Return a span with domain classes only; CSS will set background-image:url('images/<domain>.svg').
   const wrapper = document.createElement('span');
   wrapper.className = `domain-icon ${domain}`;
-  wrapper.innerHTML = fallback;
-
-  // Fetch and inline the canonical file in background; when ready, replace innerHTML.
-  inlineSvgFromFile(domain).then(svg => {
-    if (!svg) return;
-    try {
-      // If svg string doesn't start with <svg, wrap safely
-      const cleaned = svg.trim();
-      // Some SVG files might include a surrounding comment or whitespace—just inject the raw svg
-      wrapper.innerHTML = cleaned || fallback;
-    } catch (e) {
-      // ignore DOM injection errors
-    }
-  }).catch(() => {});
-
+  wrapper.setAttribute('role', 'img');
+  wrapper.setAttribute('aria-label', `${domain} icon`);
   return wrapper.outerHTML;
 }
 
