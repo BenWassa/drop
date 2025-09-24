@@ -240,6 +240,11 @@ function showScreen(screenId) {
   }
 
   appState.currentScreen = screenName;
+  try {
+    if (appState.devMode) {
+      console.info('[diagnostic] showScreen', screenName, { currentScreen: appState.currentScreen, visibleAspects: appState.visibleAspects, stack: (new Error()).stack });
+    }
+  } catch (e) {}
 }
 
 async function renderReview() {
@@ -411,7 +416,18 @@ function updateVisibleAspects() {
   Object.entries(DOMAINS).forEach(([domain, aspects]) => {
     const domainContainer = document.querySelector(`.domain[data-domain="${domain}"]`);
     if (domainContainer) {
-      domainContainer.classList.toggle('hidden', !appState.visibleAspects[domain]);
+      const shouldHide = !appState.visibleAspects[domain];
+      if (shouldHide && appState.devMode) {
+        try {
+          console.warn(`[diagnostic] Hiding domain container for ${domain}`, {
+            domain,
+            visibleAspects: appState.visibleAspects,
+            localStorageSnapshot: (function() { try { return { disabled_aspects: localStorage.getItem('disabled_aspects'), visibleAspects: localStorage.getItem('visibleAspects'), drop_client_id: localStorage.getItem('drop_client_id') }; } catch (e) { return {}; } })(),
+            stack: (new Error()).stack
+          });
+        } catch (e) {}
+      }
+      domainContainer.classList.toggle('hidden', shouldHide);
     }
   });
 }
@@ -723,9 +739,72 @@ async function initializeUI() {
     }
   }
 
+  // Dump app state and storage for debugging
+  async function dumpAppState() {
+    try {
+      const snapshot = {
+        timestamp: new Date().toISOString(),
+        appState: {
+          currentScreen: appState.currentScreen,
+          visibleAspects: appState.visibleAspects,
+          streaks: appState.streaks,
+          mood: appState.mood,
+          devMode: appState.devMode,
+          useMock: appState.useMock
+        },
+        localStorage: {},
+        indexedDB: {}
+      };
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          snapshot.localStorage[k] = localStorage.getItem(k);
+        }
+      } catch (e) { snapshot.localStorage_error = String(e); }
+
+      try {
+        const db = await dbp;
+        for (const name of Array.from(db.objectStoreNames || [])) {
+          try {
+            const tx = db.transaction(name, 'readonly');
+            const store = tx.objectStore(name);
+            const count = await new Promise((res, rej) => { const r = store.count(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+            snapshot.indexedDB[name] = { count };
+          } catch (e) { snapshot.indexedDB[name] = { error: String(e) }; }
+        }
+      } catch (e) { snapshot.indexedDB_error = String(e); }
+
+      console.group('[diagnostic] dumpAppState');
+      console.log(snapshot);
+      console.groupEnd();
+
+      if (diagAppStateEl) {
+        diagAppStateEl.textContent = JSON.stringify({ lastDump: snapshot.timestamp, appState: snapshot.appState }, null, 0);
+      }
+      return snapshot;
+    } catch (err) {
+      console.error('dumpAppState failed', err);
+      throw err;
+    }
+  }
+
   if (diagRefreshBtn) {
     diagRefreshBtn.addEventListener('click', async () => {
       await renderDiagnostics();
+    });
+  }
+
+  // Dump storage button (dev-only)
+  const dumpBtn = $('dumpStorageBtn');
+  if (dumpBtn) {
+    dumpBtn.addEventListener('click', async () => {
+      try {
+        await dumpAppState();
+        alert('Storage dumped to console and diagnostics panel.');
+      } catch (e) {
+        console.error('dump failed', e);
+        alert('Dump failed; see console.');
+      }
     });
   }
 
