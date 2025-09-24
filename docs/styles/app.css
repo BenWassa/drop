@@ -120,7 +120,7 @@
 
 /* Domain-specific background images (relative to docs/) */
 .domain-icon.sleep { background-image: url('../images/sleep.svg'); }
-.domain-icon.fitness { background-image: url('../images/exercise.svg'); }
+.domain-icon.fitness { background-image: url('../images/fitness.svg'); }
 .domain-icon.mind { background-image: url('../images/mind.svg'); }
 .domain-icon.spirit { background-image: url('../images/spirit.svg'); }
 
