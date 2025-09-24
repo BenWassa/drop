@@ -85,6 +85,24 @@ body {
   margin-left: 6px;
 }
 
+.runtime-error-panel {
+  margin: 14px auto;
+  max-width: 440px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(255, 69, 58, 0.06);
+  border: 1px solid rgba(255, 69, 58, 0.12);
+  color: #ff6b6b;
+  font-family: var(--font-mono);
+}
+.runtime-error-content {
+  font-size: 12px;
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow: auto;
+}
+.runtime-error-actions { text-align: right; margin-top: 8px; }
+
 .mission-header {
   padding: 32px 24px 12px;
   display: flex;

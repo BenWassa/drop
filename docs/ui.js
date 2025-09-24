@@ -417,6 +417,46 @@ function updateVisibleAspects() {
 }
 
 async function initializeUI() {
+  function showSafe(fn, ...args) {
+    return (async () => {
+      try {
+        await fn(...args);
+      } catch (err) {
+        try {
+          const panel = $('runtimeErrorContent');
+          if (panel) panel.textContent = `${err && err.stack ? err.stack : String(err)}`;
+          const container = $('runtimeErrorPanel');
+          if (container) container.classList.remove('hidden');
+        } catch (e) {}
+        console.error('Safe wrapper caught error', err);
+      }
+    })();
+  }
+  // Global error handlers (dev-only panel)
+  window.addEventListener('error', (ev) => {
+    try {
+      const panel = $('runtimeErrorContent');
+      if (panel) panel.textContent = `${ev.message}\n${ev.filename}:${ev.lineno}:${ev.colno}\n${ev.error && ev.error.stack ? ev.error.stack : ''}`;
+      const container = $('runtimeErrorPanel');
+      if (container) container.classList.remove('hidden');
+    } catch (e) {}
+  });
+  window.addEventListener('unhandledrejection', (ev) => {
+    try {
+      const panel = $('runtimeErrorContent');
+      if (panel) panel.textContent = `UnhandledRejection: ${ev.reason && ev.reason.stack ? ev.reason.stack : String(ev.reason)}`;
+      const container = $('runtimeErrorPanel');
+      if (container) container.classList.remove('hidden');
+    } catch (e) {}
+  });
+
+  const runtimeClear = $('runtimeErrorClear');
+  if (runtimeClear) runtimeClear.addEventListener('click', () => {
+    const panel = $('runtimeErrorContent');
+    if (panel) panel.textContent = 'No errors';
+    const container = $('runtimeErrorPanel');
+    if (container) container.classList.add('hidden');
+  });
   initializeParticles();
   updateQuarterReservoir();
   setInterval(updateQuarterReservoir, 60 * 1000);
@@ -695,11 +735,11 @@ async function initializeUI() {
     }
   });
 
-  refreshDomainScorePanel().catch(error => console.error('Domain panel update error', error));
+  await showSafe(refreshDomainScorePanel);
 
-  renderAspectsManager();
+  await showSafe(renderAspectsManager);
 
-  initializeAudioNotesList();
+  await showSafe(initializeAudioNotesList);
 
   // If mock data flag is set, load or seed mock data before loading
   if (appState.useMock && typeof window.seedMockData === 'function') {
