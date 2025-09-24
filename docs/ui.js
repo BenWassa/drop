@@ -493,9 +493,21 @@ async function initializeUI() {
   updateQuarterReservoir();
   setInterval(updateQuarterReservoir, 60 * 1000);
 
+  // Initialize todayData and visibleAspects. Load persisted visibleAspects from localStorage
+  // so toggling dev/mock or reloading doesn't unexpectedly hide domains.
+  let persistedVisible = {};
+  try {
+    const raw = localStorage.getItem('visibleAspects');
+    if (raw) persistedVisible = JSON.parse(raw) || {};
+  } catch (e) {
+    // ignore parse errors and fall back to defaults
+    persistedVisible = {};
+  }
+
   Object.entries(DOMAINS).forEach(([domain, aspects]) => {
     appState.todayData[domain] = {};
-    appState.visibleAspects[domain] = true;
+    // Use persisted value if present, otherwise default to true
+    appState.visibleAspects[domain] = (typeof persistedVisible[domain] !== 'undefined') ? Boolean(persistedVisible[domain]) : true;
     aspects.forEach(aspect => {
       appState.todayData[domain][aspect] = false;
     });
@@ -852,6 +864,11 @@ async function initializeUI() {
       e.target.textContent = appState.visibleAspects[domain] ? 'HIDE' : 'SHOW';
       updateVisibleAspects();
       renderAspectsManager();
+      try {
+        localStorage.setItem('visibleAspects', JSON.stringify(appState.visibleAspects));
+      } catch (e) {
+        // ignore quota errors
+      }
     }
   });
 
