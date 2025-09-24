@@ -598,7 +598,7 @@ async function refreshDomainScorePanel() {
     });
   }
 
-  initializeVoiceControls();
+  // Voice button removed from DOM — do not initialize voice controls.
 
   document.addEventListener('click', e => {
     if (e.target.classList.contains('toggle-domain')) {
