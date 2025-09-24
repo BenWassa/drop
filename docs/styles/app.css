@@ -458,10 +458,18 @@ body {
   margin-bottom: 28px;
 }
 
+/* Domain score overview: enforce a single horizontal row of four items.
+   Use non-wrapping flex so the row remains one line; allow horizontal
+   scrolling on narrow viewports. */
 .domain-score-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 8px 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .domain-score-card {
@@ -1764,9 +1772,11 @@ body {
   }
 
   .domain-score-grid {
-    display: flex;
-    flex-direction: column;
     gap: 12px;
+    /* keep single-row behavior; horizontal scroll will allow overflow */
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 
   .review-summary {
