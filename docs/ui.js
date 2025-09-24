@@ -519,6 +519,7 @@ async function initializeUI() {
         await loadTodayData();
         refreshDomainScorePanel();
         renderReview();
+        setMockBanner(appState.useMock);
       } catch (e) {
         console.warn('Reload after mock mode switch failed', e);
       }
@@ -527,6 +528,16 @@ async function initializeUI() {
 
   // Initialize dev-only elements
   document.querySelectorAll('.dev-only').forEach(el => el.classList.toggle('hidden', !devMode));
+
+  // Mock mode banner elements
+  const mockBanner = $('mockBanner');
+  const mockSeedQuick = $('mockSeedQuick');
+  const mockClearQuick = $('mockClearQuick');
+
+  function setMockBanner(visible) {
+    if (!mockBanner) return;
+    mockBanner.classList.toggle('hidden', !visible);
+  }
 
   // Dev control buttons
   const seedBtn = $('seedMockData');
@@ -553,6 +564,35 @@ async function initializeUI() {
         } catch (e) {
           console.error('clearMockData error', e);
         }
+      }
+    });
+  }
+
+  // Quick banner actions
+  if (mockSeedQuick) {
+    mockSeedQuick.addEventListener('click', async () => {
+      if (!confirm('Seed mock data into sandbox? This will not affect real data.')) return;
+      try {
+        await window.seedMockData();
+        await loadTodayData();
+        setMockBanner(true);
+      } catch (e) {
+        console.error('seedMockData error', e);
+        alert('Seeding mock data failed. See console.');
+      }
+    });
+  }
+
+  if (mockClearQuick) {
+    mockClearQuick.addEventListener('click', async () => {
+      if (!confirm('Clear mock sandbox data? This will remove mock entries and outbox.')) return;
+      try {
+        await window.clearMockData();
+        await loadTodayData();
+        setMockBanner(true);
+      } catch (e) {
+        console.error('clearMockData error', e);
+        alert('Clearing mock data failed. See console.');
       }
     });
   }

@@ -16,6 +16,13 @@
 <body>
   <canvas id="backgroundParticles" class="background-particles"></canvas>
   <div class="app">
+    <div id="mockBanner" class="mock-banner hidden" role="status" aria-live="polite">
+      <div class="mock-banner__content">Mock mode active — sandboxed data</div>
+      <div class="mock-banner__actions">
+        <button id="mockSeedQuick" class="setting-action">Seed Mock</button>
+        <button id="mockClearQuick" class="setting-action">Clear Mock</button>
+      </div>
+    </div>
     <!-- Header -->
     <header class="mission-header">
       <div class="quarter-reservoir" id="quarterReservoir">

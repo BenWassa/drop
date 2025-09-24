@@ -57,6 +57,34 @@ body {
   padding-bottom: 120px;
 }
 
+.mock-banner {
+  position: sticky;
+  top: 80px;
+  margin: 12px auto;
+  max-width: 440px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(99,102,241,0.12), rgba(16,185,129,0.06));
+  border: 1px solid rgba(148,163,184,0.12);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.28);
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.mock-banner__content {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mock-banner__actions button {
+  margin-left: 6px;
+}
+
 .mission-header {
   padding: 32px 24px 12px;
   display: flex;
