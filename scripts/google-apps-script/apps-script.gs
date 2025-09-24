@@ -84,6 +84,23 @@ function doGet(e) {
     return out;
   }
   
+  // Debug endpoint: echo request headers and chosen origin for troubleshooting CORS
+  if (action === 'debug') {
+    var requestOrigin = _getRequestOrigin(e);
+    var payload = {
+      timestamp: new Date().toISOString(),
+      params: e.parameter || {},
+      headers: e && e.headers ? e.headers : null,
+      chosenOrigin: requestOrigin,
+      allowedOrigins: ALLOWED_ORIGINS
+    };
+    try { Logger.log('debug payload: %s', JSON.stringify(payload)); } catch (ex) {}
+    var outDebug = ContentService.createTextOutput(JSON.stringify(payload));
+    outDebug.setMimeType(ContentService.MimeType.JSON);
+    _applyCorsHeaders(outDebug, requestOrigin);
+    return outDebug;
+  }
+  
   if (action === 'list') {
     const sh = sheet();
     const last = Math.min(200, Math.max(0, Number(params.limit || 100)));
