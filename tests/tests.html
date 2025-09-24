@@ -497,10 +497,13 @@
         });
 
         QUnit.module('UI Interactions', function() {
+            const frame = document.getElementById('testFrame');
+            const doc = frame.contentDocument;
+            const win = frame.contentWindow;
+
             QUnit.test('Navigation switching works', function(assert) {
-                window.initializeUI();
-                const todayNav = document.querySelector('[data-screen="today"]');
-                const reviewNav = document.querySelector('[data-screen="review"]');
+                const todayNav = doc.querySelector('[data-screen="today"]');
+                const reviewNav = doc.querySelector('[data-screen="review"]');
 
                 todayNav.click();
                 assert.ok(todayNav && todayNav.classList && todayNav.classList.contains('active'), 'Today nav is active');
@@ -511,8 +514,7 @@
             });
 
             QUnit.test('Aspect toggle changes state', async function(assert) {
-                window.initializeUI();
-                const toggle = document.querySelector('.aspect-toggle');
+                const toggle = doc.querySelector('.aspect-toggle');
 
                 const initialState = toggle && toggle.classList && toggle.classList.contains('completed');
                 toggle.click();
@@ -523,9 +525,8 @@
             });
 
             QUnit.test('Mood selection works', function(assert) {
-                window.initializeUI();
-                const mood1 = document.querySelector('[data-mood="1"]');
-                const mood3 = document.querySelector('[data-mood="3"]');
+                const mood1 = doc.querySelector('[data-mood="1"]');
+                const mood3 = doc.querySelector('[data-mood="3"]');
 
                 mood1.click();
                 assert.ok(mood1 && mood1.classList && mood1.classList.contains('selected'), 'Mood 1 button is selected');
@@ -986,14 +987,16 @@
         // Start QUnit only after the app has defined its functions to avoid
         // race conditions where data/ui scripts haven't finished loading.
         (function waitForAppReady() {
-            const ready = typeof window.getClientId === 'function'
-                && typeof window.saveReflection === 'function'
-                && typeof window.exportToCSV === 'function'
-                && typeof window.initializeUI === 'function';
+            const frame = document.getElementById('testFrame');
+            const win = frame.contentWindow;
+            const ready = win && typeof win.getClientId === 'function'
+                && typeof win.saveReflection === 'function'
+                && typeof win.exportToCSV === 'function'
+                && typeof win.initializeUI === 'function';
 
             if (ready) {
                 // Attach UI handlers now that functions exist (safe to call)
-                (async () => { try { await window.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
+                (async () => { try { await win.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
                 QUnit.start();
                 return;
             }
@@ -1006,14 +1009,14 @@
 
             const poll = setInterval(() => {
                 const now = Date.now();
-                const ok = typeof window.getClientId === 'function'
-                    && typeof window.saveReflection === 'function'
-                    && typeof window.exportToCSV === 'function'
-                    && typeof window.initializeUI === 'function';
+                const ok = win && typeof win.getClientId === 'function'
+                    && typeof win.saveReflection === 'function'
+                    && typeof win.exportToCSV === 'function'
+                    && typeof win.initializeUI === 'function';
 
                 if (ok) {
                     clearInterval(poll);
-                    try { window.initializeUI(); } catch (e) {}
+                    (async () => { try { await win.initializeUI(); } catch (e) { /* ignore init errors during tests */ } })();
                     QUnit.start();
                 } else if (now - startTime > maxWait) {
                     clearInterval(poll);
