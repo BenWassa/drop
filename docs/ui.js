@@ -407,10 +407,11 @@ async function refreshDomainScorePanel() {
     // Small inline icon SVG (fallback stroke-only) — prefer inline fallback so icons are styled by currentColor
     const inlineIcon = renderDomainIconInline(domain) || '';
 
+    const glowing = (typeof score === 'number' && score >= 80) ? 'glowing' : '';
     return `
-      <div class="lean-domain-item" aria-hidden="false">
+      <div class="lean-domain-item ${glowing}" aria-hidden="false">
         <div class="lean-score-ring-container" title="${domain.toUpperCase()} ${display}">
-          <svg class="lean-score-ring-svg" viewBox="0 0 72 72" width="68" height="68" aria-hidden="true">
+          <svg class="lean-score-ring-svg" viewBox="0 0 72 72" width="78" height="78" aria-hidden="true">
             <defs></defs>
             <g transform="translate(36,36)">
               <circle r="${radius}" cx="0" cy="0" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"></circle>
@@ -418,7 +419,8 @@ async function refreshDomainScorePanel() {
             </g>
           </svg>
           <div class="lean-score-value">${display}</div>
-          <div class="lean-ring-icon" aria-hidden="false">${inlineIcon}</div>
+          <div class="lean-ring-icon" aria-hidden="false"><span class="domain-icon ${domain}">${inlineIcon}</span></div>
+          ${glowing ? '<div class="lean-crown">👑</div>' : ''}
         </div>
         <div class="lean-domain-label">${domain.toUpperCase()}</div>
       </div>
