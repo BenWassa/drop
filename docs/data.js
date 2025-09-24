@@ -72,6 +72,23 @@ async function ensureStoresExist(storeNames = []) {
 
   // Open without specifying a low fixed version; use db.version+1 to force an upgrade
   const req = indexedDB.open('drop-tracker', db.version + 1);
+
+  // While the upgrade request is pending, make sure any callers awaiting
+  // window.dbp will wait for this new connection rather than getting the
+  // old (and soon-to-be-closed) DB. Assign a pending promise to window.dbp
+  // immediately so concurrent callers won't attempt transactions on a
+  // closing connection.
+  if (typeof window !== 'undefined') {
+    window.dbp = new Promise((res, rej) => {
+      req.onsuccess = () => {
+        try { res(req.result); } catch (e) { /* ignore */ }
+      };
+      req.onerror = () => {
+        try { rej(req.error || new Error('DB upgrade failed')); } catch (e) {}
+      };
+    });
+  }
+
   req.onupgradeneeded = () => {
     const upg = req.result;
     missing.forEach(name => {
@@ -92,14 +109,15 @@ async function ensureStoresExist(storeNames = []) {
   };
 
   return await new Promise((resolve, reject) => {
-    req.onsuccess = () => {
-      // Update the global db promise so callers get the fresh DB
-      try { if (typeof window !== 'undefined') window.dbp = Promise.resolve(req.result); } catch (e) {}
+    // wire up success/error handlers; we also clear the upgrade lock here
+    const onSuccess = () => {
       try { if (lockResolve) lockResolve(); } catch (e) {}
       if (typeof window !== 'undefined') window.__DB_UPGRADE_LOCK = null;
-      resolve(req.result);
+      // ensure window.dbp resolves to the fresh DB (the promise above already does this)
+      try { resolve(req.result); } catch (e) { resolve(req.result); }
     };
-    req.onerror = async () => {
+
+    const onError = async () => {
       const err = req.error || new Error('DB upgrade failed');
       // Fallback for test/mock environments: if the existing db object
       // supports createObjectStore (our in-memory mock), create the stores
@@ -110,7 +128,6 @@ async function ensureStoresExist(storeNames = []) {
             try {
               if (!db.objectStoreNames.contains(name) && typeof db.createObjectStore === 'function') {
                 db.createObjectStore(name, { keyPath: 'id' });
-                // best-effort: if indexes are needed, attempt to create a by_date index
                 try { /* best-effort index creation not available on some mocks */ } catch (e) {}
               }
             } catch (e) {}
@@ -121,6 +138,7 @@ async function ensureStoresExist(storeNames = []) {
           return resolve(db);
         }
       } catch (e) {}
+
       // If we couldn't patch the mock DB, attempt to refresh a fresh DB connection and retry once
       try {
         const refreshed = await (async function refreshDb() {
@@ -141,6 +159,9 @@ async function ensureStoresExist(storeNames = []) {
         return reject(err);
       }
     };
+
+    req.onsuccess = onSuccess;
+    req.onerror = onError;
   });
 }
 
