@@ -1150,6 +1150,74 @@ body {
   color: var(--text-primary);
 }
 
+/* Aspects manager styles */
+.aspect-domain {
+  background: rgba(8, 12, 22, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.06);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.aspect-domain-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.aspect-domain-header h3 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.toggle-domain {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.aspect-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.aspect-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(11, 15, 25, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.aspect-label {
+  color: var(--text-secondary);
+}
+
+.aspect-streak {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
 .fab {
   position: fixed;
   bottom: 100px;

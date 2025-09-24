@@ -373,20 +373,32 @@ function renderAspectsManager() {
     const domainDiv = document.createElement('div');
     domainDiv.className = 'aspect-domain';
 
+    // Default to visible if not yet set
+    const visible = (appState.visibleAspects && typeof appState.visibleAspects[domain] !== 'undefined')
+      ? Boolean(appState.visibleAspects[domain])
+      : true;
+
+    const buttonLabel = visible ? 'HIDE' : 'SHOW';
+
+    const aspectsHtml = aspects.map(aspect => {
+      const streakKey = `${domain}-${aspect}`;
+      const streak = (appState.streaks && typeof appState.streaks[streakKey] === 'number') ? appState.streaks[streakKey] : 0;
+      const label = ASPECT_LABELS[aspect] || aspect;
+      return `
+        <div class="aspect-item">
+          <span class="aspect-label">${label}</span>
+          <div class="aspect-streak">STREAK ${streak}</div>
+        </div>
+      `;
+    }).join('');
+
     domainDiv.innerHTML = `
       <div class="aspect-domain-header">
         <h3>${domain.toUpperCase()}</h3>
-        <button class="toggle-domain" data-domain="${domain}">
-          ${appState.visibleAspects[domain] ? 'HIDE' : 'SHOW'}
-        </button>
+        <button class="toggle-domain" data-domain="${domain}">${buttonLabel}</button>
       </div>
-      <div class="aspect-list ${appState.visibleAspects[domain] ? '' : 'hidden'}">
-        ${aspects.map(aspect => `
-          <div class="aspect-item">
-            <span class="aspect-label">${ASPECT_LABELS[aspect]}</span>
-            <div class="aspect-streak">STREAK ${appState.streaks[`${domain}-${aspect}`] || 0}</div>
-          </div>
-        `).join('')}
+      <div class="aspect-list ${visible ? '' : 'hidden'}">
+        ${aspectsHtml}
       </div>
     `;
 
