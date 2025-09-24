@@ -32,6 +32,9 @@
   align-items: center;
 }
 
+/* Ensure the overview container centers its items reliably across viewport widths */
+.lean-domain-overview { justify-content: center; margin-left: auto; margin-right: auto; }
+
 .lean-domain-item {
   display: flex;
   flex-direction: column;
@@ -521,8 +524,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
 }
 
 /* Decorative tinting removed — icons are authored SVGs and should be displayed as provided. */
@@ -536,6 +539,17 @@ body {
   align-items: center;
   gap: 6px;
 }
+
+/* Increase icon sizes in the main entry cards for better legibility */
+.domain-card .domain-icon,
+.domain-score-card .domain-score-title .domain-icon {
+  width: 44px;
+  height: 44px;
+}
+
+/* Small-ring inline icons tweaks */
+.small-icon svg { width: 20px; height: 20px; }
+.small-icon--fitness svg { width: 26px; height: 26px; }
 
 .domain-score-score .unit {
   font-size: 16px;

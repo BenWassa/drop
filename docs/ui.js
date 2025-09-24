@@ -216,11 +216,15 @@ async function refreshDomainScorePanel() {
       value.textContent = String(score);
       ringContainer.appendChild(value);
 
-  // Small icon overlapping bottom gap of ring — use inline SVG so it can be colored
+  // Small icon overlapping bottom gap of ring — inline the authored external SVG so artwork is used
   const iconWrap = document.createElement('div');
-  iconWrap.className = 'lean-ring-icon';
-  // inject inline SVG markup directly so CSS rules like stroke:currentColor apply
-  iconWrap.innerHTML = renderDomainIconInline(domain);
+  iconWrap.className = `lean-ring-icon small-icon small-icon--${domain}`;
+  // Try to fetch and inline the authored SVG from docs/images; fall back to inline fallback
+  (async () => {
+    const svg = await inlineSvgFromFile(domain).catch(() => DOMAIN_ICONS_FALLBACK[domain] || '');
+    // If the fitness icon should be visually larger in the small rings, scale it via CSS class
+    iconWrap.innerHTML = svg || (DOMAIN_ICONS_FALLBACK[domain] || '');
+  })();
   ringContainer.appendChild(iconWrap);
 
       const label = document.createElement('div');
