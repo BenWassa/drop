@@ -73,8 +73,8 @@
   bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -120,7 +120,7 @@
 
 /* Domain-specific background images (relative to docs/) */
 .domain-icon.sleep { background-image: url('../images/sleep.svg'); }
-.domain-icon.fitness { background-image: url('../images/fitness.svg'); }
+.domain-icon.fitness { background-image: url('../images/exercise.svg'); }
 .domain-icon.mind { background-image: url('../images/mind.svg'); }
 .domain-icon.spirit { background-image: url('../images/spirit.svg'); }
 
@@ -194,6 +194,8 @@
   display: flex;
   justify-content: center; /* center the small scores row */
   gap: 20px;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 /* Domain grid */
@@ -645,13 +647,14 @@ body {
 }
 
 /* Icon sits at the bottom gap of the ring */
+
 .lean-ring-icon {
   position: absolute;
   bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -661,7 +664,20 @@ body {
   z-index: 2;
 }
 
-.lean-domain-item .lean-ring-icon img { width: 18px; height: 18px; }
+.lean-domain-item .lean-ring-icon img { width: 20px; height: 20px; }
+
+/* Small icon image sizing when using <img> to preserve authored SVG fills */
+.small-icon-img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* Slightly larger fitness icon to make the red exercise icon more prominent */
+.small-icon-img--fitness {
+  width: 26px;
+  height: 26px;
+}
 
 /* Per-domain colored accents for ring stroke (done in JS) and icon background */
 /* Per-domain colored backgrounds removed so small ring icons show authored SVGs without CSS tints */
@@ -1732,7 +1748,9 @@ body {
   }
 
   .domain-score-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .review-summary {

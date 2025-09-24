@@ -168,9 +168,9 @@ async function refreshDomainScorePanel() {
     });
 
     grid.innerHTML = '';
-    const container = document.createElement('div');
-    container.className = 'lean-domain-overview';
 
+    // Append items directly into the #domainScoreGrid (which is a flex container)
+    // This avoids an extra wrapper that could interfere with centering/alignment.
     Object.entries(DOMAINS).forEach(([domain]) => {
       const counts = domainCounts[domain] || { completed: 0, possible: 0 };
       const score = counts.possible > 0 ? Math.round((counts.completed / counts.possible) * 100) : 0;
@@ -221,7 +221,9 @@ async function refreshDomainScorePanel() {
   iconWrap.className = `lean-ring-icon small-icon small-icon--${domain}`;
   // Use an <img> tag to load the authored SVG file directly so fills/styling from the file are preserved
   const img = document.createElement('img');
-  img.src = `images/${domain}.svg`;
+  // Some repositories use 'exercise.svg' for the fitness domain asset. Map accordingly so we load the correct file.
+  const iconFile = domain === 'fitness' ? 'exercise.svg' : `${domain}.svg`;
+  img.src = `images/${iconFile}`;
   img.alt = `${domain} icon`;
   img.className = `small-icon-img small-icon-img--${domain}`;
   iconWrap.appendChild(img);
@@ -233,10 +235,9 @@ async function refreshDomainScorePanel() {
 
       item.appendChild(ringContainer);
       item.appendChild(label);
-      container.appendChild(item);
+      // Append directly to the grid (flex container) to ensure centering works consistently.
+      grid.appendChild(item);
     });
-
-    grid.appendChild(container);
   } catch (error) {
     console.error('Failed to refresh domain score panel', error);
   }
