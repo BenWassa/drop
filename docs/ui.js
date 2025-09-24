@@ -391,17 +391,36 @@ async function refreshDomainScorePanel() {
   const grid = $('domainScoreGrid');
   if (!grid) return;
   const domains = ['sleep', 'fitness', 'mind', 'spirit'];
+  // Color palette used by the rings (kept in JS for deterministic rendering)
+  const DOMAIN_COLORS = { sleep: '#1e90ff', fitness: '#ff3b30', mind: '#7c3aed', spirit: '#16a34a' };
+
   grid.innerHTML = domains.map(domain => {
-    const value = (appState && appState.overviewScores && typeof appState.overviewScores[domain] !== 'undefined') ? String(appState.overviewScores[domain]) : '—';
+    const score = (appState && appState.overviewScores && typeof appState.overviewScores[domain] !== 'undefined') ? Number(appState.overviewScores[domain]) : null;
+    const display = (score === null || Number.isNaN(score)) ? '—' : String(score);
+
+    // Ring geometry
+    const radius = 30; // visual radius inside a 68x68 container
+    const circumference = 2 * Math.PI * radius;
+    const pct = (typeof score === 'number' && !Number.isNaN(score)) ? Math.max(0, Math.min(100, score)) : 0;
+    const dashOffset = Math.round(circumference * (1 - pct / 100));
+
+    // Small inline icon SVG (fallback stroke-only) — prefer inline fallback so icons are styled by currentColor
+    const inlineIcon = renderDomainIconInline(domain) || '';
+
     return `
-      <div class="lean-domain-item">
-        <div class="lean-domain-inner">
-          <div class="lean-ring-icon">
-            <span class="domain-icon ${domain}" role="img" aria-label="${domain} icon"></span>
-          </div>
-          <div class="lean-score-value">${value}</div>
-          <div class="lean-domain-label">${domain.toUpperCase()}</div>
+      <div class="lean-domain-item" aria-hidden="false">
+        <div class="lean-score-ring-container" title="${domain.toUpperCase()} ${display}">
+          <svg class="lean-score-ring-svg" viewBox="0 0 72 72" width="68" height="68" aria-hidden="true">
+            <defs></defs>
+            <g transform="translate(36,36)">
+              <circle r="${radius}" cx="0" cy="0" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"></circle>
+              <circle r="${radius}" cx="0" cy="0" fill="none" stroke="${DOMAIN_COLORS[domain]}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"></circle>
+            </g>
+          </svg>
+          <div class="lean-score-value">${display}</div>
+          <div class="lean-ring-icon" aria-hidden="false">${inlineIcon}</div>
         </div>
+        <div class="lean-domain-label">${domain.toUpperCase()}</div>
       </div>
     `;
   }).join('');
@@ -1300,10 +1319,119 @@ function updateProgress() {
 
 function renderReview() {
   const el = $('weeklyCompletion');
-  if (!el) return;
+  const weekGrid = $('weekGrid');
+  const streaksEl = $('streaksContainer');
+  if (!el || !weekGrid || !streaksEl) return;
+
   try {
-    el.textContent = 'Weekly completion summary will appear here.';
-  } catch (e) { /* ignore */ }
+    // Weekly completion summary (simple percent of aspects completed today)
+    const totals = Object.keys(DOMAINS).reduce((acc, d) => {
+      const total = (DOMAINS[d] || []).length;
+      const completed = Object.values(appState.todayData[d] || {}).filter(Boolean).length;
+      acc.total += total; acc.completed += completed;
+      return acc;
+    }, { total: 0, completed: 0 });
+
+    const percent = totals.total ? Math.round((totals.completed / totals.total) * 100) : 0;
+    el.innerHTML = `<div class="review-summary"><div>Weekly completion</div><div style="margin-left:8px;font-weight:700">${percent}%</div></div>`;
+
+    // Build the last 7 days rows inside #weekGrid
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().split('T')[0]);
+    }
+
+    weekGrid.innerHTML = '';
+    days.forEach(dateStr => {
+      const row = document.createElement('div');
+      row.className = 'review-day' + (dateStr === new Date().toISOString().split('T')[0] ? ' today' : '');
+      const header = document.createElement('div');
+      header.className = 'review-day-header';
+      const dateLabel = document.createElement('div');
+      dateLabel.className = 'review-day-date';
+      const d = new Date(dateStr);
+      const dayName = d.toLocaleString('en-US', { weekday: 'short' }).toUpperCase();
+      const month = d.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+      dateLabel.innerHTML = `<div class="review-day-name">${dayName}</div><div class="review-day-month">${month} ${d.getDate()}</div>`;
+      const count = document.createElement('div');
+      count.className = 'review-day-count';
+      // compute completed count for the day
+      (async () => {
+        try {
+          const entries = (await getEntriesByDate(dateStr)) || [];
+          const completedCount = entries.filter(e => e.completed).length;
+          count.textContent = `${completedCount}`;
+        } catch (e) {
+          count.textContent = '-';
+        }
+      })();
+
+      header.appendChild(dateLabel);
+      header.appendChild(count);
+      row.appendChild(header);
+
+      // List each domain with small aspect boxes
+      const details = document.createElement('div');
+      details.className = 'review-day-details';
+      Object.keys(DOMAINS).forEach(domain => {
+        const domainRow = document.createElement('div');
+        domainRow.className = 'review-domain';
+        const name = document.createElement('div');
+        name.className = 'review-domain-name';
+        name.textContent = domain.toUpperCase();
+        const aspectsWrap = document.createElement('div');
+        aspectsWrap.className = 'review-aspects';
+
+        (DOMAINS[domain] || []).forEach(aspect => {
+          const box = document.createElement('div');
+          box.className = 'review-aspect';
+          // query entry by date
+          (async () => {
+            try {
+              const entries = await getEntriesByDate(dateStr);
+              const e = entries.find(it => it.domain === domain && it.aspect === aspect);
+              if (e && e.completed) box.classList.add('completed');
+            } catch (err) {}
+          })();
+          box.title = aspect;
+          box.textContent = '';
+          aspectsWrap.appendChild(box);
+        });
+
+        domainRow.appendChild(name);
+        domainRow.appendChild(aspectsWrap);
+        details.appendChild(domainRow);
+      });
+
+      row.appendChild(details);
+      weekGrid.appendChild(row);
+    });
+
+    // Streaks
+    streaksEl.innerHTML = '';
+    Object.keys(DOMAINS).forEach(domain => {
+      const container = document.createElement('div');
+      container.className = 'streak-domain';
+      const h4 = document.createElement('h4');
+      h4.textContent = domain.toUpperCase();
+      container.appendChild(h4);
+      const list = document.createElement('div');
+      list.className = 'streak-list';
+      (DOMAINS[domain] || []).forEach(aspect => {
+        const item = document.createElement('div');
+        item.className = 'streak-item';
+        const key = `${domain}-${aspect}`;
+        const val = (appState.streaks && typeof appState.streaks[key] !== 'undefined') ? appState.streaks[key] : 0;
+        item.textContent = `${aspect}: ${val}`;
+        list.appendChild(item);
+      });
+      container.appendChild(list);
+      streaksEl.appendChild(container);
+    });
+
+  } catch (e) { console.warn('renderReview failed', e); }
 }
 
 async function updateTranscription(noteId, newValue, { button, textarea }) {
