@@ -131,6 +131,11 @@ function initializeParticles() {
   requestAnimationFrame(step);
 }
 
+// Simple logging helper for initialization steps
+function logInit(message) {
+  console.log('[init]', message);
+}
+
 async function refreshDomainScorePanel() {
   // Render a compact, lean overview: four circular score rings with single integer scores
   const grid = $('domainScoreGrid');
