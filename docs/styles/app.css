@@ -26,11 +26,13 @@
 
 /* Lean domain overview styles */
 .lean-domain-overview {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-  max-width: 400px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 520px;
   margin: 0 auto;
+  justify-content: center;
+  align-items: center;
 }
 
 .lean-domain-item {
@@ -38,6 +40,8 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  flex: 0 1 110px; /* fixed-ish width to layout four items evenly */
+  text-align: center;
 }
 
 .lean-score-ring-container {
@@ -102,10 +106,10 @@
 }
 
 /* Domain-specific background images (relative to docs/) */
-.domain-icon.sleep { background-image: url('images/sleep.svg'); }
-.domain-icon.fitness { background-image: url('images/fitness.svg'); }
-.domain-icon.mind { background-image: url('images/mind.svg'); }
-.domain-icon.spirit { background-image: url('images/spirit.svg'); }
+.domain-icon.sleep { background-image: url('../images/sleep.svg'); }
+.domain-icon.fitness { background-image: url('../images/fitness.svg'); }
+.domain-icon.mind { background-image: url('../images/mind.svg'); }
+.domain-icon.spirit { background-image: url('../images/spirit.svg'); }
 
 .domain-icon svg {
   width: 100%;
