@@ -546,8 +546,8 @@ body {
 }
 
 /* Small-ring inline icons tweaks */
-.small-icon svg { width: 20px; height: 20px; }
-.small-icon--fitness svg { width: 26px; height: 26px; }
+.small-icon img.small-icon-img { width: 20px; height: 20px; display: block; }
+.small-icon--fitness img.small-icon-img { width: 26px; height: 26px; }
 
 .domain-score-score .unit {
   font-size: 16px;
