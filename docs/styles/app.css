@@ -86,8 +86,6 @@
   width: 18px;
   height: 18px;
   display: block;
-  fill: none !important;
-  stroke: currentColor !important;
   vector-effect: non-scaling-stroke;
 }
 
@@ -657,19 +655,16 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
-  background: rgba(0,0,0,0.2);
-  backdrop-filter: blur(2px);
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
   z-index: 2;
 }
 
 .lean-domain-item .lean-ring-icon img { width: 18px; height: 18px; }
 
 /* Per-domain colored accents for ring stroke (done in JS) and icon background */
-.lean-domain-item.sleep .lean-ring-icon { background: rgba(30,144,255,0.3); }
-.lean-domain-item.fitness .lean-ring-icon { background: rgba(255,59,48,0.3); }
-.lean-domain-item.mind .lean-ring-icon { background: rgba(124,58,237,0.3); }
-.lean-domain-item.spirit .lean-ring-icon { background: rgba(22,163,74,0.3); }
+/* Per-domain colored backgrounds removed so small ring icons show authored SVGs without CSS tints */
 
 /* Compact the domain input sections: smaller aspect buttons, remove extra numbers */
 .aspect-toggle { padding: 10px 12px; font-size: 11px; }
