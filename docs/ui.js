@@ -518,6 +518,30 @@ async function initializeUI() {
   // Developer / Mock toggles
   const devToggle = $('devModeToggle');
   const mockToggle = $('mockDataToggle');
+  // Clear storage button (dev troubleshooting)
+  const clearStorageBtn = $('clearStorageBtn');
+  if (clearStorageBtn) {
+    clearStorageBtn.addEventListener('click', async () => {
+      try {
+        clearStorageBtn.disabled = true;
+        clearStorageBtn.textContent = 'Clearing...';
+        if (window.storageUtils && typeof window.storageUtils.clearAllAppStorage === 'function') {
+          await window.storageUtils.clearAllAppStorage({ clearIndexedDB: true });
+        }
+        // show a small ephemeral banner
+        const b = document.createElement('div');
+        b.className = 'ephemeral-banner';
+        b.textContent = 'Cleared local data and caches. Reloading...';
+        document.body.appendChild(b);
+        setTimeout(() => { try { document.body.removeChild(b); } catch (e) {} }, 3500);
+        setTimeout(() => { location.reload(true); }, 900);
+      } catch (e) {
+        console.error('Clear storage failed', e);
+        clearStorageBtn.disabled = false;
+        clearStorageBtn.textContent = 'Clear cached data';
+      }
+    });
+  }
   const devControls = $('devControls');
 
   // Initialize from localStorage

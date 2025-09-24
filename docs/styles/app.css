@@ -18,6 +18,33 @@
   --spirit: #16a34a;
 }
 
+/* Banners used by storage-clear helpers */
+.ephemeral-banner {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 110px;
+  background: rgba(16, 185, 129, 0.95);
+  color: #042c22;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  z-index: 9999;
+}
+
+.startup-clear-banner {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 96px;
+  background: rgba(255, 214, 10, 0.95);
+  color: #101010;
+  padding: 10px 14px;
+  border-radius: 8px;
+  z-index: 9998;
+  font-family: var(--font-mono);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }

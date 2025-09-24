@@ -16,6 +16,13 @@ async function trySync() {
   }
 
   const db = await dbp;
+  // Defensive: if the DB connection is closing, skip sync and allow upgrade flow to complete
+  try {
+    if (db && db.close && db._closing) {
+      console.log('DB is closing, skipping sync until upgrade completes');
+      return;
+    }
+  } catch (e) {}
   const tx = db.transaction('outbox', 'readonly');
   const store = tx.objectStore('outbox');
   const outbox = await new Promise((resolve, reject) => {

@@ -39,6 +39,11 @@ function isUsingMock() {
 // Ensure required object stores exist. If any are missing, perform an upgrade by opening
 // the DB with version+1 and creating the missing stores. Returns the upgraded db instance.
 async function ensureStoresExist(storeNames = []) {
+  // If another upgrade is in progress, wait for it to finish and re-check
+  if (typeof window !== 'undefined' && window.__DB_UPGRADE_LOCK) {
+    try { await window.__DB_UPGRADE_LOCK; } catch (e) { /* ignore */ }
+  }
+
   const db = await dbp;
   const missing = storeNames.filter(name => !db.objectStoreNames.contains(name));
   if (missing.length === 0) return db;
@@ -57,6 +62,12 @@ async function ensureStoresExist(storeNames = []) {
     } catch (e) {
       // fallback to normal upgrade flow below if test short-circuit fails
     }
+  }
+
+  // Create a lock promise so concurrent callers wait for this upgrade to finish
+  var lockResolve;
+  if (typeof window !== 'undefined') {
+    window.__DB_UPGRADE_LOCK = new Promise(function(res) { lockResolve = res; });
   }
 
   // Open without specifying a low fixed version; use db.version+1 to force an upgrade
@@ -81,7 +92,13 @@ async function ensureStoresExist(storeNames = []) {
   };
 
   return await new Promise((resolve, reject) => {
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      // Update the global db promise so callers get the fresh DB
+      try { if (typeof window !== 'undefined') window.dbp = Promise.resolve(req.result); } catch (e) {}
+      try { if (lockResolve) lockResolve(); } catch (e) {}
+      if (typeof window !== 'undefined') window.__DB_UPGRADE_LOCK = null;
+      resolve(req.result);
+    };
     req.onerror = async () => {
       const err = req.error || new Error('DB upgrade failed');
       // Fallback for test/mock environments: if the existing db object
@@ -94,15 +111,35 @@ async function ensureStoresExist(storeNames = []) {
               if (!db.objectStoreNames.contains(name) && typeof db.createObjectStore === 'function') {
                 db.createObjectStore(name, { keyPath: 'id' });
                 // best-effort: if indexes are needed, attempt to create a by_date index
-                try { const s = db.objectStoreNames && db.objectStoreNames.contains(name) ? null : null; } catch (e) {}
+                try { /* best-effort index creation not available on some mocks */ } catch (e) {}
               }
             } catch (e) {}
           });
+          try { if (typeof window !== 'undefined') window.dbp = Promise.resolve(db); } catch (e) {}
+          try { if (lockResolve) lockResolve(); } catch (e) {}
+          if (typeof window !== 'undefined') window.__DB_UPGRADE_LOCK = null;
           return resolve(db);
         }
       } catch (e) {}
-
-      return reject(err);
+      // If we couldn't patch the mock DB, attempt to refresh a fresh DB connection and retry once
+      try {
+        const refreshed = await (async function refreshDb() {
+          return new Promise((res, rej) => {
+            try {
+              const r = indexedDB.open('drop-tracker');
+              r.onsuccess = function() { try { if (typeof window !== 'undefined') window.dbp = Promise.resolve(r.result); } catch (e) {} ; res(r.result); };
+              r.onerror = function() { rej(r.error || new Error('refresh open failed')); };
+            } catch (e) { rej(e); }
+          });
+        })();
+        try { if (lockResolve) lockResolve(); } catch (e) {}
+        if (typeof window !== 'undefined') window.__DB_UPGRADE_LOCK = null;
+        return resolve(refreshed);
+      } catch (e) {
+        try { if (lockResolve) lockResolve(); } catch (err2) {}
+        if (typeof window !== 'undefined') window.__DB_UPGRADE_LOCK = null;
+        return reject(err);
+      }
     };
   });
 }

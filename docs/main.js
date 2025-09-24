@@ -28,6 +28,40 @@ const appState = {
       await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
     }
 
+    // Defensive: detect obviously-corrupt localStorage and offer to clear it
+    try {
+      const params = new URLSearchParams(location.search);
+      const autoClear = params.get('clear_cache') === '1';
+      if (window.storageUtils && typeof window.storageUtils.isLocalStorageCorrupt === 'function') {
+        const corrupt = window.storageUtils.isLocalStorageCorrupt();
+        if (corrupt) {
+          console.warn('Detected potentially corrupt localStorage');
+          if (autoClear && window.storageUtils && typeof window.storageUtils.clearAllAppStorage === 'function') {
+            await window.storageUtils.clearAllAppStorage({ clearIndexedDB: true });
+            console.log('Auto-cleared app storage due to corrupt state');
+            // reload to start fresh
+            location.replace(location.pathname);
+            return; // halt further init while reload happens
+          } else {
+            // Show a small banner with a clear action so users can fix without incognito
+            const banner = document.createElement('div');
+            banner.className = 'startup-clear-banner';
+            banner.innerHTML = '<div>Detected stale or invalid local data that can hide views. <button id="startupClearBtn">Clear data</button> to recover.</div>';
+            document.body.appendChild(banner);
+            const btn = document.getElementById('startupClearBtn');
+            if (btn) {
+              btn.addEventListener('click', async () => {
+                try {
+                  await window.storageUtils.clearAllAppStorage({ clearIndexedDB: true });
+                  location.replace(location.pathname);
+                } catch (e) { console.error('Startup clear failed', e); }
+              });
+            }
+          }
+        }
+      }
+    } catch (e) { console.warn('Storage sanity check failed', e); }
+
     // Initialize UI
     initializeUI();
 
