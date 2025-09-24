@@ -499,13 +499,9 @@
         });
 
         QUnit.module('UI Interactions', function() {
-            const frame = document.getElementById('testFrame');
-            const doc = frame.contentDocument;
-            const win = frame.contentWindow;
-
             QUnit.test('Navigation switching works', function(assert) {
-                const todayNav = doc.querySelector('[data-screen="today"]');
-                const reviewNav = doc.querySelector('[data-screen="review"]');
+                const todayNav = document.querySelector('[data-screen="today"]');
+                const reviewNav = document.querySelector('[data-screen="review"]');
 
                 todayNav.click();
                 assert.ok(todayNav && todayNav.classList && todayNav.classList.contains('active'), 'Today nav is active');
@@ -516,7 +512,7 @@
             });
 
             QUnit.test('Aspect toggle changes state', async function(assert) {
-                const toggle = doc.querySelector('.aspect-toggle');
+                const toggle = document.querySelector('.aspect-toggle');
 
                 const initialState = toggle && toggle.classList && toggle.classList.contains('completed');
                 toggle.click();
@@ -527,8 +523,9 @@
             });
 
             QUnit.test('Mood selection works', function(assert) {
-                const mood1 = doc.querySelector('[data-mood="1"]');
-                const mood3 = doc.querySelector('[data-mood="3"]');
+                window.appState.mood = 1;
+                const mood1 = document.querySelector('[data-mood="1"]');
+                const mood3 = document.querySelector('[data-mood="3"]');
 
                 mood1.click();
                 assert.ok(mood1 && mood1.classList && mood1.classList.contains('selected'), 'Mood 1 button is selected');
