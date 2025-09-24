@@ -361,3 +361,104 @@ window.exportToCSV = exportToCSV;
 window.saveAudioNote = saveAudioNote;
 window.getAudioNotes = getAudioNotes;
 window.updateAudioTranscription = updateAudioTranscription;
+
+// Developer: seed and clear mock data
+async function seedMockData(days = 7) {
+  const db = await dbp;
+  const tx = db.transaction(['entries', 'outbox'], 'readwrite');
+  const entriesStore = tx.objectStore('entries');
+  const outbox = tx.objectStore('outbox');
+
+  const today = new Date();
+  for (let d = 0; d < days; d++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - d);
+    const dateStr = date.toISOString().split('T')[0];
+
+    Object.entries(DOMAINS).forEach(([domain, aspects]) => {
+      aspects.forEach(aspect => {
+        const completed = Math.random() > 0.3; // ~70% complete
+        const id = `${dateStr}-${domain}-${aspect}`;
+        const entry = {
+          id,
+          clientId: getClientId(),
+          date: dateStr,
+          domain,
+          aspect,
+          completed: Boolean(completed),
+          streak: 0,
+          timestamp: Date.now(),
+          synced: false,
+          __mock: true
+        };
+        entriesStore.put(entry);
+        outbox.add({ type: 'ENTRY', payload: entry, ts: Date.now(), __mock: true });
+      });
+    });
+
+    // Add a reflection for the day
+    const reflection = {
+      id: `${dateStr}-reflection`,
+      clientId: getClientId(),
+      date: dateStr,
+      type: 'reflection',
+      mood: Math.ceil(Math.random() * 5),
+      note: d === 0 ? 'Today felt productive (mock)' : 'Mock data reflection',
+      timestamp: Date.now(),
+      synced: false,
+      __mock: true
+    };
+    entriesStore.put(reflection);
+    outbox.add({ type: 'REFLECTION', payload: reflection, ts: Date.now(), __mock: true });
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error('Transaction failed'));
+  });
+}
+
+async function clearMockData() {
+  const db = await dbp;
+  const tx = db.transaction(['entries', 'outbox'], 'readwrite');
+  const entriesStore = tx.objectStore('entries');
+  const outbox = tx.objectStore('outbox');
+
+  const allEntries = await new Promise((resolve, reject) => {
+    const req = entriesStore.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+
+  for (const entry of allEntries) {
+    if (entry && entry.__mock) {
+      try {
+        entriesStore.delete(entry.id);
+      } catch (e) {
+        // ignore per-entry failures
+      }
+    }
+  }
+
+  const allOutbox = await new Promise((resolve, reject) => {
+    const req = outbox.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+
+  for (const o of allOutbox) {
+    if (o && o.__mock) {
+      try {
+        outbox.delete(o.id);
+      } catch (e) {}
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error || new Error('Transaction failed'));
+  });
+}
+
+window.seedMockData = seedMockData;
+window.clearMockData = clearMockData;

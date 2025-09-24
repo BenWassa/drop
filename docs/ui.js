@@ -403,7 +403,7 @@ function updateVisibleAspects() {
   });
 }
 
-function initializeUI() {
+async function initializeUI() {
   initializeParticles();
   updateQuarterReservoir();
   setInterval(updateQuarterReservoir, 60 * 1000);
@@ -446,6 +446,69 @@ function initializeUI() {
     });
   });
 
+  // Developer / Mock toggles
+  const devToggle = $('devModeToggle');
+  const mockToggle = $('mockDataToggle');
+  const devControls = $('devControls');
+
+  // Initialize from localStorage
+  const devMode = localStorage.getItem('dev_mode') === '1';
+  const useMock = localStorage.getItem('use_mock_data') === '1';
+  appState.devMode = devMode;
+  appState.useMock = useMock;
+
+  if (devToggle) {
+    devToggle.checked = devMode;
+    devToggle.addEventListener('change', () => {
+      appState.devMode = devToggle.checked;
+      localStorage.setItem('dev_mode', devToggle.checked ? '1' : '0');
+      if (devControls) {
+        devControls.classList.toggle('hidden', !devToggle.checked);
+      }
+    });
+  }
+
+  if (mockToggle) {
+    mockToggle.checked = useMock;
+    mockToggle.addEventListener('change', () => {
+      appState.useMock = mockToggle.checked;
+      localStorage.setItem('use_mock_data', mockToggle.checked ? '1' : '0');
+    });
+  }
+
+  if (devControls) {
+    devControls.classList.toggle('hidden', !devMode);
+  }
+
+  // Dev control buttons
+  const seedBtn = $('seedMockData');
+  const clearBtn = $('clearMockData');
+  if (seedBtn) {
+    seedBtn.addEventListener('click', async () => {
+      if (typeof window.seedMockData === 'function') {
+        try {
+          await window.seedMockData();
+          await loadTodayData();
+        } catch (e) {
+          console.error('seedMockData error', e);
+        }
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', async () => {
+      if (typeof window.clearMockData === 'function') {
+        try {
+          await window.clearMockData();
+          await loadTodayData();
+        } catch (e) {
+          console.error('clearMockData error', e);
+        }
+      }
+    });
+  }
+
   const saveReflectionBtn = $('saveReflection');
   if (saveReflectionBtn) {
     saveReflectionBtn.addEventListener('click', saveReflection);
@@ -481,7 +544,16 @@ function initializeUI() {
 
   initializeAudioNotesList();
 
-  loadTodayData();
+  // If mock data flag is set, load or seed mock data before loading
+  if (appState.useMock && typeof window.seedMockData === 'function') {
+    try {
+      await window.seedMockData();
+    } catch (e) {
+      console.warn('seedMockData failed', e);
+    }
+  }
+
+  await loadTodayData();
   showScreen('todayScreen');
 }
 

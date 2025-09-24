@@ -398,6 +398,57 @@ body {
   transform: none;
 }
 
+/* Toggle switch for settings */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  margin-left: 12px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(148, 163, 184, 0.12);
+  border-radius: 24px;
+  border: 1px solid var(--border-subtle);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.switch .slider::after {
+  content: '';
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-surface);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(2,6,23,0.5);
+  transition: left 0.18s cubic-bezier(.2,.9,.2,1);
+}
+
+.switch input:checked + .slider {
+  background: linear-gradient(90deg, rgba(16,185,129,0.95), rgba(34,211,238,0.9));
+  border-color: rgba(124,58,237,0.8);
+}
+
+.switch input:checked + .slider::after {
+  left: calc(100% - 21px);
+}
+
 .aspect-toggle.completed {
   border-color: var(--domain-accent, var(--border-strong));
   background: var(--domain-accent-soft, rgba(148, 163, 184, 0.1));
