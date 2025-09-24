@@ -425,6 +425,53 @@
             });
         });
 
+        QUnit.module('Mock Mode Integration', function() {
+            QUnit.test('Seed mock data updates Today view', async function(assert) {
+                assert.expect(3);
+                // Ensure mock mode flag is available and set
+                if (window.localStorage && typeof window.localStorage.setItem === 'function') {
+                    window.localStorage.setItem('use_mock_data', '1');
+                }
+
+                // If ensureStoresExist exists, create mock stores
+                if (typeof window.ensureStoresExist === 'function') {
+                    try { await window.ensureStoresExist(['mock_entries', 'mock_outbox', 'mock_audio_notes']); } catch (e) {}
+                }
+
+                // If seedMockData is available, use it; otherwise directly insert into mockDB
+                if (typeof window.seedMockData === 'function') {
+                    await window.seedMockData(2);
+                } else if (window.mockDB && window.mockDB.transaction) {
+                    const today = new Date().toISOString().split('T')[0];
+                    const entry = { id: `${today}-sleep-wake`, date: today, domain: 'sleep', aspect: 'wake', completed: true, type: 'entry', timestamp: Date.now() };
+                    const tx = window.mockDB.transaction(['mock_entries', 'mock_outbox'], 'readwrite');
+                    tx.objectStore('mock_entries').add(entry);
+                }
+
+                // Reload today's data and render
+                if (typeof window.loadTodayData === 'function') await window.loadTodayData();
+
+                // Allow a small delay for async UI updates
+                await new Promise(r => setTimeout(r, 50));
+
+                const toggle = document.querySelector('.aspect-toggle[data-domain="sleep"][data-aspect="wake"]');
+                assert.ok(toggle, 'Aspect toggle exists');
+                assert.ok(toggle.classList.contains('completed') || (window.appState && window.appState.todayData && window.appState.todayData.sleep && window.appState.todayData.sleep.wake), 'Toggle shows completed state from mock data');
+
+                // Cleanup: clear mock flag and clear mock data if available
+                if (window.localStorage && typeof window.localStorage.setItem === 'function') {
+                    window.localStorage.setItem('use_mock_data', '0');
+                }
+                if (typeof window.clearMockData === 'function') {
+                    await window.clearMockData();
+                }
+
+                // Wait briefly for cleanup
+                await new Promise(r => setTimeout(r, 10));
+                assert.ok(true, 'Cleanup complete');
+            });
+        });
+
             QUnit.test('exportToCSV generates correct CSV', async function(assert) {
                 const mockEntries = [
                     {

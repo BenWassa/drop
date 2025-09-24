@@ -46,6 +46,7 @@ async function ensureStoresExist(storeNames = []) {
   // Close current connection then upgrade
   try { db.close(); } catch (e) {}
 
+  // Open without specifying a low fixed version; use db.version+1 to force an upgrade
   const req = indexedDB.open('drop-tracker', db.version + 1);
   req.onupgradeneeded = () => {
     const upg = req.result;
@@ -73,7 +74,8 @@ async function ensureStoresExist(storeNames = []) {
 }
 
 const dbp = window.dbp || new Promise((resolve, reject) => {
-  const req = indexedDB.open('drop-tracker', 2);
+  // Open DB without hard-coded version so we don't request a lower version than other contexts
+  const req = indexedDB.open('drop-tracker');
   req.onupgradeneeded = () => {
     const db = req.result;
     if (!db.objectStoreNames.contains('entries')) {
@@ -129,10 +131,12 @@ async function saveEntry(domain, aspect, completed) {
     synced: false
   };
 
-  const db = await dbp;
   const useMock = isUsingMock();
   const entriesStoreName = useMock ? 'mock_entries' : 'entries';
   const outboxStoreName = useMock ? 'mock_outbox' : 'outbox';
+  // Ensure the target stores exist before attempting the transaction
+  await ensureStoresExist([entriesStoreName, outboxStoreName]);
+  const db = await dbp;
   const tx = db.transaction([entriesStoreName, outboxStoreName], 'readwrite');
   tx.objectStore(entriesStoreName).put(entry);
   // mark outbox payload as mock if writing to mock outbox
@@ -243,10 +247,12 @@ async function saveReflection() {
     synced: false
   };
 
-  const db = await dbp;
   const useMock = isUsingMock();
   const entriesStoreName = useMock ? 'mock_entries' : 'entries';
   const outboxStoreName = useMock ? 'mock_outbox' : 'outbox';
+  // Ensure the target stores exist before attempting the transaction
+  await ensureStoresExist([entriesStoreName, outboxStoreName]);
+  const db = await dbp;
   const tx = db.transaction([entriesStoreName, outboxStoreName], 'readwrite');
   tx.objectStore(entriesStoreName).put(entry);
   tx.objectStore(outboxStoreName).add({ type: 'REFLECTION', payload: entry, ts: Date.now(), __mock: useMock });
@@ -344,9 +350,10 @@ async function loadTodayData() {
 
 // Audio notes functions
 async function saveAudioNote(date, blob, transcription = '') {
-  const db = await dbp;
   const useMock = isUsingMock();
   const storeName = useMock ? 'mock_audio_notes' : 'audio_notes';
+  await ensureStoresExist([storeName]);
+  const db = await dbp;
   const id = `${date}-audio-${Date.now()}`;
   const entry = { id, date, blob, transcription, timestamp: new Date(), __mock: useMock };
   return new Promise((resolve, reject) => {
@@ -373,10 +380,13 @@ async function getAudioNotes(date) {
 }
 
 async function updateAudioTranscription(id, transcription) {
+  const useMock = isUsingMock();
+  const storeName = useMock ? 'mock_audio_notes' : 'audio_notes';
+  await ensureStoresExist([storeName]);
   const db = await dbp;
   return new Promise((resolve, reject) => {
-    const tx = db.transaction('audio_notes', 'readwrite');
-    const store = tx.objectStore('audio_notes');
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
     const req = store.get(id);
     req.onsuccess = () => {
       const entry = req.result;

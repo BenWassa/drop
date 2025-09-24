@@ -19,8 +19,8 @@ const CONFIG = {
 
 // Minimal IndexedDB mirror for outbox flushing
 const dbp = new Promise((resolve, reject) => {
-  // Use version 2 to match the main app DB; avoid VersionError when multiple contexts open DB
-  const req = indexedDB.open('drop-tracker', 2);
+  // Open DB without specifying a version to avoid requesting an older version than other contexts
+  const req = indexedDB.open('drop-tracker');
   req.onupgradeneeded = () => {
     const db = req.result;
     if (!db.objectStoreNames.contains('entries')) {

@@ -88,6 +88,15 @@ async function updateOutboxCount() {
     const db = await dbp;
     const useMock = (typeof window.isUsingMock === 'function' && window.isUsingMock());
     const storeName = useMock ? 'mock_outbox' : 'outbox';
+    // Ensure the target outbox store exists (mock or real) before using it
+    try {
+      if (typeof window.ensureStoresExist === 'function') {
+        await window.ensureStoresExist([storeName]);
+      }
+    } catch (e) {
+      // If ensureStoresExist fails, continue and let the following transaction handle errors
+      console.warn('ensureStoresExist failed for', storeName, e);
+    }
     const tx = db.transaction(storeName, 'readonly');
     const store = tx.objectStore(storeName);
     const count = await new Promise((resolve, reject) => {
