@@ -104,11 +104,22 @@ async function refreshDomainScorePanel() {
     const db = await dbp;
     const tx = db.transaction('entries', 'readonly');
     const store = tx.objectStore('entries');
-    const allEntries = await new Promise((resolve, reject) => {
+    let allEntries = await new Promise((resolve, reject) => {
       const request = store.getAll();
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error);
     });
+
+    if (appState.useMock && typeof window.getMockEntries === 'function') {
+      try {
+        const mockEntries = await window.getMockEntries();
+        if (Array.isArray(mockEntries) && mockEntries.length) {
+          allEntries = allEntries.concat(mockEntries);
+        }
+      } catch (e) {
+        console.warn('Could not load mock entries for score panel', e);
+      }
+    }
 
     const today = new Date();
     const targetDates = [];
@@ -245,11 +256,22 @@ async function renderReview() {
   const db = await dbp;
   const tx = db.transaction('entries', 'readonly');
   const store = tx.objectStore('entries');
-  const allEntries = await new Promise((resolve, reject) => {
+  let allEntries = await new Promise((resolve, reject) => {
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result || []);
     request.onerror = () => reject(request.error);
   });
+
+  if (appState.useMock && typeof window.getMockEntries === 'function') {
+    try {
+      const mockEntries = await window.getMockEntries();
+      if (Array.isArray(mockEntries) && mockEntries.length) {
+        allEntries = allEntries.concat(mockEntries);
+      }
+    } catch (e) {
+      console.warn('Could not load mock entries for review', e);
+    }
+  }
 
   const today = new Date().toISOString().split('T')[0];
 

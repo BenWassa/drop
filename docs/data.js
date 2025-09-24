@@ -47,6 +47,14 @@ const dbp = window.dbp || new Promise((resolve, reject) => {
       const store = db.createObjectStore('audio_notes', { keyPath: 'id' });
       store.createIndex('by_date', 'date');
     }
+    // mock_entries is a sandbox store for developer/mock data so we don't overwrite real entries
+    if (!db.objectStoreNames.contains('mock_entries')) {
+      const mockStore = db.createObjectStore('mock_entries', { keyPath: 'id' });
+      mockStore.createIndex('by_date', 'date');
+    }
+    if (!db.objectStoreNames.contains('mock_outbox')) {
+      db.createObjectStore('mock_outbox', { keyPath: 'id', autoIncrement: true });
+    }
   };
   req.onsuccess = () => resolve(req.result);
   req.onerror = (e) => {
@@ -284,6 +292,19 @@ async function loadTodayData() {
     request.onerror = () => reject(request.error);
   });
 
+  // If mock mode is enabled, merge mock entries for today from sandbox store
+  try {
+    const useMock = localStorage.getItem('use_mock_data') === '1';
+    if (useMock && typeof window.getMockEntries === 'function') {
+      const mockToday = await window.getMockEntries(today);
+      if (Array.isArray(mockToday) && mockToday.length) {
+        entries.push(...mockToday);
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to merge mock entries for today', e);
+  }
+
   entries.forEach((entry) => {
     if (entry && entry.domain && DOMAINS[entry.domain] && DOMAINS[entry.domain].includes(entry.aspect) && typeof entry.completed === 'boolean') {
       appState.todayData[entry.domain][entry.aspect] = Boolean(entry.completed);
@@ -365,9 +386,9 @@ window.updateAudioTranscription = updateAudioTranscription;
 // Developer: seed and clear mock data
 async function seedMockData(days = 7) {
   const db = await dbp;
-  const tx = db.transaction(['entries', 'outbox'], 'readwrite');
-  const entriesStore = tx.objectStore('entries');
-  const outbox = tx.objectStore('outbox');
+  const tx = db.transaction(['mock_entries', 'mock_outbox'], 'readwrite');
+  const entriesStore = tx.objectStore('mock_entries');
+  const outbox = tx.objectStore('mock_outbox');
 
   const today = new Date();
   for (let d = 0; d < days; d++) {
@@ -420,9 +441,9 @@ async function seedMockData(days = 7) {
 
 async function clearMockData() {
   const db = await dbp;
-  const tx = db.transaction(['entries', 'outbox'], 'readwrite');
-  const entriesStore = tx.objectStore('entries');
-  const outbox = tx.objectStore('outbox');
+  const tx = db.transaction(['mock_entries', 'mock_outbox'], 'readwrite');
+  const entriesStore = tx.objectStore('mock_entries');
+  const outbox = tx.objectStore('mock_outbox');
 
   const allEntries = await new Promise((resolve, reject) => {
     const req = entriesStore.getAll();
@@ -431,12 +452,10 @@ async function clearMockData() {
   });
 
   for (const entry of allEntries) {
-    if (entry && entry.__mock) {
-      try {
-        entriesStore.delete(entry.id);
-      } catch (e) {
-        // ignore per-entry failures
-      }
+    try {
+      entriesStore.delete(entry.id);
+    } catch (e) {
+      // ignore per-entry failures
     }
   }
 
@@ -447,11 +466,9 @@ async function clearMockData() {
   });
 
   for (const o of allOutbox) {
-    if (o && o.__mock) {
-      try {
-        outbox.delete(o.id);
-      } catch (e) {}
-    }
+    try {
+      outbox.delete(o.id);
+    } catch (e) {}
   }
 
   return new Promise((resolve, reject) => {
@@ -460,5 +477,37 @@ async function clearMockData() {
   });
 }
 
+async function getMockEntries(date) {
+  const db = await dbp;
+  const tx = db.transaction('mock_entries', 'readonly');
+  const store = tx.objectStore('mock_entries');
+  if (date) {
+    const index = store.index('by_date');
+    return new Promise((resolve, reject) => {
+      const req = index.getAll(date);
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  }
+  return new Promise((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getMockOutbox() {
+  const db = await dbp;
+  const tx = db.transaction('mock_outbox', 'readonly');
+  const store = tx.objectStore('mock_outbox');
+  return new Promise((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 window.seedMockData = seedMockData;
 window.clearMockData = clearMockData;
+window.getMockEntries = getMockEntries;
+window.getMockOutbox = getMockOutbox;
