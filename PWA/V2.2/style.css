@@ -381,8 +381,12 @@ body.details-visible .orb-container {
 
 .orb-quadrant .domain-icon { width: 44px; height: 44px; }
 
-/* Desktop scaling: keep slightly larger rings inside orb on wide screens */
-@media (min-width: 420px) {
+/* Desktop scaling: keep slightly larger rings inside orb on very wide screens.
+   NOTE: this media query previously used 420px which can override manual edits
+   to `--domain-ring-size` on many desktop windows. Raising it prevents
+   accidental overrides when you edit :root to test small sizes (e.g., 20px).
+*/
+@media (min-width: 900px) {
     :root { --domain-ring-size: 120px; }
 }
 
