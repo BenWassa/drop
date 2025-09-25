@@ -102,22 +102,18 @@
                         <div class="orb">
                             <div class="orb-quadrant mind" data-domain-target="mind" role="button" tabindex="0" data-domain="mind">
                                 <img src="mind.svg" alt="Mind icon" class="domain-icon">
-                                <div class="quadrant-score" data-score-domain="mind">0</div>
                                 <div class="quadrant-content"><h2>MIND</h2></div>
                             </div>
                             <div class="orb-quadrant fitness" data-domain-target="fitness" role="button" tabindex="0" data-domain="fitness">
                                 <img src="fitness.svg" alt="Fitness icon" class="domain-icon">
-                                <div class="quadrant-score" data-score-domain="fitness">0</div>
                                 <div class="quadrant-content"><h2>FITNESS</h2></div>
                             </div>
                             <div class="orb-quadrant sleep" data-domain-target="sleep" role="button" tabindex="0" data-domain="sleep">
                                 <img src="sleep.svg" alt="Sleep icon" class="domain-icon">
-                                <div class="quadrant-score" data-score-domain="sleep">0</div>
                                 <div class="quadrant-content"><h2>SLEEP</h2></div>
                             </div>
                             <div class="orb-quadrant spirit" data-domain-target="spirit" role="button" tabindex="0" data-domain="spirit">
                                 <img src="spirit.svg" alt="Spirit icon" class="domain-icon">
-                                <div class="quadrant-score" data-score-domain="spirit">0</div>
                                 <div class="quadrant-content"><h2>SPIRIT</h2></div>
                             </div>
                         </div>
@@ -330,8 +326,7 @@
             // Update center number (integer) in both score-item and orb-quadrant (backwards compatible)
             const scoreSelectors = [
                 `.score-item.${domain} .domain-score`,
-                `.orb-quadrant.${domain} .domain-score`,
-                `.orb-quadrant.${domain} .quadrant-score`
+                `.orb-quadrant.${domain} .domain-score`
             ];
             scoreSelectors.forEach(sel => {
                 const el = document.querySelector(sel);

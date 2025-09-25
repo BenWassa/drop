@@ -301,20 +301,10 @@ body.details-visible .orb-container {
     transition: transform var(--transition-medium), opacity var(--transition-medium);
 }
 
-/* Numeric score inside each quadrant */
-.quadrant-score {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0,0,0,0.25);
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    font-weight: 700;
-    font-size: 12px;
-    padding: 4px 6px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.04);
-}
+/* Draw a curved accent along the outer edge of each quadrant. This uses a pseudo
+   element with a conic-gradient and an inner mask so only a thin arc near the
+   perimeter is visible. The gradient color is taken from --accent for each quadrant. */
+/* accent removed per user request */
 /* Keyboard focus styles for accessibility */
 .orb-quadrant:focus {
     outline: none;
