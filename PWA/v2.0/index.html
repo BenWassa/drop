@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Discipline Dashboard - Track daily habits">
+    <title>Drop - Discipline Dashboard</title>
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        :root {
+            --bg-color: #0d0f14;
+            --primary-glow: rgba(76, 175, 255, 0.2);
+            --sleep-color: #00A9B5;
+            --fitness-color: #FF4742;
+            --mind-color: #4C5AFF;
+            --spirit-color: #FFC900;
+            --text-primary: #ffffff;
+            --text-secondary: #9a9ca6;
+            --card-bg: rgba(28, 30, 41, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --transition-speed: 0.4s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overscroll-behavior: none;
+        }
+
+        /* Screen System */
+        .screen {
+            display: none;
+            min-height: calc(100vh - 80px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            padding: 40px 24px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .header .date {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* Today Screen Orb */
+        .orb-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+        
+        .orb {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            border-radius: 50%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 4px;
+            transform-style: preserve-3d;
+            transition: transform var(--transition-speed) cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .orb-quadrant {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 20px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .orb-quadrant:nth-child(1) { border-radius: 100% 0 0 0; background: linear-gradient(135deg, var(--mind-color), #2c37a8); }
+        .orb-quadrant:nth-child(2) { border-radius: 0 100% 0 0; background: linear-gradient(45deg, var(--fitness-color), #c72a26); }
+        .orb-quadrant:nth-child(3) { border-radius: 0 0 0 100%; background: linear-gradient(225deg, var(--sleep-color), #007c85); }
+        .orb-quadrant:nth-child(4) { border-radius: 0 0 100% 0; background: linear-gradient(315deg, var(--spirit-color), #b89300); }
+        
+        .quadrant-content {
+            text-align: center;
+        }
+
+        .quadrant-content h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .domain-score {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+        }
+        
+        .orb-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            transform: translate(-50%, -50%);
+            background: var(--bg-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        
+        .total-score {
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .total-score-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Domain Details Screen */
+        .domain-details {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-color);
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s;
+            z-index: 100;
+            padding: 20px;
+            visibility: hidden;
+        }
+
+        .domain-details.active {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .details-header {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .details-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-left: 16px;
+        }
+
+        #mind-details .details-title { color: var(--mind-color); }
+        #fitness-details .details-title { color: var(--fitness-color); }
+        #sleep-details .details-title { color: var(--sleep-color); }
+        #spirit-details .details-title { color: var(--spirit-color); }
+
+        .practices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .practice-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        
+        .practice-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 50%;
+            margin-right: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .custom-checkbox svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s;
+        }
+        
+        .practice-item span {
+            font-size: 18px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        .practice-item input:checked + .custom-checkbox {
+            background: var(--glow-color);
+            border-color: var(--glow-color);
+        }
+
+        .practice-item input:checked + .custom-checkbox svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .practice-item:has(input[data-domain="mind"]:checked) { --glow-color: var(--mind-color); }
+        .practice-item:has(input[data-domain="fitness"]:checked) { --glow-color: var(--fitness-color); }
+        .practice-item:has(input[data-domain="sleep"]:checked) { --glow-color: var(--sleep-color); }
+        .practice-item:has(input[data-domain="spirit"]:checked) { --glow-color: var(--spirit-color); }
+        
+        .practice-item:has(input:checked) {
+            border-color: var(--glow-color);
+            box-shadow: 0 0 15px 0 rgba(var(--glow-rgb), 0.3);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            height: 80px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+        
+        .nav-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Placeholder Content */
+        .placeholder {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 40px;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .app-container {
+                width: 400px;
+                height: 800px;
+                position: relative;
+                overflow: hidden;
+                border-radius: 20px;
+                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+                border: 1px solid var(--border-color);
+            }
+            .screen {
+                height: 100%;
+            }
+             .bottom-nav {
+                position: absolute;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Today Screen -->
+        <div id="screen-today" class="screen active">
+            <header class="header">
+                <h1>TODAY</h1>
+                <div class="date">SEP 24</div>
+            </header>
+            
+            <main class="main">
+                <div class="orb-container">
+                    <div class="orb">
+                        <div class="orb-quadrant" data-domain-target="mind">
+                            <div class="quadrant-content">
+                                <h2>MIND</h2>
+                                <div class="domain-score" data-score-domain="mind">0/2</div>
+                            </div>
+                        </div>
+                        <div class="orb-quadrant" data-domain-target="fitness">
+                             <div class="quadrant-content">
+                                <h2>FITNESS</h2>
+                                <div class="domain-score" data-score-domain="fitness">0/3</div>
+                            </div>
+                        </div>
+                        <div class="orb-quadrant" data-domain-target="sleep">
+                             <div class="quadrant-content">
+                                <h2>SLEEP</h2>
+                                <div class="domain-score" data-score-domain="sleep">0/2</div>
+                            </div>
+                        </div>
+                        <div class="orb-quadrant" data-domain-target="spirit">
+                             <div class="quadrant-content">
+                                <h2>SPIRIT</h2>
+                                <div class="domain-score" data-score-domain="spirit">0/2</div>
+                            </div>
+                        </div>
+                        <div class="orb-center">
+                            <div class="total-score">0</div>
+                            <div class="total-score-label">Total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domain Details Views -->
+                <div id="mind-details" class="domain-details">
+                    <header class="details-header">
+                        <button class="back-btn" data-domain-target="mind">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        </button>
+                        <h1 class="details-title">MIND</h1>
+                    </header>
+                    <div class="practices-list">
+                        <label class="practice-item">
+                            <input type="checkbox" data-domain="mind" data-aspect="read">
+                            <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                            <span>Read</span>
+                        </label>
+                         <label class="practice-item">
+                            <input type="checkbox" data-domain="mind" data-aspect="write">
+                            <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+                            <span>Write</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="fitness-details" class="domain-details">
+                    <header class="details-header">
+                        <button class="back-btn" data-domain-target="fitness">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        </button>
+                        <h1 class="details-title">FITNESS</h1>
+                    </header>
+                    <div class="practices-list">
+                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="run"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Run</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="strength"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Strength</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="skill"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Skill</span></label>
+                    </div>
+                </div>
+
+                <div id="sleep-details" class="domain-details">
+                    <header class="details-header">
+                        <button class="back-btn" data-domain-target="sleep">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        </button>
+                        <h1 class="details-title">SLEEP</h1>
+                    </header>
+                    <div class="practices-list">
+                         <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="wake"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Wake</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="rest"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Rest</span></label>
+                    </div>
+                </div>
+
+                 <div id="spirit-details" class="domain-details">
+                    <header class="details-header">
+                        <button class="back-btn" data-domain-target="spirit">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        </button>
+                        <h1 class="details-title">SPIRIT</h1>
+                    </header>
+                    <div class="practices-list">
+                         <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="stress"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Stress</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="meditation"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><span>Meditation</span></label>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Other Screens -->
+        <div id="screen-week" class="screen"><header class="header"><h1>WEEK</h1></header><div class="placeholder"><p>Weekly view coming soon</p></div></div>
+        <div id="screen-settings" class="screen"><header class="header"><h1>SETTINGS</h1></header><div class="placeholder"><p>Settings coming soon</p></div></div>
+        <div id="screen-about" class="screen"><header class="header"><h1>ABOUT</h1></header><div class="placeholder"><p>About coming soon</p></div></div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-screen="today">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                <span>Today</span>
+            </button>
+            <button class="nav-btn" data-screen="week">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+                <span>Week</span>
+            </button>
+            <button class="nav-btn" data-screen="settings">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                <span>Settings</span>
+            </button>
+             <button class="nav-btn" data-screen="about">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                <span>About</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // --- CORE LOGIC (UNCHANGED) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed'));
+            });
+        }
+        const PRACTICES = {
+            sleep: ['wake', 'rest'],
+            fitness: ['run', 'strength', 'skill'],
+            mind: ['read', 'write'],
+            spirit: ['stress', 'meditation']
+        };
+        let currentData = { date: '', practices: {} };
+
+        // --- UI & INTERACTION LOGIC (REWRITTEN) ---
+        
+        function initApp() {
+            updateDate();
+            loadData();
+            setupEventListeners();
+            updateAllDomainScores();
+            updateTotalScore();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.addEventListener('change', e => togglePractice(e.target.dataset.domain, e.target.dataset.aspect)));
+            document.querySelectorAll('.orb-quadrant').forEach(q => q.addEventListener('click', e => showDomainDetails(e.currentTarget.dataset.domainTarget)));
+            document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', e => hideDomainDetails(e.currentTarget.dataset.domainTarget)));
+        }
+
+        function switchScreen(screenName) {
+            document.querySelectorAll('.screen.active').forEach(s => s.classList.remove('active'));
+            document.getElementById(`screen-${screenName}`).classList.add('active');
+            document.querySelectorAll('.nav-btn.active').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
+        }
+
+        function showDomainDetails(domain) {
+            document.getElementById(`${domain}-details`).classList.add('active');
+        }
+
+        function hideDomainDetails(domain) {
+            document.getElementById(`${domain}-details`).classList.remove('active');
+        }
+
+        function togglePractice(domain, aspect) {
+            const practiceKey = `${domain}-${aspect}`;
+            const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
+            currentData.practices[practiceKey] = checkbox.checked;
+            updateDomainScore(domain);
+            updateTotalScore();
+            saveData();
+        }
+        
+        function updateDomainScore(domain) {
+            const completed = PRACTICES[domain].filter(aspect => currentData.practices[`${domain}-${aspect}`]).length;
+            const total = PRACTICES[domain].length;
+            const scoreElement = document.querySelector(`[data-score-domain="${domain}"]`);
+            if (scoreElement) scoreElement.textContent = `${completed}/${total}`;
+        }
+
+        function updateTotalScore() {
+            let totalCompleted = 0;
+            Object.values(currentData.practices).forEach(isDone => {
+                if (isDone) totalCompleted++;
+            });
+            const scoreElement = document.querySelector('.total-score');
+            if (scoreElement) scoreElement.textContent = totalCompleted;
+        }
+
+        function updateAllDomainScores() {
+            Object.keys(PRACTICES).forEach(domain => updateDomainScore(domain));
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem('drop-data', JSON.stringify(currentData));
+            } catch (e) { console.error('Save failed'); }
+        }
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('drop-data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.date === getTodayString()) {
+                        currentData = data;
+                        restoreUIState();
+                    } else {
+                        initTodayData();
+                    }
+                } else {
+                    initTodayData();
+                }
+            } catch (e) { initTodayData(); }
+        }
+
+        function initTodayData() {
+            currentData = { date: getTodayString(), practices: {} };
+            Object.keys(PRACTICES).forEach(domain => {
+                PRACTICES[domain].forEach(aspect => {
+                    currentData.practices[`${domain}-${aspect}`] = false;
+                });
+            });
+            saveData();
+        }
+
+        function restoreUIState() {
+            Object.keys(currentData.practices).forEach(key => {
+                const [domain, aspect] = key.split('-');
+                const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
+                if (checkbox) checkbox.checked = currentData.practices[key];
+            });
+        }
+
+        function updateDate() {
+            const dateElement = document.querySelector('.date');
+            if (dateElement) {
+                const today = new Date();
+                const options = { month: 'short', day: 'numeric' };
+                dateElement.textContent = today.toLocaleDateString('en-US', options).toUpperCase();
+            }
+        }
+
+        function getTodayString() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
