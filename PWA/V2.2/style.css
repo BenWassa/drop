@@ -234,8 +234,8 @@ body.details-visible .orb-container {
 
 /* --- Domain ring styles (SVG ring with a bottom gap and bottom-positioned icon) --- */
 .domain-ring {
-    width: 64px;
-    height: 64px;
+    width: 48px; /* further reduced to fit viewport better */
+    height: 48px;
     position: relative;
     display: inline-block;
 }
@@ -244,7 +244,8 @@ body.details-visible .orb-container {
     width: 100%;
     height: 100%;
     display: block;
-    transform: rotate(-90deg); /* Start from top; we'll rotate arc to position the gap */
+    /* flipped 180deg so the transparent gap sits at the bottom as requested */
+    transform: rotate(270deg);
 }
 
 .score-ring circle { vector-effect: non-scaling-stroke; }
@@ -268,7 +269,7 @@ body.details-visible .orb-container {
 
 .ring-center .domain-score {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: 11px; /* smaller to match the reduced rings */
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -277,9 +278,9 @@ body.details-visible .orb-container {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: -8px; /* sits in the SVG gap area */
-    width: 36px;
-    height: 36px;
+    bottom: -6px; /* sits in the SVG gap area */
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -289,7 +290,7 @@ body.details-visible .orb-container {
     box-shadow: 0 6px 12px rgba(0,0,0,0.32);
 }
 
-.ring-icon { width: 20px; height: 20px; display: block; }
+.ring-icon { width: 14px; height: 14px; display: block; }
 
 .domain-name {
     margin-top: 14px;
@@ -340,18 +341,19 @@ body.details-visible .orb-container {
     gap: 6px;
     width: 100%;
     max-width: 320px;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    /* avoid wrapping or scroll; items will shrink if needed */
+    /* keep nowrap so it's a single top row */
     flex-wrap: nowrap;
+    padding: 0 6px; /* tiny padding so the outer items don't touch the edges */
 }
 
 .score-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 1 1 60px; /* allow shrinking, but provide a comfortable minimum */
-    max-width: 76px;
+    flex: 0 1 64px; /* slightly narrower */
+    max-width: 72px;
 }
 
 /* On smaller screens, reduce grid to two columns to prevent crowding */
