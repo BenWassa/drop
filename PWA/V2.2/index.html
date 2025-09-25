@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <meta name="description" content="Drop: Your daily discipline dashboard.">
@@ -404,21 +405,24 @@
                 dateTextElement.textContent = today.toLocaleDateString('en-US', options).toUpperCase();
             }
 
-            if (weekNumberElement) {
-                const weekNum = getWeekNumber(today);
-                weekNumberElement.textContent = weekNum;
-                // Update week progress bar based on day-of-year so it updates daily
+            // Update week progress bar based on day-of-year so it updates daily
+            if (weekProgressBarFill) {
                 const totalDays = (isLeapYear(today.getFullYear()) ? 366 : 365);
                 const doy = dayOfYear(today);
                 const progressPercentage = (doy / totalDays) * 100;
                 weekProgressBarFill.style.width = `${progressPercentage}%`;
+            }
 
-                // Quarter labels: current quarter at left, next quarter at right
-                const month = today.getMonth(); // 0-based
-                const currentQuarter = Math.floor(month / 3) + 1; // 1..4
-                const nextQuarter = currentQuarter === 4 ? 1 : currentQuarter + 1;
-                if (quarterLeft) quarterLeft.textContent = `Q${currentQuarter}`;
-                if (quarterRight) quarterRight.textContent = `Q${nextQuarter}`;
+            // Quarter labels: current quarter at left, next quarter at right — always set these so they appear on the bar
+            const month = today.getMonth(); // 0-based
+            const currentQuarter = Math.floor(month / 3) + 1; // 1..4
+            const nextQuarter = currentQuarter === 4 ? 1 : currentQuarter + 1;
+            if (quarterLeft) quarterLeft.textContent = `Q${currentQuarter}`;
+            if (quarterRight) quarterRight.textContent = `Q${nextQuarter}`;
+
+            if (weekNumberElement) {
+                const weekNum = getWeekNumber(today);
+                weekNumberElement.textContent = weekNum;
             }
         }
         

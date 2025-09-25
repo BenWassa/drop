@@ -24,6 +24,8 @@
     --transition-fast: 0.2s ease-out;
     --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    /* single control for domain score ring sizing */
+    --domain-ring-size: 40px; /* change this one value to resize all score rings */
 }
 
 /* Base styles for the Pixel 8 viewport */
@@ -282,8 +284,8 @@ body.details-visible .orb-container {
 
 /* --- Domain ring styles (SVG ring with a bottom gap and bottom-positioned icon) --- */
 .domain-ring {
-    width: 40px; /* reduced so 4 fit comfortably inside the fixed frame */
-    height: 40px;
+    width: var(--domain-ring-size);
+    height: var(--domain-ring-size);
     position: relative;
     display: inline-block;
 }
@@ -317,7 +319,7 @@ body.details-visible .orb-container {
 
 .ring-center .domain-score {
     font-family: var(--font-mono);
-    font-size: 10px; /* slightly smaller to match the reduced rings */
+    font-size: calc(var(--domain-ring-size) * 0.24); /* proportional to ring size */
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -326,9 +328,9 @@ body.details-visible .orb-container {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: -6px; /* sits in the SVG gap area */
-    width: 22px;
-    height: 22px;
+    bottom: calc(var(--domain-ring-size) * -0.15); /* sits in the SVG gap area */
+    width: calc(var(--domain-ring-size) * 0.55);
+    height: calc(var(--domain-ring-size) * 0.55);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -338,7 +340,7 @@ body.details-visible .orb-container {
     box-shadow: 0 6px 10px rgba(0,0,0,0.28);
 }
 
-.ring-icon { width: 12px; height: 12px; display: block; }
+.ring-icon { width: calc(var(--domain-ring-size) * 0.33); height: calc(var(--domain-ring-size) * 0.33); display: block; }
 
 .domain-name {
     margin-top: 14px;
@@ -371,9 +373,7 @@ body.details-visible .orb-container {
 
 /* Desktop scaling: keep slightly larger rings inside orb on wide screens */
 @media (min-width: 420px) {
-    .domain-ring { width: 120px; height: 120px; }
-    .ring-icon-wrapper { bottom: -14px; width: 48px; height: 48px; }
-    .ring-icon { width: 30px; height: 30px; }
+    :root { --domain-ring-size: 120px; }
 }
 
 /* Domain scores section layout */
@@ -400,8 +400,8 @@ body.details-visible .orb-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 1 56px; /* slightly narrower so 4 fit */
-    max-width: 60px;
+    flex: 0 1 calc(var(--domain-ring-size) * 1.4);
+    max-width: calc(var(--domain-ring-size) * 1.5);
 }
 
 /* On smaller screens, reduce grid to two columns to prevent crowding */
