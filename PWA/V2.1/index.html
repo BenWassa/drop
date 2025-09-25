@@ -5,128 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#06070a">
-    <meta name="description" content="Discipline Dashboard - Track daily habits">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="description" content="Drop: Your daily discipline dashboard.">
     <title>Drop - Discipline Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         <!-- Today Screen -->
         <div id="screen-today" class="screen active">
             <header class="header">
-                <h1>TODAY</h1>
-                <div class="date">SEP 25</div>
+                <div class="date-info">
+                    <span class="date-text" data-date-format="long"></span>
+                    <span class="week-number">Week <span id="current-week-num"></span></span>
+                </div>
+                <div class="week-progress-container">
+                    <div class="progress-labels">
+                        <span>Current Quarter</span>
+                        <span>Next Quarter</span>
+                    </div>
+                    <div class="week-progress-bar">
+                        <div class="progress-fill" id="week-progress-fill"></div>
+                        <div class="quarter-marker q1" style="left: 0%;"></div>
+                        <div class="quarter-marker q2" style="left: 25%;"></div>
+                        <div class="quarter-marker q3" style="left: 50%;"></div>
+                        <div class="quarter-marker q4" style="left: 75%;"></div>
+                    </div>
+                </div>
             </header>
             
             <main class="main">
+                <div class="overall-score-section">
+                    <div class="score-card">
+                        <span class="score-label">OVERALL DISCIPLINE</span>
+                        <span class="overall-score" id="overall-discipline-score">0</span>
+                    </div>
+                </div>
+
                 <div class="orb-container">
                     <div class="orb">
-                        <div class="orb-quadrant" data-domain-target="mind">
+                        <div class="orb-quadrant mind" data-domain-target="mind">
+                            <img src="mind.svg" alt="Mind icon" class="domain-icon">
                             <div class="quadrant-content">
                                 <h2>MIND</h2>
-                                <div class="domain-score" data-score-domain="mind">0/2</div>
+                                <div class="domain-score" data-score-domain="mind">0/100</div>
                             </div>
                         </div>
-                        <div class="orb-quadrant" data-domain-target="fitness">
-                             <div class="quadrant-content">
+                        <div class="orb-quadrant fitness" data-domain-target="fitness">
+                            <img src="fitness.svg" alt="Fitness icon" class="domain-icon">
+                            <div class="quadrant-content">
                                 <h2>FITNESS</h2>
-                                <div class="domain-score" data-score-domain="fitness">0/3</div>
+                                <div class="domain-score" data-score-domain="fitness">0/100</div>
                             </div>
                         </div>
-                        <div class="orb-quadrant" data-domain-target="sleep">
-                             <div class="quadrant-content">
+                        <div class="orb-quadrant sleep" data-domain-target="sleep">
+                            <img src="sleep.svg" alt="Sleep icon" class="domain-icon">
+                            <div class="quadrant-content">
                                 <h2>SLEEP</h2>
-                                <div class="domain-score" data-score-domain="sleep">0/2</div>
+                                <div class="domain-score" data-score-domain="sleep">0/100</div>
                             </div>
                         </div>
-                        <div class="orb-quadrant" data-domain-target="spirit">
-                             <div class="quadrant-content">
+                        <div class="orb-quadrant spirit" data-domain-target="spirit">
+                            <img src="spirit.svg" alt="Spirit icon" class="domain-icon">
+                            <div class="quadrant-content">
                                 <h2>SPIRIT</h2>
-                                <div class="domain-score" data-score-domain="spirit">0/2</div>
+                                <div class="domain-score" data-score-domain="spirit">0/100</div>
                             </div>
                         </div>
-                        <div class="orb-center">
-                            <div class="total-score">0</div>
-                            <div class="total-score-label">COMPLETED</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Domain Details Panels -->
-                <div id="mind-details" class="domain-details">
-                    <header class="details-header">
-                        <button class="back-btn" data-domain-target="mind">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        </button>
-                        <h1 class="details-title">MIND</h1>
-                    </header>
-                    <div class="practices-list">
-                        <label class="practice-item">
-                            <input type="checkbox" data-domain="mind" data-aspect="read">
-                            <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                            <span>Read</span>
-                        </label>
-                         <label class="practice-item">
-                            <input type="checkbox" data-domain="mind" data-aspect="write">
-                            <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                            <span>Write</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div id="fitness-details" class="domain-details">
-                     <header class="details-header">
-                        <button class="back-btn" data-domain-target="fitness">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        </button>
-                        <h1 class="details-title">FITNESS</h1>
-                    </header>
-                    <div class="practices-list">
-                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="run"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Run</span></label>
-                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="strength"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Strength</span></label>
-                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="skill"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Skill</span></label>
-                    </div>
-                </div>
-
-                <div id="sleep-details" class="domain-details">
-                     <header class="details-header">
-                        <button class="back-btn" data-domain-target="sleep">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        </button>
-                        <h1 class="details-title">SLEEP</h1>
-                    </header>
-                    <div class="practices-list">
-                         <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="wake"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Wake</span></label>
-                         <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="rest"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Rest</span></label>
-                    </div>
-                </div>
-
-                 <div id="spirit-details" class="domain-details">
-                     <header class="details-header">
-                        <button class="back-btn" data-domain-target="spirit">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                        </button>
-                        <h1 class="details-title">SPIRIT</h1>
-                    </header>
-                    <div class="practices-list">
-                         <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="stress"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Stress</span></label>
-                         <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="meditation"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Meditation</span></label>
                     </div>
                 </div>
             </main>
         </div>
 
-        <!-- Other Screens -->
-        <div id="screen-week" class="screen"><header class="header"><h1>WEEK</h1></header><div class="placeholder"><p>Weekly view coming soon.</p></div></div>
-        <div id="screen-settings" class="screen"><header class="header"><h1>SETTINGS</h1></header><div class="placeholder"><p>Settings coming soon.</p></div></div>
-        <div id="screen-about" class="screen"><header class="header"><h1>ABOUT</h1></header><div class="placeholder"><p>About coming soon.</p></div></div>
+        <!-- Domain Details Panels (unchanged in structure, but styles will transform them) -->
+        <div id="mind-details" class="domain-details mind-details">
+            <header class="details-header">
+                <button class="back-btn" data-domain-target="mind">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <h1 class="details-title">MIND</h1>
+            </header>
+            <div class="practices-list">
+                <label class="practice-item">
+                    <input type="checkbox" data-domain="mind" data-aspect="read">
+                    <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                    <span>Read</span>
+                </label>
+                 <label class="practice-item">
+                    <input type="checkbox" data-domain="mind" data-aspect="write">
+                    <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                    <span>Write</span>
+                </label>
+            </div>
+        </div>
+        
+        <div id="fitness-details" class="domain-details fitness-details">
+             <header class="details-header">
+                <button class="back-btn" data-domain-target="fitness">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <h1 class="details-title">FITNESS</h1>
+            </header>
+            <div class="practices-list">
+                 <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="run"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Run</span></label>
+                 <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="strength"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Strength</span></label>
+                 <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="skill"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Skill</span></label>
+            </div>
+        </div>
+
+        <div id="sleep-details" class="domain-details sleep-details">
+             <header class="details-header">
+                <button class="back-btn" data-domain-target="sleep">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <h1 class="details-title">SLEEP</h1>
+            </header>
+            <div class="practices-list">
+                 <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="wake"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Wake</span></label>
+                 <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="rest"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Rest</span></label>
+            </div>
+        </div>
+
+         <div id="spirit-details" class="domain-details spirit-details">
+             <header class="details-header">
+                <button class="back-btn" data-domain-target="spirit">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <h1 class="details-title">SPIRIT</h1>
+            </header>
+            <div class="practices-list">
+                 <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="stress"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Stress</span></label>
+                 <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="meditation"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Meditation</span></label>
+            </div>
+        </div>
+
+        <!-- Other Screens (placeholders) -->
+        <div id="screen-week" class="screen"><header class="header"><div class="date-info"><span class="date-text">WEEK OVERVIEW</span></div><h1>Progress</h1></header><div class="placeholder"><p>Detailed weekly view coming soon.<br>It will integrate with the week progress bar above.</p></div></div>
+        <div id="screen-settings" class="screen"><header class="header"><div class="date-info"><span class="date-text">APP SETTINGS</span></div><h1>Configuration</h1></header><div class="placeholder"><p>Customize your experience here.</p></div></div>
+        <div id="screen-about" class="screen"><header class="header"><div class="date-info"><span class="date-text">ABOUT DROP</span></div><h1>Information</h1></header><div class="placeholder"><p>Learn more about this app.</p></div></div>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <button class="nav-btn active" data-screen="today">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
                 <span>Today</span>
             </button>
             <button class="nav-btn" data-screen="week">
@@ -134,7 +157,7 @@
                 <span>Week</span>
             </button>
             <button class="nav-btn" data-screen="settings">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span>Settings</span>
             </button>
              <button class="nav-btn" data-screen="about">
@@ -148,7 +171,7 @@
         // --- CORE LOGIC (UNCHANGED) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed'));
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed', err));
             });
         }
         const PRACTICES = {
@@ -160,13 +183,13 @@
         let currentData = { date: '', practices: {} };
 
         // --- UI & INTERACTION LOGIC ---
-        
         function initApp() {
-            updateDate();
+            updateDateAndWeek();
             loadData();
             setupEventListeners();
             updateAllDomainScores();
-            updateTotalScore();
+            updateOverallDisciplineScore();
+            updateWeekProgressBar(); // Call this initially
         }
 
         function setupEventListeners() {
@@ -184,13 +207,21 @@
         }
 
         function showDomainDetails(domain) {
-            document.body.classList.add('details-visible');
-            document.getElementById(`${domain}-details`).classList.add('active');
+            const panel = document.getElementById(`${domain}-details`);
+            if (panel) {
+                panel.classList.add('active');
+                document.body.classList.add('details-visible');
+                document.body.classList.add(`details-${domain}-active`); // For domain-specific styling
+            }
         }
 
         function hideDomainDetails(domain) {
-            document.body.classList.remove('details-visible');
-            document.getElementById(`${domain}-details`).classList.remove('active');
+            const panel = document.getElementById(`${domain}-details`);
+            if (panel) {
+                panel.classList.remove('active');
+                document.body.classList.remove('details-visible');
+                document.body.classList.remove(`details-${domain}-active`);
+            }
         }
 
         function togglePractice(domain, aspect) {
@@ -198,24 +229,37 @@
             const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
             currentData.practices[practiceKey] = checkbox.checked;
             updateDomainScore(domain);
-            updateTotalScore();
+            updateOverallDisciplineScore(); // Update overall score after each practice change
             saveData();
         }
         
         function updateDomainScore(domain) {
-            const completed = PRACTICES[domain].filter(aspect => currentData.practices[`${domain}-${aspect}`]).length;
-            const total = PRACTICES[domain].length;
-            const scoreElement = document.querySelector(`[data-score-domain="${domain}"]`);
-            if (scoreElement) scoreElement.textContent = `${completed}/${total}`;
+            const domainPractices = PRACTICES[domain];
+            const completed = domainPractices.filter(aspect => currentData.practices[`${domain}-${aspect}`]).length;
+            const total = domainPractices.length;
+            
+            // Calculate score out of 100
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            const scoreElement = document.querySelector(`.orb-quadrant.${domain} .domain-score`);
+            if (scoreElement) scoreElement.textContent = `${percentage}/100`;
         }
 
-        function updateTotalScore() {
+        function updateOverallDisciplineScore() {
             let totalCompleted = 0;
-            Object.values(currentData.practices).forEach(isDone => {
-                if (isDone) totalCompleted++;
+            let totalPossible = 0;
+
+            Object.keys(PRACTICES).forEach(domain => {
+                PRACTICES[domain].forEach(aspect => {
+                    totalPossible++;
+                    if (currentData.practices[`${domain}-${aspect}`]) {
+                        totalCompleted++;
+                    }
+                });
             });
-            const scoreElement = document.querySelector('.total-score');
-            if (scoreElement) scoreElement.textContent = totalCompleted;
+
+            const overallPercentage = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+            document.getElementById('overall-discipline-score').textContent = overallPercentage;
         }
 
         function updateAllDomainScores() {
@@ -248,26 +292,62 @@
                 });
             });
             saveData();
+            restoreUIState(); // Ensure UI reflects initial false states
         }
 
         function restoreUIState() {
-            Object.keys(currentData.practices).forEach(key => {
-                const [domain, aspect] = key.split('-');
-                const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
-                if (checkbox) checkbox.checked = currentData.practices[key];
+            Object.keys(PRACTICES).forEach(domain => {
+                PRACTICES[domain].forEach(aspect => {
+                    const key = `${domain}-${aspect}`;
+                    const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
+                    if (checkbox) {
+                        checkbox.checked = currentData.practices[key] || false;
+                    }
+                });
             });
-        }
-
-        function updateDate() {
-            const dateElement = document.querySelector('.date');
-            if (dateElement) {
-                const today = new Date();
-                const options = { month: 'short', day: 'numeric' };
-                dateElement.textContent = today.toLocaleDateString('en-US', options).toUpperCase();
-            }
+            updateAllDomainScores();
+            updateOverallDisciplineScore();
         }
 
         function getTodayString() { return new Date().toISOString().split('T')[0]; }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return weekNo;
+        }
+
+        function updateDateAndWeek() {
+            const today = new Date();
+            const dateTextElement = document.querySelector('.date-text');
+            const weekNumberElement = document.getElementById('current-week-num');
+            const weekProgressBarFill = document.getElementById('week-progress-fill');
+
+            if (dateTextElement) {
+                const options = { month: 'short', day: 'numeric' };
+                dateTextElement.textContent = today.toLocaleDateString('en-US', options).toUpperCase();
+            }
+
+            if (weekNumberElement) {
+                const weekNum = getWeekNumber(today);
+                weekNumberElement.textContent = weekNum;
+                // Update week progress bar
+                const totalWeeksInYear = 52; // Approx.
+                const progressPercentage = (weekNum / totalWeeksInYear) * 100;
+                weekProgressBarFill.style.width = `${progressPercentage}%`;
+            }
+        }
+        
+        function updateWeekProgressBar() {
+            const today = new Date();
+            const weekNum = getWeekNumber(today);
+            const totalWeeksInYear = 52; // Approximate value
+            const progressPercentage = (weekNum / totalWeeksInYear) * 100;
+            document.getElementById('week-progress-fill').style.width = `${progressPercentage}%`;
+        }
+
 
         document.addEventListener('DOMContentLoaded', initApp);
     </script>

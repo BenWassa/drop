@@ -2,111 +2,227 @@
 
 /* 1. SETUP & THEME VARIABLES */
 :root {
-    --bg-color: #06070a;
-    --sleep-color: #00A9B5;
-    --fitness-color: #FF4742;
-    --mind-color: #4C5AFF;
-    --spirit-color: #FFC900;
-    --text-primary: #f0f2f5;
-    --text-secondary: #8a8f98;
-    --card-bg: rgba(28, 30, 41, 0.6);
-    --border-color: rgba(255, 255, 255, 0.1);
-    --transition-fast: 0.2s;
-    --transition-medium: 0.4s;
-    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --bg-top: #0f172a;
+    --bg-bottom: #050608;
+    --bg-highlight: rgba(148, 163, 184, 0.18); /* For interactive elements */
+    --bg-panel: rgba(15, 23, 42, 0.65); /* Glassmorphic panel background */
+    --bg-surface: rgba(11, 15, 25, 0.6); /* Slightly darker glassmorphic elements */
+    --border-subtle: rgba(148, 163, 184, 0.25);
+    --border-strong: rgba(148, 163, 184, 0.5);
+    --shadow-elevated: 0 18px 38px rgba(2, 6, 23, 0.45);
+    --text-primary: #f8fafc; /* Lighter text for dark backgrounds */
+    --text-secondary: #cbd5f5; /* Slightly muted primary text */
+    --text-muted: #7c8ca6; /* For hints, labels */
+    --font-sans: 'Inter', 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Mono', 'SFMono-Regular', monospace;
+
+    --sleep: #1e90ff; /* Blue */
+    --fitness: #ff3b30; /* Red */
+    --mind: #7c3aed; /* Purple */
+    --spirit: #16a34a; /* Green */
+    
+    --transition-fast: 0.2s ease-out;
+    --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+/* Base styles for the Pixel 8 viewport */
+html {
+    height: 100%;
+    /* This ensures a consistent viewport height for the Pixel 8 design */
+    /* On devices with different aspect ratios, this might lead to letterboxing, 
+       but for the design canvas (360x800), it's precise. */
+    min-height: 800px; 
 }
 
-/* 2. BASE & TYPOGRAPHY */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-    background: var(--bg-color);
+    font-family: var(--font-sans);
+    background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
     color: var(--text-primary);
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* For iOS Safari */
     overscroll-behavior: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    display: flex; /* For app-container centering on larger screens */
+    justify-content: center;
+    align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* 3. LAYOUT & SCREEN MANAGEMENT */
+/* 2. LAYOUT & SCREEN MANAGEMENT */
 .app-container {
-    max-width: 420px; /* Optimal phone width */
-    margin: 0 auto;
-    min-height: 100vh;
-    min-height: -webkit-fill-available; /* iOS Safari height fix */
+    width: 360px; /* Target width for Pixel 8 design */
+    height: 800px; /* Target height for Pixel 8 design */
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: var(--shadow-elevated);
     display: flex;
     flex-direction: column;
+    background: var(--bg-top); /* Fallback */
 }
 
 .screen {
     display: none;
-    flex-grow: 1;
     flex-direction: column;
-    padding: 0 24px env(safe-area-inset-bottom);
+    flex-grow: 1;
+    padding: 0 24px;
     opacity: 0;
-    animation: fadeIn var(--transition-medium) var(--ease-out) forwards;
+    transform: scale(0.98);
+    transition: opacity var(--transition-medium), transform var(--transition-medium);
+    overflow: auto; /* Allow scrolling for content */
+    -webkit-overflow-scrolling: touch;
 }
 
 .screen.active {
     display: flex;
+    opacity: 1;
+    transform: scale(1);
 }
 
-@keyframes fadeIn {
-    to { opacity: 1; }
-}
-
+/* Header for all screens */
 .header {
-    padding: env(safe-area-inset-top) 0 20px;
-    margin-top: 40px;
+    padding-top: 32px; /* Adjusted for aesthetic spacing */
+    padding-bottom: 24px;
     text-align: center;
 }
 
-.header h1 {
+.header .date-info {
     font-size: 14px;
-    font-weight: 600;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 8px;
+}
+.header .date-text {
+    font-size: 16px;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-weight: 600;
 }
 
-.header .date {
+.header h1 {
     font-size: 28px;
     font-weight: 700;
     margin-top: 8px;
-    line-height: 1.2;
+    letter-spacing: -0.5px;
 }
 
-/* 4. ORB & MAIN INTERFACE */
+/* Week Progress Bar */
+.week-progress-container {
+    margin-top: 24px;
+    background: var(--bg-panel);
+    border-radius: 12px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.week-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 8px;
+    background: var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.week-progress-bar .progress-fill {
+    height: 100%;
+    width: 0%; /* JS updates this */
+    background: linear-gradient(90deg, #60a5fa, var(--sleep));
+    border-radius: 4px;
+    transition: width var(--transition-medium);
+}
+
+.quarter-marker {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: var(--bg-top); /* Darker line on the progress bar */
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* Overall Score Section */
+.overall-score-section {
+    margin-top: 24px;
+    padding: 0 24px; /* Maintain container padding */
+    text-align: center;
+}
+
+.score-card {
+    background: var(--bg-panel);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.score-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overall-score {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+
+/* 3. ORB - Interactive Domain Selection */
 .orb-container {
+    flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-grow: 1;
-    perspective: 1200px;
+    padding-bottom: 40px; /* Space for nav */
+    transition: filter var(--transition-slow), opacity var(--transition-slow), transform var(--transition-slow);
 }
 
 .orb {
-    width: 320px;
-    height: 320px;
+    width: 280px; /* Slightly smaller to provide more negative space */
+    height: 280px;
     position: relative;
     border-radius: 50%;
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 6px;
+    gap: 4px; /* Smaller gap for a tighter look */
     transform-style: preserve-3d;
-    transition: transform var(--transition-medium) var(--ease-out);
 }
 
-body.details-visible .orb {
-    transform: scale(0.95);
-    opacity: 0.5;
-    filter: blur(5px);
+/* When a details panel is active, shrink/blur the orb */
+body.details-visible .orb-container {
+    filter: blur(8px);
+    opacity: 0.6;
+    transform: scale(0.9);
+    pointer-events: none; /* Disable interaction with the orb when details are open */
 }
 
 .orb-quadrant {
@@ -115,11 +231,15 @@ body.details-visible .orb {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
-    padding: 24px;
-    transition: all var(--transition-fast) ease-out;
-    background-size: 200% 200%;
+    padding: 20px;
+    transition: transform var(--transition-medium), opacity var(--transition-medium);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    will-change: transform, opacity;
 }
 
 .orb-quadrant:hover {
@@ -127,71 +247,61 @@ body.details-visible .orb {
     z-index: 5;
 }
 
-.orb-quadrant:nth-child(1) { border-radius: 100% 0 0 0; background-image: linear-gradient(135deg, var(--mind-color), #2c37a8); }
-.orb-quadrant:nth-child(2) { border-radius: 0 100% 0 0; background-image: linear-gradient(45deg, var(--fitness-color), #c72a26); }
-.orb-quadrant:nth-child(3) { border-radius: 0 0 0 100%; background-image: linear-gradient(225deg, var(--sleep-color), #007c85); }
-.orb-quadrant:nth-child(4) { border-radius: 0 0 100% 0; background-image: linear-gradient(315deg, var(--spirit-color), #b89300); }
+.orb-quadrant:nth-child(1) { border-radius: 100% 0 0 0; } /* Mind (top-left) */
+.orb-quadrant:nth-child(2) { border-radius: 0 100% 0 0; } /* Fitness (top-right) */
+.orb-quadrant:nth-child(3) { border-radius: 0 0 0 100%; } /* Sleep (bottom-left) */
+.orb-quadrant:nth-child(4) { border-radius: 0 0 100% 0; } /* Spirit (bottom-right) */
+
+/* Specific quadrant colors */
+.orb-quadrant.mind { background-color: rgba(124, 58, 237, 0.4); } /* Using direct rgba for better blur blending */
+.orb-quadrant.fitness { background-color: rgba(255, 59, 48, 0.4); }
+.orb-quadrant.sleep { background-color: rgba(30, 144, 255, 0.4); }
+.orb-quadrant.spirit { background-color: rgba(22, 163, 74, 0.4); }
+
+.orb-quadrant .domain-icon {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));
+    transition: transform var(--transition-medium), opacity var(--transition-medium);
+}
+
+.quadrant-content {
+    text-align: center;
+    margin-top: 12px;
+    transition: opacity var(--transition-medium);
+}
 
 .quadrant-content h2 {
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: 14px;
     text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
     color: var(--text-primary);
 }
 
 .domain-score {
-    font-size: 14px;
-    color: rgba(255,255,255,0.7);
-    margin-top: 6px;
-}
-
-.orb-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 140px;
-    height: 140px;
-    transform: translate(-50%, -50%);
-    background: #11141a;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    pointer-events: none;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-    z-index: 10;
-    border: 1px solid var(--border-color);
-}
-
-.total-score {
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.total-score-label {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
     margin-top: 4px;
 }
 
-/* 5. DOMAIN DETAILS PANELS */
+/* 4. DOMAIN DETAILS PANELS - Dynamic Expansion */
 .domain-details {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--bg-color);
-    transform: translateY(100%);
-    transition: transform 0.5s var(--ease-out);
-    z-index: 100;
+    background: var(--bg-panel); /* Darker panel background for details */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateY(100%); /* Hidden by default */
+    transition: transform var(--transition-medium);
+    z-index: 200;
     padding: 0 24px;
     visibility: hidden;
+    display: flex; /* Use flex to manage inner content */
+    flex-direction: column;
 }
 
 .domain-details.active {
@@ -199,65 +309,81 @@ body.details-visible .orb {
     visibility: visible;
 }
 
-.details-header {
+.domain-details .details-header {
     display: flex;
     align-items: center;
-    padding: env(safe-area-inset-top) 0 20px;
-    margin-top: 40px;
+    padding-top: 32px;
+    padding-bottom: 24px;
+    position: sticky;
+    top: 0;
+    background: transparent; /* Allows blur to show through */
+    z-index: 10;
 }
 
-.back-btn {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+.domain-details .back-btn {
+    background: var(--bg-highlight);
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
     cursor: pointer;
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background var(--transition-fast);
+    flex-shrink: 0;
+    margin-right: 16px;
 }
 
-.back-btn:hover {
-    background: rgba(255,255,255,0.1);
+.domain-details .back-btn:hover {
+    background: rgba(148, 163, 184, 0.25);
 }
 
-.details-title {
-    font-size: 32px;
+.domain-details .back-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-primary);
+}
+
+.domain-details .details-title {
+    font-size: 28px;
     font-weight: 700;
-    margin-left: 16px;
-    text-shadow: 0 0 20px var(--glow-color);
+    letter-spacing: -0.5px;
+    flex-grow: 1;
+    text-align: left;
+    color: var(--text-primary); /* Default title color */
 }
 
-#mind-details { --glow-color: var(--mind-color); }
-#fitness-details { --glow-color: var(--fitness-color); }
-#sleep-details { --glow-color: var(--sleep-color); }
-#spirit-details { --glow-color: var(--spirit-color); }
-#mind-details .details-title { color: var(--mind-color); }
-#fitness-details .details-title { color: var(--fitness-color); }
-#sleep-details .details-title { color: var(--sleep-color); }
-#spirit-details .details-title { color: var(--spirit-color); }
+/* Domain-specific title colors */
+.mind-details .details-title { color: var(--mind); }
+.fitness-details .details-title { color: var(--fitness); }
+.sleep-details .details-title { color: var(--sleep); }
+.spirit-details .details-title { color: var(--spirit); }
 
 .practices-list {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-top: 24px;
+    gap: 12px;
+    padding-bottom: 20px; /* Breathing room */
+    overflow-y: auto; /* Allow scrolling for practices list */
+    -webkit-overflow-scrolling: touch;
 }
 
 .practice-item {
     display: flex;
     align-items: center;
-    padding: 20px;
-    border-radius: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 16px;
     cursor: pointer;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
     transition: background var(--transition-fast), border-color var(--transition-fast);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+}
+
+.practice-item:hover {
+    background: rgba(11, 15, 25, 0.8);
 }
 
 .practice-item input[type="checkbox"] {
@@ -267,61 +393,70 @@ body.details-visible .orb {
 .custom-checkbox {
     width: 28px;
     height: 28px;
-    border: 2px solid var(--text-secondary);
-    border-radius: 50%;
-    margin-right: 20px;
+    border: 2px solid var(--border-strong);
+    border-radius: 8px; /* Square checkboxes */
+    flex-shrink: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all var(--transition-fast) ease-out;
-    flex-shrink: 0;
+    margin-right: 16px;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+    background-color: transparent;
 }
 
 .custom-checkbox svg {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-primary);
     opacity: 0;
-    transform: scale(0.5);
-    transition: all var(--transition-fast) var(--ease-out);
+    transform: scale(0.6);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
-.practice-item span {
-    font-size: 18px;
-    font-weight: 500;
-    flex-grow: 1;
-}
-
+/* Checkbox active state - uses domain color */
 .practice-item input:checked + .custom-checkbox {
-    background: var(--glow-color);
-    border-color: var(--glow-color);
+    background-color: var(--domain-color);
+    border-color: var(--domain-color);
 }
-
 .practice-item input:checked + .custom-checkbox svg {
     opacity: 1;
     transform: scale(1);
 }
 
-.practice-item:has(input[data-domain="mind"]:checked) { --glow-color: var(--mind-color); }
-.practice-item:has(input[data-domain="fitness"]:checked) { --glow-color: var(--fitness-color); }
-.practice-item:has(input[data-domain="sleep"]:checked) { --glow-color: var(--sleep-color); }
-.practice-item:has(input[data-domain="spirit"]:checked) { --glow-color: var(--spirit-color); }
+/* Domain-specific checkbox colors */
+.practice-item:has(input[data-domain="mind"]) { --domain-color: var(--mind); }
+.practice-item:has(input[data-domain="fitness"]) { --domain-color: var(--fitness); }
+.practice-item:has(input[data-domain="sleep"]) { --domain-color: var(--sleep); }
+.practice-item:has(input[data-domain="spirit"]) { --domain-color: var(--spirit); }
 
-.practice-item:has(input:checked) {
-    border-color: var(--glow-color);
-    box-shadow: 0 0 25px 0 rgba(var(--glow-rgb, 255,255,255), 0.2);
+
+.practice-item span {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast), text-decoration var(--transition-fast);
 }
 
-/* 6. BOTTOM NAVIGATION */
+.practice-item input:checked ~ span {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+
+/* 5. BOTTOM NAVIGATION */
 .bottom-nav {
-    position: sticky;
+    position: sticky; /* Sticky to stay at bottom of app-container */
     bottom: 0;
-    background: rgba(12, 13, 16, 0.7);
-    border-top: 1px solid var(--border-color);
+    width: 100%;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-subtle);
     display: flex;
-    height: calc(80px + env(safe-area-inset-bottom));
+    height: 72px; /* Adjusted height */
     padding-bottom: env(safe-area-inset-bottom);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    z-index: 250; /* Ensure nav is above other elements */
+    flex-shrink: 0; /* Prevent it from shrinking in flex context */
 }
 
 .nav-btn {
@@ -332,36 +467,51 @@ body.details-visible .orb {
     justify-content: center;
     background: none;
     border: none;
-    color: var(--text-secondary);
+    color: var(--text-muted);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 10px; /* Smaller text for nav */
     font-weight: 500;
     gap: 4px;
     transition: color var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .nav-btn svg {
-    width: 24px;
-    height: 24px;
-    transition: transform var(--transition-fast);
+    width: 22px; /* Slightly smaller icons */
+    height: 22px;
+    stroke: var(--text-muted);
+    transition: stroke var(--transition-fast), transform var(--transition-fast);
 }
 
-.nav-btn.active, .nav-btn:hover {
+.nav-btn.active {
     color: var(--text-primary);
 }
 
-.nav-btn.active svg, .nav-btn:hover svg {
-    transform: scale(1.1);
+.nav-btn.active svg {
+    stroke: var(--text-primary);
+    transform: translateY(-2px); /* Subtle bounce effect */
 }
 
-/* 7. PLACEHOLDER CONTENT */
+.nav-btn:hover {
+    color: var(--text-secondary);
+}
+.nav-btn:hover svg {
+    stroke: var(--text-secondary);
+}
+
+/* 6. PLACEHOLDER CONTENT */
 .placeholder {
     flex-grow: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: var(--text-secondary);
-    font-size: 16px;
-    padding-bottom: 80px; /* Offset for nav */
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px;
+}
+.placeholder p {
+    max-width: 250px;
 }
