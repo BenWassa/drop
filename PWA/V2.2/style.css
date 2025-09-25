@@ -25,7 +25,7 @@
     --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
     /* single control for domain score ring sizing (tuned for 360px viewport) */
-    --domain-ring-size: 48px; /* good starting size so four rings fit comfortably */
+    --domain-ring-size: 40px; /* good starting size so four rings fit comfortably */
 }
 
 /* Base styles for the Pixel 8 viewport */
