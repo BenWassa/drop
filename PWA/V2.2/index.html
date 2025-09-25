@@ -17,18 +17,24 @@
         <!-- Today Screen -->
         <div id="screen-today" class="screen active">
             <header class="header">
-                <!-- Contained date + quarter row -->
+                <!-- Contained date row (quarters moved to progress bar ends) -->
                 <div class="date-card">
-                    <div class="date-left quarter-label" id="quarter-left">Q?</div>
                     <div class="date-center">
                         <div class="date-text" data-date-format="long"></div>
                         <div class="week-number">Wk <span id="current-week-num"></span></div>
                     </div>
-                    <div class="date-right quarter-label" id="quarter-right">Q?</div>
                 </div>
                 <div class="week-progress-container">
                     <div class="week-progress-bar">
                         <div class="progress-fill" id="week-progress-fill"></div>
+                        <!-- Quarter markers: visually divide the year into four quarters -->
+                        <div class="quarter-marker q1" style="left: 0%;"></div>
+                        <div class="quarter-marker q2" style="left: 25%;"></div>
+                        <div class="quarter-marker q3" style="left: 50%;"></div>
+                        <div class="quarter-marker q4" style="left: 75%;"></div>
+                        <!-- Quarter labels at the ends of the bar (current/next) -->
+                        <div class="progress-quarter left" id="quarter-left">Q?</div>
+                        <div class="progress-quarter right" id="quarter-right">Q?</div>
                     </div>
                 </div>
             </header>
@@ -390,6 +396,8 @@
             const dateTextElement = document.querySelector('.date-text');
             const weekNumberElement = document.getElementById('current-week-num');
             const weekProgressBarFill = document.getElementById('week-progress-fill');
+            const quarterLeft = document.getElementById('quarter-left');
+            const quarterRight = document.getElementById('quarter-right');
 
             if (dateTextElement) {
                 const options = { month: 'short', day: 'numeric' };
@@ -399,10 +407,18 @@
             if (weekNumberElement) {
                 const weekNum = getWeekNumber(today);
                 weekNumberElement.textContent = weekNum;
-                // Update week progress bar
-                const totalWeeksInYear = 52; // Approx.
-                const progressPercentage = (weekNum / totalWeeksInYear) * 100;
+                // Update week progress bar based on day-of-year so it updates daily
+                const totalDays = (isLeapYear(today.getFullYear()) ? 366 : 365);
+                const doy = dayOfYear(today);
+                const progressPercentage = (doy / totalDays) * 100;
                 weekProgressBarFill.style.width = `${progressPercentage}%`;
+
+                // Quarter labels: current quarter at left, next quarter at right
+                const month = today.getMonth(); // 0-based
+                const currentQuarter = Math.floor(month / 3) + 1; // 1..4
+                const nextQuarter = currentQuarter === 4 ? 1 : currentQuarter + 1;
+                if (quarterLeft) quarterLeft.textContent = `Q${currentQuarter}`;
+                if (quarterRight) quarterRight.textContent = `Q${nextQuarter}`;
             }
         }
         
@@ -412,6 +428,16 @@
             const totalWeeksInYear = 52; // Approximate value
             const progressPercentage = (weekNum / totalWeeksInYear) * 100;
             document.getElementById('week-progress-fill').style.width = `${progressPercentage}%`;
+        }
+
+        function dayOfYear(d) {
+            const start = new Date(d.getFullYear(), 0, 0);
+            const diff = d - start + ((start.getTimezoneOffset() - d.getTimezoneOffset()) * 60000);
+            return Math.floor(diff / 86400000);
+        }
+
+        function isLeapYear(y) {
+            return ((y % 4 === 0) && (y % 100 !== 0)) || (y % 400 === 0);
         }
 
 

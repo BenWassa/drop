@@ -94,13 +94,10 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border: 1px solid rgba(255,255,255,0.03);
-    padding: 8px 10px;
-    border-radius: 12px;
+    /* simplified: no heavy box behind the date to keep header compact */
+    padding: 4px 0;
     width: calc(100% - 48px);
-    margin: 0 auto 12px auto;
-    box-shadow: 0 6px 14px rgba(2,6,23,0.35);
+    margin: 0 auto 8px auto;
 }
 .date-card .date-center { display: flex; flex-direction: column; align-items: center; }
 .quarter-label { font-family: var(--font-mono); font-weight: 700; color: var(--text-secondary); font-size: 12px; }
@@ -178,6 +175,19 @@ body {
     opacity: 0.8;
 }
 
+/* Quarter labels that sit above the ends of the progress bar (no box) */
+.progress-quarter {
+    position: absolute;
+    top: -18px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 11px;
+    z-index: 2;
+}
+.progress-quarter.left { left: 4px; }
+.progress-quarter.right { right: 4px; }
+
 /* Overall score UI removed (styles intentionally deleted) */
 
 
@@ -194,20 +204,21 @@ body {
 /* Data entry card around the orb */
 .data-entry-card {
     margin-top: 14px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius: 14px;
-    padding: 12px 14px 22px 14px;
-    border: 1px solid rgba(255,255,255,0.03);
-    width: calc(100% - 48px);
+    /* keep a subtle card but lighter than before */
+    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
+    border-radius: 12px;
+    padding: 10px 12px 18px 12px;
+    border: 1px solid rgba(255,255,255,0.02);
+    width: calc(100% - 40px);
     margin-left: auto;
     margin-right: auto;
 }
 .data-entry-header h3 { margin: 0; font-size: 14px; letter-spacing: 0.6px; }
 .data-entry-sub { margin: 4px 0 8px 0; font-size: 11px; color: var(--text-muted); }
 
-/* Reduce orb size slightly within card for better spacing */
-.data-entry-card .orb { width: 240px; height: 240px; gap: 6px; }
-.data-entry-card .orb-quadrant { padding: 12px; }
+/* Use slightly larger orb inside card to use space better */
+.data-entry-card .orb { width: 260px; height: 260px; gap: 10px; }
+.data-entry-card .orb-quadrant { padding: 18px; }
 
 .orb {
     width: 280px; /* Slightly smaller to provide more negative space */
@@ -271,8 +282,8 @@ body.details-visible .orb-container {
 
 /* --- Domain ring styles (SVG ring with a bottom gap and bottom-positioned icon) --- */
 .domain-ring {
-    width: 48px; /* further reduced to fit viewport better */
-    height: 48px;
+    width: 40px; /* reduced so 4 fit comfortably inside the fixed frame */
+    height: 40px;
     position: relative;
     display: inline-block;
 }
@@ -306,7 +317,7 @@ body.details-visible .orb-container {
 
 .ring-center .domain-score {
     font-family: var(--font-mono);
-    font-size: 11px; /* smaller to match the reduced rings */
+    font-size: 10px; /* slightly smaller to match the reduced rings */
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -316,18 +327,18 @@ body.details-visible .orb-container {
     left: 50%;
     transform: translateX(-50%);
     bottom: -6px; /* sits in the SVG gap area */
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg-panel);
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.04);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.32);
+    border: 1px solid rgba(255,255,255,0.02);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.28);
 }
 
-.ring-icon { width: 14px; height: 14px; display: block; }
+.ring-icon { width: 12px; height: 12px; display: block; }
 
 .domain-name {
     margin-top: 14px;
@@ -378,7 +389,7 @@ body.details-visible .orb-container {
     gap: 6px;
     width: 100%;
     max-width: 320px;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     /* keep nowrap so it's a single top row */
     flex-wrap: nowrap;
@@ -389,8 +400,8 @@ body.details-visible .orb-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 1 64px; /* slightly narrower */
-    max-width: 72px;
+    flex: 0 1 56px; /* slightly narrower so 4 fit */
+    max-width: 60px;
 }
 
 /* On smaller screens, reduce grid to two columns to prevent crowding */
