@@ -211,26 +211,16 @@ body {
 }
 
 /* Data entry card around the orb */
+/* Data entry card: full-bleed inside the app container to maximize usable width */
 .data-entry-card {
-    margin-top: 12px;
-    /* minimalist card: very subtle surface, minimal chrome */
+    margin-top: 6px;
     background: rgba(255,255,255,0.02);
-    border-radius: 10px;
-    padding: 8px 10px; /* tighter padding */
+    border-radius: 8px;
+    padding: 6px 6px; /* minimal padding so orb can grow */
     border: none;
-    width: calc(100% - 36px);
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
 }
-.data-entry-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 6px 4px 8px 4px;
-}
-.data-entry-header h3 { margin: 0; font-size: 13px; letter-spacing: 0.4px; font-weight: 600; color: var(--text-primary); }
-.data-entry-sub { margin: 0; font-size: 11px; color: var(--text-muted); opacity: 0.9; }
 
 /* Optional: hide the subtitle on very small widths to keep header compact */
 @media (max-width: 320px) {
@@ -238,12 +228,19 @@ body {
 }
 
 /* Use slightly larger orb inside card to use space better */
-.data-entry-card .orb { width: 260px; height: 260px; gap: 10px; }
-.data-entry-card .orb-quadrant { padding: 18px; }
+.data-entry-card .orb {
+    /* Make the orb responsive: fill available width and keep square aspect */
+    width: 100%;
+    max-width: 320px; /* cap so it doesn't get huge on very wide screens inside the app frame */
+    aspect-ratio: 1 / 1; /* keep a square */
+    height: auto;
+    gap: 8px;
+    margin: 0 auto; /* center within the card */
+}
+.data-entry-card .orb-quadrant { padding: 12px; }
 
 .orb {
-    width: 280px; /* Slightly smaller to provide more negative space */
-    height: 280px;
+    /* Default sizing is controlled by the container (responsive) */
     position: relative;
     border-radius: 50%;
     display: grid;
