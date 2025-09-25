@@ -25,9 +25,11 @@
     --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
     /* single control for domain score ring sizing (tuned for 360px viewport) */
-    --domain-ring-size: 20px; /* good starting size so four rings fit comfortably */
+    --domain-ring-size: 48px; /* good starting size so four rings fit comfortably */
     /* stroke thickness as a fraction of the ring size (0.125 = 12.5%) */
-    --domain-stroke-ratio: 0.065;
+    --domain-stroke-ratio: 0.1;
+    /* fraction of circumference that is the transparent gap (0..1). 0.2 = 20% gap */
+    --domain-gap-fraction: 0.1666667;
 }
 
 /* Base styles for the Pixel 8 viewport */
@@ -300,7 +302,7 @@ body.details-visible .orb-container {
     height: 100%;
     display: block;
     /* flipped 180deg so the transparent gap sits at the bottom as requested */
-    transform: rotate(270deg);
+    transform: rotate(180deg);
 }
 
 .score-ring circle {
@@ -403,7 +405,7 @@ body.details-visible .orb-container {
     gap: 8px;
     width: 100%;
     max-width: 100%;
-    justify-content: space-between;
+    justify-content: center; /* center items and let item width control spacing */
     align-items: center;
     flex-wrap: nowrap; /* keep a single row */
     padding: 0 6px;
@@ -413,9 +415,10 @@ body.details-visible .orb-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* give each item an explicit basis so four fit within 360px accounting for gaps/padding */
-    flex: 0 0 calc((360px - 6px * 2 - 8px * 3) / 4); /* container width minus horizontal paddings & gaps */
-    max-width: calc((360px - 6px * 2 - 8px * 3) / 4);
+    /* size from the ring size so items tightly wrap content */
+    width: calc(var(--domain-ring-size) * 1.6);
+    flex: 0 0 calc(var(--domain-ring-size) * 1.6);
+    min-width: 0;
 }
 
 /* On smaller screens, reduce grid to two columns to prevent crowding */

@@ -215,6 +215,28 @@
     </div>
 
     <script>
+        // Helper: allow forcing domain ring size via URL or console/localStorage for testing
+        // Usage:
+        //  - Add ?ring=20px to the URL to test quickly
+        //  - In console: setDomainRingSize('20px') to apply and persist
+        (function applyCustomRingSize() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const ringParam = params.get('ring');
+                const stored = localStorage.getItem('drop-domain-ring-size');
+                const size = ringParam || stored;
+                if (size) {
+                    document.documentElement.style.setProperty('--domain-ring-size', size);
+                }
+                // Expose a small helper to change (and persist) at runtime
+                window.setDomainRingSize = function(newSize, persist = true) {
+                    document.documentElement.style.setProperty('--domain-ring-size', newSize);
+                    if (persist) localStorage.setItem('drop-domain-ring-size', newSize);
+                    // Recompute arcs if app is initialized
+                    if (typeof updateAllDomainScores === 'function') updateAllDomainScores();
+                };
+            } catch (e) { /* ignore in older browsers */ }
+        })();
         // --- CORE LOGIC (UNCHANGED) ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -321,10 +343,12 @@
                         circ = 2 * Math.PI * r;
                     }
 
-                    // Keep the same visible fraction as before (5/6 visible, 1/6 gap)
-                    const visibleFraction = 5 / 6;
+                    // Determine gap fraction from CSS variable --domain-gap-fraction (fallback to 1/6)
+                    const cs = getComputedStyle(document.documentElement);
+                    const gapFraction = parseFloat(cs.getPropertyValue('--domain-gap-fraction')) || (1/6);
+                    const visibleFraction = Math.max(0, 1 - gapFraction);
                     const visibleLen = circ * visibleFraction;
-                    const gapLen = Math.max(0, circ - visibleLen);
+                    const gapLen = Math.max(0, circ * gapFraction);
 
                     // Apply dasharray to both the progress arc and the background track so the gap stays transparent
                     // Use style properties so values are in CSS px and match rendered lengths
