@@ -24,8 +24,8 @@
     --transition-fast: 0.2s ease-out;
     --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-    /* single control for domain score ring sizing */
-    --domain-ring-size: 20px; /* change this one value to resize all score rings */
+    /* single control for domain score ring sizing (tuned for 360px viewport) */
+    --domain-ring-size: 48px; /* good starting size so four rings fit comfortably */
 }
 
 /* Base styles for the Pixel 8 viewport */
@@ -301,7 +301,7 @@ body.details-visible .orb-container {
     transform: rotate(270deg);
 }
 
-.score-ring circle { vector-effect: non-scaling-stroke; }
+.score-ring circle { vector-effect: none; }
 
 /* Arc that represents progress; dasharray set so a segment at the bottom is empty (gap ~1/6th) */
 .progress-arc {
@@ -389,22 +389,22 @@ body.details-visible .orb-container {
 
 .scores-grid {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     width: 100%;
-    max-width: 320px;
-    justify-content: center;
+    max-width: 100%;
+    justify-content: space-between;
     align-items: center;
-    /* keep nowrap so it's a single top row */
-    flex-wrap: nowrap;
-    padding: 0 6px; /* tiny padding so the outer items don't touch the edges */
+    flex-wrap: nowrap; /* keep a single row */
+    padding: 0 6px;
 }
 
 .score-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 1 calc(var(--domain-ring-size) * 1.4);
-    max-width: calc(var(--domain-ring-size) * 1.5);
+    /* give each item an explicit basis so four fit within 360px accounting for gaps/padding */
+    flex: 0 0 calc((360px - 6px * 2 - 8px * 3) / 4); /* container width minus horizontal paddings & gaps */
+    max-width: calc((360px - 6px * 2 - 8px * 3) / 4);
 }
 
 /* On smaller screens, reduce grid to two columns to prevent crowding */
