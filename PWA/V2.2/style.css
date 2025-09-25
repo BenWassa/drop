@@ -25,7 +25,7 @@
     --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
     /* single control for domain score ring sizing */
-    --domain-ring-size: 40px; /* change this one value to resize all score rings */
+    --domain-ring-size: 20px; /* change this one value to resize all score rings */
 }
 
 /* Base styles for the Pixel 8 viewport */
@@ -137,6 +137,7 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid var(--border-subtle);
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    position: relative; /* allow absolutely positioned quarter labels to sit relative to this container */
 }
 
 .progress-labels {
@@ -156,7 +157,8 @@ body {
     height: 8px;
     background: var(--border-subtle);
     border-radius: 4px;
-    overflow: hidden;
+    /* allow quarter labels positioned above the bar to be visible */
+    overflow: visible;
 }
 
 .week-progress-bar .progress-fill {
@@ -172,23 +174,24 @@ body {
     top: 0;
     height: 100%;
     width: 2px;
-    background: var(--bg-top); /* Darker line on the progress bar */
-    z-index: 1;
+    background: rgba(255,255,255,0.06); /* subtle light marker for contrast */
+    z-index: 3; /* below labels but above background */
     opacity: 0.8;
 }
 
 /* Quarter labels that sit above the ends of the progress bar (no box) */
 .progress-quarter {
     position: absolute;
-    top: -18px;
+    top: 6px; /* position labels near the top of the container to avoid overlap with other header content */
     font-family: var(--font-mono);
     font-weight: 700;
-    color: var(--text-secondary);
+    color: #e6eefc; /* slightly brighter for contrast */
     font-size: 11px;
-    z-index: 2;
+    z-index: 12; /* ensure labels sit above quarter markers and fills */
+    text-shadow: 0 1px 0 rgba(0,0,0,0.35);
 }
-.progress-quarter.left { left: 4px; }
-.progress-quarter.right { right: 4px; }
+.progress-quarter.left { left: 12px; }
+.progress-quarter.right { right: 12px; }
 
 /* Overall score UI removed (styles intentionally deleted) */
 
