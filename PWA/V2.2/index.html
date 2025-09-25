@@ -37,42 +37,78 @@
             </header>
             
             <main class="main">
-                <div class="overall-score-section">
-                    <div class="score-card">
-                        <span class="score-label">OVERALL DISCIPLINE</span>
-                        <span class="overall-score" id="overall-discipline-score">0</span>
+                <!-- overall discipline removed per request -->
+                <!-- Domain scores section (separate from data entry) -->
+                <div class="domain-scores-section">
+                    <div class="scores-grid">
+                        <div class="score-item mind">
+                            <div class="domain-ring" aria-hidden="false">
+                                <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Mind score ring">
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--mind)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                </svg>
+                                <div class="ring-center"><div class="domain-score" data-score-domain="mind">0</div></div>
+                                <div class="ring-icon-wrapper"><img src="mind.svg" alt="Mind" class="ring-icon"></div>
+                            </div>
+                            <div class="domain-name">MIND</div>
+                        </div>
+
+                        <div class="score-item fitness">
+                            <div class="domain-ring" aria-hidden="false">
+                                <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Fitness score ring">
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--fitness)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                </svg>
+                                <div class="ring-center"><div class="domain-score" data-score-domain="fitness">0</div></div>
+                                <div class="ring-icon-wrapper"><img src="fitness.svg" alt="Fitness" class="ring-icon"></div>
+                            </div>
+                            <div class="domain-name">FITNESS</div>
+                        </div>
+
+                        <div class="score-item sleep">
+                            <div class="domain-ring" aria-hidden="false">
+                                <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Sleep score ring">
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--sleep)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                </svg>
+                                <div class="ring-center"><div class="domain-score" data-score-domain="sleep">0</div></div>
+                                <div class="ring-icon-wrapper"><img src="sleep.svg" alt="Sleep" class="ring-icon"></div>
+                            </div>
+                            <div class="domain-name">SLEEP</div>
+                        </div>
+
+                        <div class="score-item spirit">
+                            <div class="domain-ring" aria-hidden="false">
+                                <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Spirit score ring">
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--spirit)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                </svg>
+                                <div class="ring-center"><div class="domain-score" data-score-domain="spirit">0</div></div>
+                                <div class="ring-icon-wrapper"><img src="spirit.svg" alt="Spirit" class="ring-icon"></div>
+                            </div>
+                            <div class="domain-name">SPIRIT</div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Domain data entry orb (keeps the interactive quadrant buttons) -->
                 <div class="orb-container">
                     <div class="orb">
                         <div class="orb-quadrant mind" data-domain-target="mind">
                             <img src="mind.svg" alt="Mind icon" class="domain-icon">
-                            <div class="quadrant-content">
-                                <h2>MIND</h2>
-                                <div class="domain-score" data-score-domain="mind">0/100</div>
-                            </div>
+                            <div class="quadrant-content"><h2>MIND</h2></div>
                         </div>
                         <div class="orb-quadrant fitness" data-domain-target="fitness">
                             <img src="fitness.svg" alt="Fitness icon" class="domain-icon">
-                            <div class="quadrant-content">
-                                <h2>FITNESS</h2>
-                                <div class="domain-score" data-score-domain="fitness">0/100</div>
-                            </div>
+                            <div class="quadrant-content"><h2>FITNESS</h2></div>
                         </div>
                         <div class="orb-quadrant sleep" data-domain-target="sleep">
                             <img src="sleep.svg" alt="Sleep icon" class="domain-icon">
-                            <div class="quadrant-content">
-                                <h2>SLEEP</h2>
-                                <div class="domain-score" data-score-domain="sleep">0/100</div>
-                            </div>
+                            <div class="quadrant-content"><h2>SLEEP</h2></div>
                         </div>
                         <div class="orb-quadrant spirit" data-domain-target="spirit">
                             <img src="spirit.svg" alt="Spirit icon" class="domain-icon">
-                            <div class="quadrant-content">
-                                <h2>SPIRIT</h2>
-                                <div class="domain-score" data-score-domain="spirit">0/100</div>
-                            </div>
+                            <div class="quadrant-content"><h2>SPIRIT</h2></div>
                         </div>
                     </div>
                 </div>
@@ -240,9 +276,34 @@
             
             // Calculate score out of 100
             const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-            
-            const scoreElement = document.querySelector(`.orb-quadrant.${domain} .domain-score`);
-            if (scoreElement) scoreElement.textContent = `${percentage}/100`;
+
+            // Update center number (integer) in both score-item and orb-quadrant (backwards compatible)
+            const scoreSelectors = [
+                `.score-item.${domain} .domain-score`,
+                `.orb-quadrant.${domain} .domain-score`
+            ];
+            scoreSelectors.forEach(sel => {
+                const el = document.querySelector(sel);
+                if (el) el.textContent = `${percentage}`;
+            });
+
+            // Update SVG arc: compute stroke-dashoffset to show proportion while keeping gap (~1/6th of circumference)
+            // Prefer the new score-item arc, fallback to orb-quadrant arc
+            let arc = document.querySelector(`.score-item.${domain} .progress-arc`);
+            if (!arc) arc = document.querySelector(`.orb-quadrant.${domain} .progress-arc`);
+            if (arc) {
+                // Circumference of circle r=44 => 2πr
+                const r = 44;
+                const circ = 2 * Math.PI * r; // ~276.46
+                // We used stroke-dasharray="230.38 46.08" which sums to ~276.46
+                // The visible portion should be percentage of the visible segment (230.38)
+                const visibleLen = 230.38;
+                const gapLen = circ - visibleLen; // ~46.08
+                const filled = (percentage / 100) * visibleLen;
+                // stroke-dashoffset should move the arc so that filled portion appears from the start; invert for SVG rotation
+                const dashOffset = visibleLen - filled;
+                arc.style.strokeDashoffset = dashOffset;
+            }
         }
 
         function updateOverallDisciplineScore() {
@@ -259,7 +320,8 @@
             });
 
             const overallPercentage = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
-            document.getElementById('overall-discipline-score').textContent = overallPercentage;
+            const overallEl = document.getElementById('overall-discipline-score');
+            if (overallEl) overallEl.textContent = overallPercentage;
         }
 
         function updateAllDomainScores() {
