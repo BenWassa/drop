@@ -289,10 +289,8 @@ body.details-visible .orb-container {
 .orb-quadrant:nth-child(4) { border-radius: 0 0 100% 0; } /* Spirit (bottom-right) */
 
 /* Specific quadrant colors */
-.orb-quadrant.mind { --accent: var(--mind); }
-.orb-quadrant.fitness { --accent: var(--fitness); }
-.orb-quadrant.sleep { --accent: var(--sleep); }
-.orb-quadrant.spirit { --accent: var(--spirit); }
+/* quadrant accent variables removed */
+/* quadrant accent variables removed */
 
 .orb-quadrant .domain-icon {
     width: 40px;
@@ -391,16 +389,7 @@ body.details-visible .orb-container {
 
 .orb-quadrant { padding: 12px; position: relative; background: transparent; border: none; }
 
-/* Accent bar to indicate domain color without tinting the icon artwork - drawn as an overlay */
-.orb-quadrant::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent), rgba(255,255,255,0.06));
-}
+/* accent removed */
 
 .orb-quadrant .domain-icon { width: 40px; height: 40px; }
 
