@@ -17,21 +17,18 @@
         <!-- Today Screen -->
         <div id="screen-today" class="screen active">
             <header class="header">
-                <div class="date-info">
-                    <span class="date-text" data-date-format="long"></span>
-                    <span class="week-number">Week <span id="current-week-num"></span></span>
+                <!-- Contained date + quarter row -->
+                <div class="date-card">
+                    <div class="date-left quarter-label" id="quarter-left">Q?</div>
+                    <div class="date-center">
+                        <div class="date-text" data-date-format="long"></div>
+                        <div class="week-number">Wk <span id="current-week-num"></span></div>
+                    </div>
+                    <div class="date-right quarter-label" id="quarter-right">Q?</div>
                 </div>
                 <div class="week-progress-container">
-                    <div class="progress-labels">
-                        <span>Current Quarter</span>
-                        <span>Next Quarter</span>
-                    </div>
                     <div class="week-progress-bar">
                         <div class="progress-fill" id="week-progress-fill"></div>
-                        <div class="quarter-marker q1" style="left: 0%;"></div>
-                        <div class="quarter-marker q2" style="left: 25%;"></div>
-                        <div class="quarter-marker q3" style="left: 50%;"></div>
-                        <div class="quarter-marker q4" style="left: 75%;"></div>
                     </div>
                 </div>
             </header>
@@ -92,27 +89,33 @@
                     </div>
                 </div>
 
-                <!-- Domain data entry orb (keeps the interactive quadrant buttons) -->
-                <div class="orb-container">
-                    <div class="orb">
-                        <div class="orb-quadrant mind" data-domain-target="mind">
-                            <img src="mind.svg" alt="Mind icon" class="domain-icon">
-                            <div class="quadrant-content"><h2>MIND</h2></div>
-                        </div>
-                        <div class="orb-quadrant fitness" data-domain-target="fitness">
-                            <img src="fitness.svg" alt="Fitness icon" class="domain-icon">
-                            <div class="quadrant-content"><h2>FITNESS</h2></div>
-                        </div>
-                        <div class="orb-quadrant sleep" data-domain-target="sleep">
-                            <img src="sleep.svg" alt="Sleep icon" class="domain-icon">
-                            <div class="quadrant-content"><h2>SLEEP</h2></div>
-                        </div>
-                        <div class="orb-quadrant spirit" data-domain-target="spirit">
-                            <img src="spirit.svg" alt="Spirit icon" class="domain-icon">
-                            <div class="quadrant-content"><h2>SPIRIT</h2></div>
+                <!-- Domain data entry - improved card layout -->
+                <section class="data-entry-card">
+                    <div class="data-entry-header">
+                        <h3>Log practices</h3>
+                        <p class="data-entry-sub">Tap a domain to view and mark practices for today</p>
+                    </div>
+                    <div class="orb-container">
+                        <div class="orb">
+                            <div class="orb-quadrant mind" data-domain-target="mind">
+                                <img src="mind.svg" alt="Mind icon" class="domain-icon">
+                                <div class="quadrant-content"><h2>MIND</h2></div>
+                            </div>
+                            <div class="orb-quadrant fitness" data-domain-target="fitness">
+                                <img src="fitness.svg" alt="Fitness icon" class="domain-icon">
+                                <div class="quadrant-content"><h2>FITNESS</h2></div>
+                            </div>
+                            <div class="orb-quadrant sleep" data-domain-target="sleep">
+                                <img src="sleep.svg" alt="Sleep icon" class="domain-icon">
+                                <div class="quadrant-content"><h2>SLEEP</h2></div>
+                            </div>
+                            <div class="orb-quadrant spirit" data-domain-target="spirit">
+                                <img src="spirit.svg" alt="Spirit icon" class="domain-icon">
+                                <div class="quadrant-content"><h2>SPIRIT</h2></div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
             </main>
         </div>
 

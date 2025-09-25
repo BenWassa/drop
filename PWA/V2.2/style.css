@@ -88,6 +88,25 @@ body {
     text-align: center;
 }
 
+/* Contained date card with quarter labels */
+.date-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.03);
+    padding: 8px 10px;
+    border-radius: 12px;
+    width: calc(100% - 48px);
+    margin: 0 auto 12px auto;
+    box-shadow: 0 6px 14px rgba(2,6,23,0.35);
+}
+.date-card .date-center { display: flex; flex-direction: column; align-items: center; }
+.quarter-label { font-family: var(--font-mono); font-weight: 700; color: var(--text-secondary); font-size: 12px; }
+.date-text { font-size: 13px; color: var(--text-primary); font-weight: 700; }
+.week-number { font-size: 11px; color: var(--text-muted); }
+
 .header .date-info {
     font-size: 14px;
     color: var(--text-muted);
@@ -171,6 +190,24 @@ body {
     padding-bottom: 40px; /* Space for nav */
     transition: filter var(--transition-slow), opacity var(--transition-slow), transform var(--transition-slow);
 }
+
+/* Data entry card around the orb */
+.data-entry-card {
+    margin-top: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 14px;
+    padding: 12px 14px 22px 14px;
+    border: 1px solid rgba(255,255,255,0.03);
+    width: calc(100% - 48px);
+    margin-left: auto;
+    margin-right: auto;
+}
+.data-entry-header h3 { margin: 0; font-size: 14px; letter-spacing: 0.6px; }
+.data-entry-sub { margin: 4px 0 8px 0; font-size: 11px; color: var(--text-muted); }
+
+/* Reduce orb size slightly within card for better spacing */
+.data-entry-card .orb { width: 240px; height: 240px; gap: 6px; }
+.data-entry-card .orb-quadrant { padding: 12px; }
 
 .orb {
     width: 280px; /* Slightly smaller to provide more negative space */
