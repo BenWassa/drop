@@ -212,18 +212,30 @@ body {
 
 /* Data entry card around the orb */
 .data-entry-card {
-    margin-top: 14px;
-    /* keep a subtle card but lighter than before */
-    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.008));
-    border-radius: 12px;
-    padding: 10px 12px 18px 12px;
-    border: 1px solid rgba(255,255,255,0.02);
-    width: calc(100% - 40px);
+    margin-top: 12px;
+    /* minimalist card: very subtle surface, minimal chrome */
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    padding: 8px 10px; /* tighter padding */
+    border: none;
+    width: calc(100% - 36px);
     margin-left: auto;
     margin-right: auto;
 }
-.data-entry-header h3 { margin: 0; font-size: 14px; letter-spacing: 0.6px; }
-.data-entry-sub { margin: 4px 0 8px 0; font-size: 11px; color: var(--text-muted); }
+.data-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 4px 8px 4px;
+}
+.data-entry-header h3 { margin: 0; font-size: 13px; letter-spacing: 0.4px; font-weight: 600; color: var(--text-primary); }
+.data-entry-sub { margin: 0; font-size: 11px; color: var(--text-muted); opacity: 0.9; }
+
+/* Optional: hide the subtitle on very small widths to keep header compact */
+@media (max-width: 320px) {
+    .data-entry-sub { display: none; }
+}
 
 /* Use slightly larger orb inside card to use space better */
 .data-entry-card .orb { width: 260px; height: 260px; gap: 10px; }
