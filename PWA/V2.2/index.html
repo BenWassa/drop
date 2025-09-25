@@ -49,8 +49,8 @@
                             <div class="domain-ring" aria-hidden="false">
                                 <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Mind score ring">
                                     <!-- background track uses same dasharray so the gap remains transparent -->
-                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
-                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--mind)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--mind)" stroke-width="6" fill="none" stroke-linecap="round"></circle>
                                 </svg>
                                 <div class="ring-center"><div class="domain-score" data-score-domain="mind">0</div></div>
                                 <div class="ring-icon-wrapper"><img src="mind.svg" alt="Mind" class="ring-icon"></div>
@@ -61,8 +61,8 @@
                         <div class="score-item fitness">
                             <div class="domain-ring" aria-hidden="false">
                                 <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Fitness score ring">
-                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
-                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--fitness)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--fitness)" stroke-width="6" fill="none" stroke-linecap="round"></circle>
                                 </svg>
                                 <div class="ring-center"><div class="domain-score" data-score-domain="fitness">0</div></div>
                                 <div class="ring-icon-wrapper"><img src="fitness.svg" alt="Fitness" class="ring-icon"></div>
@@ -73,8 +73,8 @@
                         <div class="score-item sleep">
                             <div class="domain-ring" aria-hidden="false">
                                 <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Sleep score ring">
-                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
-                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--sleep)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--sleep)" stroke-width="6" fill="none" stroke-linecap="round"></circle>
                                 </svg>
                                 <div class="ring-center"><div class="domain-score" data-score-domain="sleep">0</div></div>
                                 <div class="ring-icon-wrapper"><img src="sleep.svg" alt="Sleep" class="ring-icon"></div>
@@ -85,8 +85,8 @@
                         <div class="score-item spirit">
                             <div class="domain-ring" aria-hidden="false">
                                 <svg viewBox="0 0 100 100" class="score-ring" role="img" aria-label="Spirit score ring">
-                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
-                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--spirit)" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="230.38 46.08" stroke-dashoffset="0"></circle>
+                                    <circle cx="50" cy="50" r="44" stroke="rgba(255,255,255,0.06)" stroke-width="6" fill="none"></circle>
+                                    <circle class="progress-arc" cx="50" cy="50" r="44" stroke="var(--spirit)" stroke-width="6" fill="none" stroke-linecap="round"></circle>
                                 </svg>
                                 <div class="ring-center"><div class="domain-score" data-score-domain="spirit">0</div></div>
                                 <div class="ring-icon-wrapper"><img src="spirit.svg" alt="Spirit" class="ring-icon"></div>
@@ -237,6 +237,11 @@
             updateAllDomainScores();
             updateOverallDisciplineScore();
             updateWeekProgressBar(); // Call this initially
+            // Ensure SVGs have rendered and CSS sizing applied before computing arc geometry
+            requestAnimationFrame(() => {
+                // A second pass after layout to ensure getBoundingClientRect() returns correct sizes
+                updateAllDomainScores();
+            });
         }
 
         function setupEventListeners() {
@@ -298,22 +303,48 @@
                 if (el) el.textContent = `${percentage}`;
             });
 
-            // Update SVG arc: compute stroke-dashoffset to show proportion while keeping gap (~1/6th of circumference)
+            // Update SVG arc: compute stroke-dasharray & stroke-dashoffset dynamically from the circle's radius
             // Prefer the new score-item arc, fallback to orb-quadrant arc
             let arc = document.querySelector(`.score-item.${domain} .progress-arc`);
             if (!arc) arc = document.querySelector(`.orb-quadrant.${domain} .progress-arc`);
             if (arc) {
-                // Circumference of circle r=44 => 2πr
-                const r = 44;
-                const circ = 2 * Math.PI * r; // ~276.46
-                // We used stroke-dasharray="230.38 46.08" which sums to ~276.46
-                // The visible portion should be percentage of the visible segment (230.38)
-                const visibleLen = 230.38;
-                const gapLen = circ - visibleLen; // ~46.08
-                const filled = (percentage / 100) * visibleLen;
-                // stroke-dashoffset should move the arc so that filled portion appears from the start; invert for SVG rotation
-                const dashOffset = visibleLen - filled;
-                arc.style.strokeDashoffset = dashOffset;
+                try {
+                    // Use the rendered size (pixels) so CSS scaling of the SVG via --domain-ring-size is respected.
+                    const bbox = arc.getBoundingClientRect();
+                    let circ;
+                    if (bbox && bbox.width > 0) {
+                        const radiusPx = bbox.width / 2; // rendered radius in px
+                        circ = 2 * Math.PI * radiusPx;
+                    } else {
+                        // Fallback to attribute-based (SVG user units)
+                        const r = parseFloat(arc.getAttribute('r')) || 44;
+                        circ = 2 * Math.PI * r;
+                    }
+
+                    // Keep the same visible fraction as before (5/6 visible, 1/6 gap)
+                    const visibleFraction = 5 / 6;
+                    const visibleLen = circ * visibleFraction;
+                    const gapLen = Math.max(0, circ - visibleLen);
+
+                    // Apply dasharray to both the progress arc and the background track so the gap stays transparent
+                    // Use style properties so values are in CSS px and match rendered lengths
+                    arc.style.strokeDasharray = `${visibleLen.toFixed(2)} ${gapLen.toFixed(2)}`;
+                    const track = arc.parentElement.querySelector('circle:not(.progress-arc)');
+                    if (track) track.style.strokeDasharray = `${visibleLen.toFixed(2)} ${gapLen.toFixed(2)}`;
+
+                    // Compute filled length for the visible segment and set dashoffset so arc shows correctly
+                    const filled = (percentage / 100) * visibleLen;
+                    const dashOffset = (visibleLen - filled).toFixed(2);
+                    arc.style.strokeDashoffset = `${dashOffset}`;
+                } catch (e) {
+                    // Fallback to legacy constants if anything goes wrong
+                    const r = 44;
+                    const circ = 2 * Math.PI * r;
+                    const visibleLen = 230.38;
+                    const filled = (percentage / 100) * visibleLen;
+                    const dashOffset = visibleLen - filled;
+                    arc.setAttribute('stroke-dashoffset', dashOffset);
+                }
             }
         }
 
