@@ -220,10 +220,10 @@ body.details-visible .orb-container {
 .orb-quadrant:nth-child(4) { border-radius: 0 0 100% 0; } /* Spirit (bottom-right) */
 
 /* Specific quadrant colors */
-.orb-quadrant.mind { background-color: rgba(124, 58, 237, 0.4); } /* Using direct rgba for better blur blending */
-.orb-quadrant.fitness { background-color: rgba(255, 59, 48, 0.4); }
-.orb-quadrant.sleep { background-color: rgba(30, 144, 255, 0.4); }
-.orb-quadrant.spirit { background-color: rgba(22, 163, 74, 0.4); }
+.orb-quadrant.mind { --accent: var(--mind); }
+.orb-quadrant.fitness { --accent: var(--fitness); }
+.orb-quadrant.sleep { --accent: var(--sleep); }
+.orb-quadrant.spirit { --accent: var(--spirit); }
 
 .orb-quadrant .domain-icon {
     width: 48px;
@@ -234,8 +234,8 @@ body.details-visible .orb-container {
 
 /* --- Domain ring styles (SVG ring with a bottom gap and bottom-positioned icon) --- */
 .domain-ring {
-    width: 120px;
-    height: 120px;
+    width: 64px;
+    height: 64px;
     position: relative;
     display: inline-block;
 }
@@ -268,8 +268,8 @@ body.details-visible .orb-container {
 
 .ring-center .domain-score {
     font-family: var(--font-mono);
-    font-size: 22px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 700;
     color: var(--text-primary);
 }
 
@@ -277,19 +277,19 @@ body.details-visible .orb-container {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    bottom: -12px; /* sits in the SVG gap area */
-    width: 46px;
-    height: 46px;
+    bottom: -8px; /* sits in the SVG gap area */
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg-panel);
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.32);
 }
 
-.ring-icon { width: 28px; height: 28px; display: block; }
+.ring-icon { width: 20px; height: 20px; display: block; }
 
 .domain-name {
     margin-top: 14px;
@@ -301,8 +301,24 @@ body.details-visible .orb-container {
 }
 
 /* Adjust sizes to fit the 280px orb container while keeping mobile-first layout */
-.orb { gap: 6px; }
-.orb-quadrant { padding: 8px; }
+.orb { gap: 8px; }
+
+.orb-quadrant { padding: 14px; border-radius: 12px; background: rgba(6,8,12,0.8); border: 1px solid rgba(255,255,255,0.04); position: relative; }
+
+/* Accent bar to indicate domain color without tinting the icon artwork */
+.orb-quadrant::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background: linear-gradient(90deg, var(--accent), rgba(255,255,255,0.06));
+}
+
+.orb-quadrant .domain-icon { width: 44px; height: 44px; }
 
 /* Desktop scaling: keep slightly larger rings inside orb on wide screens */
 @media (min-width: 420px) {
@@ -320,18 +336,22 @@ body.details-visible .orb-container {
 }
 
 .scores-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    display: flex;
+    gap: 6px;
     width: 100%;
     max-width: 320px;
-    justify-items: center;
+    justify-content: center;
+    align-items: center;
+    /* avoid wrapping or scroll; items will shrink if needed */
+    flex-wrap: nowrap;
 }
 
 .score-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    flex: 1 1 60px; /* allow shrinking, but provide a comfortable minimum */
+    max-width: 76px;
 }
 
 /* On smaller screens, reduce grid to two columns to prevent crowding */
