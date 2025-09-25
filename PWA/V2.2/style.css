@@ -1,0 +1,517 @@
+/* style.css */
+
+/* 1. SETUP & THEME VARIABLES */
+:root {
+    --bg-top: #0f172a;
+    --bg-bottom: #050608;
+    --bg-highlight: rgba(148, 163, 184, 0.18); /* For interactive elements */
+    --bg-panel: rgba(15, 23, 42, 0.65); /* Glassmorphic panel background */
+    --bg-surface: rgba(11, 15, 25, 0.6); /* Slightly darker glassmorphic elements */
+    --border-subtle: rgba(148, 163, 184, 0.25);
+    --border-strong: rgba(148, 163, 184, 0.5);
+    --shadow-elevated: 0 18px 38px rgba(2, 6, 23, 0.45);
+    --text-primary: #f8fafc; /* Lighter text for dark backgrounds */
+    --text-secondary: #cbd5f5; /* Slightly muted primary text */
+    --text-muted: #7c8ca6; /* For hints, labels */
+    --font-sans: 'Inter', 'SF Pro Display', 'Segoe UI', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Mono', 'SFMono-Regular', monospace;
+
+    --sleep: #1e90ff; /* Blue */
+    --fitness: #ff3b30; /* Red */
+    --mind: #7c3aed; /* Purple */
+    --spirit: #16a34a; /* Green */
+    
+    --transition-fast: 0.2s ease-out;
+    --transition-medium: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition-slow: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Base styles for the Pixel 8 viewport */
+html {
+    height: 100%;
+    /* This ensures a consistent viewport height for the Pixel 8 design */
+    /* On devices with different aspect ratios, this might lead to letterboxing, 
+       but for the design canvas (360x800), it's precise. */
+    min-height: 800px; 
+}
+
+body {
+    font-family: var(--font-sans);
+    background: linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+    color: var(--text-primary);
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* For iOS Safari */
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex; /* For app-container centering on larger screens */
+    justify-content: center;
+    align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 2. LAYOUT & SCREEN MANAGEMENT */
+.app-container {
+    width: 360px; /* Target width for Pixel 8 design */
+    height: 800px; /* Target height for Pixel 8 design */
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: var(--shadow-elevated);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-top); /* Fallback */
+}
+
+.screen {
+    display: none;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 0 24px;
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity var(--transition-medium), transform var(--transition-medium);
+    overflow: auto; /* Allow scrolling for content */
+    -webkit-overflow-scrolling: touch;
+}
+
+.screen.active {
+    display: flex;
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Header for all screens */
+.header {
+    padding-top: 32px; /* Adjusted for aesthetic spacing */
+    padding-bottom: 24px;
+    text-align: center;
+}
+
+.header .date-info {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 8px;
+}
+.header .date-text {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 8px;
+    letter-spacing: -0.5px;
+}
+
+/* Week Progress Bar */
+.week-progress-container {
+    margin-top: 24px;
+    background: var(--bg-panel);
+    border-radius: 12px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.week-progress-bar {
+    position: relative;
+    width: 100%;
+    height: 8px;
+    background: var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.week-progress-bar .progress-fill {
+    height: 100%;
+    width: 0%; /* JS updates this */
+    background: linear-gradient(90deg, #60a5fa, var(--sleep));
+    border-radius: 4px;
+    transition: width var(--transition-medium);
+}
+
+.quarter-marker {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: var(--bg-top); /* Darker line on the progress bar */
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* Overall Score Section */
+.overall-score-section {
+    margin-top: 24px;
+    padding: 0 24px; /* Maintain container padding */
+    text-align: center;
+}
+
+.score-card {
+    background: var(--bg-panel);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.score-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overall-score {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+
+/* 3. ORB - Interactive Domain Selection */
+.orb-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 40px; /* Space for nav */
+    transition: filter var(--transition-slow), opacity var(--transition-slow), transform var(--transition-slow);
+}
+
+.orb {
+    width: 280px; /* Slightly smaller to provide more negative space */
+    height: 280px;
+    position: relative;
+    border-radius: 50%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 4px; /* Smaller gap for a tighter look */
+    transform-style: preserve-3d;
+}
+
+/* When a details panel is active, shrink/blur the orb */
+body.details-visible .orb-container {
+    filter: blur(8px);
+    opacity: 0.6;
+    transform: scale(0.9);
+    pointer-events: none; /* Disable interaction with the orb when details are open */
+}
+
+.orb-quadrant {
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    transition: transform var(--transition-medium), opacity var(--transition-medium);
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    will-change: transform, opacity;
+}
+
+.orb-quadrant:hover {
+    transform: scale(1.05);
+    z-index: 5;
+}
+
+.orb-quadrant:nth-child(1) { border-radius: 100% 0 0 0; } /* Mind (top-left) */
+.orb-quadrant:nth-child(2) { border-radius: 0 100% 0 0; } /* Fitness (top-right) */
+.orb-quadrant:nth-child(3) { border-radius: 0 0 0 100%; } /* Sleep (bottom-left) */
+.orb-quadrant:nth-child(4) { border-radius: 0 0 100% 0; } /* Spirit (bottom-right) */
+
+/* Specific quadrant colors */
+.orb-quadrant.mind { background-color: rgba(124, 58, 237, 0.4); } /* Using direct rgba for better blur blending */
+.orb-quadrant.fitness { background-color: rgba(255, 59, 48, 0.4); }
+.orb-quadrant.sleep { background-color: rgba(30, 144, 255, 0.4); }
+.orb-quadrant.spirit { background-color: rgba(22, 163, 74, 0.4); }
+
+.orb-quadrant .domain-icon {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));
+    transition: transform var(--transition-medium), opacity var(--transition-medium);
+}
+
+.quadrant-content {
+    text-align: center;
+    margin-top: 12px;
+    transition: opacity var(--transition-medium);
+}
+
+.quadrant-content h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.domain-score {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* 4. DOMAIN DETAILS PANELS - Dynamic Expansion */
+.domain-details {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-panel); /* Darker panel background for details */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transform: translateY(100%); /* Hidden by default */
+    transition: transform var(--transition-medium);
+    z-index: 200;
+    padding: 0 24px;
+    visibility: hidden;
+    display: flex; /* Use flex to manage inner content */
+    flex-direction: column;
+}
+
+.domain-details.active {
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.domain-details .details-header {
+    display: flex;
+    align-items: center;
+    padding-top: 32px;
+    padding-bottom: 24px;
+    position: sticky;
+    top: 0;
+    background: transparent; /* Allows blur to show through */
+    z-index: 10;
+}
+
+.domain-details .back-btn {
+    background: var(--bg-highlight);
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast);
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+
+.domain-details .back-btn:hover {
+    background: rgba(148, 163, 184, 0.25);
+}
+
+.domain-details .back-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-primary);
+}
+
+.domain-details .details-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    flex-grow: 1;
+    text-align: left;
+    color: var(--text-primary); /* Default title color */
+}
+
+/* Domain-specific title colors */
+.mind-details .details-title { color: var(--mind); }
+.fitness-details .details-title { color: var(--fitness); }
+.sleep-details .details-title { color: var(--sleep); }
+.spirit-details .details-title { color: var(--spirit); }
+
+.practices-list {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px; /* Breathing room */
+    overflow-y: auto; /* Allow scrolling for practices list */
+    -webkit-overflow-scrolling: touch;
+}
+
+.practice-item {
+    display: flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.practice-item:hover {
+    background: rgba(11, 15, 25, 0.8);
+}
+
+.practice-item input[type="checkbox"] {
+    display: none;
+}
+
+.custom-checkbox {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--border-strong);
+    border-radius: 8px; /* Square checkboxes */
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 16px;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+    background-color: transparent;
+}
+
+.custom-checkbox svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-primary);
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Checkbox active state - uses domain color */
+.practice-item input:checked + .custom-checkbox {
+    background-color: var(--domain-color);
+    border-color: var(--domain-color);
+}
+.practice-item input:checked + .custom-checkbox svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Domain-specific checkbox colors */
+.practice-item:has(input[data-domain="mind"]) { --domain-color: var(--mind); }
+.practice-item:has(input[data-domain="fitness"]) { --domain-color: var(--fitness); }
+.practice-item:has(input[data-domain="sleep"]) { --domain-color: var(--sleep); }
+.practice-item:has(input[data-domain="spirit"]) { --domain-color: var(--spirit); }
+
+
+.practice-item span {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color var(--transition-fast), text-decoration var(--transition-fast);
+}
+
+.practice-item input:checked ~ span {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+
+/* 5. BOTTOM NAVIGATION */
+.bottom-nav {
+    position: sticky; /* Sticky to stay at bottom of app-container */
+    bottom: 0;
+    width: 100%;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    height: 72px; /* Adjusted height */
+    padding-bottom: env(safe-area-inset-bottom);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 250; /* Ensure nav is above other elements */
+    flex-shrink: 0; /* Prevent it from shrinking in flex context */
+}
+
+.nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 10px; /* Smaller text for nav */
+    font-weight: 500;
+    gap: 4px;
+    transition: color var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-btn svg {
+    width: 22px; /* Slightly smaller icons */
+    height: 22px;
+    stroke: var(--text-muted);
+    transition: stroke var(--transition-fast), transform var(--transition-fast);
+}
+
+.nav-btn.active {
+    color: var(--text-primary);
+}
+
+.nav-btn.active svg {
+    stroke: var(--text-primary);
+    transform: translateY(-2px); /* Subtle bounce effect */
+}
+
+.nav-btn:hover {
+    color: var(--text-secondary);
+}
+.nav-btn:hover svg {
+    stroke: var(--text-secondary);
+}
+
+/* 6. PLACEHOLDER CONTENT */
+.placeholder {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px;
+}
+.placeholder p {
+    max-width: 250px;
+}
