@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#06070a">
+    <meta name="description" content="Discipline Dashboard - Track daily habits">
+    <title>Drop - Discipline Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Today Screen -->
+        <div id="screen-today" class="screen active">
+            <header class="header">
+                <h1>TODAY</h1>
+                <div class="date">SEP 25</div>
+            </header>
+            
+            <main class="main">
+                <div class="orb-container">
+                    <div class="orb">
+                        <div class="orb-quadrant" data-domain-target="mind">
+                            <div class="quadrant-content">
+                                <h2>MIND</h2>
+                                <div class="domain-score" data-score-domain="mind">0/2</div>
+                            </div>
+                        </div>
+                        <div class="orb-quadrant" data-domain-target="fitness">
+                             <div class="quadrant-content">
+                                <h2>FITNESS</h2>
+                                <div class="domain-score" data-score-domain="fitness">0/3</div>
+                            </div>
+                        </div>
+                        <div class="orb-quadrant" data-domain-target="sleep">
+                             <div class="quadrant-content">
+                                <h2>SLEEP</h2>
+                                <div class="domain-score" data-score-domain="sleep">0/2</div>
+                            </div>
+                        </div>
+                        <div class="orb-quadrant" data-domain-target="spirit">
+                             <div class="quadrant-content">
+                                <h2>SPIRIT</h2>
+                                <div class="domain-score" data-score-domain="spirit">0/2</div>
+                            </div>
+                        </div>
+                        <div class="orb-center">
+                            <div class="total-score">0</div>
+                            <div class="total-score-label">COMPLETED</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domain Details Panels -->
+                <div id="mind-details" class="domain-details">
+                    <header class="details-header">
+                        <button class="back-btn" data-domain-target="mind">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <h1 class="details-title">MIND</h1>
+                    </header>
+                    <div class="practices-list">
+                        <label class="practice-item">
+                            <input type="checkbox" data-domain="mind" data-aspect="read">
+                            <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                            <span>Read</span>
+                        </label>
+                         <label class="practice-item">
+                            <input type="checkbox" data-domain="mind" data-aspect="write">
+                            <div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                            <span>Write</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="fitness-details" class="domain-details">
+                     <header class="details-header">
+                        <button class="back-btn" data-domain-target="fitness">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <h1 class="details-title">FITNESS</h1>
+                    </header>
+                    <div class="practices-list">
+                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="run"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Run</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="strength"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Strength</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="fitness" data-aspect="skill"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Skill</span></label>
+                    </div>
+                </div>
+
+                <div id="sleep-details" class="domain-details">
+                     <header class="details-header">
+                        <button class="back-btn" data-domain-target="sleep">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <h1 class="details-title">SLEEP</h1>
+                    </header>
+                    <div class="practices-list">
+                         <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="wake"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Wake</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="sleep" data-aspect="rest"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Rest</span></label>
+                    </div>
+                </div>
+
+                 <div id="spirit-details" class="domain-details">
+                     <header class="details-header">
+                        <button class="back-btn" data-domain-target="spirit">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <h1 class="details-title">SPIRIT</h1>
+                    </header>
+                    <div class="practices-list">
+                         <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="stress"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Stress</span></label>
+                         <label class="practice-item"><input type="checkbox" data-domain="spirit" data-aspect="meditation"><div class="custom-checkbox"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div><span>Meditation</span></label>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Other Screens -->
+        <div id="screen-week" class="screen"><header class="header"><h1>WEEK</h1></header><div class="placeholder"><p>Weekly view coming soon.</p></div></div>
+        <div id="screen-settings" class="screen"><header class="header"><h1>SETTINGS</h1></header><div class="placeholder"><p>Settings coming soon.</p></div></div>
+        <div id="screen-about" class="screen"><header class="header"><h1>ABOUT</h1></header><div class="placeholder"><p>About coming soon.</p></div></div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-screen="today">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span>Today</span>
+            </button>
+            <button class="nav-btn" data-screen="week">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/></svg>
+                <span>Week</span>
+            </button>
+            <button class="nav-btn" data-screen="settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>Settings</span>
+            </button>
+             <button class="nav-btn" data-screen="about">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span>About</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // --- CORE LOGIC (UNCHANGED) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed'));
+            });
+        }
+        const PRACTICES = {
+            sleep: ['wake', 'rest'],
+            fitness: ['run', 'strength', 'skill'],
+            mind: ['read', 'write'],
+            spirit: ['stress', 'meditation']
+        };
+        let currentData = { date: '', practices: {} };
+
+        // --- UI & INTERACTION LOGIC ---
+        
+        function initApp() {
+            updateDate();
+            loadData();
+            setupEventListeners();
+            updateAllDomainScores();
+            updateTotalScore();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', e => switchScreen(e.currentTarget.dataset.screen)));
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.addEventListener('change', e => togglePractice(e.target.dataset.domain, e.target.dataset.aspect)));
+            document.querySelectorAll('.orb-quadrant').forEach(q => q.addEventListener('click', e => showDomainDetails(e.currentTarget.dataset.domainTarget)));
+            document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', e => hideDomainDetails(e.currentTarget.dataset.domainTarget)));
+        }
+
+        function switchScreen(screenName) {
+            document.querySelectorAll('.screen.active').forEach(s => s.classList.remove('active'));
+            document.getElementById(`screen-${screenName}`).classList.add('active');
+            document.querySelectorAll('.nav-btn.active').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
+        }
+
+        function showDomainDetails(domain) {
+            document.body.classList.add('details-visible');
+            document.getElementById(`${domain}-details`).classList.add('active');
+        }
+
+        function hideDomainDetails(domain) {
+            document.body.classList.remove('details-visible');
+            document.getElementById(`${domain}-details`).classList.remove('active');
+        }
+
+        function togglePractice(domain, aspect) {
+            const practiceKey = `${domain}-${aspect}`;
+            const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
+            currentData.practices[practiceKey] = checkbox.checked;
+            updateDomainScore(domain);
+            updateTotalScore();
+            saveData();
+        }
+        
+        function updateDomainScore(domain) {
+            const completed = PRACTICES[domain].filter(aspect => currentData.practices[`${domain}-${aspect}`]).length;
+            const total = PRACTICES[domain].length;
+            const scoreElement = document.querySelector(`[data-score-domain="${domain}"]`);
+            if (scoreElement) scoreElement.textContent = `${completed}/${total}`;
+        }
+
+        function updateTotalScore() {
+            let totalCompleted = 0;
+            Object.values(currentData.practices).forEach(isDone => {
+                if (isDone) totalCompleted++;
+            });
+            const scoreElement = document.querySelector('.total-score');
+            if (scoreElement) scoreElement.textContent = totalCompleted;
+        }
+
+        function updateAllDomainScores() {
+            Object.keys(PRACTICES).forEach(domain => updateDomainScore(domain));
+        }
+
+        function saveData() {
+            try { localStorage.setItem('drop-data', JSON.stringify(currentData)); } 
+            catch (e) { console.error('Save failed'); }
+        }
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('drop-data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.date === getTodayString()) {
+                        currentData = data;
+                        restoreUIState();
+                    } else { initTodayData(); }
+                } else { initTodayData(); }
+            } catch (e) { initTodayData(); }
+        }
+
+        function initTodayData() {
+            currentData = { date: getTodayString(), practices: {} };
+            Object.keys(PRACTICES).forEach(domain => {
+                PRACTICES[domain].forEach(aspect => {
+                    currentData.practices[`${domain}-${aspect}`] = false;
+                });
+            });
+            saveData();
+        }
+
+        function restoreUIState() {
+            Object.keys(currentData.practices).forEach(key => {
+                const [domain, aspect] = key.split('-');
+                const checkbox = document.querySelector(`[data-domain="${domain}"][data-aspect="${aspect}"]`);
+                if (checkbox) checkbox.checked = currentData.practices[key];
+            });
+        }
+
+        function updateDate() {
+            const dateElement = document.querySelector('.date');
+            if (dateElement) {
+                const today = new Date();
+                const options = { month: 'short', day: 'numeric' };
+                dateElement.textContent = today.toLocaleDateString('en-US', options).toUpperCase();
+            }
+        }
+
+        function getTodayString() { return new Date().toISOString().split('T')[0]; }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
