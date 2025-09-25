@@ -234,8 +234,10 @@ body {
     max-width: 320px; /* cap so it doesn't get huge on very wide screens inside the app frame */
     aspect-ratio: 1 / 1; /* keep a square */
     height: auto;
-    gap: 8px;
     margin: 0 auto; /* center within the card */
+    border-radius: 50%;
+    overflow: hidden; /* clip children so the orb appears round */
+    background: var(--bg-surface);
 }
 .data-entry-card .orb-quadrant { padding: 12px; }
 
@@ -246,7 +248,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 4px; /* Smaller gap for a tighter look */
+    gap: 0; /* remove gaps so quadrants form a continuous circle */
     transform-style: preserve-3d;
 }
 
@@ -257,7 +259,6 @@ body.details-visible .orb-container {
     transform: scale(0.9);
     pointer-events: none; /* Disable interaction with the orb when details are open */
 }
-
 .orb-quadrant {
     position: relative;
     cursor: pointer;
@@ -266,17 +267,19 @@ body.details-visible .orb-container {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    transition: transform var(--transition-medium), opacity var(--transition-medium);
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-surface);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    padding: 12px; /* tightened padding for compact layout */
+    transition: transform var(--transition-medium), opacity var(--transition-medium), box-shadow var(--transition-fast);
+    /* remove square chrome so quadrants don't show corners outside the circle */
+    border: none;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
     will-change: transform, opacity;
+    border-radius: 0;
 }
 
 .orb-quadrant:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
     z-index: 5;
 }
 
@@ -292,10 +295,31 @@ body.details-visible .orb-container {
 .orb-quadrant.spirit { --accent: var(--spirit); }
 
 .orb-quadrant .domain-icon {
-    width: 48px;
-    height: 48px;
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.2));
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.12));
     transition: transform var(--transition-medium), opacity var(--transition-medium);
+}
+
+/* Numeric score inside each quadrant */
+.quadrant-score {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.25);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+/* Keyboard focus styles for accessibility */
+.orb-quadrant:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.12); /* subtle purple focus ring */
+    transform: translateY(-2px);
 }
 
 /* --- Domain ring styles (SVG ring with a bottom gap and bottom-positioned icon) --- */
@@ -372,12 +396,12 @@ body.details-visible .orb-container {
     text-transform: uppercase;
 }
 
-/* Adjust sizes to fit the 280px orb container while keeping mobile-first layout */
-.orb { gap: 8px; }
+/* Ensure quadrants fill the circular orb seamlessly */
+.orb { gap: 0; }
 
-.orb-quadrant { padding: 14px; border-radius: 12px; background: rgba(6,8,12,0.8); border: 1px solid rgba(255,255,255,0.04); position: relative; }
+.orb-quadrant { padding: 12px; position: relative; background: transparent; border: none; }
 
-/* Accent bar to indicate domain color without tinting the icon artwork */
+/* Accent bar to indicate domain color without tinting the icon artwork - drawn as an overlay */
 .orb-quadrant::before {
     content: '';
     position: absolute;
@@ -385,12 +409,10 @@ body.details-visible .orb-container {
     left: 0;
     right: 0;
     height: 4px;
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
     background: linear-gradient(90deg, var(--accent), rgba(255,255,255,0.06));
 }
 
-.orb-quadrant .domain-icon { width: 44px; height: 44px; }
+.orb-quadrant .domain-icon { width: 40px; height: 40px; }
 
 /* Desktop scaling: keep slightly larger rings inside orb on very wide screens.
    NOTE: this media query previously used 420px which can override manual edits
@@ -437,14 +459,14 @@ body.details-visible .orb-container {
 
 .quadrant-content {
     text-align: center;
-    margin-top: 12px;
+    margin-top: 8px; /* reduce top margin to pack content */
     transition: opacity var(--transition-medium);
 }
 
 .quadrant-content h2 {
-    font-size: 14px;
+    font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     font-weight: 600;
     color: var(--text-primary);
 }
