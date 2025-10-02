@@ -9,15 +9,15 @@
   "background_color": "#050608",
   "icons": [
     {
-      "src": "mind.svg",
+      "src": "../images/drop_colourized.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "mind.svg",
+      "src": "../images/drop_colourized.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],

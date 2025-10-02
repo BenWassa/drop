@@ -7,7 +7,8 @@ const CACHE_FILES = [
   '/mind.svg',
   '/fitness.svg',
   '/sleep.svg',
-  '/spirit.svg'
+  '/spirit.svg',
+  '/images/drop_colourized.png'
 ];
 
 // Install service worker
