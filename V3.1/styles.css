@@ -1,7 +1,7 @@
 /* === DESIGN SYSTEM & SETUP === */
 :root {
-  --font-sans: -apple-system, BlinkMacSystem-Font, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  --font-sans: 'Ubuntu', -apple-system, BlinkMacSystem-Font, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Wix Madefor Display', 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
 
   --color-bg: #0B0B0F;
   --color-bg-gradient-start: #1C1C21;
@@ -72,6 +72,10 @@ body {
 .scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .score-item { text-align: center; }
 .score-icon { width: 20px; height: 20px; margin: 0 auto 6px; color: var(--color-text-tertiary); display: block; opacity: 0.8; }
+img.score-icon[src*="sleep.svg"] { filter: invert(20%) sepia(96%) saturate(7451%) hue-rotate(190deg) brightness(104%) contrast(105%); }
+img.score-icon[src*="fitness.svg"] { filter: invert(27%) sepia(96%) saturate(7451%) hue-rotate(356deg) brightness(104%) contrast(105%); }
+img.score-icon[src*="mind.svg"] { filter: invert(26%) sepia(96%) saturate(7451%) hue-rotate(258deg) brightness(104%) contrast(105%); }
+img.score-icon[src*="spirit.svg"] { filter: invert(34%) sepia(96%) saturate(7451%) hue-rotate(87deg) brightness(104%) contrast(105%); }
 .score-name { font-size: 11px; color: var(--color-text-tertiary); font-weight: 500; }
 .score-value { font-size: 18px; font-weight: 600; margin-top: 4px; color: var(--color-text-primary); font-family: var(--font-mono); }
 
@@ -103,7 +107,7 @@ body {
 }
 
 /* === FOOTER NAVIGATION === */
-.bottom-nav { display: flex; justify-content: space-around; }
+.bottom-nav { display: flex; justify-content: space-around; height: 80px; }
 .nav-btn {
   background: transparent;
   border: none;
@@ -114,13 +118,16 @@ body {
   align-items: center;
   gap: 4px;
   transition: var(--transition-fast);
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-md);
 }
 .nav-btn:hover { background: var(--color-surface-2); }
-.nav-btn.active { color: var(--color-primary); }
-.nav-icon { width: 24px; height: 24px; display: block; }
-.nav-label { font-size: 11px; font-weight: 500; }
+.nav-btn.active { color: var(--color-primary); background: var(--color-surface-1); }
+.nav-icon { width: 28px; height: 28px; display: block; }
+img.nav-icon[src*="vision.svg"] { filter: invert(27%) sepia(96%) saturate(7451%) hue-rotate(356deg) brightness(104%) contrast(105%); }
+img.nav-icon[src*="gratitude.svg"] { filter: invert(26%) sepia(96%) saturate(7451%) hue-rotate(258deg) brightness(104%) contrast(105%); }
+img.nav-icon[src*="drop_icon.svg"] { filter: invert(37%) sepia(96%) saturate(7451%) hue-rotate(210deg) brightness(104%) contrast(105%); }
+.nav-label { font-size: 12px; font-weight: 500; }
 
 /* === OVERLAY / MODAL === */
 .overlay {
