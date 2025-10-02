@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Store.init();
       UI.initDate();
       // Show a brief loading frame so the app feels intentional on startup
-      const minLoadMs = 55500; // minimum visible time for loading overlay
+      const minLoadMs = 5000; // minimum visible time for loading overlay
       const start = Date.now();
       UI.showLoading(true);
       this.updateScores();

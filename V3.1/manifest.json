@@ -14,5 +14,11 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
+    ,
+    {
+      "src": "icons/drop_rounded.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
