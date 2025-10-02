@@ -112,26 +112,43 @@ body {
 }
 
 /* === MAIN GRID & CARDS === */
-.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 360px; }
+.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; max-width: 420px; }
 .card {
   background: linear-gradient(145deg, #1f1f24, #18181c);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: 24px;
+  padding: 32px 24px;
   text-align: center;
   cursor: pointer;
   transition: var(--transition-slow);
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 180px;
 }
 .card:hover { transform: translateY(-4px); border-color: var(--color-border-hover); box-shadow: var(--shadow-lg); }
 .card:active { transform: scale(0.97) translateY(-2px); box-shadow: var(--shadow-sm); }
-.card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--color-text-tertiary); letter-spacing: 1px; margin-bottom: 12px; }
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+.card[data-domain="sleep"] .card-icon { filter: invert(20%) sepia(96%) saturate(7451%) hue-rotate(190deg) brightness(104%) contrast(105%); }
+.card[data-domain="fitness"] .card-icon { filter: invert(27%) sepia(96%) saturate(7451%) hue-rotate(356deg) brightness(104%) contrast(105%); }
+.card[data-domain="mind"] .card-icon { filter: invert(26%) sepia(96%) saturate(7451%) hue-rotate(258deg) brightness(104%) contrast(105%); }
+.card[data-domain="spirit"] .card-icon { filter: invert(34%) sepia(96%) saturate(7451%) hue-rotate(87deg) brightness(104%) contrast(105%); }
+
+.card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--color-text-tertiary); letter-spacing: 1px; }
 .card-score {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 700;
   line-height: 1;
+  font-family: var(--font-mono);
   background: linear-gradient(135deg, #ffffff 30%, #a0aec0 100%);
   background-clip: text;
   -webkit-background-clip: text;
