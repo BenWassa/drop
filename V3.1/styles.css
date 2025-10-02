@@ -69,15 +69,58 @@ body {
 
 /* === HEADER === */
 .date { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 16px; font-weight: 500; }
-.scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.score-item { text-align: center; }
-.score-icon { width: 20px; height: 20px; margin: 0 auto 6px; color: var(--color-text-tertiary); display: block; opacity: 0.8; }
+.scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 0 8px; }
+.score-item { 
+  text-align: center; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.score-item:nth-child(1) .score-circle { border-color: var(--sleep); }
+.score-item:nth-child(2) .score-circle { border-color: var(--fitness); }
+.score-item:nth-child(3) .score-circle { border-color: var(--mind); }
+.score-item:nth-child(4) .score-circle { border-color: var(--spirit); }
+
+.score-value { 
+  font-size: 32px; 
+  font-weight: 600; 
+  color: var(--color-text-primary); 
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+
+.score-icon { 
+  width: 36px; 
+  height: 36px; 
+  display: block; 
+  margin-top: -4px;
+}
 img.score-icon[src*="sleep.svg"] { filter: invert(20%) sepia(96%) saturate(7451%) hue-rotate(190deg) brightness(104%) contrast(105%); }
 img.score-icon[src*="fitness.svg"] { filter: invert(27%) sepia(96%) saturate(7451%) hue-rotate(356deg) brightness(104%) contrast(105%); }
 img.score-icon[src*="mind.svg"] { filter: invert(26%) sepia(96%) saturate(7451%) hue-rotate(258deg) brightness(104%) contrast(105%); }
 img.score-icon[src*="spirit.svg"] { filter: invert(34%) sepia(96%) saturate(7451%) hue-rotate(87deg) brightness(104%) contrast(105%); }
-.score-name { font-size: 11px; color: var(--color-text-tertiary); font-weight: 500; }
-.score-value { font-size: 18px; font-weight: 600; margin-top: 4px; color: var(--color-text-primary); font-family: var(--font-mono); }
+
+.score-name { 
+  font-size: 11px; 
+  color: var(--color-text-tertiary); 
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 /* === MAIN GRID & CARDS === */
 .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 360px; }
