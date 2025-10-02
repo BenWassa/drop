@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Wix+Madefor+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <title>Life Tracker</title>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="date" id="date-display"></div>
+    <div class="scores-grid">
+      <div class="score-item">
+        <div class="score-circle">
+          <div class="score-value" id="sleep-score">99</div>
+        </div>
+        <div class="score-name">Sleep</div>
+      </div>
+      <div class="score-item">
+        <div class="score-circle">
+          <div class="score-value" id="fitness-score">99</div>
+        </div>
+        <div class="score-name">Fitness</div>
+      </div>
+      <div class="score-item">
+        <div class="score-circle">
+          <div class="score-value" id="mind-score">99</div>
+        </div>
+        <div class="score-name">Mind</div>
+      </div>
+      <div class="score-item">
+        <div class="score-circle">
+          <div class="score-value" id="spirit-score">99</div>
+        </div>
+        <div class="score-name">Spirit</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="main-grid">
+      <div class="card" data-domain="sleep">
+        <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
+        <div class="card-title">Sleep</div>
+        <div class="card-score" id="sleep-card">0</div>
+      </div>
+      <div class="card" data-domain="fitness">
+        <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
+        <div class="card-title">Fitness</div>
+        <div class="card-score" id="fitness-card">0</div>
+      </div>
+      <div class="card" data-domain="mind">
+        <img src="icons/mind.svg" class="card-icon" alt="Mind">
+        <div class="card-title">Mind</div>
+        <div class="card-score" id="mind-card">0</div>
+      </div>
+      <div class="card" data-domain="spirit">
+        <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
+        <div class="card-title">Spirit</div>
+        <div class="card-score" id="spirit-card">0</div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <nav class="bottom-nav">
+      <button class="nav-btn" aria-label="Vision">
+        <img src="icons/vision.svg" class="nav-icon" alt="">
+        <span class="nav-label">Vision</span>
+      </button>
+      <button class="nav-btn active" aria-label="Home">
+        <img src="icons/drop_icon.svg" class="nav-icon" alt="">
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-btn" aria-label="Gratitude">
+        <img src="icons/gratitude.svg" class="nav-icon" alt="">
+        <span class="nav-label">Gratitude</span>
+      </button>
+    </nav>
+  </footer>
+  
+  <!-- Overlays -->
+  <div class="overlay" id="sleep-overlay" data-domain="sleep">
+    <div class="overlay-content-wrapper">
+      <header class="overlay-header">
+        <h2 class="overlay-title">Sleep</h2>
+        <button class="close-btn" aria-label="Close sleep overlay">&times;</button>
+      </header>
+      <div class="overlay-content">
+        <div class="input-group">
+          <label class="input-label" for="wake-time">Wake Time</label>
+          <input type="time" class="time-input" id="wake-time">
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="rest-time">Rest Time</label>
+          <input type="time" class="time-input" id="rest-time">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="fitness-overlay" data-domain="fitness">
+    <div class="overlay-content-wrapper">
+      <header class="overlay-header">
+        <h2 class="overlay-title">Fitness</h2>
+        <button class="close-btn" aria-label="Close fitness overlay">&times;</button>
+      </header>
+      <div class="overlay-content">
+        <div class="input-group">
+          <label class="input-label">Run Distance (km)</label>
+          <div class="preset-group">
+            <button class="preset-btn" data-action="adjustRun" data-delta="-5" aria-label="Decrease run distance">-</button>
+            <div class="preset-value" id="run-value">0</div>
+            <button class="preset-btn" data-action="adjustRun" data-delta="5" aria-label="Increase run distance">+</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Strength Training</label>
+          <div class="btn-group" data-type="strength">
+            <button class="btn" data-value="false">No</button>
+            <button class="btn" data-value="true">Yes</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Skill Practice</label>
+          <div class="btn-group" data-type="skill">
+            <button class="btn" data-value="false">No</button>
+            <button class="btn" data-value="true">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="overlay" id="mind-overlay" data-domain="mind">
+    <div class="overlay-content-wrapper">
+      <header class="overlay-header">
+        <h2 class="overlay-title">Mind</h2>
+        <button class="close-btn" aria-label="Close mind overlay">&times;</button>
+      </header>
+      <div class="overlay-content">
+        <div class="input-group">
+          <label class="input-label">Read Today</label>
+          <div class="btn-group" data-type="read">
+            <button class="btn" data-value="false">No</button>
+            <button class="btn" data-value="true">Yes</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Write Today</label>
+          <div class="btn-group" data-type="write">
+            <button class="btn" data-value="false">No</button>
+            <button class="btn" data-value="true">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="spirit-overlay" data-domain="spirit">
+    <div class="overlay-content-wrapper">
+      <header class="overlay-header">
+        <h2 class="overlay-title">Spirit</h2>
+        <button class="close-btn" aria-label="Close spirit overlay">&times;</button>
+      </header>
+      <div class="overlay-content">
+        <div class="input-group">
+          <label class="input-label">Mood Quadrant</label>
+          <div class="quadrant-grid" data-type="quadrant">
+            <button class="quad-btn" data-value="1">High Energy<br>Positive</button>
+            <button class="quad-btn" data-value="2">Low Energy<br>Positive</button>
+            <button class="quad-btn" data-value="3">High Energy<br>Negative</button>
+            <button class="quad-btn" data-value="4">Low Energy<br>Negative</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Meditation</label>
+          <div class="btn-group" data-type="meditation">
+            <button class="btn" data-value="false">No</button>
+            <button class="btn" data-value="true">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
