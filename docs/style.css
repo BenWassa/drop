@@ -94,6 +94,18 @@ body {
     text-align: center;
 }
 
+.app-logo-container {
+    margin-bottom: 16px;
+}
+
+.app-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+}
+
 /* Contained date card with quarter labels */
 .date-card {
     display: flex;
