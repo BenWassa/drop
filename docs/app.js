@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // === DEVELOPER MODE TOGGLE ===
+  // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
+  const DEV_MODE = false;
+
   const Store = {
     DB_KEY: 'lifeTrackerData',
     state: {},
@@ -33,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
       cards: document.querySelectorAll('.card'),
       overlays: document.querySelectorAll('.overlay'),
       navButtons: document.querySelectorAll('.nav-btn'),
+      loadingOverlay: document.getElementById('loading-overlay'),
+      devPill: document.getElementById('dev-pill'),
+      devToast: document.getElementById('dev-toast'),
       scoreDisplays: {
         sleep: { score: document.getElementById('sleep-score'), card: document.getElementById('sleep-card') },
         fitness: { score: document.getElementById('fitness-score'), card: document.getElementById('fitness-card') },
@@ -51,6 +58,22 @@ document.addEventListener('DOMContentLoaded', () => {
         this.elements.scoreDisplays[domain].score.textContent = scores[domain];
         this.elements.scoreDisplays[domain].card.textContent = scores[domain];
       }
+    },
+
+    showLoading(show = true) {
+      const el = this.elements.loadingOverlay;
+      if (!el) return;
+      if (show) el.classList.remove('hidden');
+      else el.classList.add('hidden');
+    },
+
+    toast(msg, ms = 1500) {
+      if (!DEV_MODE) return;
+      const t = this.elements.devToast;
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), ms);
     },
 
     toggleOverlay(domain, show = true) {
@@ -105,9 +128,54 @@ document.addEventListener('DOMContentLoaded', () => {
     init() {
       Store.init();
       UI.initDate();
+      // Show loading overlay with a 5s breath animation synchronized with the overlay hide
+      const animDurationMs = 5000; // matches the CSS breath animation duration
+      UI.showLoading(true);
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
+      // Apply dev mode UI if persisted
+      const dev = Store.state.devMode === true;
+      UI.setDevPill(dev);
+
+      // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
+      const logo = document.querySelector('.loading-logo');
+      let fallbackTimeout = null;
+      const hideOverlay = () => {
+        if (fallbackTimeout) clearTimeout(fallbackTimeout);
+        UI.showLoading(false);
+      };
+
+      if (logo) {
+        const onAnimEnd = (e) => {
+          if (e.animationName === 'breath') {
+            logo.removeEventListener('animationend', onAnimEnd);
+            hideOverlay();
+          }
+        };
+        logo.addEventListener('animationend', onAnimEnd);
+      }
+
+      // Fallback: ensure loading overlay hidden after animDurationMs
+      fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
+
+      // Keyboard shortcut to toggle dev mode: Ctrl+D
+      window.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+          Store.update('devMode', !Store.state.devMode);
+          UI.setDevPill(Store.state.devMode);
+          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
+        }
+      });
+
+      // Click on dev pill toggles developer mode when visible
+      if (UI.elements.devPill) {
+        UI.elements.devPill.addEventListener('click', () => {
+          Store.update('devMode', !Store.state.devMode);
+          UI.setDevPill(Store.state.devMode);
+          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
+        });
+      }
     },
 
     updateScores() {

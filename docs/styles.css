@@ -111,6 +111,102 @@ body {
   letter-spacing: 0.5px;
 }
 
+
+/* Loading overlay (enhanced) */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 40%, rgba(28,30,36,0.95), rgba(8,9,12,0.96));
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 260ms ease-in-out, visibility 260ms ease-in-out;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+.loading-frame { display: flex; align-items: center; justify-content: center; padding: 24px; }
+
+/* large circular frame with an animated ring */
+
+.loading-circle {
+  width: 320px; height: 320px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;
+    background: transparent;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+}
+
+/* circular ring removed to keep the loading frame minimal and let the PNG + word breathe */
+
+.loading-logo {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  display: block;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 14px 48px rgba(0,0,0,0.6);
+  transform: translateZ(0) scale(1);
+  transition: transform 420ms cubic-bezier(0.2,0.9,0.22,1), opacity 220ms linear;
+  will-change: transform, opacity;
+  /* single 5s breath: enlarge then shrink; hold final (exhale) state */
+  animation: breath 5000ms ease-in-out 1 forwards;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes breath {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.06); } /* inhale (grow) */
+  90% { transform: scale(0.96); } /* exhale (shrink) - near end */
+  100% { transform: scale(0.96); } /* hold at exhale */
+}
+
+/* loading word styling (synchronized with the logo breath) */
+.loading-word {
+  margin-top: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  text-transform: lowercase;
+  opacity: 0.95;
+  animation: breath 5000ms ease-in-out 1 forwards;
+  transform-origin: center center;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* Respect reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .loading-circle::before { animation: none; }
+  .loading-logo { transition: none; animation: none; }
+  .loading-word { animation: none; }
+}
+
+/* Developer UI: small pill and toast */
+.dev-pill {
+  position: fixed; right: 16px; bottom: 110px; z-index: 10001;
+  background: rgba(255,255,255,0.04); color: var(--color-text-primary);
+  padding: 8px 10px; border-radius: 10px; font-size: 12px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.03); cursor: pointer; user-select: none;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+  display: none; /* hidden by default; shown when dev mode enabled */
+}
+.dev-pill.visible { display: block; transform: translateY(0); }
+.dev-pill:hover { background: rgba(255,255,255,0.06); }
+.dev-toast {
+  position: fixed; right: 16px; bottom: 74px; z-index: 10002;
+  background: rgba(12,14,20,0.9); color: var(--color-text-primary);
+  padding: 10px 14px; border-radius: 10px; font-size: 13px; display: none;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.55);
+}
+.dev-toast.show { display: block; }
+
+/* Developer UI: small pill and toast (styling kept further down) */
+
 /* === MAIN GRID & CARDS === */
 .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; max-width: 420px; }
 .card {

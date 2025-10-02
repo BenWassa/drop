@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // === DEVELOPER MODE TOGGLE ===
+  // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
+  const DEV_MODE = false;
+
   const Store = {
     DB_KEY: 'lifeTrackerData',
     state: {},
     defaults: {
       wake: '', rest: '', run: 0, strength: false, skill: false,
-      read: false, write: false, quadrant: 0, meditation: false,
-      devMode: false
+      read: false, write: false, quadrant: 0, meditation: false
     },
     
     init() {
@@ -64,13 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
       else el.classList.add('hidden');
     },
 
-    setDevPill(enabled) {
-      const pill = this.elements.devPill;
-      if (!pill) return;
-      pill.classList.toggle('visible', enabled);
-    },
-
     toast(msg, ms = 1500) {
+      if (!DEV_MODE) return;
       const t = this.elements.devToast;
       if (!t) return;
       t.textContent = msg;
