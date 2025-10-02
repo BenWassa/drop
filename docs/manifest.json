@@ -1,9 +1,0 @@
-{
-  "name": "Discipline Dashboard",
-  "short_name": "DisciplineDash",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "description": "Performance-focused app that tracks daily execution across four life domains with clear numeric scores.",
-  "icons": []
-}
