@@ -13,7 +13,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .date { font-size: 13px; color: #94a3b8; margin-bottom: 12px; font-weight: 500; letter-spacing: 0.3px; }
 .scores { display: flex; justify-content: space-between; gap: 10px; }
 .score-item { flex: 1; text-align: center; padding: 10px 4px; background: linear-gradient(145deg, #1e1e1e, #181818); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-.score-icon { width: 22px; height: 22px; margin: 0 auto 6px; color: #60a5fa; }
+.score-icon { width: 22px; height: 22px; margin: 0 auto 6px; color: #60a5fa; display: block; }
 .score-name { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
 .score-value { font-size: 20px; font-weight: 700; margin-top: 4px; color: #f1f5f9; }
 .main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at center, #1a1a1a 0%, #0f0f0f 100%); }
@@ -27,7 +27,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .bottom-nav { display: flex; background: linear-gradient(180deg, #151515 0%, #1a1a1a 100%); border-top: 1px solid rgba(255,255,255,0.08); padding: 10px 8px 12px; backdrop-filter: blur(10px); }
 .nav-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #e4e4e7; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.2s; border-radius: 12px; }
 .nav-btn:active { background: rgba(96,165,250,0.1); }
-.nav-icon { width: 24px; height: 24px; color: #64748b; transition: color 0.2s; }
+.nav-icon { width: 24px; height: 24px; color: #64748b; transition: color 0.2s; display: block; margin: 0 auto; }
 .nav-btn.active .nav-icon { color: #60a5fa; }
 .nav-label { font-size: 10px; color: #64748b; font-weight: 500; letter-spacing: 0.3px; }
 .nav-btn.active .nav-label { color: #60a5fa; }
@@ -63,22 +63,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="date" id="date"></div>
   <div class="scores">
     <div class="score-item">
-      <svg class="score-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <img src="assets/icons/sleep.svg" class="score-icon" alt="Sleep">
       <div class="score-name">Sleep</div>
       <div class="score-value" id="sleep-score">0</div>
     </div>
     <div class="score-item">
-      <svg class="score-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4.41 4.59L5.5 13.68V21h2v-6l2.05-2.05V15h2V9.91l2.72 2.72.99.99H21v-2h-3.59l-2.5-2.5-1.91-1.91c-.39-.39-.91-.59-1.41-.59H8.41c-.5 0-1.02.2-1.41.59l-1.91 1.91z"/></svg>
+      <img src="assets/icons/fitness.svg" class="score-icon" alt="Fitness">
       <div class="score-name">Fitness</div>
       <div class="score-value" id="fitness-score">0</div>
     </div>
     <div class="score-item">
-      <svg class="score-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-11h4v6h-4z"/></svg>
+      <img src="assets/icons/mind.svg" class="score-icon" alt="Mind">
       <div class="score-name">Mind</div>
       <div class="score-value" id="mind-score">0</div>
     </div>
     <div class="score-item">
-      <svg class="score-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7-6-4.6h7.6z"/></svg>
+      <img src="assets/icons/spirit.svg" class="score-icon" alt="Spirit">
       <div class="score-name">Spirit</div>
       <div class="score-value" id="spirit-score">0</div>
     </div>
@@ -108,15 +108,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <nav class="bottom-nav">
   <button class="nav-btn">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+    <img src="assets/icons/fitness.svg" class="nav-icon" alt="Goals">
     <span class="nav-label">Goals</span>
   </button>
   <button class="nav-btn active">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <img src="assets/icons/drop_icon.svg" class="nav-icon" alt="Home">
     <span class="nav-label">Home</span>
   </button>
   <button class="nav-btn">
-    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+    <img src="assets/icons/mind.svg" class="nav-icon" alt="Results">
     <span class="nav-label">Results</span>
   </button>
 </nav>
