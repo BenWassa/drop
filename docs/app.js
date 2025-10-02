@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.addEventListener('appinstalled', () => {
         this.deferredInstallPrompt = null;
         UI.showInstallButton(false);
-        UI.toast('Life Tracker installed');
+        UI.toast('drop installed');
       });
 
       installBtn.addEventListener('click', async () => {
