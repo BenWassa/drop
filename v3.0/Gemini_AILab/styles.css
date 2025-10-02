@@ -1,0 +1,82 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+.container {
+    max-width: 412px;
+    margin: auto;
+    background-color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+.top-bar {
+    padding: 1rem;
+    background-color: #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.domain-scores { display: flex; }
+.domain-score { text-align: center; margin-left: 0.5rem; }
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    flex-grow: 1;
+}
+.card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+}
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 1rem;
+    border-top: 1px solid #ddd;
+}
+.bottom-nav button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: center;
+}
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.overlay-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 80%;
+}
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+.quadrant-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.quadrant-grid div {
+    height: 50px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+}
