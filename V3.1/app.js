@@ -130,9 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
     init() {
       Store.init();
       UI.initDate();
-      // Show a brief loading frame so the app feels intentional on startup
-      const minLoadMs = 5000; // minimum visible time for loading overlay
-      const start = Date.now();
+      // Show loading overlay with a 5s breath animation synchronized with the overlay hide
+      const animDurationMs = 5000; // matches the CSS breath animation duration
       UI.showLoading(true);
       this.updateScores();
       this.bindEvents();
@@ -141,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const dev = Store.state.devMode === true;
       UI.setDevPill(dev);
 
-      // Hide loading overlay when the breath animation finishes (or fallback after minLoadMs)
+      // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
       let fallbackTimeout = null;
       const hideOverlay = () => {
@@ -159,8 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
         logo.addEventListener('animationend', onAnimEnd);
       }
 
-      // Fallback: ensure loading overlay hidden after minLoadMs
-      fallbackTimeout = setTimeout(hideOverlay, minLoadMs);
+      // Fallback: ensure loading overlay hidden after animDurationMs
+      fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
 
       // Keyboard shortcut to toggle dev mode: Ctrl+D
       window.addEventListener('keydown', e => {

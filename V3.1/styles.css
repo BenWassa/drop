@@ -131,26 +131,12 @@ body {
 
 .loading-circle {
   width: 320px; height: 320px; border-radius: 50%;
-  display: grid; place-items: center; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;
     background: transparent;
     box-shadow: 0 30px 80px rgba(0,0,0,0.6);
 }
 
-/* rotating outer ring using a conic gradient for a soft progress-like effect */
-.loading-circle::before {
-  content: '';
-  position: absolute;
-  inset: -18px;
-  border-radius: 50%;
-  padding: 18px;
-  /* place transparent gap first, then the colored arc ending at the top so its tip leads during clockwise rotation */
-  background: conic-gradient(from -90deg, transparent 65%, rgba(79,138,245,0.45) 65%, rgba(79,138,245,0.98) 100%);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 28px), black calc(100% - 26px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 28px), black calc(100% - 26px));
-  /* single full rotation over 5s */
-  animation: spin 5000ms linear 1 forwards;
-  filter: drop-shadow(0 12px 34px rgba(79,138,245,0.18));
-}
+/* circular ring removed to keep the loading frame minimal and let the PNG + word breathe */
 
 .loading-logo {
   width: 220px;
@@ -176,10 +162,28 @@ body {
   100% { transform: scale(0.96); } /* hold at exhale */
 }
 
+/* loading word styling (synchronized with the logo breath) */
+.loading-word {
+  margin-top: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  text-transform: lowercase;
+  opacity: 0.95;
+  animation: breath 5000ms ease-in-out 1 forwards;
+  transform-origin: center center;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
 /* Respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .loading-circle::before { animation: none; }
-  .loading-logo { transition: none; }
+  .loading-logo { transition: none; animation: none; }
+  .loading-word { animation: none; }
 }
 
 /* Developer UI: small pill and toast */
