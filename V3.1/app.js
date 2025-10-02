@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
-  const DEV_MODE = false;
+  const DEV_MODE = true;
 
   const Store = {
     DB_KEY: 'lifeTrackerData',
@@ -134,9 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
-      // Apply dev mode UI if persisted
-      const dev = Store.state.devMode === true;
-      UI.setDevPill(dev);
 
       // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
@@ -145,6 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fallbackTimeout) clearTimeout(fallbackTimeout);
         UI.showLoading(false);
       };
+
+      // In dev mode, skip the loading overlay auto-hide
+      if (DEV_MODE) {
+        UI.toast('DEV MODE: Loading overlay will not auto-hide');
+        return; // Skip setting up animation listeners and timeout
+      }
 
       if (logo) {
         const onAnimEnd = (e) => {
@@ -158,24 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Fallback: ensure loading overlay hidden after animDurationMs
       fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
-
-      // Keyboard shortcut to toggle dev mode: Ctrl+D
-      window.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
-          Store.update('devMode', !Store.state.devMode);
-          UI.setDevPill(Store.state.devMode);
-          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
-        }
-      });
-
-      // Click on dev pill toggles developer mode when visible
-      if (UI.elements.devPill) {
-        UI.elements.devPill.addEventListener('click', () => {
-          Store.update('devMode', !Store.state.devMode);
-          UI.setDevPill(Store.state.devMode);
-          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
-        });
-      }
     },
 
     updateScores() {
