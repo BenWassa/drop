@@ -2,8 +2,8 @@
 const CACHE_NAME = 'life-tracker-v1';
 const urlsToCache = [
   './',
-  './index_Claude.html',
-  './manifest_Claude.json',
+  './index.html',
+  './manifest.json',
   './assets/icons/drop_icon.svg',
   './assets/icons/fitness.svg',
   './assets/icons/mind.svg',

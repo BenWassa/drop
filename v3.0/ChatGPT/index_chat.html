@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>Daily Domains</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div id="today"></div>
+    <div class="scores">
+      <button class="score" data-domain="sleep" aria-label="Open Sleep overlay">
+        <svg viewBox="0 0 64 64" class="ico"><path d="M10 10h44v44H10z"/></svg>
+        <span>Sleep</span><strong id="score-sleep">0</strong>
+      </button>
+      <button class="score" data-domain="fitness" aria-label="Open Fitness overlay">
+        <svg viewBox="0 0 64 64" class="ico"><path d="M12 32h40M12 24h12M40 40h12"/></svg>
+        <span>Fitness</span><strong id="score-fitness">0</strong>
+      </button>
+      <button class="score" data-domain="mind" aria-label="Open Mind overlay">
+        <svg viewBox="0 0 64 64" class="ico"><path d="M20 24a12 12 0 1 1 24 0v16H20z"/></svg>
+        <span>Mind</span><strong id="score-mind">0</strong>
+      </button>
+      <button class="score" data-domain="spirit" aria-label="Open Spirit overlay">
+        <svg viewBox="0 0 64 64" class="ico"><path d="M12 12h40v40H12z"/></svg>
+        <span>Spirit</span><strong id="score-spirit">0</strong>
+      </button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <button class="card" data-domain="sleep">
+      <h3>Sleep</h3><div class="val" id="card-sleep">0</div>
+    </button>
+    <button class="card" data-domain="fitness">
+      <h3>Fitness</h3><div class="val" id="card-fitness">0</div>
+    </button>
+    <button class="card" data-domain="mind">
+      <h3>Mind</h3><div class="val" id="card-mind">0</div>
+    </button>
+    <button class="card" data-domain="spirit">
+      <h3>Spirit</h3><div class="val" id="card-spirit">0</div>
+    </button>
+  </main>
+
+  <nav class="bottombar">
+    <button class="navbtn" aria-label="Goals">
+      <svg viewBox="0 0 64 64" class="ico"><path d="M12 12h40v8H12zM12 28h28v8H12zM12 44h20v8H12z"/></svg>
+      <span>Goals</span>
+    </button>
+    <button class="navbtn home" aria-label="Home">
+      <svg viewBox="0 0 64 64" class="ico"><path d="M12 36L32 16l20 20v16H12zM24 52V40h16v12"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="navbtn" aria-label="Results">
+      <svg viewBox="0 0 64 64" class="ico"><path d="M12 52V28h10v24M28 52V20h10v32M44 52V12h10v40"/></svg>
+      <span>Results</span>
+    </button>
+  </nav>
+
+  <!-- Overlays -->
+  <section class="overlay" id="ov-sleep" aria-hidden="true">
+    <div class="sheet">
+      <header><h2>Sleep</h2><button class="close" data-close>×</button></header>
+      <label>Rest (bedtime)
+        <input type="time" id="sleep-rest" />
+      </label>
+      <label>Wake
+        <input type="time" id="sleep-wake" />
+      </label>
+    </div>
+  </section>
+
+  <section class="overlay" id="ov-fitness" aria-hidden="true">
+    <div class="sheet">
+      <header><h2>Fitness</h2><button class="close" data-close>×</button></header>
+      <div class="row">
+        <span>Run (km)</span>
+        <div class="stepper">
+          <button id="run-minus">−</button>
+          <input type="number" id="run-km" min="0" step="1" />
+          <button id="run-plus">+</button>
+        </div>
+      </div>
+      <div class="chips">
+        <button class="chip" data-km="5">5</button>
+        <button class="chip" data-km="10">10</button>
+        <button class="chip" data-km="20">20</button>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="fit-strength" /><i></i><span>Strength</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="fit-skill" /><i></i><span>Skill</span>
+      </label>
+    </div>
+  </section>
+
+  <section class="overlay" id="ov-mind" aria-hidden="true">
+    <div class="sheet">
+      <header><h2>Mind</h2><button class="close" data-close>×</button></header>
+      <label class="switch">
+        <input type="checkbox" id="mind-read" /><i></i><span>Read</span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="mind-write" /><i></i><span>Write</span>
+      </label>
+    </div>
+  </section>
+
+  <section class="overlay" id="ov-spirit" aria-hidden="true">
+    <div class="sheet">
+      <header><h2>Spirit</h2><button class="close" data-close>×</button></header>
+      <div class="quad" id="spirit-quad" role="grid" aria-label="Valence × Energy">
+        <button data-q="0" aria-label="Low valence, low energy"></button>
+        <button data-q="1" aria-label="Low valence, high energy"></button>
+        <button data-q="2" aria-label="High valence, low energy"></button>
+        <button data-q="3" aria-label="High valence, high energy"></button>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="spirit-med" /><i></i><span>Meditation</span>
+      </label>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>

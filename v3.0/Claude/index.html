@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<title>Life Tracker</title>
+</head>
+<body>
+<div class="top-bar">
+  <div class="date" id="date"></div>
+  <div class="scores">
+    <div class="score-item">
+      <img src="assets/icons/sleep.svg" class="score-icon" alt="Sleep">
+      <div class="score-name">Sleep</div>
+      <div class="score-value" id="sleep-score">0</div>
+    </div>
+    <div class="score-item">
+      <img src="assets/icons/fitness.svg" class="score-icon" alt="Fitness">
+      <div class="score-name">Fitness</div>
+      <div class="score-value" id="fitness-score">0</div>
+    </div>
+    <div class="score-item">
+      <img src="assets/icons/mind.svg" class="score-icon" alt="Mind">
+      <div class="score-name">Mind</div>
+      <div class="score-value" id="mind-score">0</div>
+    </div>
+    <div class="score-item">
+      <img src="assets/icons/spirit.svg" class="score-icon" alt="Spirit">
+      <div class="score-name">Spirit</div>
+      <div class="score-value" id="spirit-score">0</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="grid">
+    <div class="card" data-domain="sleep">
+      <div class="card-title">Sleep</div>
+      <div class="card-score" id="sleep-card">0</div>
+    </div>
+    <div class="card" data-domain="fitness">
+      <div class="card-title">Fitness</div>
+      <div class="card-score" id="fitness-card">0</div>
+    </div>
+    <div class="card" data-domain="mind">
+      <div class="card-title">Mind</div>
+      <div class="card-score" id="mind-card">0</div>
+    </div>
+    <div class="card" data-domain="spirit">
+      <div class="card-title">Spirit</div>
+      <div class="card-score" id="spirit-card">0</div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn">
+    <img src="assets/icons/fitness.svg" class="nav-icon" alt="Goals">
+    <span class="nav-label">Goals</span>
+  </button>
+  <button class="nav-btn active">
+    <img src="assets/icons/drop_icon.svg" class="nav-icon" alt="Home">
+    <span class="nav-label">Home</span>
+  </button>
+  <button class="nav-btn">
+    <img src="assets/icons/mind.svg" class="nav-icon" alt="Results">
+    <span class="nav-label">Results</span>
+  </button>
+</nav>
+
+<div class="overlay" id="sleep-overlay">
+  <div class="overlay-header">
+    <h2 class="overlay-title">Sleep</h2>
+    <button class="close-btn" onclick="closeOverlay('sleep')">&times;</button>
+  </div>
+  <div class="overlay-content">
+    <div class="input-group">
+      <label class="input-label">Wake Time</label>
+      <input type="time" class="time-input" id="wake-time">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Rest Time</label>
+      <input type="time" class="time-input" id="rest-time">
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="fitness-overlay">
+  <div class="overlay-header">
+    <h2 class="overlay-title">Fitness</h2>
+    <button class="close-btn" onclick="closeOverlay('fitness')">&times;</button>
+  </div>
+  <div class="overlay-content">
+    <div class="input-group">
+      <label class="input-label">Run Distance (km)</label>
+      <div class="preset-group">
+        <button class="preset-btn" onclick="adjustRun(-5)">-</button>
+        <div class="preset-value" id="run-value">0</div>
+        <button class="preset-btn" onclick="adjustRun(5)">+</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Strength Training</label>
+      <div class="btn-group">
+        <button class="btn" id="strength-no" onclick="setStrength(false)">No</button>
+        <button class="btn" id="strength-yes" onclick="setStrength(true)">Yes</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Skill Practice</label>
+      <div class="btn-group">
+        <button class="btn" id="skill-no" onclick="setSkill(false)">No</button>
+        <button class="btn" id="skill-yes" onclick="setSkill(true)">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="mind-overlay">
+  <div class="overlay-header">
+    <h2 class="overlay-title">Mind</h2>
+    <button class="close-btn" onclick="closeOverlay('mind')">&times;</button>
+  </div>
+  <div class="overlay-content">
+    <div class="input-group">
+      <label class="input-label">Read Today</label>
+      <div class="btn-group">
+        <button class="btn" id="read-no" onclick="setRead(false)">No</button>
+        <button class="btn" id="read-yes" onclick="setRead(true)">Yes</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Write Today</label>
+      <div class="btn-group">
+        <button class="btn" id="write-no" onclick="setWrite(false)">No</button>
+        <button class="btn" id="write-yes" onclick="setWrite(true)">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="spirit-overlay">
+  <div class="overlay-header">
+    <h2 class="overlay-title">Spirit</h2>
+    <button class="close-btn" onclick="closeOverlay('spirit')">&times;</button>
+  </div>
+  <div class="overlay-content">
+    <div class="input-group">
+      <label class="input-label">Mood Quadrant</label>
+      <div class="quadrant">
+        <button class="quad-btn" id="quad-1" onclick="setQuadrant(1)">High Energy<br>Positive</button>
+        <button class="quad-btn" id="quad-2" onclick="setQuadrant(2)">Low Energy<br>Positive</button>
+        <button class="quad-btn" id="quad-3" onclick="setQuadrant(3)">High Energy<br>Negative</button>
+        <button class="quad-btn" id="quad-4" onclick="setQuadrant(4)">Low Energy<br>Negative</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label class="input-label">Meditation</label>
+      <div class="btn-group">
+        <button class="btn" id="meditation-no" onclick="setMeditation(false)">No</button>
+        <button class="btn" id="meditation-yes" onclick="setMeditation(true)">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
