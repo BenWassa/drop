@@ -2,23 +2,28 @@
   "name": "Life Tracker",
   "short_name": "LifeTrack",
   "description": "Track your sleep, fitness, mind, and spirit daily.",
-  "start_url": ".",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0B0B0F",
   "theme_color": "#1C1C21",
   "icons": [
     {
-      "src": "icons/drop_icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icons/drop_app_icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
       "purpose": "any maskable"
-    }
-    ,
+    },
     {
       "src": "icons/drop_rounded.png",
-      "sizes": "512x512",
+      "sizes": "563x564",
       "type": "image/png"
+    },
+    {
+      "src": "icons/drop_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }

@@ -5,11 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1C1C21">
+  <meta name="application-name" content="Life Tracker">
+  <meta name="apple-mobile-web-app-title" content="Life Tracker">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Wix+Madefor+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="icons/drop_rounded.png">
   <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/drop_rounded.png">
   <link rel="stylesheet" href="styles.css">
   <title>Life Tracker</title>
 </head>
@@ -29,7 +33,13 @@
   <div class="dev-toast" id="dev-toast" aria-live="polite"></div>
 
   <header class="app-header">
-    <div class="date" id="date-display"></div>
+    <div class="app-header__top">
+      <div class="date" id="date-display"></div>
+      <button class="install-button" id="install-button" aria-label="Install Life Tracker" hidden>
+        <span class="install-button__icon" aria-hidden="true">➕</span>
+        <span>Install App</span>
+      </button>
+    </div>
     <div class="scores-grid">
       <div class="score-item">
         <div class="score-circle">

@@ -1,13 +1,17 @@
 // Service Worker for Life Tracker PWA
 
-const CACHE_NAME = 'life-tracker-cache-v2'; // Incremented version
+const CACHE_NAME = 'life-tracker-cache-v3';
 const urlsToCache = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './manifest.json',
+  './icons/drop_app_icon.png',
+  './icons/drop_rounded.png',
   './icons/drop_icon.svg',
+  './icons/vision.svg',
+  './icons/gratitude.svg',
   './icons/fitness.svg',
   './icons/mind.svg',
   './icons/sleep.svg',
@@ -22,21 +26,46 @@ self.addEventListener('install', event => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting())
   );
 });
 
 // Fetch event: Serve from cache first, with a network fallback.
-// This makes the app load instantly and work offline.
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response
         if (response) {
           return response;
         }
-        // Not in cache - fetch from network
-        return fetch(event.request);
+
+        return fetch(event.request)
+          .then(networkResponse => {
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === 'opaque') {
+              return networkResponse;
+            }
+
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+            return networkResponse;
+          });
       })
   );
 });
@@ -53,7 +82,7 @@ self.addEventListener('activate', event => {
             return caches.delete(cacheName);
           }
         })
-      );
+      ).then(() => self.clients.claim());
     })
   );
 });

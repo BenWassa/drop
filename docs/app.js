@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
       overlays: document.querySelectorAll('.overlay'),
       navButtons: document.querySelectorAll('.nav-btn'),
       loadingOverlay: document.getElementById('loading-overlay'),
+      installButton: document.getElementById('install-button'),
       devPill: document.getElementById('dev-pill'),
       devToast: document.getElementById('dev-toast'),
       scoreDisplays: {
@@ -65,6 +66,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!el) return;
       if (show) el.classList.remove('hidden');
       else el.classList.add('hidden');
+    },
+
+    showInstallButton(show = true) {
+      const btn = this.elements.installButton;
+      if (!btn) return;
+      if (show) {
+        btn.removeAttribute('hidden');
+        btn.disabled = false;
+      } else {
+        btn.setAttribute('hidden', '');
+        btn.disabled = false;
+      }
     },
 
     toast(msg, ms = 1500) {
@@ -130,6 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const App = {
+    deferredInstallPrompt: null,
+
     init() {
       Store.init();
       UI.initDate();
@@ -139,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
+      this.initInstallPrompt();
 
       // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
@@ -176,6 +192,58 @@ document.addEventListener('DOMContentLoaded', () => {
         spirit: this.calcSpirit()
       };
       UI.renderScores(scores);
+    },
+
+    initInstallPrompt() {
+      const installBtn = UI.elements.installButton;
+      if (!installBtn) return;
+
+      UI.showInstallButton(false);
+
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      if (isStandalone) {
+        return;
+      }
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        this.deferredInstallPrompt = event;
+        UI.showInstallButton(true);
+      });
+
+      window.addEventListener('appinstalled', () => {
+        this.deferredInstallPrompt = null;
+        UI.showInstallButton(false);
+        UI.toast('Life Tracker installed');
+      });
+
+      installBtn.addEventListener('click', async () => {
+        const promptEvent = this.deferredInstallPrompt;
+        if (!promptEvent) {
+          UI.showInstallButton(false);
+          return;
+        }
+
+        installBtn.disabled = true;
+        promptEvent.prompt();
+
+        try {
+          const { outcome } = await promptEvent.userChoice;
+          if (outcome === 'accepted') {
+            UI.toast('Installation started');
+            UI.showInstallButton(false);
+          } else {
+            installBtn.disabled = false;
+            UI.showInstallButton(true);
+          }
+        } catch (error) {
+          console.error('Install prompt failed:', error);
+          installBtn.disabled = false;
+          UI.showInstallButton(true);
+        }
+
+        this.deferredInstallPrompt = null;
+      });
     },
 
     bindEvents() {
