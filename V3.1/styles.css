@@ -103,17 +103,6 @@ body {
   line-height: 1;
 }
 
-.score-icon { 
-  width: 36px; 
-  height: 36px; 
-  display: block; 
-  margin-top: -4px;
-}
-img.score-icon[src*="sleep.svg"] { filter: invert(20%) sepia(96%) saturate(7451%) hue-rotate(190deg) brightness(104%) contrast(105%); }
-img.score-icon[src*="fitness.svg"] { filter: invert(27%) sepia(96%) saturate(7451%) hue-rotate(356deg) brightness(104%) contrast(105%); }
-img.score-icon[src*="mind.svg"] { filter: invert(26%) sepia(96%) saturate(7451%) hue-rotate(258deg) brightness(104%) contrast(105%); }
-img.score-icon[src*="spirit.svg"] { filter: invert(34%) sepia(96%) saturate(7451%) hue-rotate(87deg) brightness(104%) contrast(105%); }
-
 .score-name { 
   font-size: 11px; 
   color: var(--color-text-tertiary); 
