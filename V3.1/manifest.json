@@ -1,6 +1,6 @@
 {
-  "name": "Life Tracker",
-  "short_name": "LifeTrack",
+  "name": "drop",
+  "short_name": "drop",
   "description": "Track your sleep, fitness, mind, and spirit daily.",
   "start_url": ".",
   "display": "standalone",

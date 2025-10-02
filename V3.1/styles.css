@@ -49,10 +49,12 @@ body {
   width: 100%;
   max-width: 412px;
   margin: 0 auto;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* === LAYOUT COMPONENTS === */
@@ -64,7 +66,8 @@ body {
   -webkit-backdrop-filter: blur(12px);
   z-index: 10;
 }
-.app-footer { border-bottom: none; border-top: 1px solid var(--color-border); padding: 8px; }
+.app-header { padding-top: calc(16px + env(safe-area-inset-top)); }
+.app-footer { border-bottom: none; border-top: 1px solid var(--color-border); padding: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
 .app-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at top, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%); }
 
 /* === HEADER === */
