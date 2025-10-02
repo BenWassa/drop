@@ -83,12 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
-    updateToggleButton(type, value) {
+    updateToggleButton(type, value, skipIfDefault = false) {
       const group = document.querySelector(`.btn-group[data-type="${type}"], .quadrant-grid[data-type="${type}"]`);
       if (group) {
         group.querySelectorAll('.btn, .quad-btn').forEach(btn => {
           btn.classList.remove('active');
         });
+        // If skipIfDefault is true and value matches the default, leave all buttons unclicked
+        if (skipIfDefault) {
+          const defaultVal = Store.defaults[type];
+          if (value === defaultVal) return; // don't highlight any button
+        }
         const activeBtn = group.querySelector(`[data-value="${value}"]`);
         if (activeBtn) activeBtn.classList.add('active');
       }
@@ -103,16 +108,16 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case 'fitness':
           this.elements.inputs.runValue.textContent = state.run;
-          this.updateToggleButton('strength', state.strength);
-          this.updateToggleButton('skill', state.skill);
+          this.updateToggleButton('strength', state.strength, true);
+          this.updateToggleButton('skill', state.skill, true);
           break;
         case 'mind':
-          this.updateToggleButton('read', state.read);
-          this.updateToggleButton('write', state.write);
+          this.updateToggleButton('read', state.read, true);
+          this.updateToggleButton('write', state.write, true);
           break;
         case 'spirit':
-          this.updateToggleButton('quadrant', state.quadrant);
-          this.updateToggleButton('meditation', state.meditation);
+          this.updateToggleButton('quadrant', state.quadrant, true);
+          this.updateToggleButton('meditation', state.meditation, true);
           break;
       }
     },
@@ -134,9 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
-      // Apply dev mode UI if persisted
-      const dev = Store.state.devMode === true;
-      UI.setDevPill(dev);
 
       // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
@@ -145,6 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fallbackTimeout) clearTimeout(fallbackTimeout);
         UI.showLoading(false);
       };
+
+      // In dev mode, skip the loading overlay auto-hide
+      if (DEV_MODE) {
+        UI.toast('DEV MODE: Loading overlay will not auto-hide');
+        return; // Skip setting up animation listeners and timeout
+      }
 
       if (logo) {
         const onAnimEnd = (e) => {
@@ -158,24 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Fallback: ensure loading overlay hidden after animDurationMs
       fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
-
-      // Keyboard shortcut to toggle dev mode: Ctrl+D
-      window.addEventListener('keydown', e => {
-        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
-          Store.update('devMode', !Store.state.devMode);
-          UI.setDevPill(Store.state.devMode);
-          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
-        }
-      });
-
-      // Click on dev pill toggles developer mode when visible
-      if (UI.elements.devPill) {
-        UI.elements.devPill.addEventListener('click', () => {
-          Store.update('devMode', !Store.state.devMode);
-          UI.setDevPill(Store.state.devMode);
-          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
-        });
-      }
     },
 
     updateScores() {
