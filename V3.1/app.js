@@ -83,12 +83,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
-    updateToggleButton(type, value) {
+    updateToggleButton(type, value, skipIfDefault = false) {
       const group = document.querySelector(`.btn-group[data-type="${type}"], .quadrant-grid[data-type="${type}"]`);
       if (group) {
         group.querySelectorAll('.btn, .quad-btn').forEach(btn => {
           btn.classList.remove('active');
         });
+        // If skipIfDefault is true and value matches the default, leave all buttons unclicked
+        if (skipIfDefault) {
+          const defaultVal = Store.defaults[type];
+          if (value === defaultVal) return; // don't highlight any button
+        }
         const activeBtn = group.querySelector(`[data-value="${value}"]`);
         if (activeBtn) activeBtn.classList.add('active');
       }
@@ -103,16 +108,16 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case 'fitness':
           this.elements.inputs.runValue.textContent = state.run;
-          this.updateToggleButton('strength', state.strength);
-          this.updateToggleButton('skill', state.skill);
+          this.updateToggleButton('strength', state.strength, true);
+          this.updateToggleButton('skill', state.skill, true);
           break;
         case 'mind':
-          this.updateToggleButton('read', state.read);
-          this.updateToggleButton('write', state.write);
+          this.updateToggleButton('read', state.read, true);
+          this.updateToggleButton('write', state.write, true);
           break;
         case 'spirit':
-          this.updateToggleButton('quadrant', state.quadrant);
-          this.updateToggleButton('meditation', state.meditation);
+          this.updateToggleButton('quadrant', state.quadrant, true);
+          this.updateToggleButton('meditation', state.meditation, true);
           break;
       }
     },
