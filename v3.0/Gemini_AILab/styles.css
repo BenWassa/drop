@@ -1,82 +1,183 @@
-body {
-    font-family: sans-serif;
-    margin: 0;
-    background-color: #f0f0f0;
+/* === Root Variables for Dark Theme === */
+:root {
+    --bg-color: #1a1a1a;
+    --surface-color: #2c2c2c;
+    --primary-color: #00aaff;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --border-color: #444;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --overlay-bg: rgba(0, 0, 0, 0.7);
 }
+
+/* === General Styles === */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === Main App Container === */
 .container {
     max-width: 412px;
     margin: auto;
-    background-color: white;
+    background-color: var(--bg-color);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
+
+/* === Top Bar & Scores === */
 .top-bar {
-    padding: 1rem;
-    background-color: #eee;
+    padding: 1rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border-color);
 }
-.domain-scores { display: flex; }
-.domain-score { text-align: center; margin-left: 0.5rem; }
+#date {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+.domain-scores {
+    display: flex;
+    gap: 1rem;
+}
+.domain-score {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.domain-score svg {
+    fill: var(--text-secondary);
+}
+.domain-score span:last-child {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 4px;
+}
+
+/* === Main Grid & Cards === */
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-    padding: 1rem;
+    padding: 1.5rem;
     flex-grow: 1;
 }
 .card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem 1rem;
     text-align: center;
     cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+}
+.card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+.card span {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* === Bottom Navigation === */
 .bottom-nav {
     display: flex;
     justify-content: space-around;
-    padding: 1rem;
-    border-top: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--surface-color);
 }
 .bottom-nav button {
     border: none;
     background: none;
     cursor: pointer;
     text-align: center;
+    color: var(--text-secondary);
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
+.bottom-nav button:hover {
+    color: var(--text-primary);
+}
+.bottom-nav button svg {
+    fill: currentColor;
+    margin-bottom: 4px;
+}
+
+/* === Overlays & Inputs === */
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: var(--overlay-bg);
     display: none;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(5px);
 }
 .overlay-content {
-    background: white;
+    background: var(--surface-color);
     padding: 2rem;
-    border-radius: 8px;
-    width: 80%;
+    border-radius: 16px;
+    width: 85%;
+    max-width: 350px;
+    box-shadow: 0 10px 30px var(--shadow-color);
+    border: 1px solid var(--border-color);
 }
 .close {
     float: right;
     cursor: pointer;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
 }
+.close:hover {
+    color: var(--text-primary);
+}
+.overlay-content h2 {
+    margin-top: 0;
+}
+.overlay-content label, .overlay-content div {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+input[type="time"], input[type="checkbox"] {
+    margin-left: 0.5rem;
+}
+
+/* === Quadrant Grid (Example Style) === */
 .quadrant-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin: 1.5rem 0;
 }
 .quadrant-grid div {
-    height: 50px;
-    background-color: #eee;
-    border: 1px solid #ccc;
+    height: 60px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.quadrant-grid div:hover {
+    background-color: #3e3e3e;
 }
