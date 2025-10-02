@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dateDisplay: document.getElementById('date-display'),
       cards: document.querySelectorAll('.card'),
       overlays: document.querySelectorAll('.overlay'),
+      navButtons: document.querySelectorAll('.nav-btn'),
       scoreDisplays: {
         sleep: { score: document.getElementById('sleep-score'), card: document.getElementById('sleep-card') },
         fitness: { score: document.getElementById('fitness-score'), card: document.getElementById('fitness-card') },
@@ -166,6 +167,23 @@ document.addEventListener('DOMContentLoaded', () => {
           if (e.target.matches('#rest-time')) {
             Store.update('rest', e.target.value);
           }
+        });
+      });
+
+      // Nav buttons
+      UI.elements.navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const label = btn.querySelector('.nav-label').textContent;
+          if (label === 'Vision') {
+            alert('Vision page - Coming soon!');
+          } else if (label === 'Gratitude') {
+            alert('Gratitude page - Coming soon!');
+          } else if (label === 'Home') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          // Update active state
+          UI.elements.navButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
         });
       });
     },
