@@ -14,6 +14,16 @@
   <title>Life Tracker</title>
 </head>
 <body>
+  <!-- Loading overlay shown on app startup (short minimum duration) -->
+  <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
+    <div class="loading-frame">
+      <div class="loading-circle" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- Developer pill (clickable) and small toast for dev messages -->
+  <div class="dev-pill" id="dev-pill" title="Toggle developer mode">DEV</div>
+  <div class="dev-toast" id="dev-toast" aria-live="polite"></div>
 
   <header class="app-header">
     <div class="date" id="date-display"></div>

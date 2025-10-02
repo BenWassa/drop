@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     state: {},
     defaults: {
       wake: '', rest: '', run: 0, strength: false, skill: false,
-      read: false, write: false, quadrant: 0, meditation: false
+      read: false, write: false, quadrant: 0, meditation: false,
+      devMode: false
     },
     
     init() {
@@ -33,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
       cards: document.querySelectorAll('.card'),
       overlays: document.querySelectorAll('.overlay'),
       navButtons: document.querySelectorAll('.nav-btn'),
+      loadingOverlay: document.getElementById('loading-overlay'),
+      devPill: document.getElementById('dev-pill'),
+      devToast: document.getElementById('dev-toast'),
       scoreDisplays: {
         sleep: { score: document.getElementById('sleep-score'), card: document.getElementById('sleep-card') },
         fitness: { score: document.getElementById('fitness-score'), card: document.getElementById('fitness-card') },
@@ -51,6 +55,27 @@ document.addEventListener('DOMContentLoaded', () => {
         this.elements.scoreDisplays[domain].score.textContent = scores[domain];
         this.elements.scoreDisplays[domain].card.textContent = scores[domain];
       }
+    },
+
+    showLoading(show = true) {
+      const el = this.elements.loadingOverlay;
+      if (!el) return;
+      if (show) el.classList.remove('hidden');
+      else el.classList.add('hidden');
+    },
+
+    setDevPill(enabled) {
+      const pill = this.elements.devPill;
+      if (!pill) return;
+      pill.classList.toggle('visible', enabled);
+    },
+
+    toast(msg, ms = 1500) {
+      const t = this.elements.devToast;
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), ms);
     },
 
     toggleOverlay(domain, show = true) {
@@ -105,9 +130,38 @@ document.addEventListener('DOMContentLoaded', () => {
     init() {
       Store.init();
       UI.initDate();
+      // Show a brief loading frame so the app feels intentional on startup
+      const minLoadMs = 300; // minimum visible time for loading overlay
+      const start = Date.now();
+      UI.showLoading(true);
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
+      // Apply dev mode UI if persisted
+      const dev = Store.state.devMode === true;
+      UI.setDevPill(dev);
+
+      // Ensure loading overlay visible for at least minLoadMs
+      const remaining = Math.max(0, minLoadMs - (Date.now() - start));
+      setTimeout(() => UI.showLoading(false), remaining);
+
+      // Keyboard shortcut to toggle dev mode: Ctrl+D
+      window.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+          Store.update('devMode', !Store.state.devMode);
+          UI.setDevPill(Store.state.devMode);
+          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
+        }
+      });
+
+      // Click on dev pill toggles developer mode when visible
+      if (UI.elements.devPill) {
+        UI.elements.devPill.addEventListener('click', () => {
+          Store.update('devMode', !Store.state.devMode);
+          UI.setDevPill(Store.state.devMode);
+          UI.toast(`Developer mode ${Store.state.devMode ? 'ON' : 'OFF'}`);
+        });
+      }
     },
 
     updateScores() {
