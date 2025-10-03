@@ -9,7 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state: {},
     defaults: {
       wake: '', rest: '', run: 0, strength: false, skill: false,
-      read: false, write: false, quadrant: 0, meditation: false
+      read: false, write: false, quadrant: 0, meditation: false,
+      visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
+      visionMindFocus: '', visionSpiritFocus: ''
     },
     
     init() {
@@ -26,7 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (key in this.state) {
         this.state[key] = value;
         this.save();
-        App.updateScores();
+        if (!key.startsWith('vision')) {
+          App.updateScores();
+        }
       }
     }
   };
@@ -37,10 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
       cards: document.querySelectorAll('.card'),
       overlays: document.querySelectorAll('.overlay'),
       navButtons: document.querySelectorAll('.nav-btn'),
+      pages: document.querySelectorAll('[data-page]'),
       loadingOverlay: document.getElementById('loading-overlay'),
       installButton: document.getElementById('install-button'),
       devPill: document.getElementById('dev-pill'),
       devToast: document.getElementById('dev-toast'),
+      visionInputs: {
+        theme: document.getElementById('vision-theme'),
+        sleep: document.getElementById('vision-sleep-focus'),
+        fitness: document.getElementById('vision-fitness-focus'),
+        mind: document.getElementById('vision-mind-focus'),
+        spirit: document.getElementById('vision-spirit-focus')
+      },
+      gratitude: {
+        topDomain: document.getElementById('gratitude-top-domain'),
+        topScore: document.getElementById('gratitude-top-score'),
+        topDetail: document.getElementById('gratitude-top-detail'),
+        focusDomain: document.getElementById('gratitude-focus-domain'),
+        focusScore: document.getElementById('gratitude-focus-score'),
+        focusDetail: document.getElementById('gratitude-focus-detail'),
+        momentumDetail: document.getElementById('gratitude-momentum-detail'),
+        sleepSummary: document.getElementById('gratitude-sleep-summary'),
+        runSummary: document.getElementById('gratitude-run-summary'),
+        meditationSummary: document.getElementById('gratitude-meditation-summary'),
+        progressBars: document.querySelectorAll('[data-progress-domain]')
+      },
       scoreDisplays: {
         sleep: { score: document.getElementById('sleep-score'), card: document.getElementById('sleep-card') },
         fitness: { score: document.getElementById('fitness-score'), card: document.getElementById('fitness-card') },
@@ -59,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         this.elements.scoreDisplays[domain].score.textContent = scores[domain];
         this.elements.scoreDisplays[domain].card.textContent = scores[domain];
       }
+      this.renderGratitude(scores);
     },
 
     showLoading(show = true) {
@@ -139,15 +165,65 @@ document.addEventListener('DOMContentLoaded', () => {
       this.elements.dateDisplay.textContent = new Date().toLocaleDateString('en-US', {
         weekday: 'long', month: 'long', day: 'numeric'
       });
+    },
+
+    setVisionFields(state) {
+      const { visionInputs } = this.elements;
+      if (!visionInputs) return;
+      if (visionInputs.theme) visionInputs.theme.value = state.visionTheme || '';
+      if (visionInputs.sleep) visionInputs.sleep.value = state.visionSleepFocus || '';
+      if (visionInputs.fitness) visionInputs.fitness.value = state.visionFitnessFocus || '';
+      if (visionInputs.mind) visionInputs.mind.value = state.visionMindFocus || '';
+      if (visionInputs.spirit) visionInputs.spirit.value = state.visionSpiritFocus || '';
+    },
+
+    renderGratitude(scores) {
+      const {
+        topDomain, topScore, topDetail,
+        focusDomain, focusScore, focusDetail,
+        momentumDetail, sleepSummary, runSummary,
+        meditationSummary, progressBars
+      } = this.elements.gratitude;
+
+      if (!topDomain) return;
+
+      const insights = App.generateInsights(scores);
+
+      topDomain.textContent = insights.topDomain.label;
+      topScore.textContent = insights.topDomain.score;
+      topDetail.textContent = insights.topDomain.detail;
+
+      focusDomain.textContent = insights.focusDomain.label;
+      focusScore.textContent = insights.focusDomain.score;
+      focusDetail.textContent = insights.focusDomain.detail;
+
+      momentumDetail.textContent = insights.momentum;
+      sleepSummary.textContent = insights.sleepSummary;
+      runSummary.textContent = insights.runSummary;
+      meditationSummary.textContent = insights.meditationSummary;
+
+      progressBars.forEach(bar => {
+        const domain = bar.dataset.progressDomain;
+        if (domain in scores) {
+          bar.style.setProperty('--progress', `${scores[domain]}%`);
+          bar.setAttribute('aria-valuenow', scores[domain]);
+          const fill = bar.querySelector('.progress-fill');
+          const scoreEl = bar.querySelector('.progress-score');
+          if (fill) fill.style.width = `${scores[domain]}%`;
+          if (scoreEl) scoreEl.textContent = scores[domain];
+        }
+      });
     }
   };
 
   const App = {
     deferredInstallPrompt: null,
+    currentPage: 'home',
 
     init() {
       Store.init();
       UI.initDate();
+      UI.setVisionFields(Store.state);
       // Show loading overlay with a 5s breath animation synchronized with the overlay hide
       const animDurationMs = 5000; // matches the CSS breath animation duration
       UI.showLoading(true);
@@ -155,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.bindEvents();
       this.registerServiceWorker();
       this.initInstallPrompt();
+      this.showPage('home');
 
       // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
@@ -299,18 +376,60 @@ document.addEventListener('DOMContentLoaded', () => {
       // Nav buttons
       UI.elements.navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-          const label = btn.querySelector('.nav-label').textContent;
-          if (label === 'Vision') {
-            alert('Vision page - Coming soon!');
-          } else if (label === 'Gratitude') {
-            alert('Gratitude page - Coming soon!');
-          } else if (label === 'Home') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-          // Update active state
-          UI.elements.navButtons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          const page = btn.dataset.page;
+          if (!page) return;
+          this.showPage(page);
         });
+      });
+
+      // Vision inputs
+      Object.entries(UI.elements.visionInputs).forEach(([key, input]) => {
+        if (!input) return;
+        input.addEventListener('input', (event) => {
+          const value = event.target.value.trim();
+          const storeKey = this.mapVisionKey(key);
+          if (storeKey) {
+            Store.update(storeKey, value);
+          }
+        });
+      });
+    },
+
+    mapVisionKey(key) {
+      switch (key) {
+        case 'theme':
+          return 'visionTheme';
+        case 'sleep':
+          return 'visionSleepFocus';
+        case 'fitness':
+          return 'visionFitnessFocus';
+        case 'mind':
+          return 'visionMindFocus';
+        case 'spirit':
+          return 'visionSpiritFocus';
+        default:
+          return null;
+      }
+    },
+
+    showPage(page) {
+      if (!page) return;
+
+      UI.elements.pages.forEach(section => {
+        section.classList.toggle('active', section.dataset.page === page);
+      });
+
+      this.currentPage = page;
+      this.updateNavState(page);
+
+      if (page === 'home') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+
+    updateNavState(page) {
+      UI.elements.navButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.page === page);
       });
     },
 
@@ -353,6 +472,90 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (quadrant === 3 || quadrant === 4) score += 25;
       if (meditation) score += 50;
       return Math.min(100, score);
+    },
+
+    calculateSleepHours() {
+      const { wake, rest } = Store.state;
+      if (!wake || !rest) return null;
+      const [wh, wm] = wake.split(':').map(Number);
+      const [rh, rm] = rest.split(':').map(Number);
+      if ([wh, wm, rh, rm].some(v => isNaN(v))) return null;
+      const wakeMins = wh * 60 + wm;
+      const restMins = rh * 60 + rm;
+      const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
+      return Math.round((duration / 60) * 10) / 10;
+    },
+
+    generateInsights(scores) {
+      const domainLabels = {
+        sleep: 'Sleep',
+        fitness: 'Fitness',
+        mind: 'Mind',
+        spirit: 'Spirit'
+      };
+
+      const entries = Object.entries(scores);
+      const top = entries.reduce((acc, curr) => (curr[1] > acc[1] ? curr : acc));
+      const bottom = entries.reduce((acc, curr) => (curr[1] < acc[1] ? curr : acc));
+
+      const narrative = {
+        sleep: {
+          high: 'Your routines are setting the tone for energised mornings.',
+          low: 'Try reinforcing your wind-down cues to unlock deeper rest.'
+        },
+        fitness: {
+          high: 'Your training block is building real momentum—keep riding it.',
+          low: 'A fresh plan for progressive sessions could reignite this lane.'
+        },
+        mind: {
+          high: 'Curiosity is compounding—your inputs are sharpening thinking.',
+          low: 'Schedule protected time for reading or writing to refuel clarity.'
+        },
+        spirit: {
+          high: 'You’re staying grounded and connected to what matters most.',
+          low: 'Experiment with a micro-practice to recenter during transitions.'
+        }
+      };
+
+      const topDomain = {
+        label: domainLabels[top[0]],
+        score: top[1],
+        detail: narrative[top[0]].high
+      };
+
+      const focusDomain = {
+        label: domainLabels[bottom[0]],
+        score: bottom[1],
+        detail: narrative[bottom[0]].low
+      };
+
+      const sleepHours = this.calculateSleepHours();
+      const sleepSummary = sleepHours
+        ? `Averaged ${sleepHours}h between rest and wake—calibrate toward 7.5h for steady energy.`
+        : 'Log wake and rest windows to unlock personalised sleep feedback.';
+
+      const runKm = Store.state.run;
+      const runSummary = runKm > 0
+        ? `Logged ${runKm} km. Consider a stride session or recovery run to stay balanced.`
+        : 'No distance logged yet—set a target run to spark momentum.';
+
+      const meditationSummary = Store.state.meditation
+        ? 'Meditation checked in—carry that presence into high-leverage moments.'
+        : 'A two-minute pause could reset your baseline before the next sprint.';
+
+      const averageScore = Math.round(entries.reduce((total, [, val]) => total + val, 0) / entries.length);
+      const momentum = averageScore >= 75
+        ? `Strong average (${averageScore}) across domains—build on what’s working.`
+        : `Average sits at ${averageScore}. Choose one ritual to upgrade and lift the whole system.`;
+
+      return {
+        topDomain,
+        focusDomain,
+        sleepSummary,
+        runSummary,
+        meditationSummary,
+        momentum
+      };
     },
 
     registerServiceWorker() {
