@@ -249,9 +249,8 @@ body {
 .score-item[data-domain="mind"] .score-ring__arc { stroke: var(--mind); }
 .score-item[data-domain="spirit"] .score-ring__arc { stroke: var(--spirit); }
 
-.score-item[data-domain="fitness"] .fitness-icon path,
-.score-item[data-domain="fitness"] .fitness-icon circle {
-  fill: var(--fitness);
+.score-item[data-domain="fitness"] .score-meter__icon img {
+  filter: brightness(0) saturate(100%) invert(34%) sepia(91%) saturate(5453%) hue-rotate(352deg) brightness(103%) contrast(105%);
 }
 
 .score-item[data-domain="sleep"] .score-meter {
