@@ -789,16 +789,13 @@ body {
 .card[data-domain="mind"] .card-icon { filter: invert(26%) sepia(96%) saturate(7451%) hue-rotate(258deg) brightness(104%) contrast(105%); }
 .card[data-domain="spirit"] .card-icon { filter: invert(34%) sepia(96%) saturate(7451%) hue-rotate(87deg) brightness(104%) contrast(105%); }
 
-.card-title { font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--color-text-tertiary); letter-spacing: 1px; }
-.card-score {
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 1;
-  font-family: var(--font-mono);
-  background: linear-gradient(135deg, #ffffff 30%, #a0aec0 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.card-title { 
+  font-size: 13px; 
+  font-weight: 600; 
+  text-transform: uppercase; 
+  color: var(--color-text-tertiary); 
+  letter-spacing: 1px;
+  margin-bottom: 8px;
 }
 
 .card-streak {

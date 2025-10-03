@@ -162,25 +162,21 @@ document.addEventListener('DOMContentLoaded', () => {
       scoreDisplays: {
         sleep: {
           score: document.getElementById('sleep-score'),
-          card: document.getElementById('sleep-card'),
           meter: document.querySelector('[data-domain-meter="sleep"]'),
           streak: document.getElementById('sleep-streak')
         },
         fitness: {
           score: document.getElementById('fitness-score'),
-          card: document.getElementById('fitness-card'),
           meter: document.querySelector('[data-domain-meter="fitness"]'),
           streak: document.getElementById('fitness-streak')
         },
         mind: {
           score: document.getElementById('mind-score'),
-          card: document.getElementById('mind-card'),
           meter: document.querySelector('[data-domain-meter="mind"]'),
           streak: document.getElementById('mind-streak')
         },
         spirit: {
           score: document.getElementById('spirit-score'),
-          card: document.getElementById('spirit-card'),
           meter: document.querySelector('[data-domain-meter="spirit"]'),
           streak: document.getElementById('spirit-streak')
         }
@@ -207,9 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (display.score) {
           display.score.textContent = scoreText;
-        }
-        if (display.card) {
-          display.card.textContent = scoreText;
         }
         if (display.meter) {
           display.meter.setAttribute('aria-valuenow', scoreText);
