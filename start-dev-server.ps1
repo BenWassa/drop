@@ -14,8 +14,8 @@ Write-Host "
   Drop Development Server
 ═══════════════════════════════════════════════
 
-  Local:   http://localhost:8000
-  Mobile:  http://${ip}:8000
+  Local:   http://localhost:8080
+  Mobile:  http://${ip}:8080
 
   Open the Mobile URL on your Pixel 8
   (Make sure both devices are on same WiFi)
@@ -24,6 +24,19 @@ Write-Host "
 ═══════════════════════════════════════════════
 " -ForegroundColor Cyan
 
-# Start server
+# Check if http-server is installed
+$httpServerInstalled = $null
+try {
+    $httpServerInstalled = &npm.cmd list -g http-server 2>$null
+} catch {
+    $httpServerInstalled = $null
+}
+
+if (-not $httpServerInstalled -or $httpServerInstalled -notmatch "http-server@") {
+    Write-Host "Installing http-server globally..." -ForegroundColor Yellow
+    &npm.cmd install -g http-server
+}
+
+# Start server from docs directory
 Set-Location docs
-python -m http.server 8000
+&npx.cmd http-server -p 8080 -c-1

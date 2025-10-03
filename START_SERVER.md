@@ -1,37 +1,49 @@
 # Quick Start Local Server for Mobile Testing
 
-## Method 1: Python (Recommended - Fast & Simple)
+## Easiest Method: Use the Provided Script
+
+```powershell
+.\start-dev-server.ps1
+```
+
+This will automatically:
+- Install http-server if needed (using npm)
+- Show your local IP address
+- Start the server on port 8080
+- Display the mobile URL to use on your Pixel 8
+
+---
+
+## Method 1: Node.js / NPM (Recommended)
+
+### Using npx (no installation needed):
+```powershell
+cd docs
+&npx.cmd http-server -p 8080 -c-1
+```
+
+### Or install globally first:
+```powershell
+&npm.cmd install -g http-server
+cd docs
+&npx.cmd http-server -p 8080 -c-1
+```
+
+Then on your Pixel 8, open browser and go to:
+```
+http://YOUR_PC_IP:8080
+```
+
+The `-c-1` flag disables caching for development.
+
+---
+
+## Method 2: Python (Alternative)
 
 ### If you have Python 3:
 ```powershell
 cd docs
 python -m http.server 8000
-```
-
-Then on your Pixel 8, open browser and go to:
-```
-http://YOUR_PC_IP:8000
-```
-
-To find your PC's IP address:
-```powershell
-ipconfig
-# Look for "IPv4 Address" under your active network adapter (usually starts with 192.168.x.x)
-```
-
----
-
-## Method 2: Node.js (If you have Node installed)
-
-### Install http-server globally (one-time):
-```powershell
-npm install -g http-server
-```
-
-### Then run from docs folder:
-```powershell
-cd docs
-http-server -p 8000
 ```
 
 Access at: `http://YOUR_PC_IP:8000`
@@ -104,7 +116,7 @@ Look for something like: `192.168.1.x` or `192.168.0.x`
 
 ## Quick Test Script (PowerShell)
 
-Copy this into a file called `start-dev-server.ps1` in your drop folder:
+The provided `start-dev-server.ps1` script handles everything:
 
 ```powershell
 # Start development server for mobile testing
@@ -118,19 +130,24 @@ Write-Host "
   Drop Development Server
 ═══════════════════════════════════════════════
 
-  Local:   http://localhost:8000
-  Mobile:  http://$ip:8000
+  Local:   http://localhost:8080
+  Mobile:  http://$ip:8080
 
   Press Ctrl+C to stop
 ═══════════════════════════════════════════════
 " -ForegroundColor Cyan
 
+# Auto-install http-server if needed
+if (-not (npm list -g http-server)) {
+    &npm.cmd install -g http-server
+}
+
 # Start server
 Set-Location docs
-python -m http.server 8000
+&npx.cmd http-server -p 8080 -c-1
 ```
 
-Then run:
+Just run:
 ```powershell
 .\start-dev-server.ps1
 ```
