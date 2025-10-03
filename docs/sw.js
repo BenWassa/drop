@@ -1,6 +1,6 @@
 // Service Worker for drop PWA
 
-const CACHE_NAME = 'life-tracker-cache-v3';
+const CACHE_NAME = 'drop-cache-v1';
 const urlsToCache = [
   './',
   './index.html',
