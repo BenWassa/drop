@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const UI = {
     elements: {
       dateDisplay: document.getElementById('date-display'),
+      appMain: document.querySelector('.app-main'),
+      pages: document.querySelectorAll('.page'),
       cards: document.querySelectorAll('.card'),
       overlays: document.querySelectorAll('.overlay'),
       navButtons: document.querySelectorAll('.nav-btn'),
@@ -50,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
         wakeTime: document.getElementById('wake-time'),
         restTime: document.getElementById('rest-time'),
         runValue: document.getElementById('run-value'),
-      }
+      },
+      gratitudeDate: document.getElementById('gratitude-date')
     },
 
     renderScores(scores) {
@@ -123,9 +126,55 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     initDate() {
-      this.elements.dateDisplay.textContent = new Date().toLocaleDateString('en-US', {
+      const now = new Date();
+      this.elements.dateDisplay.textContent = now.toLocaleDateString('en-US', {
         weekday: 'long', month: 'long', day: 'numeric'
       });
+      this.updateGratitudeDate(now);
+    },
+
+    updateGratitudeDate(date = new Date()) {
+      const el = this.elements.gratitudeDate;
+      if (!el) return;
+      const startOfYear = new Date(date.getFullYear(), 0, 0);
+      const diff = date - startOfYear;
+      const day = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const formatted = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+      el.textContent = `${formatted} • Day ${day}`;
+    },
+
+    showPage(target) {
+      const { pages, navButtons, appMain } = this.elements;
+      pages.forEach(page => {
+        const isTarget = page.dataset.page === target;
+        page.hidden = !isTarget;
+        if (isTarget) {
+          page.removeAttribute('aria-hidden');
+        } else {
+          page.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      navButtons.forEach(btn => {
+        const isActive = btn.dataset.target === target;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive.toString());
+        if (isActive) {
+          btn.setAttribute('aria-current', 'page');
+        } else {
+          btn.removeAttribute('aria-current');
+        }
+      });
+
+      if (target === 'gratitude') {
+        this.updateGratitudeDate();
+      }
+
+      if (appMain) {
+        appMain.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   };
 
@@ -139,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
+      UI.showPage('home');
 
       // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
@@ -231,17 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Nav buttons
       UI.elements.navButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-          const label = btn.querySelector('.nav-label').textContent;
-          if (label === 'Vision') {
-            alert('Vision page - Coming soon!');
-          } else if (label === 'Gratitude') {
-            alert('Gratitude page - Coming soon!');
-          } else if (label === 'Home') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-          // Update active state
-          UI.elements.navButtons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          const target = btn.dataset.target || 'home';
+          UI.showPage(target);
         });
       });
     },

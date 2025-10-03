@@ -59,41 +59,250 @@
   </header>
 
   <main class="app-main">
-    <div class="main-grid">
-      <div class="card" data-domain="sleep">
-        <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
-        <div class="card-title">Sleep</div>
-        <div class="card-score" id="sleep-card">0</div>
+    <section class="page page--home" id="home-page" data-page="home" aria-label="Daily scores overview">
+      <div class="main-grid">
+        <div class="card" data-domain="sleep">
+          <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
+          <div class="card-title">Sleep</div>
+          <div class="card-score" id="sleep-card">0</div>
+        </div>
+        <div class="card" data-domain="fitness">
+          <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
+          <div class="card-title">Fitness</div>
+          <div class="card-score" id="fitness-card">0</div>
+        </div>
+        <div class="card" data-domain="mind">
+          <img src="icons/mind.svg" class="card-icon" alt="Mind">
+          <div class="card-title">Mind</div>
+          <div class="card-score" id="mind-card">0</div>
+        </div>
+        <div class="card" data-domain="spirit">
+          <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
+          <div class="card-title">Spirit</div>
+          <div class="card-score" id="spirit-card">0</div>
+        </div>
       </div>
-      <div class="card" data-domain="fitness">
-        <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
-        <div class="card-title">Fitness</div>
-        <div class="card-score" id="fitness-card">0</div>
+    </section>
+
+    <section class="page page--vision" id="vision-page" data-page="vision" aria-label="Vision roadmap" hidden>
+      <header class="page-header">
+        <div class="page-kicker">Long view</div>
+        <h1 class="page-title">Vision roadmap</h1>
+        <p class="page-subtitle">Translate purpose into clear horizons, tangible outcomes, and rhythms that keep the mission vivid every day.</p>
+      </header>
+
+      <div class="vision-grid">
+        <article class="vision-card vision-card--highlight">
+          <h2 class="vision-card__title">North star statement</h2>
+          <p class="vision-card__body">Design a well-balanced life that compounds energy, clarity, and generosity so every commitment receives the very best of me.</p>
+          <ul class="vision-pillars" aria-label="Vision pillars">
+            <li class="vision-pillars__item">Lead with calm confidence</li>
+            <li class="vision-pillars__item">Build enduring systems and products</li>
+            <li class="vision-pillars__item">Invest deeply in relationships</li>
+          </ul>
+        </article>
+
+        <article class="vision-card">
+          <h2 class="vision-card__title">12-month horizons</h2>
+          <dl class="vision-horizons">
+            <div class="vision-horizons__item">
+              <dt>Health</dt>
+              <dd>Consistent 90+ day streak meeting sleep, recovery, and training targets.</dd>
+            </div>
+            <div class="vision-horizons__item">
+              <dt>Mind</dt>
+              <dd>Publish two long-form essays and complete one immersive learning sprint.</dd>
+            </div>
+            <div class="vision-horizons__item">
+              <dt>Spirit</dt>
+              <dd>Create a weekly renewal ritual that blends reflection, connection, and service.</dd>
+            </div>
+          </dl>
+        </article>
+
+        <article class="vision-card">
+          <h2 class="vision-card__title">Operating principles</h2>
+          <ul class="vision-list">
+            <li><span>Default to clarity.</span> Articulate the why, the win, and the next action.</li>
+            <li><span>Measure what matters.</span> Pair qualitative reflection with meaningful metrics.</li>
+            <li><span>Protect recovery.</span> Guard deep rest, solitude, and family time as strategic assets.</li>
+            <li><span>Practice generosity.</span> Offer encouragement, insight, or help in every interaction.</li>
+          </ul>
+        </article>
+
+        <article class="vision-card vision-card--progress">
+          <h2 class="vision-card__title">Quarterly focus</h2>
+          <div class="vision-progress" role="list">
+            <div class="vision-progress__item" role="listitem">
+              <div class="vision-progress__meta">
+                <span class="vision-progress__label">Q1 • Foundation</span>
+                <span class="vision-progress__value">72%</span>
+              </div>
+              <div class="vision-progress__bar" aria-hidden="true">
+                <span style="width:72%"></span>
+              </div>
+              <p class="vision-progress__description">Dial-in the sleep and training cadence while documenting the playbook.</p>
+            </div>
+            <div class="vision-progress__item" role="listitem">
+              <div class="vision-progress__meta">
+                <span class="vision-progress__label">Q2 • Amplify</span>
+                <span class="vision-progress__value">38%</span>
+              </div>
+              <div class="vision-progress__bar" aria-hidden="true">
+                <span style="width:38%"></span>
+              </div>
+              <p class="vision-progress__description">Ship two thought-leadership pieces and anchor a monthly mastermind session.</p>
+            </div>
+            <div class="vision-progress__item" role="listitem">
+              <div class="vision-progress__meta">
+                <span class="vision-progress__label">Q3 • Deepen</span>
+                <span class="vision-progress__value">Planning</span>
+              </div>
+              <div class="vision-progress__bar vision-progress__bar--empty" aria-hidden="true">
+                <span style="width:12%"></span>
+              </div>
+              <p class="vision-progress__description">Map a service project and plan an unplugged retreat focused on renewal.</p>
+            </div>
+          </div>
+        </article>
       </div>
-      <div class="card" data-domain="mind">
-        <img src="icons/mind.svg" class="card-icon" alt="Mind">
-        <div class="card-title">Mind</div>
-        <div class="card-score" id="mind-card">0</div>
+
+      <section class="vision-timeline" aria-label="Milestones timeline">
+        <h2 class="vision-card__title">Milestones</h2>
+        <ol class="timeline">
+          <li class="timeline__item">
+            <div class="timeline__marker">April</div>
+            <div class="timeline__content">
+              <h3>Wellness review</h3>
+              <p>Evaluate biometrics and coaching feedback, then recalibrate the training block.</p>
+            </div>
+          </li>
+          <li class="timeline__item">
+            <div class="timeline__marker">July</div>
+            <div class="timeline__content">
+              <h3>Thought leadership drop</h3>
+              <p>Release long-form essay and companion toolkit to the community.</p>
+            </div>
+          </li>
+          <li class="timeline__item">
+            <div class="timeline__marker">October</div>
+            <div class="timeline__content">
+              <h3>Renewal retreat</h3>
+              <p>48-hour retreat with digital fast, gratitude practice, and future-state planning.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+    </section>
+
+    <section class="page page--gratitude" id="gratitude-page" data-page="gratitude" aria-label="Gratitude journal" hidden>
+      <header class="page-header">
+        <div class="page-kicker">Perspective</div>
+        <h1 class="page-title">Gratitude studio</h1>
+        <p class="page-subtitle">Capture bright spots, celebrate small wins, and curate reminders that keep you anchored in abundance.</p>
+      </header>
+
+      <div class="gratitude-layout">
+        <section class="gratitude-card gratitude-card--primary" aria-labelledby="gratitude-today">
+          <div class="gratitude-card__header">
+            <h2 id="gratitude-today">Today's snapshot</h2>
+            <span class="gratitude-date" id="gratitude-date">April 12 • Day 102</span>
+          </div>
+          <ul class="gratitude-highlights">
+            <li>
+              <h3>Energy spark</h3>
+              <p>Sunrise run felt strong and calm — first negative split of the training block.</p>
+            </li>
+            <li>
+              <h3>Relationship win</h3>
+              <p>Coffee with Avery turned into a deep conversation about purpose and pace.</p>
+            </li>
+            <li>
+              <h3>Creative moment</h3>
+              <p>Sketched a new dashboard layout that simplifies weekly review dramatically.</p>
+            </li>
+          </ul>
+        </section>
+
+        <section class="gratitude-card" aria-labelledby="gratitude-prompts">
+          <h2 id="gratitude-prompts">Prompt library</h2>
+          <div class="prompt-list">
+            <article class="prompt">
+              <h3>Anchor</h3>
+              <p>Who quietly supports your growth? Send a note acknowledging their impact.</p>
+            </article>
+            <article class="prompt">
+              <h3>Reframe</h3>
+              <p>What challenge taught you something useful this week?</p>
+            </article>
+            <article class="prompt">
+              <h3>Moment</h3>
+              <p>Capture one sensory detail from today that felt restorative.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="gratitude-card gratitude-card--journal" aria-labelledby="gratitude-journal">
+          <div class="gratitude-card__header">
+            <h2 id="gratitude-journal">Journal queue</h2>
+            <button class="gratitude-action" type="button">Start 5-minute session</button>
+          </div>
+          <p class="gratitude-intro">Use these prompts to seed your next entry. Capture three specifics and close with one generous action you can take tomorrow.</p>
+          <div class="journal-queue">
+            <div class="journal-queue__item">
+              <span class="journal-queue__tag">Relationships</span>
+              <p>Write about someone whose presence made today lighter.</p>
+            </div>
+            <div class="journal-queue__item">
+              <span class="journal-queue__tag">Progress</span>
+              <p>Document a small step that moved a big dream forward.</p>
+            </div>
+            <div class="journal-queue__item">
+              <span class="journal-queue__tag">Service</span>
+              <p>Identify one way to pay today's goodness forward.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="gratitude-card gratitude-card--log" aria-labelledby="gratitude-log">
+          <div class="gratitude-card__header">
+            <h2 id="gratitude-log">Recent entries</h2>
+            <button class="gratitude-action" type="button">View archive</button>
+          </div>
+          <ul class="gratitude-log">
+            <li>
+              <time datetime="2024-04-11">Apr 11</time>
+              <p>Team celebrated our launch milestone — felt proud of the collective effort.</p>
+            </li>
+            <li>
+              <time datetime="2024-04-10">Apr 10</time>
+              <p>Neighbor dropped off homemade soup while I was heads-down shipping.</p>
+            </li>
+            <li>
+              <time datetime="2024-04-09">Apr 9</time>
+              <p>Read a note from a customer describing how the product simplified their day.</p>
+            </li>
+            <li>
+              <time datetime="2024-04-08">Apr 8</time>
+              <p>Watched the sunset with family and unplugged without guilt.</p>
+            </li>
+          </ul>
+        </section>
       </div>
-      <div class="card" data-domain="spirit">
-        <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
-        <div class="card-title">Spirit</div>
-        <div class="card-score" id="spirit-card">0</div>
-      </div>
-    </div>
+    </section>
   </main>
 
   <footer class="app-footer">
     <nav class="bottom-nav">
-      <button class="nav-btn" aria-label="Vision">
+      <button class="nav-btn" type="button" data-target="vision" aria-label="Vision" aria-controls="vision-page" aria-selected="false">
         <img src="icons/vision.svg" class="nav-icon" alt="">
         <span class="nav-label">Vision</span>
       </button>
-      <button class="nav-btn active" aria-label="Home">
+      <button class="nav-btn active" type="button" data-target="home" aria-label="Home" aria-controls="home-page" aria-selected="true">
         <img src="icons/drop_icon.svg" class="nav-icon" alt="">
         <span class="nav-label">Home</span>
       </button>
-      <button class="nav-btn" aria-label="Gratitude">
+      <button class="nav-btn" type="button" data-target="gratitude" aria-label="Gratitude" aria-controls="gratitude-page" aria-selected="false">
         <img src="icons/gratitude.svg" class="nav-icon" alt="">
         <span class="nav-label">Gratitude</span>
       </button>
