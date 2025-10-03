@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
-  const DEV_MODE = true;
+  const DEV_MODE = false;
 
   const Store = {
     DB_KEY: 'lifeTrackerData',
