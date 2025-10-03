@@ -40,6 +40,8 @@
   --spirit: #16a34a; /* Green */
 }
 
+html { height: 100%; }
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -54,8 +56,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-y: hidden;
   touch-action: pan-y pinch-zoom;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
@@ -80,9 +81,15 @@ body {
   flex: 1 1 auto;
   display: block;
   padding: 24px;
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
   background: radial-gradient(circle at top, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
   width: 100%;
   min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  scroll-behavior: smooth;
+  touch-action: pan-y pinch-zoom;
 }
 
 /* === HEADER === */
@@ -92,6 +99,60 @@ body {
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
+}
+
+.data-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.data-btn {
+  flex: 1 1 120px;
+  min-width: 140px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: rgba(79, 138, 245, 0.12);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.2);
+}
+
+.data-btn:hover,
+.data-btn:focus-visible {
+  border-color: var(--color-border-focus);
+  background: rgba(79, 138, 245, 0.2);
+  outline: none;
+}
+
+.app-toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  background: rgba(28, 28, 33, 0.95);
+  color: var(--color-text-primary);
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 200;
+  font-size: 13px;
+}
+
+.app-toast.show {
+  opacity: 1;
+  transform: translate(-50%, -8px);
 }
 
 .date { font-size: 14px; color: var(--color-text-secondary); font-weight: 500; }

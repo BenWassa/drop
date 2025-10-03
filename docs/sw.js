@@ -1,6 +1,7 @@
 // Service Worker for drop PWA
 
-const CACHE_NAME = 'drop-cache-v1';
+const APP_VERSION = '3.0.0';
+const CACHE_NAME = `drop-cache-v${APP_VERSION.replace(/\./g, '-')}`;
 const urlsToCache = [
   './',
   './index.html',
@@ -82,7 +83,10 @@ self.addEventListener('activate', event => {
             return caches.delete(cacheName);
           }
         })
-      ).then(() => self.clients.claim());
+      ).then(() => {
+        console.log(`Cache updated to v${APP_VERSION}`);
+        return self.clients.claim();
+      });
     })
   );
 });

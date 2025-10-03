@@ -31,6 +31,7 @@
   <!-- Developer pill (clickable) and small toast for dev messages -->
   <div class="dev-pill" id="dev-pill" title="Toggle developer mode">DEV</div>
   <div class="dev-toast" id="dev-toast" aria-live="polite"></div>
+  <div class="app-toast" id="app-toast" aria-live="polite" role="status"></div>
 
   <header class="app-header">
     <div class="app-header__top">
@@ -39,6 +40,11 @@
         <span class="install-button__icon" aria-hidden="true">➕</span>
         <span>Install App</span>
       </button>
+    </div>
+    <div class="data-controls" aria-label="Backup controls">
+      <button class="data-btn" id="export-data-btn" type="button">Export Data</button>
+      <button class="data-btn" id="import-data-btn" type="button">Import Data</button>
+      <input type="file" id="import-data-input" accept="application/json" hidden>
     </div>
     <!-- Screen reader announcements for score updates -->
     <div class="sr-announce" id="score-announcer" aria-live="polite" aria-atomic="true"></div>

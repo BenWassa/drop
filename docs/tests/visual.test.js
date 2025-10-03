@@ -163,15 +163,67 @@ test.describe('Visual Regression Tests', () => {
     // Focus on home button
     const homeBtn = page.locator('[data-page="home"]');
     await homeBtn.focus();
-    
+
     // Wait for focus styles
     await page.waitForTimeout(100);
-    
+
     // Capture footer with focused element
     const footer = page.locator('.app-footer');
     await footer.screenshot({
       path: path.join(__dirname, 'screenshots', 'nav-focus.png')
     });
+  });
+
+  test('App shell scroll retains footer navigation access', async ({ page }) => {
+    const visionBtn = page.locator('[data-page="vision"]');
+    await visionBtn.click();
+    await page.waitForTimeout(300);
+
+    const scrollMetrics = await page.evaluate(() => {
+      const main = document.querySelector('.app-main');
+      if (!main) return { scrollHeight: 0, clientHeight: 0, scrollTop: 0 };
+      main.scrollTo({ top: main.scrollHeight, behavior: 'auto' });
+      return {
+        scrollHeight: main.scrollHeight,
+        clientHeight: main.clientHeight,
+        scrollTop: main.scrollTop
+      };
+    });
+
+    expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+    expect(scrollMetrics.scrollTop).toBeGreaterThan(0);
+
+    const gratitudeBtn = page.locator('[data-page="gratitude"]');
+    await gratitudeBtn.click();
+    await expect(page.locator('[data-page="gratitude"].active')).toBeVisible();
+  });
+
+  test('Overlay scrolling does not lock the app shell', async ({ page }) => {
+    const fitnessCard = page.locator('[data-domain="fitness"].card');
+    await fitnessCard.click();
+    await page.waitForTimeout(400);
+
+    const overlayContent = page.locator('#fitness-overlay .overlay-content');
+    await expect(overlayContent).toHaveCSS('overflow-y', 'auto');
+
+    const closeBtn = page.locator('#fitness-overlay .close-btn');
+    await closeBtn.click();
+    await expect(page.locator('#fitness-overlay')).not.toHaveClass(/active/);
+
+    const visionBtn = page.locator('[data-page="vision"]');
+    await visionBtn.click();
+    await page.waitForTimeout(300);
+
+    const canScroll = await page.evaluate(() => {
+      const main = document.querySelector('.app-main');
+      if (!main) return false;
+      main.scrollTop = 0;
+      const initial = main.scrollTop;
+      main.scrollTo({ top: main.scrollHeight, behavior: 'auto' });
+      return main.scrollTop > initial;
+    });
+
+    expect(canScroll).toBeTruthy();
   });
 
   test('Progress bars on gratitude page', async ({ page }) => {

@@ -32,6 +32,38 @@ document.addEventListener('DOMContentLoaded', () => {
           App.updateScores();
         }
       }
+    },
+
+    validateImport(payload) {
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+        return false;
+      }
+
+      const allowedKeys = Object.keys(this.defaults);
+      return Object.keys(payload).every(key => {
+        if (!allowedKeys.includes(key)) return false;
+        const defaultValue = this.defaults[key];
+        const value = payload[key];
+
+        if (value === null || value === undefined) return false;
+
+        const defaultType = typeof defaultValue;
+        if (defaultType === 'boolean') {
+          return typeof value === 'boolean';
+        }
+        if (defaultType === 'number') {
+          return typeof value === 'number' && Number.isFinite(value);
+        }
+        if (defaultType === 'string') {
+          return typeof value === 'string';
+        }
+        return false;
+      });
+    },
+
+    merge(payload) {
+      this.state = { ...this.defaults, ...this.state, ...payload };
+      this.save();
     }
   };
 
@@ -46,6 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
       installButton: document.getElementById('install-button'),
       devPill: document.getElementById('dev-pill'),
       devToast: document.getElementById('dev-toast'),
+      appToast: document.getElementById('app-toast'),
+      dataControls: {
+        exportBtn: document.getElementById('export-data-btn'),
+        importBtn: document.getElementById('import-data-btn'),
+        importInput: document.getElementById('import-data-input')
+      },
       visionInputs: {
         theme: document.getElementById('vision-theme'),
         sleep: document.getElementById('vision-sleep-focus'),
@@ -79,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         runValue: document.getElementById('run-value'),
       }
     },
+    toastTimer: null,
 
     renderScores(scores) {
       const announcements = [];
@@ -136,6 +175,19 @@ document.addEventListener('DOMContentLoaded', () => {
       t.textContent = msg;
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), ms);
+    },
+
+    notify(message, ms = 2000) {
+      const toast = this.elements.appToast;
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      if (this.toastTimer) {
+        clearTimeout(this.toastTimer);
+      }
+      this.toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, ms);
     },
 
     toggleOverlay(domain, show = true) {
@@ -346,6 +398,63 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     },
 
+    handleExport() {
+      try {
+        const data = JSON.stringify(Store.state, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const fileName = `drop-life-tracker-${timestamp}.json`;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        UI.notify('Data exported');
+      } catch (error) {
+        console.error('Data export failed:', error);
+        UI.notify('Export failed');
+      }
+    },
+
+    handleImport(file) {
+      try {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const raw = event.target?.result;
+            const payload = JSON.parse(raw);
+
+            if (!Store.validateImport(payload)) {
+              throw new Error('Invalid schema');
+            }
+
+            Store.merge(payload);
+            UI.setVisionFields(Store.state);
+            if (UI.elements.inputs.runValue) {
+              UI.elements.inputs.runValue.textContent = Store.state.run;
+            }
+            this.updateScores();
+            UI.notify('Data imported');
+          } catch (error) {
+            console.error('Data import failed:', error);
+            UI.notify('Import failed');
+          }
+        };
+
+        reader.onerror = () => {
+          UI.notify('Import failed');
+        };
+
+        reader.readAsText(file);
+      } catch (error) {
+        console.error('Failed to read import file:', error);
+        UI.notify('Import failed');
+      }
+    },
+
     bindEvents() {
       // Open overlays
       UI.elements.cards.forEach(card => {
@@ -429,6 +538,28 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       });
+
+      const { exportBtn, importBtn, importInput } = UI.elements.dataControls;
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          this.handleExport();
+        });
+      }
+
+      if (importBtn && importInput) {
+        importBtn.addEventListener('click', () => {
+          importInput.value = '';
+          importInput.click();
+        });
+
+        importInput.addEventListener('change', () => {
+          const [file] = importInput.files || [];
+          if (file) {
+            this.handleImport(file);
+          }
+          importInput.value = '';
+        });
+      }
     },
 
     mapVisionKey(key) {
@@ -458,8 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
       this.currentPage = page;
       this.updateNavState(page);
 
-      if (page === 'home') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      const main = document.querySelector('.app-main');
+      if (main) {
+        main.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },
 
