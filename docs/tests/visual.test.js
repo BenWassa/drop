@@ -144,18 +144,18 @@ test.describe('Visual Regression Tests', () => {
     });
   });
 
-  test('Score circles with different values', async ({ page }) => {
+  test('Score meters with different values', async ({ page }) => {
     // This test verifies visual consistency of score rendering
     const scoresGrid = page.locator('.scores-grid');
     await expect(scoresGrid).toBeVisible();
-    
-    // Check all score circles are rendered
-    const scoreCircles = page.locator('.score-circle');
-    await expect(scoreCircles).toHaveCount(4);
-    
+
+    // Check all score meters are rendered
+    const scoreMeters = page.locator('[data-domain-meter]');
+    await expect(scoreMeters).toHaveCount(4);
+
     // Take focused screenshot of scores
     await scoresGrid.screenshot({
-      path: path.join(__dirname, 'screenshots', 'score-circles.png')
+      path: path.join(__dirname, 'screenshots', 'score-meters.png')
     });
   });
 

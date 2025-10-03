@@ -130,6 +130,7 @@ Fonts:
 - **Sprint Summary**: `docs/SPRINT_SUMMARY.md`
 - **Verification Checklist**: `docs/VERIFICATION_CHECKLIST.md`
 - **Test Documentation**: `docs/tests/README.md`
+- **Sprint Backlog**: `docs/documentation/Sprints.md`
 
 ## 🌐 GitHub Pages Deployment
 

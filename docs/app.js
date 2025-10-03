@@ -106,10 +106,26 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBars: document.querySelectorAll('[data-progress-domain]')
       },
       scoreDisplays: {
-        sleep: { score: document.getElementById('sleep-score'), card: document.getElementById('sleep-card') },
-        fitness: { score: document.getElementById('fitness-score'), card: document.getElementById('fitness-card') },
-        mind: { score: document.getElementById('mind-score'), card: document.getElementById('mind-card') },
-        spirit: { score: document.getElementById('spirit-score'), card: document.getElementById('spirit-card') }
+        sleep: {
+          score: document.getElementById('sleep-score'),
+          card: document.getElementById('sleep-card'),
+          meter: document.querySelector('[data-domain-meter="sleep"]')
+        },
+        fitness: {
+          score: document.getElementById('fitness-score'),
+          card: document.getElementById('fitness-card'),
+          meter: document.querySelector('[data-domain-meter="fitness"]')
+        },
+        mind: {
+          score: document.getElementById('mind-score'),
+          card: document.getElementById('mind-card'),
+          meter: document.querySelector('[data-domain-meter="mind"]')
+        },
+        spirit: {
+          score: document.getElementById('spirit-score'),
+          card: document.getElementById('spirit-card'),
+          meter: document.querySelector('[data-domain-meter="spirit"]')
+        }
       },
       inputs: {
         wakeTime: document.getElementById('wake-time'),
@@ -122,31 +138,57 @@ document.addEventListener('DOMContentLoaded', () => {
     renderScores(scores) {
       const announcements = [];
       for (const domain in scores) {
-        const oldScore = this.elements.scoreDisplays[domain].score.textContent;
-        const newScore = scores[domain];
-        
-        // Update displayed scores
-        this.elements.scoreDisplays[domain].score.textContent = newScore;
-        this.elements.scoreDisplays[domain].card.textContent = newScore;
-        
-        // Update ARIA attributes on score circles
-        const scoreCircle = this.elements.scoreDisplays[domain].score.closest('.score-circle');
-        if (scoreCircle) {
-          scoreCircle.setAttribute('aria-valuenow', newScore);
+        const display = this.elements.scoreDisplays[domain];
+        if (!display) continue;
+
+        const previousValue = display.score ? display.score.textContent : null;
+        const numericScore = Number.isFinite(scores[domain]) ? scores[domain] : 0;
+        const clampedScore = Math.max(0, Math.min(100, Math.round(numericScore)));
+        const scoreText = String(clampedScore);
+
+        if (display.score) {
+          display.score.textContent = scoreText;
         }
-        
-        // Collect announcement if score changed
-        if (oldScore !== String(newScore)) {
-          announcements.push(`${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${newScore}`);
+        if (display.card) {
+          display.card.textContent = scoreText;
+        }
+        if (display.meter) {
+          display.meter.setAttribute('aria-valuenow', scoreText);
+          this.updateScoreRing(display.meter, clampedScore);
+        }
+
+        if (previousValue !== null && previousValue !== scoreText) {
+          announcements.push(`${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${scoreText}`);
         }
       }
-      
-      // Announce changes to screen readers (polite mode, non-disruptive)
+
       if (announcements.length > 0 && this.elements.scoreAnnouncer) {
         this.elements.scoreAnnouncer.textContent = announcements.join('. ');
       }
-      
+
       this.renderGratitude(scores);
+    },
+
+    updateScoreRing(meter, score) {
+      const arc = meter.querySelector('.score-ring__arc');
+      if (!arc) return;
+      const track = meter.querySelector('.score-ring__track');
+      const radius = (arc.r && arc.r.baseVal ? arc.r.baseVal.value : parseFloat(arc.getAttribute('r'))) || 52;
+      const circumference = 2 * Math.PI * radius;
+      const rootStyles = getComputedStyle(document.documentElement);
+      const gapValue = parseFloat(rootStyles.getPropertyValue('--score-ring-gap'));
+      const gapFraction = Number.isFinite(gapValue) ? Math.min(Math.max(gapValue, 0), 0.6) : 0.22;
+      const visibleLength = circumference * (1 - gapFraction);
+      const gapLength = circumference - visibleLength;
+      const dashArray = `${visibleLength.toFixed(2)} ${gapLength.toFixed(2)}`;
+      arc.style.strokeDasharray = dashArray;
+      if (track) {
+        track.style.strokeDasharray = dashArray;
+      }
+
+      const clamped = Math.max(0, Math.min(100, Number(score) || 0));
+      const dashOffset = visibleLength - (clamped / 100) * visibleLength;
+      arc.style.strokeDashoffset = `${dashOffset.toFixed(2)}`;
     },
 
     showLoading(show = true) {

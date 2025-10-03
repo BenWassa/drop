@@ -33,30 +33,54 @@ QUnit.module('Domain Score Display', function(hooks) {
     // Create a minimal DOM structure for testing
     this.fixture = document.getElementById('qunit-fixture');
     this.fixture.innerHTML = `
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-label="Sleep score">
-          <div class="score-value" id="sleep-score">75</div>
+      <article class="score-item" data-domain="sleep">
+        <div class="score-meter" data-domain-meter="sleep" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" aria-label="Sleep score">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="sleep-score">75</span>
+          </div>
         </div>
         <div class="score-name">Sleep</div>
-      </div>
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-label="Fitness score">
-          <div class="score-value" id="fitness-score">60</div>
+      </article>
+      <article class="score-item" data-domain="fitness">
+        <div class="score-meter" data-domain-meter="fitness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-label="Fitness score">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="fitness-score">60</span>
+          </div>
         </div>
         <div class="score-name">Fitness</div>
-      </div>
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" aria-label="Mind score">
-          <div class="score-value" id="mind-score">80</div>
+      </article>
+      <article class="score-item" data-domain="mind">
+        <div class="score-meter" data-domain-meter="mind" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" aria-label="Mind score">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="mind-score">80</span>
+          </div>
         </div>
         <div class="score-name">Mind</div>
-      </div>
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-label="Spirit score">
-          <div class="score-value" id="spirit-score">50</div>
+      </article>
+      <article class="score-item" data-domain="spirit">
+        <div class="score-meter" data-domain-meter="spirit" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-label="Spirit score">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="spirit-score">50</span>
+          </div>
         </div>
         <div class="score-name">Spirit</div>
-      </div>
+      </article>
       <div class="card" id="sleep-card">75</div>
       <div class="card" id="fitness-card">60</div>
       <div class="card" id="mind-card">80</div>
@@ -71,15 +95,18 @@ QUnit.module('Domain Score Display', function(hooks) {
     assert.ok(document.getElementById('spirit-score'), 'Spirit score element exists');
   });
 
-  QUnit.test('Score circles have proper ARIA attributes', function(assert) {
-    const sleepCircle = document.querySelector('[aria-label="Sleep score"]');
-    assert.equal(sleepCircle.getAttribute('role'), 'meter', 'Sleep circle has meter role');
-    assert.equal(sleepCircle.getAttribute('aria-valuemin'), '0', 'Sleep circle has min value');
-    assert.equal(sleepCircle.getAttribute('aria-valuemax'), '100', 'Sleep circle has max value');
-    assert.equal(sleepCircle.getAttribute('aria-valuenow'), '75', 'Sleep circle has current value');
-    
-    const fitnessCircle = document.querySelector('[aria-label="Fitness score"]');
-    assert.ok(fitnessCircle.hasAttribute('aria-valuenow'), 'Fitness circle has aria-valuenow');
+  QUnit.test('Score meters expose ARIA attributes and arcs', function(assert) {
+    const sleepMeter = document.querySelector('[data-domain-meter="sleep"]');
+    assert.equal(sleepMeter.getAttribute('role'), 'meter', 'Sleep meter has meter role');
+    assert.equal(sleepMeter.getAttribute('aria-valuemin'), '0', 'Sleep meter has min value');
+    assert.equal(sleepMeter.getAttribute('aria-valuemax'), '100', 'Sleep meter has max value');
+    assert.equal(sleepMeter.getAttribute('aria-valuenow'), '75', 'Sleep meter has current value');
+
+    const sleepArc = sleepMeter.querySelector('.score-ring__arc');
+    assert.ok(sleepArc, 'Sleep meter renders a progress arc');
+
+    const fitnessMeter = document.querySelector('[data-domain-meter="fitness"]');
+    assert.ok(fitnessMeter.hasAttribute('aria-valuenow'), 'Fitness meter has aria-valuenow');
   });
 
   QUnit.test('Score values are numeric', function(assert) {
