@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mind: document.getElementById('vision-mind-focus'),
         spirit: document.getElementById('vision-spirit-focus')
       },
+      scoreAnnouncer: document.getElementById('score-announcer'),
       gratitude: {
         topDomain: document.getElementById('gratitude-top-domain'),
         topScore: document.getElementById('gratitude-top-score'),
@@ -80,10 +81,32 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     renderScores(scores) {
+      const announcements = [];
       for (const domain in scores) {
-        this.elements.scoreDisplays[domain].score.textContent = scores[domain];
-        this.elements.scoreDisplays[domain].card.textContent = scores[domain];
+        const oldScore = this.elements.scoreDisplays[domain].score.textContent;
+        const newScore = scores[domain];
+        
+        // Update displayed scores
+        this.elements.scoreDisplays[domain].score.textContent = newScore;
+        this.elements.scoreDisplays[domain].card.textContent = newScore;
+        
+        // Update ARIA attributes on score circles
+        const scoreCircle = this.elements.scoreDisplays[domain].score.closest('.score-circle');
+        if (scoreCircle) {
+          scoreCircle.setAttribute('aria-valuenow', newScore);
+        }
+        
+        // Collect announcement if score changed
+        if (oldScore !== String(newScore)) {
+          announcements.push(`${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${newScore}`);
+        }
       }
+      
+      // Announce changes to screen readers (polite mode, non-disruptive)
+      if (announcements.length > 0 && this.elements.scoreAnnouncer) {
+        this.elements.scoreAnnouncer.textContent = announcements.join('. ');
+      }
+      
       this.renderGratitude(scores);
     },
 
@@ -382,6 +405,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
+      // Close overlays with Esc key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const activeOverlay = document.querySelector('.overlay.active');
+          if (activeOverlay) {
+            const domain = activeOverlay.dataset.domain;
+            if (domain) {
+              UI.toggleOverlay(domain, false);
+            }
+          }
+        }
+      });
+
       // Vision inputs
       Object.entries(UI.elements.visionInputs).forEach(([key, input]) => {
         if (!input) return;
@@ -564,9 +600,33 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(registration => console.log('Service Worker registered successfully:', registration))
           .catch(error => console.log('Service Worker registration failed:', error));
       }
+    },
+
+    setupDevPill() {
+      const devPill = UI.elements.devPill;
+      if (!devPill) return;
+
+      // Show dev pill if DEV_MODE is enabled
+      if (DEV_MODE) {
+        devPill.classList.add('visible');
+      }
+
+      // Click handler to open test suite
+      devPill.addEventListener('click', () => {
+        // Open test suite in new window
+        const testUrl = 'tests/index.html';
+        const testWindow = window.open(testUrl, 'drop-tests', 'width=1200,height=800');
+        
+        if (testWindow) {
+          UI.toast('Opening test suite...', 2000);
+        } else {
+          UI.toast('Please allow pop-ups to open test suite', 3000);
+        }
+      });
     }
   };
 
   App.init();
+  App.setupDevPill();
 
 });

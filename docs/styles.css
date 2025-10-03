@@ -168,7 +168,8 @@ body {
   letter-spacing: 0.5px;
 }
 
-.visually-hidden {
+.visually-hidden,
+.sr-announce {
   position: absolute !important;
   height: 1px; width: 1px;
   overflow: hidden;
@@ -498,7 +499,7 @@ body {
 
 @keyframes breath {
   0% { transform: scale(1); }
-  45% { transform: scale(1.09); } /* inhale (grow) */
+  45% { transform: scale(1.5); } /* inhale (grow) */
   90% { transform: scale(0.96); } /* exhale (shrink) - near end */
   100% { transform: scale(0.96); } /* hold at exhale */
 }
@@ -611,6 +612,10 @@ body {
 .nav-btn:hover { 
   background: var(--color-surface-2); 
   border-color: var(--color-border-hover);
+}
+.nav-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 .nav-btn.active { 
   color: var(--color-primary); 
