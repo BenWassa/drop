@@ -11,15 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
       wake: '', rest: '', run: 0, strength: false, skill: false,
       read: false, write: false, quadrant: 0, meditation: false,
       visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
-      visionMindFocus: '', visionSpiritFocus: ''
+      visionMindFocus: '', visionSpiritFocus: '',
+      history: []
     },
-    
+
     init() {
       const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
       this.state = { ...this.defaults, ...savedData };
+      this.ensureHistory();
       this.save();
     },
-    
+
+    ensureHistory() {
+      if (!Array.isArray(this.state.history)) {
+        this.state.history = [];
+      }
+    },
+
     save() {
       localStorage.setItem(this.DB_KEY, JSON.stringify(this.state));
     },
@@ -48,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (value === null || value === undefined) return false;
 
         const defaultType = typeof defaultValue;
+        if (Array.isArray(defaultValue)) {
+          return Array.isArray(value);
+        }
         if (defaultType === 'boolean') {
           return typeof value === 'boolean';
         }
@@ -63,6 +74,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     merge(payload) {
       this.state = { ...this.defaults, ...this.state, ...payload };
+      this.ensureHistory();
+      this.save();
+    },
+
+    recordHistory(scores) {
+      if (!scores || typeof scores !== 'object') return;
+
+      this.ensureHistory();
+
+      const today = new Date().toISOString().split('T')[0];
+      const safeScores = ['sleep', 'fitness', 'mind', 'spirit'].reduce((acc, domain) => {
+        const value = Number(scores[domain]);
+        const safeValue = Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
+        acc[domain] = safeValue;
+        return acc;
+      }, {});
+
+      const history = Array.isArray(this.state.history) ? [...this.state.history] : [];
+      const existingIndex = history.findIndex(entry => entry.date === today);
+      const snapshot = { date: today, scores: safeScores };
+
+      if (existingIndex >= 0) {
+        history[existingIndex] = snapshot;
+      } else {
+        history.push(snapshot);
+      }
+
+      const MAX_ENTRIES = 14;
+      if (history.length > MAX_ENTRIES) {
+        history.splice(0, history.length - MAX_ENTRIES);
+      }
+
+      this.state.history = history;
       this.save();
     }
   };
@@ -109,22 +153,26 @@ document.addEventListener('DOMContentLoaded', () => {
         sleep: {
           score: document.getElementById('sleep-score'),
           card: document.getElementById('sleep-card'),
-          meter: document.querySelector('[data-domain-meter="sleep"]')
+          meter: document.querySelector('[data-domain-meter="sleep"]'),
+          streak: document.getElementById('sleep-streak')
         },
         fitness: {
           score: document.getElementById('fitness-score'),
           card: document.getElementById('fitness-card'),
-          meter: document.querySelector('[data-domain-meter="fitness"]')
+          meter: document.querySelector('[data-domain-meter="fitness"]'),
+          streak: document.getElementById('fitness-streak')
         },
         mind: {
           score: document.getElementById('mind-score'),
           card: document.getElementById('mind-card'),
-          meter: document.querySelector('[data-domain-meter="mind"]')
+          meter: document.querySelector('[data-domain-meter="mind"]'),
+          streak: document.getElementById('mind-streak')
         },
         spirit: {
           score: document.getElementById('spirit-score'),
           card: document.getElementById('spirit-card'),
-          meter: document.querySelector('[data-domain-meter="spirit"]')
+          meter: document.querySelector('[data-domain-meter="spirit"]'),
+          streak: document.getElementById('spirit-streak')
         }
       },
       inputs: {
@@ -133,9 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
         runValue: document.getElementById('run-value'),
       }
     },
+    visionHints: {},
     toastTimer: null,
 
-    renderScores(scores) {
+    renderScores(scores, streaks = {}) {
       const announcements = [];
       for (const domain in scores) {
         const display = this.elements.scoreDisplays[domain];
@@ -155,6 +204,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (display.meter) {
           display.meter.setAttribute('aria-valuenow', scoreText);
           this.updateScoreRing(display.meter, clampedScore);
+        }
+        if (display.streak) {
+          const streakText = streaks && streaks[domain] ? streaks[domain] : '0 of 7 days';
+          display.streak.textContent = streakText;
         }
 
         if (previousValue !== null && previousValue !== scoreText) {
@@ -292,6 +345,36 @@ document.addEventListener('DOMContentLoaded', () => {
       if (visionInputs.fitness) visionInputs.fitness.value = state.visionFitnessFocus || '';
       if (visionInputs.mind) visionInputs.mind.value = state.visionMindFocus || '';
       if (visionInputs.spirit) visionInputs.spirit.value = state.visionSpiritFocus || '';
+      this.updateVisionHint(visionInputs.theme, state.visionTheme);
+      this.updateVisionHint(visionInputs.sleep, state.visionSleepFocus);
+      this.updateVisionHint(visionInputs.fitness, state.visionFitnessFocus);
+      this.updateVisionHint(visionInputs.mind, state.visionMindFocus);
+      this.updateVisionHint(visionInputs.spirit, state.visionSpiritFocus);
+    },
+
+    ensureVisionHint(input) {
+      if (!input || !input.dataset.emptyHint) return null;
+      if (!this.visionHints[input.id]) {
+        const hint = document.createElement('p');
+        hint.className = 'vision-empty-hint';
+        hint.id = `${input.id}-empty-hint`;
+        hint.textContent = input.dataset.emptyHint;
+        input.insertAdjacentElement('afterend', hint);
+        this.visionHints[input.id] = hint;
+      }
+      return this.visionHints[input.id];
+    },
+
+    updateVisionHint(input, value) {
+      if (!input || !input.dataset.emptyHint) return;
+      const hint = this.ensureVisionHint(input);
+      if (!hint) return;
+      hint.textContent = input.dataset.emptyHint;
+      if (value && value.trim().length > 0) {
+        hint.classList.remove('is-visible');
+      } else {
+        hint.classList.add('is-visible');
+      }
     },
 
     renderGratitude(scores) {
@@ -303,6 +386,36 @@ document.addEventListener('DOMContentLoaded', () => {
       } = this.elements.gratitude;
 
       if (!topDomain) return;
+
+      progressBars.forEach(bar => {
+        const domain = bar.dataset.progressDomain;
+        if (domain in scores) {
+          bar.style.setProperty('--progress', `${scores[domain]}%`);
+          bar.setAttribute('aria-valuenow', scores[domain]);
+          const fill = bar.querySelector('.progress-fill');
+          const scoreEl = bar.querySelector('.progress-score');
+          if (fill) fill.style.width = `${scores[domain]}%`;
+          if (scoreEl) scoreEl.textContent = scores[domain];
+        }
+      });
+
+      const allScoresZero = Object.values(scores).every(value => Number(value) === 0);
+
+      if (allScoresZero) {
+        topDomain.textContent = 'Log a win';
+        topScore.textContent = '—';
+        topDetail.textContent = 'Add your first entries to reveal highlights tailored to you.';
+
+        focusDomain.textContent = 'Where to start';
+        focusScore.textContent = '—';
+        focusDetail.textContent = 'Log sleep, movement or a reflection to surface your next focus.';
+
+        momentumDetail.textContent = 'Track a full day to unlock momentum stories and week-over-week comparisons.';
+        sleepSummary.textContent = 'Enter rest and wake times to unlock recovery coaching.';
+        runSummary.textContent = 'Record even a short walk to seed your fitness narrative.';
+        meditationSummary.textContent = 'Take two minutes to breathe and log it to spark the streak.';
+        return;
+      }
 
       const insights = App.generateInsights(scores);
 
@@ -318,18 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
       sleepSummary.textContent = insights.sleepSummary;
       runSummary.textContent = insights.runSummary;
       meditationSummary.textContent = insights.meditationSummary;
-
-      progressBars.forEach(bar => {
-        const domain = bar.dataset.progressDomain;
-        if (domain in scores) {
-          bar.style.setProperty('--progress', `${scores[domain]}%`);
-          bar.setAttribute('aria-valuenow', scores[domain]);
-          const fill = bar.querySelector('.progress-fill');
-          const scoreEl = bar.querySelector('.progress-score');
-          if (fill) fill.style.width = `${scores[domain]}%`;
-          if (scoreEl) scoreEl.textContent = scores[domain];
-        }
-      });
     }
   };
 
@@ -385,7 +486,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mind: this.calcMind(),
         spirit: this.calcSpirit()
       };
-      UI.renderScores(scores);
+      Store.recordHistory(scores);
+      const streaks = this.calculateStreaks();
+      UI.renderScores(scores, streaks);
     },
 
     initInstallPrompt() {
@@ -575,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', (event) => {
           const value = event.target.value.trim();
           const storeKey = this.mapVisionKey(key);
+          UI.updateVisionHint(event.target, event.target.value);
           if (storeKey) {
             Store.update(storeKey, value);
           }
@@ -696,6 +800,75 @@ document.addEventListener('DOMContentLoaded', () => {
       return Math.round((duration / 60) * 10) / 10;
     },
 
+    calculateStreaks() {
+      const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
+      const recent = history.slice(-7);
+      const domains = ['sleep', 'fitness', 'mind', 'spirit'];
+      const streaks = {};
+      const denominator = recent.length === 0 ? 7 : recent.length;
+
+      domains.forEach(domain => {
+        const activeDays = recent.reduce((count, entry) => {
+          const value = Number(entry?.scores?.[domain]);
+          return count + (Number.isFinite(value) && value > 0 ? 1 : 0);
+        }, 0);
+        const labelDenominator = denominator === 1 ? 'day' : 'days';
+        const totalLabel = recent.length === 0 ? `7 ${labelDenominator}` : `${denominator} ${labelDenominator}`;
+        streaks[domain] = `${activeDays} of ${totalLabel}`;
+      });
+
+      return streaks;
+    },
+
+    averageForDomain(entries, domain) {
+      if (!entries || entries.length === 0) return 0;
+      const total = entries.reduce((sum, entry) => {
+        const value = Number(entry?.scores?.[domain]);
+        return sum + (Number.isFinite(value) ? value : 0);
+      }, 0);
+      return total / entries.length;
+    },
+
+    computeWeekOverWeekChanges(domainLabels) {
+      const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
+      if (history.length === 0) {
+        return '';
+      }
+
+      const sorted = history.slice().sort((a, b) => a.date.localeCompare(b.date));
+      const recent = sorted.slice(-7);
+      const previous = sorted.slice(-14, -7);
+
+      if (recent.length === 0) {
+        return '';
+      }
+
+      if (recent.length < 7) {
+        return 'Log a full week to unlock week-over-week comparisons.';
+      }
+
+      if (previous.length === 0) {
+        return 'Log another week to unlock week-over-week comparisons.';
+      }
+
+      const statements = Object.keys(domainLabels).map(domain => {
+        const currentAvg = this.averageForDomain(recent, domain);
+        const previousAvg = this.averageForDomain(previous, domain);
+        let percentChange;
+        if (previousAvg === 0) {
+          percentChange = currentAvg === 0 ? 0 : 100;
+        } else {
+          percentChange = ((currentAvg - previousAvg) / previousAvg) * 100;
+        }
+        const rounded = Math.round(percentChange);
+        const normalized = Object.is(rounded, -0) ? 0 : rounded;
+        const sign = normalized > 0 ? '+' : '';
+        return `${domainLabels[domain]} ${sign}${normalized}% vs last week.`;
+      });
+
+      return statements.join(' ');
+    },
+
     generateInsights(scores) {
       const domainLabels = {
         sleep: 'Sleep',
@@ -754,9 +927,13 @@ document.addEventListener('DOMContentLoaded', () => {
         : 'A two-minute pause could reset your baseline before the next sprint.';
 
       const averageScore = Math.round(entries.reduce((total, [, val]) => total + val, 0) / entries.length);
-      const momentum = averageScore >= 75
+      const momentumBase = averageScore >= 75
         ? `Strong average (${averageScore}) across domains—build on what’s working.`
         : `Average sits at ${averageScore}. Choose one ritual to upgrade and lift the whole system.`;
+      const changeNarrative = this.computeWeekOverWeekChanges(domainLabels).trim();
+      const momentum = changeNarrative
+        ? `${momentumBase} ${changeNarrative}`
+        : momentumBase;
 
       return {
         topDomain,

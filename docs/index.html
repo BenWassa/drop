@@ -120,21 +120,25 @@
           <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
           <div class="card-title">Sleep</div>
           <div class="card-score" id="sleep-card">0</div>
+          <div class="card-streak" id="sleep-streak">0 of 7 days</div>
         </div>
         <div class="card" data-domain="fitness">
           <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
           <div class="card-title">Fitness</div>
           <div class="card-score" id="fitness-card">0</div>
+          <div class="card-streak" id="fitness-streak">0 of 7 days</div>
         </div>
         <div class="card" data-domain="mind">
           <img src="icons/mind.svg" class="card-icon" alt="Mind">
           <div class="card-title">Mind</div>
           <div class="card-score" id="mind-card">0</div>
+          <div class="card-streak" id="mind-streak">0 of 7 days</div>
         </div>
         <div class="card" data-domain="spirit">
           <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
           <div class="card-title">Spirit</div>
           <div class="card-score" id="spirit-card">0</div>
+          <div class="card-streak" id="spirit-streak">0 of 7 days</div>
         </div>
       </div>
     </section>
@@ -150,7 +154,7 @@
         <h3>Weekly North Star</h3>
         <p>Anchor the week with a single theme or feeling you want to cultivate.</p>
         <label class="input-label" for="vision-theme">Theme</label>
-        <textarea id="vision-theme" class="vision-textarea" rows="3" placeholder="Example: Protect deep sleep and prime creative energy." maxlength="200"></textarea>
+        <textarea id="vision-theme" class="vision-textarea" rows="3" placeholder="Example: Protect deep sleep and prime creative energy." maxlength="200" data-empty-hint="Set a weekly mantra you can return to when decisions stack up."></textarea>
         <p class="vision-tip">Keep it short and memorable—something you can revisit on the fly.</p>
       </article>
 
@@ -164,7 +168,7 @@
             </div>
           </header>
           <label class="input-label" for="vision-sleep-focus">Focus statement</label>
-          <textarea id="vision-sleep-focus" class="vision-textarea" rows="3" placeholder="Lights out by 10:30pm with devices off." maxlength="160"></textarea>
+          <textarea id="vision-sleep-focus" class="vision-textarea" rows="3" placeholder="Lights out by 10:30pm with devices off." maxlength="160" data-empty-hint="Try setting a bedtime goal to anchor your recovery."></textarea>
           <ul class="vision-prompts">
             <li>What habit ensures you wake sharp?</li>
             <li>Where can you remove friction from the wind-down?</li>
@@ -180,7 +184,7 @@
             </div>
           </header>
           <label class="input-label" for="vision-fitness-focus">Focus statement</label>
-          <textarea id="vision-fitness-focus" class="vision-textarea" rows="3" placeholder="Two strength blocks + one tempo run." maxlength="160"></textarea>
+          <textarea id="vision-fitness-focus" class="vision-textarea" rows="3" placeholder="Two strength blocks + one tempo run." maxlength="160" data-empty-hint="Drop in the training block that will move the needle this week."></textarea>
           <ul class="vision-prompts">
             <li>Which session creates the biggest return?</li>
             <li>How will you celebrate consistency?</li>
@@ -196,7 +200,7 @@
             </div>
           </header>
           <label class="input-label" for="vision-mind-focus">Focus statement</label>
-          <textarea id="vision-mind-focus" class="vision-textarea" rows="3" placeholder="Read 20 pages before checking messages." maxlength="160"></textarea>
+          <textarea id="vision-mind-focus" class="vision-textarea" rows="3" placeholder="Read 20 pages before checking messages." maxlength="160" data-empty-hint="Pick one input that will sharpen your thinking each day."></textarea>
           <ul class="vision-prompts">
             <li>Which questions are you exploring?</li>
             <li>Where can you trade scrolling for study?</li>
@@ -212,7 +216,7 @@
             </div>
           </header>
           <label class="input-label" for="vision-spirit-focus">Focus statement</label>
-          <textarea id="vision-spirit-focus" class="vision-textarea" rows="3" placeholder="Daily gratitude note before shutting down work." maxlength="160"></textarea>
+          <textarea id="vision-spirit-focus" class="vision-textarea" rows="3" placeholder="Daily gratitude note before shutting down work." maxlength="160" data-empty-hint="Name the relationship or ritual you want to pour into this week."></textarea>
           <ul class="vision-prompts">
             <li>What practice keeps you centred?</li>
             <li>Who can you intentionally pour into?</li>

@@ -421,6 +421,22 @@ body {
   box-shadow: 0 0 0 2px rgba(79, 138, 245, 0.15);
 }
 
+.vision-empty-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  line-height: 1.5;
+  padding: 10px 12px;
+  border-radius: var(--radius-lg);
+  border: 1px dashed rgba(79, 138, 245, 0.25);
+  background: rgba(79, 138, 245, 0.08);
+  display: none;
+}
+
+.vision-empty-hint.is-visible {
+  display: block;
+}
+
 .vision-tip {
   margin-top: 12px;
   font-size: 12px;
@@ -745,6 +761,13 @@ body {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.card-streak {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 /* === FOOTER NAVIGATION === */
