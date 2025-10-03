@@ -1221,13 +1221,14 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     setupDevPill() {
+      // Only setup dev features when DEV_MODE is enabled
+      if (!DEV_MODE) return;
+
       const devPill = UI.elements.devPill;
       if (!devPill) return;
 
-      // Show dev pill if DEV_MODE is enabled
-      if (DEV_MODE) {
-        devPill.classList.add('visible');
-      }
+      // Show dev pill
+      devPill.classList.add('visible');
 
       // Click handler to open test suite
       devPill.addEventListener('click', () => {
@@ -1244,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Setup loader toggle
       const loaderToggle = document.getElementById('dev-loader-toggle');
-      if (loaderToggle && DEV_MODE) {
+      if (loaderToggle) {
         loaderToggle.classList.add('visible');
         
         // Check localStorage for saved preference
