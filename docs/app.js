@@ -466,18 +466,34 @@ document.addEventListener('DOMContentLoaded', () => {
       Store.init();
       UI.initDate();
       UI.setVisionFields(Store.state);
-      // Show loading overlay with a 5s breath animation synchronized with the overlay hide
-      const animDurationMs = 5000; // matches the CSS breath animation duration
-      UI.showLoading(true);
+      
+      // Check if loading overlay should be skipped (dev mode toggle)
+      const skipLoader = DEV_MODE && localStorage.getItem('dev_disable_loader') === 'true';
+      
+      if (skipLoader) {
+        // Skip loading overlay entirely
+        UI.showLoading(false);
+      } else {
+        // Show loading overlay with a 5s breath animation synchronized with the overlay hide
+        const animDurationMs = 5000; // matches the CSS breath animation duration
+        UI.showLoading(true);
+      }
+      
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
       this.initInstallPrompt();
       this.showPage('home');
 
+      // Skip loading animation logic if disabled
+      if (skipLoader) {
+        return;
+      }
+
       // Hide loading overlay when the breath animation finishes (or fallback after animDurationMs)
       const logo = document.querySelector('.loading-logo');
       let fallbackTimeout = null;
+      const animDurationMs = 5000;
       const hideOverlay = () => {
         if (fallbackTimeout) clearTimeout(fallbackTimeout);
         UI.showLoading(false);
@@ -1225,6 +1241,39 @@ document.addEventListener('DOMContentLoaded', () => {
           UI.toast('Please allow pop-ups to open test suite', 3000);
         }
       });
+
+      // Setup loader toggle
+      const loaderToggle = document.getElementById('dev-loader-toggle');
+      if (loaderToggle && DEV_MODE) {
+        loaderToggle.classList.add('visible');
+        
+        // Check localStorage for saved preference
+        const loaderDisabled = localStorage.getItem('dev_disable_loader') === 'true';
+        if (loaderDisabled) {
+          loaderToggle.classList.add('disabled');
+          loaderToggle.title = 'Loading screen disabled (click to enable)';
+        } else {
+          loaderToggle.title = 'Loading screen enabled (click to disable)';
+        }
+
+        loaderToggle.addEventListener('click', () => {
+          const isCurrentlyDisabled = loaderToggle.classList.contains('disabled');
+          
+          if (isCurrentlyDisabled) {
+            // Enable loader
+            localStorage.removeItem('dev_disable_loader');
+            loaderToggle.classList.remove('disabled');
+            loaderToggle.title = 'Loading screen enabled (click to disable)';
+            UI.toast('Loading screen enabled', 2000);
+          } else {
+            // Disable loader
+            localStorage.setItem('dev_disable_loader', 'true');
+            loaderToggle.classList.add('disabled');
+            loaderToggle.title = 'Loading screen disabled (click to enable)';
+            UI.toast('Loading screen disabled - reload to test', 2000);
+          }
+        });
+      }
     },
 
     async checkCriticalResources() {

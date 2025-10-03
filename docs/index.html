@@ -36,6 +36,9 @@
 
   <!-- Developer pill (clickable) and small toast for dev messages -->
   <div class="dev-pill" id="dev-pill" title="Toggle developer mode">DEV</div>
+  <div class="dev-loader-toggle" id="dev-loader-toggle" title="Toggle loading screen">
+    <span id="dev-loader-icon">🔄</span>
+  </div>
   <div class="dev-toast" id="dev-toast" aria-live="polite"></div>
   <div class="app-toast" id="app-toast" aria-live="polite" role="status"></div>
 
@@ -200,7 +203,7 @@
             </div>
           </header>
           <label class="input-label" for="vision-mind-focus">Focus statement</label>
-          <textarea id="vision-mind-focus" class="vision-textarea" rows="4" placeholder="Read 20 pages before checking messages." maxlength="160" data-empty-hint="Pick one input that will sharpen your thinking each day."></textarea>
+          <textarea id="vision-mind-focus" class="vision-textarea" rows="3" placeholder="Read 20 pages before checking messages." maxlength="160" data-empty-hint="Pick one input that will sharpen your thinking each day."></textarea>
           <ul class="vision-prompts">
             <li>Which questions are you exploring?</li>
             <li>Where can you trade scrolling for study?</li>
