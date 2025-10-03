@@ -249,6 +249,11 @@ body {
 .score-item[data-domain="mind"] .score-ring__arc { stroke: var(--mind); }
 .score-item[data-domain="spirit"] .score-ring__arc { stroke: var(--spirit); }
 
+.score-item[data-domain="fitness"] .fitness-icon path,
+.score-item[data-domain="fitness"] .fitness-icon circle {
+  fill: var(--fitness);
+}
+
 .score-item[data-domain="sleep"] .score-meter {
   box-shadow: 0 20px 38px rgba(0, 0, 0, 0.45), 0 0 28px rgba(30, 144, 255, 0.22);
 }
