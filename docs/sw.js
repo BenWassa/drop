@@ -63,8 +63,11 @@ self.addEventListener('fetch', event => {
               return networkResponse;
             }
 
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+            // Only cache requests from the same origin to avoid chrome-extension errors
+            if (event.request.url.startsWith(self.location.origin)) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+            }
             return networkResponse;
           });
       })
