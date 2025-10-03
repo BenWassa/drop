@@ -199,32 +199,33 @@ Older versions preserved in `archive/`:
 - `V3.1/` - Pre-docs iteration
 
 Current live version is in `docs/` folder.
-Place new or updated icons in `V3.1/icons/` and reference them from `index.html` or `manifest.json`. The manifest expects `icons/drop_icon.svg`.
 
-Recommended icons to add/check:
-- `vision.svg` (for "Vision")
-- `gratitude.svg` (for "Gratitude")
+## 🛠️ Technical Notes
 
-## Notes about the service worker
-- `sw.js` caches the app shell for offline use. If you change the files listed in `sw.js`, bump the `CACHE_NAME` to force an update.
+### Service Worker
+The `sw.js` caches the app shell for offline use. When updating cached files, bump the `CACHE_NAME` constant to force a cache refresh.
 
-## Development & Testing
-- Use the browser DevTools Application tab to inspect the service worker and manifest.
-- Clear site data or unregister the SW when testing major asset changes.
+### Icons
+All icons are in `docs/icons/` as SVG files:
+- Domain icons: `sleep.svg`, `fitness.svg`, `mind.svg`, `spirit.svg`
+- Navigation: `vision.svg`, `gratitude.svg`
+- App icon: `drop_icon.svg`, `drop_rounded.png`
 
-## Contributing
-1. Fork and create a branch for your feature/fix.
-2. Make changes and test locally (see Quick start).
-3. Open a pull request with a summary of changes.
+### Browser DevTools
+- Use Application tab to inspect service worker status
+- Check manifest and PWA installation
+- Clear site data when testing major changes
 
-## License
-This repo currently has no license file. Add `LICENSE` if you want to publish under an open-source license.
+## 📄 License
 
-----
+MIT License - See LICENSE file for details
 
-If you'd like, I can also:
-- Add a small `package.json` and development scripts (start, serve),
-- Add a basic test harness or linting, or
-- Create a short screenshot and usage section for the README.
+## 🔗 Links
 
-Which of those would you like next?
+- **Live App**: https://benwassa.github.io/drop/
+- **Repository**: https://github.com/BenWassa/drop
+- **Test Suite**: https://benwassa.github.io/drop/tests/
+
+---
+
+Built with ❤️ by Benjamin Haddon
