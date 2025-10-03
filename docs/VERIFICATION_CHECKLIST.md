@@ -5,7 +5,7 @@ Use this checklist to verify all sprint deliverables before merging to `main`.
 ## ✅ Accessibility Enhancements
 
 ### ARIA Attributes
-- [ ] Open DevTools → Elements → Inspect `.score-circle` elements
+- [ ] Open DevTools → Elements → Inspect `.score-meter` elements
 - [ ] Verify each has `role="meter"`, `aria-valuemin="0"`, `aria-valuemax="100"`, `aria-valuenow`
 - [ ] Verify each has `aria-label` (e.g., "Sleep score")
 
@@ -87,7 +87,7 @@ npm run test:visual
 - [ ] `gratitude-page-baseline.png`
 - [ ] `sleep-overlay-baseline.png`
 - [ ] `fitness-overlay-baseline.png`
-- [ ] `score-circles.png`
+- [ ] `score-meters.png`
 - [ ] `nav-focus.png`
 - [ ] `progress-bars.png`
 

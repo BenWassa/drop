@@ -43,30 +43,66 @@
     <!-- Screen reader announcements for score updates -->
     <div class="sr-announce" id="score-announcer" aria-live="polite" aria-atomic="true"></div>
     <div class="scores-grid">
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99" aria-label="Sleep score">
-          <div class="score-value" id="sleep-score">99</div>
+      <article class="score-item" data-domain="sleep">
+        <div class="score-meter" data-domain-meter="sleep" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Sleep score">
+          <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="sleep-score">0</span>
+          </div>
+          <div class="score-meter__icon" aria-hidden="true">
+            <img src="icons/sleep.svg" alt="">
+          </div>
         </div>
         <div class="score-name">Sleep</div>
-      </div>
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99" aria-label="Fitness score">
-          <div class="score-value" id="fitness-score">99</div>
+      </article>
+      <article class="score-item" data-domain="fitness">
+        <div class="score-meter" data-domain-meter="fitness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Fitness score">
+          <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="fitness-score">0</span>
+          </div>
+          <div class="score-meter__icon" aria-hidden="true">
+            <img src="icons/fitness.svg" alt="">
+          </div>
         </div>
         <div class="score-name">Fitness</div>
-      </div>
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99" aria-label="Mind score">
-          <div class="score-value" id="mind-score">99</div>
+      </article>
+      <article class="score-item" data-domain="mind">
+        <div class="score-meter" data-domain-meter="mind" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Mind score">
+          <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="mind-score">0</span>
+          </div>
+          <div class="score-meter__icon" aria-hidden="true">
+            <img src="icons/mind.svg" alt="">
+          </div>
         </div>
         <div class="score-name">Mind</div>
-      </div>
-      <div class="score-item">
-        <div class="score-circle" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99" aria-label="Spirit score">
-          <div class="score-value" id="spirit-score">99</div>
+      </article>
+      <article class="score-item" data-domain="spirit">
+        <div class="score-meter" data-domain-meter="spirit" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Spirit score">
+          <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+            <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="score-meter__center">
+            <span class="score-value" id="spirit-score">0</span>
+          </div>
+          <div class="score-meter__icon" aria-hidden="true">
+            <img src="icons/spirit.svg" alt="">
+          </div>
         </div>
         <div class="score-name">Spirit</div>
-      </div>
+      </article>
     </div>
   </header>
 
