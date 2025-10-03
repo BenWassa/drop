@@ -23,6 +23,10 @@
   --color-primary-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
   --color-shadow-primary: rgba(79, 138, 245, 0.2);
 
+  --score-ring-size: 96px;
+  --score-ring-stroke: 10px;
+  --score-ring-gap: 0.22;
+
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 var(--color-surface-inset);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
@@ -127,46 +131,132 @@ body {
 .install-button__icon {
   font-size: 16px;
 }
-.scores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 0 8px; }
-.score-item { 
-  text-align: center; 
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  padding: 0 4px;
+}
+
+.score-item {
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding-bottom: 28px;
+  position: relative;
 }
 
-.score-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 3px solid var(--color-border);
+.score-meter {
+  position: relative;
+  width: var(--score-ring-size);
+  height: var(--score-ring-size);
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(28, 28, 33, 0.95) 0%, rgba(10, 10, 14, 0.75) 100%);
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.45);
+  overflow: visible;
 }
 
-.score-item:nth-child(1) .score-circle { border-color: var(--sleep); }
-.score-item:nth-child(2) .score-circle { border-color: var(--fitness); }
-.score-item:nth-child(3) .score-circle { border-color: var(--mind); }
-.score-item:nth-child(4) .score-circle { border-color: var(--spirit); }
+.score-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(180deg);
+}
 
-.score-value { 
-  font-size: 32px; 
-  font-weight: 600; 
-  color: var(--color-text-primary); 
+.score-ring__track,
+.score-ring__arc {
+  fill: none;
+  stroke-width: var(--score-ring-stroke);
+}
+
+.score-ring__track {
+  stroke: rgba(240, 242, 245, 0.12);
+}
+
+.score-ring__arc {
+  stroke: var(--color-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--transition-slow), stroke 0.2s linear;
+}
+
+.score-item[data-domain="sleep"] .score-ring__arc { stroke: var(--sleep); }
+.score-item[data-domain="fitness"] .score-ring__arc { stroke: var(--fitness); }
+.score-item[data-domain="mind"] .score-ring__arc { stroke: var(--mind); }
+.score-item[data-domain="spirit"] .score-ring__arc { stroke: var(--spirit); }
+
+.score-item[data-domain="sleep"] .score-meter {
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.45), 0 0 28px rgba(30, 144, 255, 0.22);
+}
+
+.score-item[data-domain="fitness"] .score-meter {
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.45), 0 0 28px rgba(255, 59, 48, 0.22);
+}
+
+.score-item[data-domain="mind"] .score-meter {
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.45), 0 0 28px rgba(124, 58, 237, 0.22);
+}
+
+.score-item[data-domain="spirit"] .score-meter {
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.45), 0 0 28px rgba(22, 163, 74, 0.22);
+}
+
+.score-meter__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -56%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.score-value {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--color-text-primary);
   font-family: var(--font-mono);
   line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.score-meter__icon {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(18, 18, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.45);
+}
+
+.score-meter__icon img {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 .score-name {
   font-size: 11px;
   color: var(--color-text-tertiary);
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.55px;
+  margin-top: 16px;
+}
+
+@media (max-width: 360px) {
+  :root {
+    --score-ring-size: 88px;
+  }
 }
 
 .visually-hidden,
