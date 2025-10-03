@@ -234,9 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const visibleLength = circumference * (1 - gapFraction);
       const gapLength = circumference - visibleLength;
       const dashArray = `${visibleLength.toFixed(2)} ${gapLength.toFixed(2)}`;
+      
+      // Set arc dasharray with gap
       arc.style.strokeDasharray = dashArray;
+      
+      // Keep track as complete circle (no gap)
       if (track) {
-        track.style.strokeDasharray = dashArray;
+        track.style.strokeDasharray = 'none';
       }
 
       const clamped = Math.max(0, Math.min(100, Number(score) || 0));
