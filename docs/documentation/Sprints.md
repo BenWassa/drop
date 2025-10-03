@@ -1,0 +1,130 @@
+# 🚀 Sprint Commissions — Drop PWA
+
+## Sprint 1 — **Stability & Persistence (Launch Blockers)**
+
+### Commission 1: JSON Import / Export
+
+**Goal:** Add backup/restore for `lifeTrackerData`.
+
+**Spec:**
+
+* Add “Export Data” button → downloads `lifeTrackerData` as `.json` file.
+* Add “Import Data” button → opens file picker, merges parsed JSON into Store, saves state.
+* Must validate schema keys against `Store.defaults` before merging.
+* Use **`Blob` + `URL.createObjectURL`** for export.
+* Use **`FileReader` API** for import.
+* Provide simple toast confirmation (“Data exported”, “Data imported”).
+
+---
+
+### Commission 2: Navigation & Scroll Fix
+
+**Goal:** Ensure mobile navigation works across iOS Safari & Android Chrome.
+
+**Spec:**
+
+* Fix `.app-main` scroll issues (currently overflow/viewport bug).
+* Footer nav (`.bottom-nav`) must remain tappable, not blocked by content.
+* Test overlays (`.overlay`) → scrolling inside overlay must not break global scroll.
+* Deliver CSS patch + regression Playwright tests.
+* Verify on `Pixel 5` and `iPhone 12` configs (already in `playwright.config.js`).
+
+---
+
+### Commission 3: Service Worker Cache Versioning
+
+**Goal:** Prevent stale builds when new versions ship.
+
+**Spec:**
+
+* Increment `CACHE_NAME` with app version (e.g., `drop-cache-v3-0-1`).
+* On `activate`, delete all old caches not matching.
+* Confirm install/fetch still works offline.
+* Add console log “Cache updated to vX.Y.Z” for debugging.
+
+---
+
+## Sprint 2 — **Stickiness & Insight**
+
+### Commission 4: Smart Empty States
+
+**Goal:** Replace placeholders with contextual guidance.
+
+**Spec:**
+
+* Vision page: if focus fields are empty, show inline example prompts (e.g., “Try setting a bedtime goal”).
+* Gratitude page: if scores = 0, show motivational nudge instead of blank copy.
+* Implementation: conditional rendering inside `UI.renderGratitude()` + `UI.setVisionFields()`.
+
+---
+
+### Commission 5: Data-Driven Gratitude Insights
+
+**Goal:** Replace generic “Momentum copy” with measurable comparisons.
+
+**Spec:**
+
+* Extend `App.generateInsights()` to compare this week vs last week.
+* Calculate % change in each domain.
+* Inject into narrative: e.g., “Sleep +10% vs last week.”
+* Store still remains single-object; just compute deltas in runtime.
+
+---
+
+### Commission 6: Streaks
+
+**Goal:** Add streak calculation for each domain.
+
+**Spec:**
+
+* Track 7-day history per domain (add `history` array to Store).
+* Calculate “X of last 7 days” streak for each.
+* Display under domain score in Home.
+* Graceful logic: “6 of 7” not “broken streak.”
+
+---
+
+## Sprint 3 — **Delight & Progressive Reveal**
+
+### Commission 7: Quick Log Defaults
+
+**Goal:** Long-press a card to auto-log last values.
+
+**Spec:**
+
+* On `.card` long-press → copy yesterday’s values into today’s state.
+* Fire `Store.update()` for each domain key.
+* Animate card briefly (pulse glow).
+
+---
+
+### Commission 8: Progressive Unlocks
+
+**Goal:** Reveal deeper insights after user activity.
+
+**Spec:**
+
+* If app has >14 days of logs, unlock secondary UI (mini graphs, extra prompts).
+* Lock behind flag until condition met.
+* Add subtle “Unlocked new view” toast.
+
+---
+
+### Commission 9: Reward Animations
+
+**Goal:** Make completion satisfying.
+
+**Spec:**
+
+* On domain score = 100, trigger sparkle/confetti CSS animation inside `.score-circle`.
+* On overlay save, add subtle sound (ding).
+* Must be toggleable in settings.
+
+---
+
+# 📋 Delivery Rules
+
+* All commissions must ship in **vanilla JS, CSS, HTML only** (no frameworks).
+* Tests: extend Playwright suite with regression checks for new features.
+* No new files unless required; keep within `index.html`, `styles.css`, `app.js`, `sw.js`.
+
