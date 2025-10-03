@@ -56,6 +56,7 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y pinch-zoom;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
@@ -567,6 +568,8 @@ body {
   align-items: center;
   gap: 12px;
   min-height: 180px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.15);
+  touch-action: manipulation;
 }
 .card:hover { transform: translateY(-4px); border-color: var(--color-border-hover); box-shadow: var(--shadow-lg); }
 .card:active { transform: scale(0.97) translateY(-2px); box-shadow: var(--shadow-sm); }
@@ -608,6 +611,10 @@ body {
   padding: 12px 24px;
   border-radius: var(--radius-lg);
   position: relative;
+  min-height: 48px;
+  min-width: 48px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.2);
+  touch-action: manipulation;
 }
 .nav-btn:hover { 
   background: var(--color-surface-2); 
@@ -666,6 +673,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.2);
+  touch-action: manipulation;
 }
 .close-btn:hover { background: var(--color-surface-1); color: var(--color-text-primary); transform: rotate(90deg); }
 .overlay-content { flex: 1; overflow-y: auto; padding-right: 8px; }
@@ -697,6 +708,9 @@ body {
   transition: var(--transition-fast);
   font-weight: 600;
   font-size: 14px;
+  min-height: 48px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.15);
+  touch-action: manipulation;
 }
 .btn:hover { background: var(--color-surface-2); border-color: var(--color-border-hover); color: var(--color-text-primary); }
 .btn.active {
@@ -726,6 +740,10 @@ body {
   cursor: pointer;
   font-size: 24px;
   transition: var(--transition-fast);
+  min-width: 44px;
+  min-height: 44px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.2);
+  touch-action: manipulation;
 }
 .preset-btn:hover { background: var(--color-surface-1); color: var(--color-text-primary); }
 .preset-btn:active { transform: scale(0.95); }
@@ -744,6 +762,9 @@ body {
   transition: var(--transition-fast);
   font-weight: 500;
   line-height: 1.5;
+  min-height: 48px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.15);
+  touch-action: manipulation;
 }
 .quad-btn:hover { background: var(--color-surface-2); border-color: var(--color-border-hover); color: var(--color-text-primary); }
 .quad-btn.active {

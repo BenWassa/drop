@@ -1,53 +1,204 @@
-# Drop — Life Tracker
+# drop — Daily Domain Tracker PWA
 
-A small Progressive Web App (PWA) for tracking daily life domains: Sleep, Fitness, Mind, and Spirit.
+A minimalist Progressive Web App for tracking daily life domains: Sleep, Fitness, Mind, and Spirit.
 
-This repository contains several versions (V2.2, V3.0, V3.1). The `V3.1` folder is the active UI iteration with a compact dashboard, domain cards, and PWA support.
+**Live App:** https://benwassa.github.io/drop/
 
-## Features
-- Minimal dashboard showing per-domain scores
-- Domain cards with large scores and icons
-- PWA support: `manifest.json` and `sw.js` (service worker) for offline caching
-- Uses Google Fonts (Ubuntu for UI text, Wix Madefor Display for numeric scores)
-- Lightweight, no build step required — plain HTML/CSS/JS
+## 📱 Features
+- **Single Page Application** - Seamless navigation without page reloads
+- **PWA Support** - Install on mobile/desktop, works offline
+- **Accessible** - ARIA attributes, screen reader support, keyboard navigation
+- **Mobile-Optimized** - Touch-friendly tap targets, smooth scrolling
+- **Test Suite** - DOM tests (QUnit) and visual regression tests (Playwright)
 
-## Quick start (local)
-Open the app locally from the `V3.1` folder. For best results serve over HTTP (service worker requires a secure context or localhost).
+## 🏗️ Project Structure
 
-Using Python (PowerShell):
-
-```powershell
-# from workspace root
-cd .\V3.1
-python -m http.server 8000
-# then open http://localhost:8000 in your browser
+```
+drop/
+├── docs/                      # GitHub Pages root (live app)
+│   ├── index.html            # Main app entry point
+│   ├── app.js                # App logic & state management
+│   ├── styles.css            # Styling & design tokens
+│   ├── manifest.json         # PWA manifest
+│   ├── sw.js                 # Service worker for offline support
+│   ├── icons/                # App icons and domain SVGs
+│   ├── tests/                # Test suite
+│   │   ├── index.html        # QUnit test runner
+│   │   ├── dom.test.js       # DOM tests
+│   │   ├── visual.test.js    # Playwright visual tests
+│   │   └── README.md         # Test documentation
+│   ├── package.json          # Dependencies & scripts
+│   ├── playwright.config.js  # Playwright configuration
+│   ├── SPRINT_SUMMARY.md     # Sprint deliverables
+│   └── VERIFICATION_CHECKLIST.md
+├── archive/                   # Old versions (V2.2, V3.0, V3.1)
+└── README.md                 # This file
 ```
 
-Using Node (http-server):
+## 🚀 Quick Start
 
-```powershell
-cd .\V3.1
-npx http-server -p 8000
-# then open http://localhost:8000
+### View Live App
+Visit: **https://benwassa.github.io/drop/**
+
+### Run Locally
+```bash
+# Serve from docs folder
+cd docs
+npx serve -p 3000
+
+# Or use Python
+python -m http.server 3000
+
+# Then open http://localhost:3000
 ```
 
-If you just open `V3.1/index.html` as a file, the UI will render but the service worker and some PWA features won't work.
+### Install as PWA
+1. Open the app in Chrome/Edge/Safari
+2. Look for "Install" prompt or menu option
+3. Add to home screen (mobile) or desktop
 
-## Files of interest (V3.1)
-- `index.html` — main UI
-- `styles.css` — styling and design tokens
-- `app.js` — app logic, event binding, score calc, and service worker registration
-- `sw.js` — service worker that caches core assets
-- `manifest.json` — PWA manifest
-- `icons/` — SVG icons used by the app
-- `icons/drop_app_icon.png` — PNG used as the website favicon (referenced in `index.html`)
+## 🧪 Development
 
-## Styling / Design notes
-- Design tokens and colors live in `styles.css` (`:root`) — domain colors include `--sleep`, `--fitness`, `--mind`, and `--spirit`.
-- Numeric scores use the Wix Madefor Display font; UI text uses Ubuntu (loaded from Google Fonts in `index.html`).
-- The header was changed to show clean circular score badges; domain icons were moved into the larger domain cards to reduce redundancy.
+### Run Tests
+```bash
+cd docs
 
-## Adding / Updating icons
+# DOM Tests (QUnit)
+# Open tests/index.html in browser
+# Or: http://localhost:3000/tests/
+
+# Visual Tests (Playwright)
+npm install
+npx playwright install
+npm run test:visual
+
+# Update visual baselines
+npm run test:visual:update
+```
+
+### Enable Dev Mode
+```javascript
+// In docs/app.js, line 5:
+const DEV_MODE = true;
+```
+- Shows dev pill in UI
+- Click pill to open test suite
+- Loading overlay doesn't auto-hide
+
+## 📐 Architecture
+
+### Single Page App (SPA)
+- Pages: Home, Vision, Gratitude
+- Navigation via footer buttons
+- No page reloads - uses `classList.toggle('active')`
+- State persisted in `localStorage`
+
+### Score Calculation
+- **Sleep**: Hours between rest and wake time
+- **Fitness**: Run distance + strength + skill practice
+- **Mind**: Reading + writing activities
+- **Spirit**: Meditation + mood quadrant
+
+### Accessibility
+- ARIA meter roles on score circles
+- aria-live announcements for score updates
+- Keyboard navigation (Tab, Esc)
+- Focus-visible indicators
+- Screen reader compatible
+
+### Mobile Optimization
+- Touch-action: manipulation (prevents double-tap zoom)
+- Min tap targets: 44px × 44px
+- -webkit-tap-highlight-color for visual feedback
+- Smooth scrolling with -webkit-overflow-scrolling
+- Safe area insets for notched devices
+
+## 🎨 Design System
+
+Colors defined in `docs/styles.css`:
+- `--sleep`: #1e90ff (Blue)
+- `--fitness`: #ff3b30 (Red)
+- `--mind`: #7c3aed (Purple)
+- `--spirit`: #16a34a (Green)
+
+Fonts:
+- UI Text: Ubuntu (Google Fonts)
+- Scores: Wix Madefor Display (Google Fonts)
+
+## 📚 Documentation
+
+- **Sprint Summary**: `docs/SPRINT_SUMMARY.md`
+- **Verification Checklist**: `docs/VERIFICATION_CHECKLIST.md`
+- **Test Documentation**: `docs/tests/README.md`
+
+## 🌐 GitHub Pages Deployment
+
+The `docs/` folder is configured as the GitHub Pages source:
+
+1. Go to repo Settings → Pages
+2. Source: Deploy from branch
+3. Branch: `main` (or `dev`) → `/docs` folder
+4. Save
+
+Changes pushed to the selected branch automatically deploy.
+
+## 🔄 Development Workflow
+
+```bash
+# Work on dev branch
+git checkout dev
+
+# Make changes in docs/ folder
+# Test locally
+
+# Commit and push
+git add .
+git commit -m "feat: add new feature"
+git push origin dev
+
+# When ready, merge to main
+git checkout main
+git merge dev
+git push origin main
+
+# GitHub Pages auto-deploys from docs/
+```
+
+## 📦 Dependencies
+
+### Production
+- None! Vanilla HTML/CSS/JS
+
+### Development
+- `@playwright/test` - Visual regression testing
+- QUnit (CDN) - DOM testing
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Work in `docs/` folder
+4. Add tests for new features
+5. Commit changes (`git commit -m 'feat: add amazing feature'`)
+6. Push to branch (`git push origin feature/amazing-feature`)
+7. Open Pull Request
+
+## 📝 License
+
+MIT License - see LICENSE file for details
+
+## 👤 Author
+
+Benjamin Haddon
+
+## 🗂️ Archive
+
+Older versions preserved in `archive/`:
+- `V2.2/` - Early prototype
+- `V3.0/` - Multiple AI variants (ChatGPT, Claude, Gemini)
+- `V3.1/` - Pre-docs iteration
+
+Current live version is in `docs/` folder.
 Place new or updated icons in `V3.1/icons/` and reference them from `index.html` or `manifest.json`. The manifest expects `icons/drop_icon.svg`.
 
 Recommended icons to add/check:
