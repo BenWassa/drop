@@ -69,41 +69,207 @@
   </header>
 
   <main class="app-main">
-    <div class="main-grid">
-      <div class="card" data-domain="sleep">
-        <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
-        <div class="card-title">Sleep</div>
-        <div class="card-score" id="sleep-card">0</div>
+    <section class="page page--home active" data-page="home" aria-labelledby="home-heading">
+      <h1 id="home-heading" class="visually-hidden">Daily Domain Tracker</h1>
+      <div class="main-grid">
+        <div class="card" data-domain="sleep">
+          <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
+          <div class="card-title">Sleep</div>
+          <div class="card-score" id="sleep-card">0</div>
+        </div>
+        <div class="card" data-domain="fitness">
+          <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
+          <div class="card-title">Fitness</div>
+          <div class="card-score" id="fitness-card">0</div>
+        </div>
+        <div class="card" data-domain="mind">
+          <img src="icons/mind.svg" class="card-icon" alt="Mind">
+          <div class="card-title">Mind</div>
+          <div class="card-score" id="mind-card">0</div>
+        </div>
+        <div class="card" data-domain="spirit">
+          <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
+          <div class="card-title">Spirit</div>
+          <div class="card-score" id="spirit-card">0</div>
+        </div>
       </div>
-      <div class="card" data-domain="fitness">
-        <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
-        <div class="card-title">Fitness</div>
-        <div class="card-score" id="fitness-card">0</div>
+    </section>
+
+    <section class="page page--vision" data-page="vision" aria-labelledby="vision-heading">
+      <div class="page-header">
+        <p class="page-eyebrow">Vision</p>
+        <h2 id="vision-heading">Set the tone for the week</h2>
+        <p class="page-subtitle">Define where your attention goes in each domain so execution feels intentional.</p>
       </div>
-      <div class="card" data-domain="mind">
-        <img src="icons/mind.svg" class="card-icon" alt="Mind">
-        <div class="card-title">Mind</div>
-        <div class="card-score" id="mind-card">0</div>
+
+      <article class="vision-intent">
+        <h3>Weekly North Star</h3>
+        <p>Anchor the week with a single theme or feeling you want to cultivate.</p>
+        <label class="input-label" for="vision-theme">Theme</label>
+        <textarea id="vision-theme" class="vision-textarea" rows="3" placeholder="Example: Protect deep sleep and prime creative energy." maxlength="200"></textarea>
+        <p class="vision-tip">Keep it short and memorable—something you can revisit on the fly.</p>
+      </article>
+
+      <div class="vision-grid">
+        <article class="vision-card" data-domain="sleep">
+          <header class="vision-card__header">
+            <img src="icons/sleep.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Sleep</h3>
+              <p>Protect recovery so mornings start steady.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-sleep-focus">Focus statement</label>
+          <textarea id="vision-sleep-focus" class="vision-textarea" rows="3" placeholder="Lights out by 10:30pm with devices off." maxlength="160"></textarea>
+          <ul class="vision-prompts">
+            <li>What habit ensures you wake sharp?</li>
+            <li>Where can you remove friction from the wind-down?</li>
+          </ul>
+        </article>
+
+        <article class="vision-card" data-domain="fitness">
+          <header class="vision-card__header">
+            <img src="icons/fitness.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Fitness</h3>
+              <p>Set a clear training rhythm and win the reps.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-fitness-focus">Focus statement</label>
+          <textarea id="vision-fitness-focus" class="vision-textarea" rows="3" placeholder="Two strength blocks + one tempo run." maxlength="160"></textarea>
+          <ul class="vision-prompts">
+            <li>Which session creates the biggest return?</li>
+            <li>How will you celebrate consistency?</li>
+          </ul>
+        </article>
+
+        <article class="vision-card" data-domain="mind">
+          <header class="vision-card__header">
+            <img src="icons/mind.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Mind</h3>
+              <p>Curate inputs that sharpen thinking.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-mind-focus">Focus statement</label>
+          <textarea id="vision-mind-focus" class="vision-textarea" rows="3" placeholder="Read 20 pages before checking messages." maxlength="160"></textarea>
+          <ul class="vision-prompts">
+            <li>Which questions are you exploring?</li>
+            <li>Where can you trade scrolling for study?</li>
+          </ul>
+        </article>
+
+        <article class="vision-card" data-domain="spirit">
+          <header class="vision-card__header">
+            <img src="icons/spirit.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Spirit</h3>
+              <p>Stay rooted in purpose and connection.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-spirit-focus">Focus statement</label>
+          <textarea id="vision-spirit-focus" class="vision-textarea" rows="3" placeholder="Daily gratitude note before shutting down work." maxlength="160"></textarea>
+          <ul class="vision-prompts">
+            <li>What practice keeps you centred?</li>
+            <li>Who can you intentionally pour into?</li>
+          </ul>
+        </article>
       </div>
-      <div class="card" data-domain="spirit">
-        <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
-        <div class="card-title">Spirit</div>
-        <div class="card-score" id="spirit-card">0</div>
+    </section>
+
+    <section class="page page--gratitude" data-page="gratitude" aria-labelledby="gratitude-heading">
+      <div class="page-header">
+        <p class="page-eyebrow">Gratitude</p>
+        <h2 id="gratitude-heading">Review the results with clarity</h2>
+        <p class="page-subtitle">Surface meaningful progress and the next nudge—no generic dashboards.</p>
       </div>
-    </div>
+
+      <div class="insights-grid">
+        <article class="insight-card insight-card--highlight">
+          <div class="card-eyebrow">Highlights</div>
+          <h3>Standout Domain</h3>
+          <div class="insight-metric">
+            <span id="gratitude-top-domain" class="insight-metric__label">Sleep</span>
+            <span id="gratitude-top-score" class="insight-metric__value">0</span>
+          </div>
+          <p id="gratitude-top-detail" class="insight-detail">Momentum copy.</p>
+        </article>
+
+        <article class="insight-card insight-card--focus">
+          <div class="card-eyebrow">Next Focus</div>
+          <h3>Sharpen This Area</h3>
+          <div class="insight-metric">
+            <span id="gratitude-focus-domain" class="insight-metric__label">Fitness</span>
+            <span id="gratitude-focus-score" class="insight-metric__value">0</span>
+          </div>
+          <p id="gratitude-focus-detail" class="insight-detail">Opportunity copy.</p>
+        </article>
+
+        <article class="insight-card insight-card--momentum">
+          <div class="card-eyebrow">Momentum</div>
+          <h3>Weekly Pulse</h3>
+          <p id="gratitude-momentum-detail" class="insight-detail">Momentum narrative.</p>
+        </article>
+
+        <article class="insight-card insight-card--scoreboard">
+          <div class="card-eyebrow">Scoreboard</div>
+          <h3>Domain Scores</h3>
+          <div class="progress-list">
+            <div class="progress-row" data-progress-domain="sleep" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Sleep</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+            <div class="progress-row" data-progress-domain="fitness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Fitness</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+            <div class="progress-row" data-progress-domain="mind" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Mind</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+            <div class="progress-row" data-progress-domain="spirit" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Spirit</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="insight-card insight-card--reflections">
+          <div class="card-eyebrow">Micro Reflections</div>
+          <h3>Signals Worth Noting</h3>
+          <ul class="insight-list">
+            <li id="gratitude-sleep-summary">Sleep insight.</li>
+            <li id="gratitude-run-summary">Run insight.</li>
+            <li id="gratitude-meditation-summary">Meditation insight.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
   </main>
 
   <footer class="app-footer">
     <nav class="bottom-nav">
-      <button class="nav-btn" aria-label="Vision">
+      <button class="nav-btn" data-page="vision" aria-label="Vision">
         <img src="icons/vision.svg" class="nav-icon" alt="">
         <span class="nav-label">Vision</span>
       </button>
-      <button class="nav-btn active" aria-label="Home">
+      <button class="nav-btn active" data-page="home" aria-label="Home">
         <img src="icons/drop_icon.svg" class="nav-icon" alt="">
         <span class="nav-label">Home</span>
       </button>
-      <button class="nav-btn" aria-label="Gratitude">
+      <button class="nav-btn" data-page="gratitude" aria-label="Gratitude">
         <img src="icons/gratitude.svg" class="nav-icon" alt="">
         <span class="nav-label">Gratitude</span>
       </button>
