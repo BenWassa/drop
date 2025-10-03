@@ -249,7 +249,7 @@ body {
 .score-ring__arc {
   stroke: var(--color-primary);
   stroke-linecap: round;
-  transition: stroke-dashoffset var(--transition-slow), stroke 0.2s linear;
+  transition: stroke-dashoffset var(--transition-slow), stroke 0.2s linear, opacity 0.3s ease;
 }
 
 .score-item[data-domain="sleep"] .score-ring__arc { stroke: var(--sleep); }

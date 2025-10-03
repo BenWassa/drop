@@ -240,6 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const clamped = Math.max(0, Math.min(100, Number(score) || 0));
+      
+      // Hide arc when score is 0 to avoid showing just the rounded cap
+      if (clamped === 0) {
+        arc.style.opacity = '0';
+      } else {
+        arc.style.opacity = '1';
+      }
+      
       const dashOffset = visibleLength - (clamped / 100) * visibleLength;
       arc.style.strokeDashoffset = `${dashOffset.toFixed(2)}`;
     },
