@@ -131,7 +131,16 @@ document.addEventListener('DOMContentLoaded', () => {
         installBtn: document.getElementById('settings-install-btn'),
         exportBtn: document.getElementById('settings-export-btn'),
         importBtn: document.getElementById('settings-import-btn'),
-        importInput: document.getElementById('settings-import-input')
+        importInput: document.getElementById('settings-import-input'),
+        historyBtn: document.getElementById('settings-history-btn')
+      },
+      historyOverlay: {
+        overlay: document.getElementById('history-overlay'),
+        closeBtn: document.querySelector('#history-overlay .close-btn'),
+        list: document.getElementById('history-list'),
+        dateRange: document.getElementById('history-date-range'),
+        prevBtn: document.getElementById('history-prev-btn'),
+        nextBtn: document.getElementById('history-next-btn')
       },
       dataControls: {
         exportBtn: document.getElementById('export-data-btn'),
@@ -804,6 +813,150 @@ document.addEventListener('DOMContentLoaded', () => {
           closeSettings();
         });
       }
+
+      // History view from settings
+      const { historyBtn } = UI.elements.settingsMenu;
+      if (historyBtn) {
+        historyBtn.addEventListener('click', () => {
+          closeSettings();
+          this.openHistoryView();
+        });
+      }
+    },
+
+    openHistoryView() {
+      const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
+      
+      if (!overlay) return;
+
+      // Current page state
+      let currentPage = 0;
+      const entriesPerPage = 7;
+
+      // Render history entries
+      const renderHistory = () => {
+        const allDates = Object.keys(Store.state.entries).sort((a, b) => new Date(b) - new Date(a));
+        const startIdx = currentPage * entriesPerPage;
+        const endIdx = startIdx + entriesPerPage;
+        const datesToShow = allDates.slice(startIdx, endIdx);
+
+        // Update navigation buttons
+        if (prevBtn) prevBtn.disabled = currentPage === 0;
+        if (nextBtn) nextBtn.disabled = endIdx >= allDates.length;
+
+        // Update date range text
+        if (dateRange && datesToShow.length > 0) {
+          const firstDate = new Date(datesToShow[datesToShow.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const lastDate = new Date(datesToShow[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          dateRange.textContent = datesToShow.length === 1 ? lastDate : `${firstDate} - ${lastDate}`;
+        }
+
+        // Render entries
+        if (list) {
+          if (datesToShow.length === 0) {
+            list.innerHTML = `
+              <div class="history-empty">
+                <div class="history-empty__icon">📅</div>
+                <p class="history-empty__text">No entries yet. Start tracking your daily progress!</p>
+              </div>
+            `;
+          } else {
+            list.innerHTML = datesToShow.map(dateKey => {
+              const entry = Store.state.entries[dateKey];
+              const scores = this.calculateDomainScores(entry);
+              const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+
+              const date = new Date(dateKey);
+              const formattedDate = date.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+              });
+
+              return `
+                <div class="history-entry" data-date="${dateKey}">
+                  <div class="history-entry__header">
+                    <div class="history-entry__date">${formattedDate}</div>
+                    <div class="history-entry__total">${totalScore}</div>
+                  </div>
+                  <div class="history-entry__domains">
+                    <div class="history-domain">
+                      <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                      <div class="history-domain__info">
+                        <div class="history-domain__name">Sleep</div>
+                        <div class="history-domain__score">${scores.sleep}</div>
+                      </div>
+                    </div>
+                    <div class="history-domain">
+                      <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                      <div class="history-domain__info">
+                        <div class="history-domain__name">Fitness</div>
+                        <div class="history-domain__score">${scores.fitness}</div>
+                      </div>
+                    </div>
+                    <div class="history-domain">
+                      <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                      <div class="history-domain__info">
+                        <div class="history-domain__name">Mind</div>
+                        <div class="history-domain__score">${scores.mind}</div>
+                      </div>
+                    </div>
+                    <div class="history-domain">
+                      <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                      <div class="history-domain__info">
+                        <div class="history-domain__name">Spirit</div>
+                        <div class="history-domain__score">${scores.spirit}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+
+            // Add click handlers to entries
+            list.querySelectorAll('.history-entry').forEach(entryEl => {
+              entryEl.addEventListener('click', () => {
+                const dateKey = entryEl.dataset.date;
+                overlay.classList.remove('active');
+                // Switch to the date and show home page
+                Store.state.currentDate = dateKey;
+                UI.updateDateDisplay();
+                this.render();
+                UI.showPage('home');
+              });
+            });
+          }
+        }
+      };
+
+      // Navigation handlers
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          currentPage++;
+          renderHistory();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          if (currentPage > 0) {
+            currentPage--;
+            renderHistory();
+          }
+        });
+      }
+
+      // Close handler
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          overlay.classList.remove('active');
+        });
+      }
+
+      // Open overlay and render
+      overlay.classList.add('active');
+      renderHistory();
     },
 
     mapVisionKey(key) {

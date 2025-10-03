@@ -200,7 +200,7 @@
             </div>
           </header>
           <label class="input-label" for="vision-mind-focus">Focus statement</label>
-          <textarea id="vision-mind-focus" class="vision-textarea" rows="3" placeholder="Read 20 pages before checking messages." maxlength="160" data-empty-hint="Pick one input that will sharpen your thinking each day."></textarea>
+          <textarea id="vision-mind-focus" class="vision-textarea" rows="4" placeholder="Read 20 pages before checking messages." maxlength="160" data-empty-hint="Pick one input that will sharpen your thinking each day."></textarea>
           <ul class="vision-prompts">
             <li>Which questions are you exploring?</li>
             <li>Where can you trade scrolling for study?</li>
@@ -429,6 +429,30 @@
     </div>
   </div>
 
+  <!-- History overlay -->
+  <div class="overlay" id="history-overlay">
+    <div class="overlay-content-wrapper">
+      <header class="overlay-header">
+        <h2 class="overlay-title">History</h2>
+        <button class="close-btn" aria-label="Close history overlay">&times;</button>
+      </header>
+      <div class="overlay-content">
+        <div class="history-controls">
+          <button class="history-nav-btn" id="history-prev-btn" aria-label="Previous entries">
+            <span aria-hidden="true">◀</span>
+          </button>
+          <div class="history-date-range" id="history-date-range">Last 7 Days</div>
+          <button class="history-nav-btn" id="history-next-btn" aria-label="Next entries" disabled>
+            <span aria-hidden="true">▶</span>
+          </button>
+        </div>
+        <div class="history-list" id="history-list">
+          <!-- History entries will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Settings side menu -->
   <div class="settings-menu" id="settings-menu">
     <div class="settings-menu__backdrop" id="settings-backdrop"></div>
@@ -443,6 +467,13 @@
           <button class="settings-btn" id="settings-install-btn" aria-label="Install drop app" hidden>
             <span class="settings-btn__icon" aria-hidden="true">➕</span>
             <span>Install App</span>
+          </button>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">History</h3>
+          <button class="settings-btn" id="settings-history-btn" type="button">
+            <span class="settings-btn__icon" aria-hidden="true">📅</span>
+            <span>View & Edit Past Entries</span>
           </button>
         </section>
         <section class="settings-section">
