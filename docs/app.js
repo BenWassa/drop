@@ -1079,10 +1079,64 @@ document.addEventListener('DOMContentLoaded', () => {
           UI.toast('Please allow pop-ups to open test suite', 3000);
         }
       });
+    },
+
+    async checkCriticalResources() {
+      const criticalImages = [
+        'icons/drop_rounded.png',
+        'icons/fitness.svg',
+        'icons/sleep.svg',
+        'icons/mind.svg',
+        'icons/spirit.svg'
+      ];
+
+      const checkImage = (src) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => resolve({ src, loaded: true });
+          img.onerror = () => resolve({ src, loaded: false });
+          img.src = src;
+        });
+      };
+
+      const results = await Promise.all(criticalImages.map(checkImage));
+      const failed = results.filter(r => !r.loaded);
+
+      if (failed.length > 0) {
+        console.warn('Failed to load critical resources:', failed.map(f => f.src));
+      }
+
+      // Check if styles.css is loaded by checking for a known CSS variable
+      const testElement = document.createElement('div');
+      testElement.style.display = 'none';
+      document.body.appendChild(testElement);
+      const computedStyle = getComputedStyle(testElement);
+      const cssLoaded = computedStyle.getPropertyValue('--color-primary').trim() !== '';
+      document.body.removeChild(testElement);
+
+      if (!cssLoaded) {
+        console.error('Critical CSS failed to load');
+        UI.toast('Loading styles...', 2000);
+      }
+
+      return {
+        imagesOk: failed.length === 0,
+        cssOk: cssLoaded,
+        allOk: failed.length === 0 && cssLoaded
+      };
     }
   };
 
-  App.init();
-  App.setupDevPill();
+  // Initialize app with resource checks
+  (async () => {
+    const resourceCheck = await App.checkCriticalResources();
+    
+    if (!resourceCheck.allOk) {
+      console.warn('Some resources failed to load, but continuing...');
+    }
+
+    App.init();
+    App.setupDevPill();
+  })();
 
 });
