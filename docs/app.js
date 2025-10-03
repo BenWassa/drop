@@ -123,6 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
       devPill: document.getElementById('dev-pill'),
       devToast: document.getElementById('dev-toast'),
       appToast: document.getElementById('app-toast'),
+      settingsMenu: {
+        menu: document.getElementById('settings-menu'),
+        openBtn: document.getElementById('settings-icon-btn'),
+        closeBtn: document.getElementById('settings-close-btn'),
+        backdrop: document.getElementById('settings-backdrop'),
+        installBtn: document.getElementById('settings-install-btn'),
+        exportBtn: document.getElementById('settings-export-btn'),
+        importBtn: document.getElementById('settings-import-btn'),
+        importInput: document.getElementById('settings-import-input')
+      },
       dataControls: {
         exportBtn: document.getElementById('export-data-btn'),
         importBtn: document.getElementById('import-data-btn'),
@@ -505,6 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initInstallPrompt() {
       const installBtn = UI.elements.installButton;
+      const settingsInstallBtn = UI.elements.settingsMenu.installBtn;
       if (!installBtn) return;
 
       UI.showInstallButton(false);
@@ -518,6 +529,11 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         this.deferredInstallPrompt = event;
         UI.showInstallButton(true);
+        
+        // Also show install button in settings menu
+        if (settingsInstallBtn) {
+          settingsInstallBtn.hidden = false;
+        }
       });
 
       window.addEventListener('appinstalled', () => {
@@ -716,6 +732,83 @@ document.addEventListener('DOMContentLoaded', () => {
             this.handleImport(file);
           }
           importInput.value = '';
+        });
+      }
+
+      // Settings menu bindings
+      this.bindSettingsMenu();
+    },
+
+    bindSettingsMenu() {
+      const { menu, openBtn, closeBtn, backdrop, installBtn, exportBtn, importBtn, importInput } = UI.elements.settingsMenu;
+      
+      if (!menu || !openBtn) return;
+
+      // Open settings
+      if (openBtn) {
+        openBtn.addEventListener('click', () => {
+          menu.classList.add('active');
+        });
+      }
+
+      // Close settings
+      const closeSettings = () => {
+        menu.classList.remove('active');
+      };
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', closeSettings);
+      }
+
+      if (backdrop) {
+        backdrop.addEventListener('click', closeSettings);
+      }
+
+      // Escape key to close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('active')) {
+          closeSettings();
+        }
+      });
+
+      // Install app from settings
+      if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+          if (this.deferredInstallPrompt) {
+            this.deferredInstallPrompt.prompt();
+            const { outcome } = await this.deferredInstallPrompt.userChoice;
+            console.log(`User response to install prompt: ${outcome}`);
+            
+            installBtn.hidden = true;
+            UI.elements.installButton.hidden = true;
+            this.deferredInstallPrompt = null;
+          }
+          closeSettings();
+        });
+      }
+
+      // Export data from settings
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          this.handleExport();
+          closeSettings();
+        });
+      }
+
+      // Import data from settings
+      if (importBtn && importInput) {
+        importBtn.addEventListener('click', () => {
+          importInput.value = '';
+          importInput.click();
+        });
+
+        importInput.addEventListener('change', () => {
+          const [file] = importInput.files || [];
+          if (file) {
+            this.handleImport(file);
+          }
+          importInput.value = '';
+          closeSettings();
         });
       }
     },

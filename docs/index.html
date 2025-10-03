@@ -35,16 +35,14 @@
 
   <header class="app-header">
     <div class="app-header__top">
+      <button class="settings-icon-btn" id="settings-icon-btn" aria-label="Open settings menu">
+        <img src="icons/drop_rounded.png" alt="Settings" class="settings-icon">
+      </button>
       <div class="date" id="date-display"></div>
       <button class="install-button" id="install-button" aria-label="Install drop" hidden>
         <span class="install-button__icon" aria-hidden="true">➕</span>
         <span>Install App</span>
       </button>
-    </div>
-    <div class="data-controls" aria-label="Backup controls">
-      <button class="data-btn" id="export-data-btn" type="button">Export Data</button>
-      <button class="data-btn" id="import-data-btn" type="button">Import Data</button>
-      <input type="file" id="import-data-input" accept="application/json" hidden>
     </div>
     <!-- Screen reader announcements for score updates -->
     <div class="sr-announce" id="score-announcer" aria-live="polite" aria-atomic="true"></div>
@@ -427,6 +425,38 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Settings side menu -->
+  <div class="settings-menu" id="settings-menu">
+    <div class="settings-menu__backdrop" id="settings-backdrop"></div>
+    <nav class="settings-menu__panel" role="dialog" aria-labelledby="settings-title">
+      <div class="settings-menu__header">
+        <h2 id="settings-title">Settings</h2>
+        <button class="close-btn" id="settings-close-btn" aria-label="Close settings">✕</button>
+      </div>
+      <div class="settings-menu__content">
+        <section class="settings-section">
+          <h3 class="settings-section__title">App</h3>
+          <button class="settings-btn" id="settings-install-btn" aria-label="Install drop app" hidden>
+            <span class="settings-btn__icon" aria-hidden="true">➕</span>
+            <span>Install App</span>
+          </button>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Data Management</h3>
+          <button class="settings-btn" id="settings-export-btn" type="button">
+            <span class="settings-btn__icon" aria-hidden="true">📥</span>
+            <span>Export Data</span>
+          </button>
+          <button class="settings-btn" id="settings-import-btn" type="button">
+            <span class="settings-btn__icon" aria-hidden="true">📤</span>
+            <span>Import Data</span>
+          </button>
+          <input type="file" id="settings-import-input" accept="application/json" hidden>
+        </section>
+      </div>
+    </nav>
   </div>
 
   <script src="app.js"></script>

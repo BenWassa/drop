@@ -113,6 +113,32 @@ body {
   margin-bottom: 16px;
 }
 
+.settings-icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-icon-btn:hover {
+  transform: scale(1.05);
+}
+
+.settings-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.settings-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
 .data-controls {
   display: flex;
   flex-wrap: wrap;
@@ -971,4 +997,133 @@ body {
   border-color: transparent;
   color: #fff;
   box-shadow: 0 4px 12px var(--color-shadow-primary);
+}
+
+/* === SETTINGS SIDE MENU === */
+.settings-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.settings-menu.active {
+  pointer-events: auto;
+}
+
+.settings-menu__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.settings-menu.active .settings-menu__backdrop {
+  opacity: 1;
+}
+
+.settings-menu__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 80vw);
+  background: rgba(22, 22, 27, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform var(--transition-base);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+.settings-menu.active .settings-menu__panel {
+  transform: translateX(0);
+}
+
+.settings-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.settings-menu__header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.settings-menu__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  
+  /* Hide scrollbars */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.settings-menu__content::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-section__title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px 0;
+}
+
+.settings-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  margin-bottom: 8px;
+  text-align: left;
+  min-height: 48px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.15);
+  touch-action: manipulation;
+}
+
+.settings-btn:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-hover);
+}
+
+.settings-btn:active {
+  transform: scale(0.98);
+}
+
+.settings-btn__icon {
+  font-size: 20px;
+  line-height: 1;
 }
