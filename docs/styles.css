@@ -50,10 +50,12 @@ body {
   max-width: 412px;
   margin: 0 auto;
   min-height: 100dvh;
-  height: auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
@@ -78,9 +80,8 @@ body {
   display: block;
   padding: 24px;
   background: radial-gradient(circle at top, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
-  overflow-y: auto;
   width: 100%;
-  -webkit-overflow-scrolling: touch;
+  min-height: 0;
 }
 
 /* === HEADER === */
@@ -634,6 +635,7 @@ body {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
+  overflow: hidden;
 }
 .overlay.active { opacity: 1; visibility: visible; }
 .overlay-content-wrapper {
