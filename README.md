@@ -4,17 +4,35 @@ A minimalist Progressive Web App for tracking daily life domains: Sleep, Fitness
 
 **Live App:** https://benwassa.github.io/drop/
 
-## 📱 Features
+## � Quick Start Development Server
+
+**Test on your mobile device:**
+```bash
+# Just double-click this file (Windows):
+start-server.bat
+
+# Or run manually:
+cd docs
+npx http-server -p 8080 -c-1
+```
+
+See [START_SERVER.md](START_SERVER.md) for detailed instructions.
+
+## �📱 Features
 - **Single Page Application** - Seamless navigation without page reloads
 - **PWA Support** - Install on mobile/desktop, works offline
 - **Accessible** - ARIA attributes, screen reader support, keyboard navigation
-- **Mobile-Optimized** - Touch-friendly tap targets, smooth scrolling
+- **Mobile-Optimized** - Touch-friendly tap targets, smooth scrolling, full-screen display
 - **Test Suite** - DOM tests (QUnit) and visual regression tests (Playwright)
 
 ## 🏗️ Project Structure
 
 ```
 drop/
+├── start-server.bat          # Quick-start dev server (double-click)
+├── start-dev-server.bat      # Alternative (runs PowerShell script)
+├── start-dev-server.ps1      # PowerShell dev server script
+├── START_SERVER.md           # Server setup documentation
 ├── docs/                      # GitHub Pages root (live app)
 │   ├── index.html            # Main app entry point
 │   ├── app.js                # App logic & state management

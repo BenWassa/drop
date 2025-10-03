@@ -1,16 +1,35 @@
 # Quick Start Local Server for Mobile Testing
 
-## Easiest Method: Use the Provided Script
+## ⚡ Easiest Method: Double-Click the Batch File
 
-```powershell
-.\start-dev-server.ps1
+**Just double-click:**
+```
+start-server.bat
 ```
 
-This will automatically:
-- Install http-server if needed (using npm)
-- Show your local IP address
+This pure batch file will:
+- Show your local IP address automatically
 - Start the server on port 8080
 - Display the mobile URL to use on your Pixel 8
+- No PowerShell execution policy issues!
+
+---
+
+## Alternative: PowerShell Script (if .ps1 files won't run directly)
+
+If you get execution policy errors with `.ps1` files, use the wrapper:
+
+**Double-click:**
+```
+start-dev-server.bat
+```
+
+This `.bat` file runs the PowerShell script with `-ExecutionPolicy Bypass`
+
+**Or run manually in PowerShell:**
+```powershell
+powershell -ExecutionPolicy Bypass -File start-dev-server.ps1
+```
 
 ---
 
