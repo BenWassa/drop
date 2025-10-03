@@ -94,6 +94,14 @@ body {
   position: relative;
   scroll-behavior: smooth;
   touch-action: pan-y pinch-zoom;
+
+  /* Hide scrollbars while keeping scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.app-main::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* === HEADER === */
@@ -857,7 +865,20 @@ body {
   touch-action: manipulation;
 }
 .close-btn:hover { background: var(--color-surface-1); color: var(--color-text-primary); transform: rotate(90deg); }
-.overlay-content { flex: 1; overflow-y: auto; padding-right: 8px; }
+
+.overlay-content { 
+  flex: 1; 
+  overflow-y: auto; 
+  padding-right: 8px;
+  
+  /* Hide scrollbars while keeping scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.overlay-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
 
 /* === FORM ELEMENTS & BUTTONS === */
 .input-group { margin-bottom: 32px; }
