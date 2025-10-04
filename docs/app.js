@@ -7,18 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const Store = {
     DB_KEY: 'lifeTrackerData',
     state: {},
+    dailyKeys: ['wake', 'rest', 'run', 'strength', 'skill', 'read', 'write', 'quadrant', 'meditation'],
     defaults: {
       wake: '', rest: '', run: 0, strength: false, skill: false,
       read: false, write: false, quadrant: 0, meditation: false,
       visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
       visionMindFocus: '', visionSpiritFocus: '',
-      history: []
+      history: [],
+      lastEntryDate: ''
     },
 
     init() {
       const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
       this.state = { ...this.defaults, ...savedData };
       this.ensureHistory();
+      this.checkForNewDay();
       this.save();
     },
 
@@ -28,13 +31,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    getToday() {
+      return new Date().toISOString().split('T')[0];
+    },
+
+    resetDailyData() {
+      this.dailyKeys.forEach(key => {
+        if (key in this.defaults) {
+          this.state[key] = this.defaults[key];
+        }
+      });
+    },
+
+    checkForNewDay() {
+      const today = this.getToday();
+      if (this.state.lastEntryDate !== today) {
+        this.resetDailyData();
+        this.state.lastEntryDate = today;
+        this.save();
+        if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
+          App.updateScores();
+        }
+      }
+    },
+
     save() {
       localStorage.setItem(this.DB_KEY, JSON.stringify(this.state));
     },
 
     update(key, value) {
+      this.checkForNewDay();
       if (key in this.state) {
         this.state[key] = value;
+        if (this.dailyKeys.includes(key)) {
+          this.state.lastEntryDate = this.getToday();
+        }
         this.save();
         if (!key.startsWith('vision')) {
           App.updateScores();
@@ -75,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     merge(payload) {
       this.state = { ...this.defaults, ...this.state, ...payload };
       this.ensureHistory();
+      this.checkForNewDay();
       this.save();
     },
 
@@ -83,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       this.ensureHistory();
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = this.getToday();
       const safeScores = ['sleep', 'fitness', 'mind', 'spirit'].reduce((acc, domain) => {
         const value = Number(scores[domain]);
         const safeValue = Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
@@ -107,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       this.state.history = history;
+      this.state.lastEntryDate = today;
       this.save();
     }
   };
@@ -318,21 +351,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateToggleButton(type, value, skipIfDefault = false) {
       const group = document.querySelector(`.btn-group[data-type="${type}"], .quadrant-grid[data-type="${type}"]`);
-      if (group) {
-        group.querySelectorAll('.btn, .quad-btn').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        // If skipIfDefault is true and value matches the default, leave all buttons unclicked
-        if (skipIfDefault) {
-          const defaultVal = Store.defaults[type];
-          if (value === defaultVal) return; // don't highlight any button
+      if (!group) return;
+
+      const isToggleGroup = group.dataset.toggle === 'true';
+      const buttons = group.querySelectorAll('.btn, .quad-btn');
+
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+
+      if (isToggleGroup) {
+        const [button] = buttons;
+        if (button) {
+          const isActive = Boolean(value);
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
         }
-        const activeBtn = group.querySelector(`[data-value="${value}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
+        return;
+      }
+
+      if (skipIfDefault) {
+        const defaultVal = Store.defaults[type];
+        if (Object.is(value, defaultVal)) {
+          return;
+        }
+      }
+
+      const normalizedValue = typeof value === 'string' ? value : String(value);
+      let activeBtn = group.querySelector(`[data-value="${normalizedValue}"]`);
+
+      if (!activeBtn && typeof value === 'boolean') {
+        activeBtn = group.querySelector(`[data-value="${value ? 'true' : 'false'}"]`);
+      }
+
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.setAttribute('aria-pressed', 'true');
       }
     },
 
     loadOverlayData(domain) {
+      Store.checkForNewDay();
       const state = Store.state;
       switch (domain) {
         case 'sleep':
@@ -341,16 +401,16 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case 'fitness':
           this.elements.inputs.runValue.textContent = state.run;
-          this.updateToggleButton('strength', state.strength, true);
-          this.updateToggleButton('skill', state.skill, true);
+          this.updateToggleButton('strength', state.strength);
+          this.updateToggleButton('skill', state.skill);
           break;
         case 'mind':
-          this.updateToggleButton('read', state.read, true);
-          this.updateToggleButton('write', state.write, true);
+          this.updateToggleButton('read', state.read);
+          this.updateToggleButton('write', state.write);
           break;
         case 'spirit':
           this.updateToggleButton('quadrant', state.quadrant, true);
-          this.updateToggleButton('meditation', state.meditation, true);
+          this.updateToggleButton('meditation', state.meditation);
           break;
       }
     },
@@ -466,7 +526,8 @@ document.addEventListener('DOMContentLoaded', () => {
       Store.init();
       UI.initDate();
       UI.setVisionFields(Store.state);
-      
+      this.syncDailyUI();
+
       // Check if loading overlay should be skipped (dev mode toggle)
       const skipLoader = DEV_MODE && localStorage.getItem('dev_disable_loader') === 'true';
       
@@ -517,6 +578,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Fallback: ensure loading overlay hidden after animDurationMs
       fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
+    },
+
+    syncDailyUI() {
+      const { inputs } = UI.elements;
+      if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake;
+      if (inputs.restTime) inputs.restTime.value = Store.state.rest;
+      if (inputs.runValue) inputs.runValue.textContent = Store.state.run;
+
+      UI.updateToggleButton('strength', Store.state.strength);
+      UI.updateToggleButton('skill', Store.state.skill);
+      UI.updateToggleButton('read', Store.state.read);
+      UI.updateToggleButton('write', Store.state.write);
+      UI.updateToggleButton('meditation', Store.state.meditation);
+      UI.updateToggleButton('quadrant', Store.state.quadrant, true);
     },
 
     updateScores() {
@@ -667,11 +742,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const group = e.target.closest('[data-type]');
             if (group) {
               const type = group.dataset.type;
+              const isToggleGroup = group.dataset.toggle === 'true';
+              if (!(type in Store.state)) {
+                return;
+              }
+
+              if (isToggleGroup) {
+                const newValue = !Boolean(Store.state[type]);
+                Store.update(type, newValue);
+                UI.updateToggleButton(type, newValue);
+                return;
+              }
+
               let value = e.target.dataset.value;
               if (value === 'true') value = true;
               if (value === 'false') value = false;
               if (!isNaN(Number(value))) value = Number(value);
-              
+
               Store.update(type, value);
               UI.updateToggleButton(type, value);
             }

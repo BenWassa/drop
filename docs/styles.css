@@ -855,7 +855,6 @@ body {
   transition: var(--transition-fast);
   width: 40px;
   height: 40px;
-  display: flex;
   align-items: center;
   justify-content: center;
 }
@@ -1057,6 +1056,7 @@ body {
 .time-input:focus { outline: none; border-color: var(--color-border-focus); background: var(--color-bg); }
 
 .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-group[data-toggle="true"] { grid-template-columns: 1fr; }
 .btn {
   padding: 16px;
   background: var(--color-surface-1);
@@ -1071,12 +1071,52 @@ body {
   -webkit-tap-highlight-color: rgba(79, 138, 245, 0.15);
   touch-action: manipulation;
 }
+.btn-group[data-toggle="true"] .btn {
+  position: relative;
+  padding-left: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+.btn-group[data-toggle="true"] .btn::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: transparent;
+  transition: var(--transition-fast);
+  opacity: 0.7;
+}
+.btn-group[data-toggle="true"] .btn::after {
+  content: '\2713';
+  position: absolute;
+  left: 19px;
+  top: 50%;
+  transform: translateY(-58%);
+  font-size: 14px;
+  color: transparent;
+  transition: var(--transition-fast);
+}
 .btn:hover { background: var(--color-surface-2); border-color: var(--color-border-hover); color: var(--color-text-primary); }
 .btn.active {
   background: var(--color-primary-gradient);
   border-color: transparent;
   color: #fff;
   box-shadow: 0 4px 12px var(--color-shadow-primary);
+}
+.btn-group[data-toggle="true"] .btn.active::before {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 1;
+}
+.btn-group[data-toggle="true"] .btn.active::after {
+  color: #fff;
 }
 
 .preset-group {
