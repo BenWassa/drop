@@ -14,13 +14,15 @@ document.addEventListener('DOMContentLoaded', () => {
       visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
       visionMindFocus: '', visionSpiritFocus: '',
       history: [],
-      lastEntryDate: ''
+      lastEntryDate: '',
+      dailyTimestamps: {}
     },
 
     init() {
       const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
       this.state = { ...this.defaults, ...savedData };
       this.ensureHistory();
+      this.ensureDailyTimestamps();
       this.checkForNewDay();
       this.save();
     },
@@ -31,6 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    ensureDailyTimestamps() {
+      if (!this.state.dailyTimestamps || typeof this.state.dailyTimestamps !== 'object' || Array.isArray(this.state.dailyTimestamps)) {
+        this.state.dailyTimestamps = {};
+        return;
+      }
+
+      const sanitized = {};
+      Object.entries(this.state.dailyTimestamps).forEach(([key, value]) => {
+        if (typeof value === 'string' && value) {
+          sanitized[key] = value;
+        }
+      });
+      this.state.dailyTimestamps = sanitized;
+    },
+
     getToday() {
       const now = new Date();
       const year = now.getFullYear();
@@ -39,16 +56,44 @@ document.addEventListener('DOMContentLoaded', () => {
       return `${year}-${month}-${day}`;
     },
 
+    expireStaleDailyData() {
+      this.ensureDailyTimestamps();
+      const today = this.getToday();
+      let changed = false;
+
+      this.dailyKeys.forEach(key => {
+        const lastLogged = this.state.dailyTimestamps[key];
+        const hasTimestamp = Object.prototype.hasOwnProperty.call(this.state.dailyTimestamps, key);
+        const defaultValue = this.defaults[key];
+        const currentValue = this.state[key];
+        const valueDifferent = !Object.is(currentValue, defaultValue);
+
+        if (lastLogged !== today && (hasTimestamp || valueDifferent)) {
+          if (key in this.defaults) {
+            this.state[key] = defaultValue;
+          }
+          if (hasTimestamp) {
+            delete this.state.dailyTimestamps[key];
+          }
+          changed = true;
+        }
+      });
+
+      return changed;
+    },
+
     resetDailyData() {
       this.dailyKeys.forEach(key => {
         if (key in this.defaults) {
           this.state[key] = this.defaults[key];
         }
       });
+      this.state.dailyTimestamps = {};
     },
 
     checkForNewDay() {
       const today = this.getToday();
+      const staleDataCleared = this.expireStaleDailyData();
       if (this.state.lastEntryDate !== today) {
         this.resetDailyData();
         this.state.lastEntryDate = today;
@@ -56,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
           App.updateScores();
         }
+        return;
+      }
+
+      if (staleDataCleared) {
+        this.save();
       }
     },
 
@@ -69,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
         this.state[key] = value;
         if (this.dailyKeys.includes(key)) {
           this.state.lastEntryDate = this.getToday();
+          this.ensureDailyTimestamps();
+          this.state.dailyTimestamps[key] = this.state.lastEntryDate;
         }
         this.save();
         if (!key.startsWith('vision')) {
@@ -103,6 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (defaultType === 'string') {
           return typeof value === 'string';
         }
+        if (defaultType === 'object') {
+          return value && typeof value === 'object' && !Array.isArray(value);
+        }
         return false;
       });
     },
@@ -110,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     merge(payload) {
       this.state = { ...this.defaults, ...this.state, ...payload };
       this.ensureHistory();
+      this.ensureDailyTimestamps();
       this.checkForNewDay();
       this.save();
     },
@@ -1354,8 +1410,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Setup loader toggle
       const loaderToggle = document.getElementById('dev-loader-toggle');
       if (loaderToggle) {
+        loaderToggle.hidden = false;
         loaderToggle.classList.add('visible');
-        
+
         // Check localStorage for saved preference
         const loaderDisabled = localStorage.getItem('dev_disable_loader') === 'true';
         if (loaderDisabled) {
