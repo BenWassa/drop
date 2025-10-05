@@ -32,7 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     getToday() {
-      return new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     },
 
     resetDailyData() {
@@ -320,6 +324,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    removeDevElements() {
+      if (DEV_MODE) return;
+
+      const devElements = [
+        this.elements.devPill,
+        document.getElementById('dev-loader-toggle'),
+        this.elements.devToast
+      ];
+
+      devElements.forEach(el => {
+        if (el && el.parentElement) {
+          el.parentElement.removeChild(el);
+        }
+      });
+    },
+
     toast(msg, ms = 1500) {
       if (!DEV_MODE) return;
       const t = this.elements.devToast;
@@ -525,6 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
     init() {
       Store.init();
       UI.initDate();
+      UI.removeDevElements();
       UI.setVisionFields(Store.state);
       this.syncDailyUI();
 
