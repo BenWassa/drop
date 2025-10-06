@@ -1590,15 +1590,19 @@ body {
 }
 
 .heatmap-container {
-  display: grid;
-  grid-template-columns: 1fr 7fr;
-  gap: 4px;
-  max-width: 350px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
+/* Header row with day labels */
+.heatmap-header-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .heatmap-header {
-  grid-column: 2 / 3;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
@@ -1612,33 +1616,39 @@ body {
   font-weight: 600;
 }
 
-.heatmap-grid {
-  grid-column: 1 / 3;
+/* Domain rows container */
+.heatmap-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.heatmap-row {
   display: grid;
-  grid-template-columns: subgrid;
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: 80px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.domain-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-align: right;
+  padding-right: 8px;
+  font-family: var(--font-mono);
+}
+
+.domain-cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 4px;
 }
 
-.domain-icon-label {
-  grid-column: 1 / 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.domain-icon-label img {
-  width: 20px;
-  height: 20px;
-  opacity: 0.9;
-  border-radius: 4px;
-}
-
 .heatmap-cell {
-  height: 28px;
+  height: 32px;
   border-radius: 4px;
-  grid-column: span 1;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 

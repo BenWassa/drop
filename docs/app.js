@@ -1617,21 +1617,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const domains = ['sleep', 'fitness', 'mind', 'spirit'];
       const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
       const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
-      const recentHistory = history.slice(-7);
       const today = Store.getToday();
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+      const fullDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+      // Calculate the current week (Monday to Sunday)
+      const now = new Date();
+      const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      
+      // Calculate days since last Monday (adjusting so Monday = 0, Sunday = 6)
+      const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+      
+      // Build array starting from Monday of the current week
       const last7Days = [];
-      for (let i = 6; i >= 0; i--) {
+      for (let i = 0; i < 7; i++) {
         const d = new Date();
-        d.setDate(d.getDate() - i);
+        d.setDate(d.getDate() - daysSinceMonday + i);
         const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const dayIndex = d.getDay();
-        const entry = recentHistory.find(e => e.date === dateKey) || { date: dateKey, scores: {} };
+        const entry = history.find(e => e.date === dateKey) || { date: dateKey, scores: {} };
 
         last7Days.push({
-          dayLabel: dayNames[dayIndex].charAt(0),
-          fullDayName: dayNames[dayIndex],
+          dayLabel: dayNames[dayIndex],
+          fullDayName: fullDayNames[dayIndex],
           dateKey,
           scores: entry.scores || { sleep: 0, fitness: 0, mind: 0, spirit: 0 },
           isToday: dateKey === today
@@ -1711,27 +1719,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const domains = ['sleep', 'fitness', 'mind', 'spirit'];
       const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
 
+      // Build day labels header
       const headerHTML = last7Days.map(day => {
         const tooltip = day.isToday ? 'Today' : day.fullDayName;
         return `<span class="day-label" title="${tooltip}">${day.dayLabel}</span>`;
       }).join('');
 
-      const gridHTML = domains.map(domain => {
-        const iconSrc = `icons/${domain}.svg`;
-        const iconAlt = `${formatDomain(domain)} icon`;
-        const domainCells = last7Days.map(day => {
+      // Build rows for each domain
+      const rowsHTML = domains.map(domain => {
+        const cellsHTML = last7Days.map(day => {
           const score = Number(day.scores[domain]) || 0;
           const intensity = this.getHeatmapIntensity(score);
           const tooltip = `${formatDomain(domain)} on ${day.fullDayName}${day.isToday ? ' (Today)' : ''}: ${score} pts`;
           return `<div class="heatmap-cell" data-intensity="${intensity}" title="${tooltip}"></div>`;
         }).join('');
 
-        return `<div class="domain-icon-label" data-domain="${domain}"><img src="${iconSrc}" alt="${iconAlt}" title="${formatDomain(domain)} Score"></div>${domainCells}`;
+        return `
+          <div class="heatmap-row">
+            <div class="domain-label">${formatDomain(domain)}</div>
+            <div class="domain-cells">${cellsHTML}</div>
+          </div>
+        `;
       }).join('');
 
       container.innerHTML = `
-        <div class="heatmap-header">${headerHTML}</div>
-        <div class="heatmap-grid">${gridHTML}</div>
+        <div class="heatmap-header-row">
+          <div class="domain-label-spacer"></div>
+          <div class="heatmap-header">${headerHTML}</div>
+        </div>
+        <div class="heatmap-rows">${rowsHTML}</div>
       `;
 
       container.setAttribute('data-mode', mode);
