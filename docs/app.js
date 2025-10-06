@@ -564,10 +564,16 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     initDate() {
-      if (this.elements.dateDisplay) {
-        this.elements.dateDisplay.textContent = new Date().toLocaleDateString('en-US', {
+      try {
+        // Query at runtime in case the cached reference isn't available yet
+        const el = document.getElementById('date-display') || (this.elements && this.elements.dateDisplay);
+        if (!el) return;
+        el.textContent = new Date().toLocaleDateString('en-US', {
           weekday: 'long', month: 'long', day: 'numeric'
         });
+      } catch (err) {
+        // Swallow to avoid breaking app init; log for debugging
+        console.warn('initDate failed to set date display:', err);
       }
     },
 
