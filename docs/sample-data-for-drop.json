@@ -1,0 +1,65 @@
+{
+  "wake": "07:00",
+  "rest": "23:00",
+  "run": 12,
+  "strength": true,
+  "skill": false,
+  "read": true,
+  "write": false,
+  "quadrant": 2,
+  "meditation": true,
+  "visionTheme": "Focus",
+  "visionSleepFocus": "Consistent bedtime",
+  "visionFitnessFocus": "Run 3x week",
+  "visionMindFocus": "Read daily",
+  "visionSpiritFocus": "Meditation practice",
+  "history": [
+    { "date": "2025-09-30", "scores": { "sleep": 85, "fitness": 60, "mind": 100, "spirit": 75 } },
+    { "date": "2025-10-01", "scores": { "sleep": 90, "fitness": 45, "mind": 100, "spirit": 80 } },
+    { "date": "2025-10-02", "scores": { "sleep": 70, "fitness": 70, "mind": 45, "spirit": 50 } },
+    { "date": "2025-10-03", "scores": { "sleep": 60, "fitness": 85, "mind": 100, "spirit": 65 } },
+    { "date": "2025-10-04", "scores": { "sleep": 75, "fitness": 30, "mind": 0, "spirit": 40 } }
+  ],
+  "entries": {
+    "2025-09-30": {
+      "wake": "07:10",
+      "rest": "23:20",
+      "run": 10,
+      "strength": true,
+      "skill": false,
+      "read": true,
+      "write": false,
+      "quadrant": 2,
+      "meditation": true
+    },
+    "2025-10-01": {
+      "wake": "06:50",
+      "rest": "22:40",
+      "run": 5,
+      "strength": false,
+      "skill": true,
+      "read": true,
+      "write": false,
+      "quadrant": 1,
+      "meditation": true
+    },
+    "2025-10-02": {
+      "wake": "08:15",
+      "rest": "00:30",
+      "run": 20,
+      "strength": true,
+      "skill": false,
+      "read": false,
+      "write": false,
+      "quadrant": 3,
+      "meditation": false
+    }
+  },
+  "lastEntryDate": "2025-10-04",
+  "dailyTimestamps": {
+    "run": "2025-10-04",
+    "strength": "2025-10-03",
+    "read": "2025-10-03",
+    "meditation": "2025-10-03"
+  }
+}
