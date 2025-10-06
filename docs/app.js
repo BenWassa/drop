@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
-  const DEV_MODE = false;
+  const DEV_MODE = true;
 
   const Store = {
     DB_KEY: 'lifeTrackerData',
@@ -437,31 +437,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateScoreRing(meter, score) {
       const arc = meter.querySelector('.score-ring__arc');
       if (!arc) return;
-      const track = meter.querySelector('.score-ring__track');
       const radius = (arc.r && arc.r.baseVal ? arc.r.baseVal.value : parseFloat(arc.getAttribute('r'))) || 52;
       const circumference = 2 * Math.PI * radius;
       
-      // Always use complete circle (no gap)
+      // Static full circle (360 degrees) - always visible
       arc.style.strokeDasharray = `${circumference.toFixed(2)}`;
-      
-      // Keep track as complete circle (no gap)
-      if (track) {
-        track.style.strokeDasharray = `${circumference.toFixed(2)}`;
-      }
 
       const clamped = Math.max(0, Math.min(100, Number(score) || 0));
-      if (meter && typeof meter.setAttribute === 'function') {
-        meter.setAttribute('data-score-active', clamped > 80 ? 'true' : 'false');
-      }
 
-      // Hide arc when score is 0 to avoid showing just the rounded cap
-      if (clamped === 0) {
-        arc.style.opacity = '0';
-      } else {
-        arc.style.opacity = '';
-      }
-
-      // For complete circle: offset starts from 0 (full circle) and increases to hide portions
+      // Animate fill based on score percentage
       const dashOffset = (100 - clamped) / 100 * circumference;
       arc.style.strokeDashoffset = `${dashOffset.toFixed(2)}`;
     },

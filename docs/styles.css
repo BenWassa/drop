@@ -259,24 +259,15 @@ body {
 }
 
 .score-ring__arc {
-  stroke: var(--color-primary);
   stroke-linecap: round;
-  transition: stroke-dashoffset var(--transition-slow), stroke 0.2s linear, opacity 0.3s ease;
+  transition: stroke-dashoffset var(--transition-slow);
 }
 
+/* Static domain colors - always visible, always colored */
 .score-item[data-domain="sleep"] .score-ring__arc { stroke: var(--sleep); }
 .score-item[data-domain="fitness"] .score-ring__arc { stroke: var(--fitness); }
 .score-item[data-domain="mind"] .score-ring__arc { stroke: var(--mind); }
 .score-item[data-domain="spirit"] .score-ring__arc { stroke: var(--spirit); }
-
-.score-item[data-domain] .score-meter:not([data-score-active="true"]) .score-ring__arc {
-  stroke: rgba(240, 242, 245, 0.32);
-  opacity: 0.45;
-}
-
-.score-item[data-domain] .score-meter[data-score-active="true"] .score-ring__arc {
-  opacity: 1;
-}
 
 .score-item[data-domain="fitness"] .score-meter__icon img {
   filter: brightness(0) saturate(100%) invert(34%) sepia(91%) saturate(5453%) hue-rotate(352deg) brightness(103%) contrast(105%);
