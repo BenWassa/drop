@@ -883,6 +883,16 @@ body {
   flex-shrink: 0;
 }
 
+/* Layout wrapper for logo + word to control spacing during 'breath' */
+.loading-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px; /* ensures space between logo and word at max scale */
+  z-index: 1;
+}
+
 @keyframes breath {
   0% { transform: scale(1); }
   45% { transform: scale(1.35); } /* inhale (grow) - reduced from 1.5x */
@@ -908,6 +918,34 @@ body {
 /* Respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .loading-logo { transition: none; animation: none; }
+}
+
+/* Loading word: simple, synced with logo breath animation */
+.loading-word {
+  margin-top: 12px;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: 4.5px;
+  color: var(--color-text-primary);
+  font-size: 28px;
+  text-transform: lowercase;
+  opacity: 0.95;
+  /* Use the same breath animation as the logo for clean sync */
+  animation: breath 5000ms ease-in-out 1 forwards;
+  transform-origin: center center;
+  will-change: transform;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-word { animation: none; }
+}
+
+@media (min-width: 1200px) {
+  .loading-word { font-size: 30px; letter-spacing: 5px; }
+  .loading-frame { gap: 20px; }
 }
 
 /* Developer UI: small pill and toast */
