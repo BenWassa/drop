@@ -478,8 +478,115 @@ body {
 
 /* === HOME PAGE === */
 .page--home .main-grid {
-  margin-top: 12px;
+  margin-top: 24px;
 }
+
+/* === WEEKLY HEATMAP COMPONENT === */
+.weekly-heatmap {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--color-surface-2);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    border: 1px solid var(--color-border);
+}
+
+.heatmap-title {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.heatmap-container {
+    display: grid;
+    grid-template-columns: 1fr 7fr; /* Icon column + 7 day columns */
+    gap: 4px;
+    max-width: 350px;
+    margin: 0 auto;
+}
+
+.heatmap-header {
+    grid-column: 2 / 3;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.day-label {
+    font-size: 11px;
+    opacity: 0.7;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+}
+
+.heatmap-grid {
+    grid-column: 1 / 3;
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.domain-icon-label {
+    grid-column: 1 / 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.domain-icon-label img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+    border-radius: 4px;
+}
+
+/* Heatmap Cell Styling (using data-intensity) */
+.heatmap-cell {
+    height: 28px;
+    border-radius: 4px;
+    grid-column: span 1;
+    transition: background 0.3s ease;
+    cursor: pointer;
+}
+
+/* Intensity Coloring: Fading from background to the primary success/spirit color */
+.heatmap-cell[data-intensity="none"] { 
+    background: var(--color-surface-1);
+    border: 1px dashed rgba(255, 255, 255, 0.05);
+} 
+/* Using var(--spirit) for the green success color */
+.heatmap-cell[data-intensity="low"] { 
+    background: rgba(22, 163, 74, 0.25); 
+} 
+.heatmap-cell[data-intensity="med"] { 
+    background: rgba(22, 163, 74, 0.5); 
+} 
+.heatmap-cell[data-intensity="high"] { 
+    background: rgba(22, 163, 74, 0.85);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+} 
+
+.heatmap-cell:hover {
+    transform: scale(1.05);
+    z-index: 1;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.heatmap-summary {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-top: 20px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+/* === END WEEKLY HEATMAP COMPONENT === */
 
 /* === VISION PAGE === */
 .vision-intent,
