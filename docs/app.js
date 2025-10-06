@@ -227,6 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return acc;
       }, {});
 
+      // Don't record history if all scores are zero (no real data entered)
+      const hasData = Object.values(safeScores).some(score => score > 0);
+      if (!hasData) return;
+
       const history = Array.isArray(this.state.history) ? [...this.state.history] : [];
       const existingIndex = history.findIndex(entry => entry.date === today);
       const snapshot = { date: today, scores: safeScores };
