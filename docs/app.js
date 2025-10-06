@@ -1611,94 +1611,132 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     /**
-     * Renders the Weekly Trajectory Heatmap component.
-     * Uses raw activity scores stored in Store.state.history.
+     * Analyzes the last 7 days of historical data and determines the heatmap mode.
+     */
+    getWeeklyData() {
+      const domains = ['sleep', 'fitness', 'mind', 'spirit'];
+      const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
+      const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
+      const recentHistory = history.slice(-7);
+      const today = Store.getToday();
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      const last7Days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const dayIndex = d.getDay();
+        const entry = recentHistory.find(e => e.date === dateKey) || { date: dateKey, scores: {} };
+
+        last7Days.push({
+          dayLabel: dayNames[dayIndex].charAt(0),
+          fullDayName: dayNames[dayIndex],
+          dateKey,
+          scores: entry.scores || { sleep: 0, fitness: 0, mind: 0, spirit: 0 },
+          isToday: dateKey === today
+        });
+      }
+
+      const totalDays = last7Days.length || 1;
+      const activeDaySet = new Set();
+      const domainConsistencies = domains.map(domain => {
+        const activeDays = last7Days.reduce((count, day) => {
+          const score = Number(day.scores[domain]) || 0;
+          if (score >= 50) {
+            activeDaySet.add(day.dateKey);
+            return count + 1;
+          }
+          return count;
+        }, 0);
+        return {
+          domain,
+          count: activeDays,
+          consistency: activeDays / totalDays
+        };
+      });
+
+      const totalActiveDaysCount = activeDaySet.size;
+      const weakestDomain = domainConsistencies.reduce((min, curr) => {
+        if (!min || curr.consistency < min.consistency) return curr;
+        return min;
+      }, null) || { domain: 'sleep', count: 0, consistency: 0 };
+      const strongestDomain = domainConsistencies.reduce((max, curr) => {
+        if (!max || curr.consistency > max.consistency) return curr;
+        return max;
+      }, null) || { domain: 'sleep', count: 0, consistency: 0 };
+
+      const requiredDays = Math.ceil(totalDays * 0.5);
+      let mode = 'V1';
+
+      if (totalActiveDaysCount === 0) {
+        mode = 'V3';
+      } else if (weakestDomain.consistency < 0.5) {
+        mode = 'V2';
+      }
+
+      let summary = '';
+      if (mode === 'V3' || !domainConsistencies.length) {
+        summary = 'Ready to start? Log an entry now to begin your weekly momentum.';
+      } else if (mode === 'V2') {
+        const neededDays = Math.max(0, requiredDays - weakestDomain.count);
+        const deficitStatement = weakestDomain.count === 0
+          ? 'not logged this week'
+          : `only tracked ${weakestDomain.count} of ${totalDays} days`;
+        const actionStatement = neededDays > 0
+          ? `Hit it ${neededDays === 1 ? 'once' : `${neededDays} more times`} this week to rebound.`
+          : 'Focus on the missing action today to boost alignment.';
+        summary = `${formatDomain(weakestDomain.domain)} shows a clear deficit—${deficitStatement}. ${actionStatement}`;
+      } else {
+        const allEven = domainConsistencies.every(d => d.count === strongestDomain.count);
+        if (allEven) {
+          summary = `Exceptional consistency! All domains tracked on ${strongestDomain.count} of ${totalDays} days.`;
+        } else {
+          summary = `${formatDomain(strongestDomain.domain)} shows great consistency, tracked on ${strongestDomain.count} of ${totalDays} days. Keep pushing for ${formatDomain(weakestDomain.domain)}!`;
+        }
+      }
+
+      return { last7Days, mode, summary, weakestDomain, strongestDomain, domainConsistencies };
+    },
+
+    /**
+     * Renders the Weekly Trajectory Heatmap component based on the weekly data.
      */
     renderWeeklyHeatmap() {
       const container = UI.elements.heatmapContainer;
       const summaryEl = UI.elements.heatmapSummary;
       if (!container || !summaryEl) return;
 
+      const { last7Days, mode, summary } = this.getWeeklyData();
       const domains = ['sleep', 'fitness', 'mind', 'spirit'];
-      // Get up to the last 7 days of history
-      const history = Array.isArray(Store.state.history) ? [...Store.state.history].slice(-7) : [];
-      
-      const today = Store.getToday();
-      const last7Days = [];
-      const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-      const fullDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
 
-      // 1. Get the current week (Monday to Sunday)
-      console.log('🗓️ Weekly Heatmap Debug - Building current week (Mon-Sun):');
-      const now = new Date();
-      const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-      
-      // Calculate days since last Monday (adjusting so Monday = 0, Sunday = 6)
-      const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-      
-      // Start from Monday of the current week
-      for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - daysSinceMonday + i);
-        const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const dayOfWeek = dayNames[d.getDay()];
-        const fullDayName = fullDayNames[d.getDay()];
-        
-        console.log(`  Day ${i}: ${dateKey} | getDay()=${d.getDay()} | Label="${dayOfWeek}" | Full="${fullDayName}"`);
-        
-        // Find history entry for this date or use an empty scores object
-        const entry = history.find(e => e.date === dateKey) || { date: dateKey, scores: { sleep: 0, fitness: 0, mind: 0, spirit: 0 } };
-        
-        last7Days.push({
-          dayLabel: dayOfWeek,
-          fullDayName: fullDayName,
-          dateKey: dateKey,
-          scores: entry.scores || { sleep: 0, fitness: 0, mind: 0, spirit: 0 },
-          isToday: dateKey === today
-        });
-      }
-      console.log('📊 Final last7Days order:', last7Days.map(d => d.dayLabel).join(' '));
-      
-      // 2. Generate HTML - simple grid layout
-      let gridHTML = '';
-      let activeDaysCount = 0;
-      
-      // Header row - empty cell for label column, then day labels
-      gridHTML += '<div></div>'; // Empty top-left corner
-      last7Days.forEach(day => {
-        gridHTML += `<div class="day-label" title="${day.isToday ? 'Today' : day.dateKey}">${day.dayLabel}</div>`;
-      });
-      
-      // Data rows - one per domain
-      domains.forEach(domain => {
-        const domainName = domain.charAt(0).toUpperCase() + domain.slice(1);
-        
-        // Domain label
-        gridHTML += `<div class="domain-label">${domainName}</div>`;
-        
-        // Cells for each day
-        last7Days.forEach(day => {
-          // Use the raw activity score stored in history (0-100)
-          const score = Number(day.scores[domain]) || 0; 
+      const headerHTML = last7Days.map(day => {
+        const tooltip = day.isToday ? 'Today' : day.fullDayName;
+        return `<span class="day-label" title="${tooltip}">${day.dayLabel}</span>`;
+      }).join('');
+
+      const gridHTML = domains.map(domain => {
+        const iconSrc = `icons/${domain}.svg`;
+        const iconAlt = `${formatDomain(domain)} icon`;
+        const domainCells = last7Days.map(day => {
+          const score = Number(day.scores[domain]) || 0;
           const intensity = this.getHeatmapIntensity(score);
-          
-          if (intensity !== 'none') {
-            activeDaysCount++;
-          }
-          
-          gridHTML += `<div class="heatmap-cell" data-intensity="${intensity}" title="${domainName} on ${day.fullDayName}: ${score} pts"></div>`;
-        });
-      });
-      
-      // 3. Assemble and inject
-      if (activeDaysCount === 0) {
-        container.innerHTML = `<div style="padding: 24px 0; font-style: italic; color: var(--color-text-tertiary);">Track your domains to view weekly trajectory.</div>`;
-        summaryEl.textContent = 'Ready to start? Log an entry now to begin your weekly momentum.';
-      } else {
-        container.innerHTML = gridHTML;
-        // Generate summary based on the aggregated data
-        summaryEl.textContent = this.generateHeatmapSummary(last7Days);
-      }
+          const tooltip = `${formatDomain(domain)} on ${day.fullDayName}${day.isToday ? ' (Today)' : ''}: ${score} pts`;
+          return `<div class="heatmap-cell" data-intensity="${intensity}" title="${tooltip}"></div>`;
+        }).join('');
+
+        return `<div class="domain-icon-label" data-domain="${domain}"><img src="${iconSrc}" alt="${iconAlt}" title="${formatDomain(domain)} Score"></div>${domainCells}`;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="heatmap-header">${headerHTML}</div>
+        <div class="heatmap-grid">${gridHTML}</div>
+      `;
+
+      container.setAttribute('data-mode', mode);
+      summaryEl.textContent = summary;
+      summaryEl.setAttribute('data-mode', mode);
     },
 
     /**
@@ -1706,58 +1744,9 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     getHeatmapIntensity(rawScore) {
       if (!Number.isFinite(rawScore) || rawScore === 0) return 'none';
-      if (rawScore < 50) return 'low';    
-      if (rawScore < 80) return 'med';    
-      return 'high';                     
-    },
-
-    /**
-     * Generates a narrative summary based on the last 7 days of heatmap data.
-     */
-    generateHeatmapSummary(last7Days) {
-      if (last7Days.length === 0) return 'No data recorded in the last 7 days.';
-      
-      const domainStats = { sleep: 0, fitness: 0, mind: 0, spirit: 0 };
-      const totalDays = last7Days.length;
-      
-      last7Days.forEach(day => {
-        Object.keys(domainStats).forEach(domain => {
-          const score = Number(day.scores[domain]) || 0;
-          if (score >= 50) { // Count days where at least a 'medium' effort was made (raw score)
-            domainStats[domain]++;
-          }
-        });
-      });
-      
-      const sortedDomains = Object.entries(domainStats).sort((a, b) => b[1] - a[1]);
-      const topDomain = sortedDomains[0];
-      const bottomDomain = sortedDomains[sortedDomains.length - 1];
-      
-      const allEven = Object.values(domainStats).every(count => count === topDomain[1] && count > 0);
-      const allMissing = Object.values(domainStats).every(count => count === 0);
-      
-      const formatDomain = (d) => d.charAt(0).toUpperCase() + d.slice(1);
-
-      if (allMissing) {
-        return 'Ready to start? Log an entry now to begin your weekly momentum.';
-      }
-      if (allEven) {
-        return `Exceptional consistency! All domains tracked on ${topDomain[1]} of ${totalDays} days.`;
-      }
-      
-      const topName = formatDomain(topDomain[0]);
-      const bottomName = formatDomain(bottomDomain[0]);
-      
-      let summary = `${topName} shows great consistency, tracked on ${topDomain[1]} of ${totalDays} days. `;
-      
-      if (topDomain[1] > bottomDomain[1]) {
-        const daysDifference = topDomain[1] - bottomDomain[1];
-        summary += `Focusing on ${bottomName} could balance your week with ${daysDifference} more active day${daysDifference > 1 ? 's' : ''}.`;
-      } else {
-        summary += `Overall momentum is building well!`;
-      }
-      
-      return summary;
+      if (rawScore < 50) return 'low';
+      if (rawScore < 80) return 'med';
+      return 'high';
     },
 
     averageForDomain(entries, domain) {
