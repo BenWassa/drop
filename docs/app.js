@@ -1216,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             list.innerHTML = datesToShow.map(dateKey => {
               const entry = entries[dateKey];
-              const scores = this.calculateDomainScores(entry);
+              const scores = App.calculateDomainScores(entry);
               const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
 
               const date = new Date(dateKey);
@@ -1422,6 +1422,72 @@ document.addEventListener('DOMContentLoaded', () => {
       );
       
       return Math.round(compressed);
+    },
+
+    /**
+     * Calculate domain scores from an entry object (used for history view)
+     * @param {Object} entry - Entry object with wake, rest, run, strength, etc.
+     * @returns {Object} Object with sleep, fitness, mind, spirit scores
+     */
+    calculateDomainScores(entry) {
+      if (!entry || typeof entry !== 'object') {
+        return { sleep: 0, fitness: 0, mind: 0, spirit: 0 };
+      }
+
+      // Calculate sleep score
+      let sleepScore = 0;
+      if (entry.wake && entry.rest) {
+        const [wh, wm] = entry.wake.split(':').map(Number);
+        const [rh, rm] = entry.rest.split(':').map(Number);
+        if (!isNaN(wh) && !isNaN(wm) && !isNaN(rh) && !isNaN(rm)) {
+          const wakeMins = wh * 60 + wm;
+          const restMins = rh * 60 + rm;
+          const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
+          const hours = duration / 60;
+          
+          if (hours >= 7 && hours <= 9) sleepScore = 100;
+          else if (hours >= 6 && hours < 7) sleepScore = 85;
+          else if (hours > 9 && hours <= 10) sleepScore = 85;
+          else if (hours >= 5 && hours < 6) sleepScore = 65;
+          else if (hours > 10 && hours <= 11) sleepScore = 65;
+          else if (hours >= 4 && hours < 5) sleepScore = 45;
+          else if (hours > 11) sleepScore = 50;
+          else sleepScore = 30;
+        }
+      }
+
+      // Calculate fitness score
+      let fitnessScore = 0;
+      const run = Number(entry.run) || 0;
+      if (run >= 20) fitnessScore += 45;
+      else if (run >= 15) fitnessScore += 38;
+      else if (run >= 10) fitnessScore += 32;
+      else if (run >= 5) fitnessScore += 25;
+      else if (run >= 3) fitnessScore += 18;
+      else if (run >= 1) fitnessScore += 10;
+      
+      if (entry.strength) fitnessScore += 35;
+      if (entry.skill) fitnessScore += 20;
+      fitnessScore = Math.min(100, fitnessScore);
+
+      // Calculate mind score
+      let mindScore = 0;
+      if (entry.read) mindScore += 55;
+      if (entry.write) mindScore += 45;
+
+      // Calculate spirit score
+      let spiritScore = 0;
+      const quadrant = Number(entry.quadrant) || 0;
+      if (quadrant === 1 || quadrant === 2) spiritScore += 50;
+      else if (quadrant === 3 || quadrant === 4) spiritScore += 25;
+      if (entry.meditation) spiritScore += 50;
+
+      return {
+        sleep: sleepScore,
+        fitness: fitnessScore,
+        mind: mindScore,
+        spirit: spiritScore
+      };
     },
 
     calcSleep() {
