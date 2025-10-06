@@ -5,13 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>drop - QUnit Test Suite</title>
   <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.4.css">
+  <style>
+    /* Enhanced QUnit UI styles */
+    #qunit-enhanced {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      top: 12px;
+      z-index: 9999;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    #qunit-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      background: #0b1220;
+      color: #fff;
+    }
+    #qunit-summary .counts { display:flex; gap:8px; align-items:center }
+    .count-pill { padding:6px 10px; border-radius:999px; font-weight:600 }
+    .pass { background:#0ea5a1; color:white }
+    .fail { background:#ef4444; color:white }
+    .total { background:#374151; color:white }
+    #qunit-controls { margin-left:auto; display:flex; gap:8px }
+    #qunit-errors { margin-top:8px; max-height:280px; overflow:auto; background:#fff; color:#111; border-radius:8px; padding:8px; display:none }
+    .error-item { border-bottom:1px solid #eee; padding:8px 6px }
+    .error-title { font-weight:700; color:#b91c1c }
+    .error-details { font-family: monospace; white-space:pre-wrap; font-size:12px; color:#111 }
+    .small-btn { background:transparent; border:1px solid rgba(255,255,255,0.12); color:inherit; padding:6px 8px; border-radius:6px; cursor:pointer }
+    /* Push default QUnit output down */
+    #qunit { margin-top:120px }
+    @media (max-width:640px) { #qunit-enhanced { left:8px; right:8px; top:8px } #qunit { margin-top:160px } }
+  </style>
 </head>
 <body data-drop-test="true">
+  <div id="qunit-enhanced" aria-hidden="false">
+    <div id="qunit-summary" role="region" aria-live="polite">
+      <div class="counts">
+        <span class="count-pill total" id="q-total">Total: 0</span>
+        <span class="count-pill pass" id="q-pass">Passed: 0</span>
+        <span class="count-pill fail" id="q-fail">Failed: 0</span>
+      </div>
+      <div id="qunit-controls">
+        <button id="q-toggle-errors" class="small-btn">Show failures</button>
+        <button id="q-scroll-first" class="small-btn">Jump to first failure</button>
+        <button id="q-clear" class="small-btn">Clear</button>
+      </div>
+    </div>
+    <div id="qunit-errors" aria-live="polite" aria-atomic="true"></div>
+  </div>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
 
   <!-- Load QUnit library -->
   <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
+
+  <!-- Enhancement script to improve test output visualization -->
+  <script src="qunit-enhance.js" defer></script>
 
   <!-- Load test modules -->
   <script src="../app.js" defer></script>
