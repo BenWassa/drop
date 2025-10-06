@@ -14,40 +14,40 @@
   "visionMindFocus": "Read daily",
   "visionSpiritFocus": "Meditation practice",
   "history": [
-    { "date": "2025-10-01", "scores": { "sleep": 85, "fitness": 90, "mind": 100, "spirit": 90 } },
-    { "date": "2025-10-02", "scores": { "sleep": 90, "fitness": 70, "mind": 95, "spirit": 85 } },
-    { "date": "2025-10-03", "scores": { "sleep": 75, "fitness": 50, "mind": 90, "spirit": 80 } },
-    { "date": "2025-10-04", "scores": { "sleep": 60, "fitness": 30, "mind": 50, "spirit": 40 } },
-    { "date": "2025-10-05", "scores": { "sleep": 70, "fitness": 95, "mind": 80, "spirit": 90 } },
-    { "date": "2025-10-06", "scores": { "sleep": 95, "fitness": 60, "mind": 100, "spirit": 95 } },
-    { "date": "2025-10-07", "scores": { "sleep": 80, "fitness": 85, "mind": 90, "spirit": 80 } },
-    { "date": "2025-10-08", "scores": { "sleep": 85, "fitness": 70, "mind": 100, "spirit": 85 } },
-    { "date": "2025-10-09", "scores": { "sleep": 75, "fitness": 80, "mind": 90, "spirit": 75 } },
-    { "date": "2025-10-10", "scores": { "sleep": 85, "fitness": 65, "mind": 100, "spirit": 85 } },
-    { "date": "2025-10-11", "scores": { "sleep": 65, "fitness": 35, "mind": 40, "spirit": 30 } },
-    { "date": "2025-10-12", "scores": { "sleep": 70, "fitness": 100, "mind": 85, "spirit": 90 } },
-    { "date": "2025-10-13", "scores": { "sleep": 90, "fitness": 75, "mind": 100, "spirit": 95 } },
-    { "date": "2025-10-14", "scores": { "sleep": 80, "fitness": 75, "mind": 90, "spirit": 80 } },
-    { "date": "2025-10-15", "scores": { "sleep": 85, "fitness": 80, "mind": 95, "spirit": 85 } },
-    { "date": "2025-10-16", "scores": { "sleep": 75, "fitness": 80, "mind": 90, "spirit": 75 } },
-    { "date": "2025-10-17", "scores": { "sleep": 80, "fitness": 65, "mind": 95, "spirit": 80 } },
-    { "date": "2025-10-18", "scores": { "sleep": 70, "fitness": 50, "mind": 85, "spirit": 70 } },
-    { "date": "2025-10-19", "scores": { "sleep": 70, "fitness": 90, "mind": 85, "spirit": 90 } },
-    { "date": "2025-10-20", "scores": { "sleep": 95, "fitness": 60, "mind": 100, "spirit": 95 } },
-    { "date": "2025-10-21", "scores": { "sleep": 80, "fitness": 95, "mind": 90, "spirit": 80 } },
-    { "date": "2025-10-22", "scores": { "sleep": 85, "fitness": 70, "mind": 95, "spirit": 85 } },
-    { "date": "2025-10-23", "scores": { "sleep": 75, "fitness": 75, "mind": 90, "spirit": 75 } },
-    { "date": "2025-10-24", "scores": { "sleep": 85, "fitness": 65, "mind": 100, "spirit": 85 } },
-    { "date": "2025-10-25", "scores": { "sleep": 50, "fitness": 20, "mind": 20, "spirit": 10 } },
-    { "date": "2025-10-26", "scores": { "sleep": 70, "fitness": 90, "mind": 85, "spirit": 90 } },
-    { "date": "2025-10-27", "scores": { "sleep": 90, "fitness": 75, "mind": 100, "spirit": 95 } },
-    { "date": "2025-10-28", "scores": { "sleep": 80, "fitness": 75, "mind": 90, "spirit": 80 } },
-    { "date": "2025-10-29", "scores": { "sleep": 85, "fitness": 80, "mind": 95, "spirit": 85 } },
-    { "date": "2025-10-30", "scores": { "sleep": 75, "fitness": 80, "mind": 90, "spirit": 75 } },
-    { "date": "2025-10-31", "scores": { "sleep": 80, "fitness": 65, "mind": 95, "spirit": 80 } }
+    { "date": "2025-09-06", "scores": { "sleep": 85, "fitness": 90, "mind": 100, "spirit": 90 } },
+    { "date": "2025-09-07", "scores": { "sleep": 90, "fitness": 70, "mind": 95, "spirit": 85 } },
+    { "date": "2025-09-08", "scores": { "sleep": 75, "fitness": 50, "mind": 90, "spirit": 80 } },
+    { "date": "2025-09-09", "scores": { "sleep": 60, "fitness": 30, "mind": 50, "spirit": 40 } },
+    { "date": "2025-09-10", "scores": { "sleep": 70, "fitness": 95, "mind": 80, "spirit": 90 } },
+    { "date": "2025-09-11", "scores": { "sleep": 95, "fitness": 60, "mind": 100, "spirit": 95 } },
+    { "date": "2025-09-12", "scores": { "sleep": 80, "fitness": 85, "mind": 90, "spirit": 80 } },
+    { "date": "2025-09-13", "scores": { "sleep": 85, "fitness": 70, "mind": 100, "spirit": 85 } },
+    { "date": "2025-09-14", "scores": { "sleep": 75, "fitness": 80, "mind": 90, "spirit": 75 } },
+    { "date": "2025-09-15", "scores": { "sleep": 85, "fitness": 65, "mind": 100, "spirit": 85 } },
+    { "date": "2025-09-16", "scores": { "sleep": 65, "fitness": 35, "mind": 40, "spirit": 30 } },
+    { "date": "2025-09-17", "scores": { "sleep": 70, "fitness": 100, "mind": 85, "spirit": 90 } },
+    { "date": "2025-09-18", "scores": { "sleep": 90, "fitness": 75, "mind": 100, "spirit": 95 } },
+    { "date": "2025-09-19", "scores": { "sleep": 80, "fitness": 75, "mind": 90, "spirit": 80 } },
+    { "date": "2025-09-20", "scores": { "sleep": 85, "fitness": 80, "mind": 95, "spirit": 85 } },
+    { "date": "2025-09-21", "scores": { "sleep": 75, "fitness": 80, "mind": 90, "spirit": 75 } },
+    { "date": "2025-09-22", "scores": { "sleep": 80, "fitness": 65, "mind": 95, "spirit": 80 } },
+    { "date": "2025-09-23", "scores": { "sleep": 70, "fitness": 50, "mind": 85, "spirit": 70 } },
+    { "date": "2025-09-24", "scores": { "sleep": 70, "fitness": 90, "mind": 85, "spirit": 90 } },
+    { "date": "2025-09-25", "scores": { "sleep": 95, "fitness": 60, "mind": 100, "spirit": 95 } },
+    { "date": "2025-09-26", "scores": { "sleep": 80, "fitness": 95, "mind": 90, "spirit": 80 } },
+    { "date": "2025-09-27", "scores": { "sleep": 85, "fitness": 70, "mind": 95, "spirit": 85 } },
+    { "date": "2025-09-28", "scores": { "sleep": 75, "fitness": 75, "mind": 90, "spirit": 75 } },
+    { "date": "2025-09-29", "scores": { "sleep": 85, "fitness": 65, "mind": 100, "spirit": 85 } },
+    { "date": "2025-09-30", "scores": { "sleep": 50, "fitness": 20, "mind": 20, "spirit": 10 } },
+    { "date": "2025-10-01", "scores": { "sleep": 70, "fitness": 90, "mind": 85, "spirit": 90 } },
+    { "date": "2025-10-02", "scores": { "sleep": 90, "fitness": 75, "mind": 100, "spirit": 95 } },
+    { "date": "2025-10-03", "scores": { "sleep": 80, "fitness": 75, "mind": 90, "spirit": 80 } },
+    { "date": "2025-10-04", "scores": { "sleep": 85, "fitness": 80, "mind": 95, "spirit": 85 } },
+    { "date": "2025-10-05", "scores": { "sleep": 75, "fitness": 80, "mind": 90, "spirit": 75 } },
+    { "date": "2025-10-06", "scores": { "sleep": 80, "fitness": 65, "mind": 95, "spirit": 80 } }
   ],
   "entries": {
-    "2025-10-01": {
+    "2025-09-06": {
       "wake": "07:05",
       "rest": "23:10",
       "run": 12,
@@ -58,7 +58,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-02": {
+    "2025-09-07": {
       "wake": "06:45",
       "rest": "22:50",
       "run": 0,
@@ -69,7 +69,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-03": {
+    "2025-09-08": {
       "wake": "07:15",
       "rest": "23:25",
       "run": 0,
@@ -80,7 +80,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-04": {
+    "2025-09-09": {
       "wake": "08:00",
       "rest": "00:00",
       "run": 5,
@@ -91,7 +91,7 @@
       "quadrant": 4,
       "meditation": false
     },
-    "2025-10-05": {
+    "2025-09-10": {
       "wake": "07:30",
       "rest": "23:00",
       "run": 15,
@@ -102,7 +102,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-06": {
+    "2025-09-11": {
       "wake": "06:50",
       "rest": "22:45",
       "run": 0,
@@ -113,7 +113,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-07": {
+    "2025-09-12": {
       "wake": "07:00",
       "rest": "23:05",
       "run": 10,
@@ -124,7 +124,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-08": {
+    "2025-09-13": {
       "wake": "07:00",
       "rest": "23:00",
       "run": 0,
@@ -135,7 +135,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-09": {
+    "2025-09-14": {
       "wake": "07:10",
       "rest": "23:20",
       "run": 12,
@@ -146,7 +146,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-10": {
+    "2025-09-15": {
       "wake": "06:55",
       "rest": "22:55",
       "run": 0,
@@ -157,7 +157,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-11": {
+    "2025-09-16": {
       "wake": "07:45",
       "rest": "23:45",
       "run": 0,
@@ -168,7 +168,7 @@
       "quadrant": 3,
       "meditation": false
     },
-    "2025-10-12": {
+    "2025-09-17": {
       "wake": "07:20",
       "rest": "23:15",
       "run": 18,
@@ -179,7 +179,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-13": {
+    "2025-09-18": {
       "wake": "06:55",
       "rest": "22:50",
       "run": 0,
@@ -190,7 +190,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-14": {
+    "2025-09-19": {
       "wake": "07:05",
       "rest": "23:10",
       "run": 10,
@@ -201,7 +201,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-15": {
+    "2025-09-20": {
       "wake": "07:00",
       "rest": "23:00",
       "run": 0,
@@ -212,7 +212,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-16": {
+    "2025-09-21": {
       "wake": "07:15",
       "rest": "23:25",
       "run": 12,
@@ -223,7 +223,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-17": {
+    "2025-09-22": {
       "wake": "07:05",
       "rest": "23:10",
       "run": 0,
@@ -234,7 +234,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-18": {
+    "2025-09-23": {
       "wake": "07:30",
       "rest": "23:40",
       "run": 0,
@@ -245,7 +245,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-19": {
+    "2025-09-24": {
       "wake": "07:35",
       "rest": "23:20",
       "run": 12,
@@ -256,7 +256,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-20": {
+    "2025-09-25": {
       "wake": "06:50",
       "rest": "22:40",
       "run": 0,
@@ -267,7 +267,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-21": {
+    "2025-09-26": {
       "wake": "07:00",
       "rest": "23:05",
       "run": 15,
@@ -278,7 +278,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-22": {
+    "2025-09-27": {
       "wake": "07:00",
       "rest": "23:00",
       "run": 0,
@@ -289,7 +289,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-23": {
+    "2025-09-28": {
       "wake": "07:10",
       "rest": "23:20",
       "run": 10,
@@ -300,7 +300,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-24": {
+    "2025-09-29": {
       "wake": "06:55",
       "rest": "22:55",
       "run": 0,
@@ -311,7 +311,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-25": {
+    "2025-09-30": {
       "wake": "08:15",
       "rest": "00:30",
       "run": 0,
@@ -322,7 +322,7 @@
       "quadrant": 4,
       "meditation": false
     },
-    "2025-10-26": {
+    "2025-10-01": {
       "wake": "07:20",
       "rest": "23:15",
       "run": 12,
@@ -333,7 +333,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-27": {
+    "2025-10-02": {
       "wake": "06:55",
       "rest": "22:50",
       "run": 0,
@@ -344,7 +344,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-28": {
+    "2025-10-03": {
       "wake": "07:05",
       "rest": "23:10",
       "run": 10,
@@ -355,7 +355,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-29": {
+    "2025-10-04": {
       "wake": "07:00",
       "rest": "23:00",
       "run": 0,
@@ -366,7 +366,7 @@
       "quadrant": 1,
       "meditation": true
     },
-    "2025-10-30": {
+    "2025-10-05": {
       "wake": "07:15",
       "rest": "23:25",
       "run": 12,
@@ -377,7 +377,7 @@
       "quadrant": 2,
       "meditation": true
     },
-    "2025-10-31": {
+    "2025-10-06": {
       "wake": "07:05",
       "rest": "23:10",
       "run": 0,
@@ -389,11 +389,11 @@
       "meditation": true
     }
   },
-  "lastEntryDate": "2025-10-31",
+  "lastEntryDate": "2025-10-06",
   "dailyTimestamps": {
-    "run": "2025-10-30",
-    "strength": "2025-10-31",
-    "read": "2025-10-31",
-    "meditation": "2025-10-31"
+    "run": "2025-10-05",
+    "strength": "2025-10-06",
+    "read": "2025-10-06",
+    "meditation": "2025-10-06"
   }
 }
