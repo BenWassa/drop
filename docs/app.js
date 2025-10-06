@@ -1256,45 +1256,160 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     },
 
-    // --- SCORE CALCULATION LOGIC (Unchanged) ---
+    // --- SCORE CALCULATION LOGIC (Trend-based with 7-day weighted average) ---
+    
+    /**
+     * Calculates a trend-based score that considers:
+     * 1. Today's raw activity score (40% weight)
+     * 2. 7-day weighted average (60% weight) - recent days weighted more heavily
+     * 3. Baseline adjustment to center around 80 for typical performance
+     * 4. Floor and ceiling to prevent extreme values (never 0 or 100)
+     */
+    calcTrendScore(domain, rawScore) {
+      const history = Array.isArray(Store.state.history) ? Store.state.history.slice(-7) : [];
+      
+      // If no history, return adjusted raw score
+      if (history.length === 0) {
+        return this.adjustToRealisticRange(rawScore);
+      }
+
+      // Calculate 7-day weighted average (more recent = higher weight)
+      let weightedSum = 0;
+      let weightSum = 0;
+      
+      history.forEach((entry, index) => {
+        const score = Number(entry?.scores?.[domain]) || 0;
+        // Exponential decay: most recent day has highest weight
+        const daysAgo = history.length - index;
+        const weight = Math.pow(0.7, daysAgo - 1); // Recent days weighted 1.0, 0.7, 0.49, 0.34...
+        weightedSum += score * weight;
+        weightSum += weight;
+      });
+      
+      const historicalAverage = weightSum > 0 ? weightedSum / weightSum : 0;
+      
+      // Blend today's score (40%) with historical trend (60%)
+      const blendedScore = (rawScore * 0.4) + (historicalAverage * 0.6);
+      
+      // Adjust to realistic range centered around 80
+      return this.adjustToRealisticRange(blendedScore);
+    },
+
+    /**
+     * Adjusts raw scores to realistic range:
+     * - Centers typical performance around 75-85
+     * - 1 standard deviation: 70-88
+     * - Never returns 0 or 100
+     * - Uses sigmoid-like curve for smooth transitions
+     */
+    adjustToRealisticRange(rawScore) {
+      // Baseline floor: any activity gives you at least 60
+      const floor = 60;
+      const ceiling = 95;
+      const target = 80; // Center point for typical performance
+      
+      if (rawScore <= 0) return floor;
+      if (rawScore >= 100) return ceiling;
+      
+      // Sigmoid adjustment: compress extremes, expand middle range
+      // This creates natural clustering around 70-88 for typical performance
+      const normalized = rawScore / 100;
+      
+      // Apply compression to reduce variance
+      // Maps: 0->60, 50->78, 75->84, 100->95
+      const compressed = floor + (ceiling - floor) * (
+        0.5 + 0.5 * Math.tanh(2.5 * (normalized - 0.5))
+      );
+      
+      return Math.round(compressed);
+    },
+
     calcSleep() {
       const { wake, rest } = Store.state;
-      if (!wake || !rest) return 0;
+      if (!wake || !rest) return this.calcTrendScore('sleep', 0);
+      
       const [wh, wm] = wake.split(':').map(Number);
       const [rh, rm] = rest.split(':').map(Number);
       const wakeMins = wh * 60 + wm;
       const restMins = rh * 60 + rm;
       const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
       const hours = duration / 60;
-      if (hours >= 7 && hours <= 9) return 100;
-      if (hours >= 6 && hours < 7) return 80;
-      if (hours > 9 && hours <= 10) return 80;
-      if (hours >= 5 && hours < 6) return 60;
-      if (hours > 10 && hours <= 11) return 60;
-      return 40;
+      
+      // Raw scoring: optimal sleep (7-9 hours) = 100, poor sleep = lower
+      let rawScore;
+      if (hours >= 7 && hours <= 9) {
+        rawScore = 100; // Optimal
+      } else if (hours >= 6 && hours < 7) {
+        rawScore = 85; // Good
+      } else if (hours > 9 && hours <= 10) {
+        rawScore = 85; // Good (slight oversleep)
+      } else if (hours >= 5 && hours < 6) {
+        rawScore = 65; // Below optimal
+      } else if (hours > 10 && hours <= 11) {
+        rawScore = 65; // Oversleep
+      } else if (hours >= 4 && hours < 5) {
+        rawScore = 45; // Poor
+      } else if (hours > 11) {
+        rawScore = 50; // Significant oversleep
+      } else {
+        rawScore = 30; // Very poor (<4 hours)
+      }
+      
+      return this.calcTrendScore('sleep', rawScore);
     },
+
     calcFitness() {
-      let score = 0;
-      if (Store.state.run >= 20) score += 40;
-      else if (Store.state.run >= 10) score += 30;
-      else if (Store.state.run >= 5) score += 20;
-      if (Store.state.strength) score += 30;
-      if (Store.state.skill) score += 30;
-      return Math.min(100, score);
+      let rawScore = 0;
+      
+      // Running: up to 45 points
+      if (Store.state.run >= 20) rawScore += 45;
+      else if (Store.state.run >= 15) rawScore += 38;
+      else if (Store.state.run >= 10) rawScore += 32;
+      else if (Store.state.run >= 5) rawScore += 25;
+      else if (Store.state.run >= 3) rawScore += 18;
+      else if (Store.state.run >= 1) rawScore += 10;
+      
+      // Strength training: 35 points
+      if (Store.state.strength) rawScore += 35;
+      
+      // Skill practice: 20 points
+      if (Store.state.skill) rawScore += 20;
+      
+      return this.calcTrendScore('fitness', Math.min(100, rawScore));
     },
+
     calcMind() {
-      let score = 0;
-      if (Store.state.read) score += 50;
-      if (Store.state.write) score += 50;
-      return score;
+      let rawScore = 0;
+      
+      // Reading: 55 points (intellectual input)
+      if (Store.state.read) rawScore += 55;
+      
+      // Writing: 45 points (intellectual output/processing)
+      if (Store.state.write) rawScore += 45;
+      
+      return this.calcTrendScore('mind', rawScore);
     },
+
     calcSpirit() {
-      let score = 0;
+      let rawScore = 0;
       const { quadrant, meditation } = Store.state;
-      if (quadrant === 1 || quadrant === 2) score += 50;
-      else if (quadrant === 3 || quadrant === 4) score += 25;
-      if (meditation) score += 50;
-      return Math.min(100, score);
+      
+      // Mood quadrant: up to 50 points
+      // Q1 (motivated/energized) & Q2 (calm/content) = optimal states
+      if (quadrant === 1 || quadrant === 2) {
+        rawScore += 50;
+      } else if (quadrant === 3) {
+        // Q3 (calm/unmotivated): neutral state
+        rawScore += 35;
+      } else if (quadrant === 4) {
+        // Q4 (stressed/anxious): challenging state but still scored
+        rawScore += 25;
+      }
+      
+      // Meditation: 50 points (mindfulness practice)
+      if (meditation) rawScore += 50;
+      
+      return this.calcTrendScore('spirit', Math.min(100, rawScore));
     },
 
     calculateSleepHours() {
