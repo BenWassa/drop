@@ -1807,6 +1807,54 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       }
+
+      // Setup clear app data button (dev only)
+      const clearDataBtn = document.getElementById('dev-clear-data');
+      if (clearDataBtn) {
+        clearDataBtn.hidden = false;
+        clearDataBtn.addEventListener('click', async () => {
+          const confirmClear = confirm('Clear all app data, caches, service workers, and cookies? This will reload the page.');
+          if (!confirmClear) return;
+
+          try {
+            // Clear local/session storage keys used by app
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Clear caches
+            if (window.caches && caches.keys) {
+              const keys = await caches.keys();
+              await Promise.all(keys.map(k => caches.delete(k)));
+            }
+
+            // Unregister service workers
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map(r => r.unregister()));
+            }
+
+            // Attempt to clear cookies (best-effort)
+            try {
+              document.cookie.split(';').forEach(function(c) {
+                document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+              });
+            } catch (e) {
+              console.warn('Failed to clear cookies programmatically:', e);
+            }
+
+            // If Store exists, call clearAllData
+            if (window.DropApp && DropApp.Store && typeof DropApp.Store.clearAllData === 'function') {
+              DropApp.Store.clearAllData();
+            }
+
+            UI.toast('Cleared app data. Reloading...', 1400);
+            setTimeout(() => location.reload(true), 800);
+          } catch (err) {
+            console.error('Error clearing app data:', err);
+            UI.toast('Failed to clear some data. Check console.', 3000);
+          }
+        });
+      }
     },
 
     async checkCriticalResources() {
