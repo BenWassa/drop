@@ -94,19 +94,31 @@ document.addEventListener('DOMContentLoaded', () => {
     checkForNewDay() {
       const today = this.getToday();
       const staleDataCleared = this.expireStaleDailyData();
+      let needsUpdate = false;
+
       if (this.state.lastEntryDate !== today) {
         this.resetDailyData();
         this.state.lastEntryDate = today;
-        this.save();
-        if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
-          App.updateScores();
-        }
-        return;
+        needsUpdate = true;
       }
 
       if (staleDataCleared) {
-        this.save();
+        needsUpdate = true;
       }
+
+      if (needsUpdate) {
+        this.save();
+        if (typeof App !== 'undefined') {
+          if (typeof App.syncDailyUI === 'function') {
+            App.syncDailyUI();
+          }
+          if (typeof App.updateScores === 'function') {
+            App.updateScores();
+          }
+        }
+      }
+
+      return needsUpdate;
     },
 
     save() {
@@ -166,8 +178,18 @@ document.addEventListener('DOMContentLoaded', () => {
       this.state = { ...this.defaults, ...this.state, ...payload };
       this.ensureHistory();
       this.ensureDailyTimestamps();
-      this.checkForNewDay();
-      this.save();
+      const handled = this.checkForNewDay();
+      if (!handled) {
+        this.save();
+        if (typeof App !== 'undefined') {
+          if (typeof App.syncDailyUI === 'function') {
+            App.syncDailyUI();
+          }
+          if (typeof App.updateScores === 'function') {
+            App.updateScores();
+          }
+        }
+      }
     },
 
     recordHistory(scores) {
@@ -349,14 +371,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const clamped = Math.max(0, Math.min(100, Number(score) || 0));
-      
+      if (meter && typeof meter.setAttribute === 'function') {
+        meter.setAttribute('data-score-active', clamped > 80 ? 'true' : 'false');
+      }
+
       // Hide arc when score is 0 to avoid showing just the rounded cap
       if (clamped === 0) {
         arc.style.opacity = '0';
       } else {
-        arc.style.opacity = '1';
+        arc.style.opacity = '';
       }
-      
+
       const dashOffset = visibleLength - (clamped / 100) * visibleLength;
       arc.style.strokeDashoffset = `${dashOffset.toFixed(2)}`;
     },
@@ -776,10 +801,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             Store.merge(payload);
             UI.setVisionFields(Store.state);
-            if (UI.elements.inputs.runValue) {
-              UI.elements.inputs.runValue.textContent = Store.state.run;
-            }
-            this.updateScores();
             UI.notify('Data imported');
           } catch (error) {
             console.error('Data import failed:', error);
