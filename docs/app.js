@@ -336,23 +336,19 @@ document.addEventListener('DOMContentLoaded', () => {
       scoreDisplays: {
         sleep: {
           score: document.getElementById('sleep-score'),
-          meter: document.querySelector('[data-domain-meter="sleep"]'),
-          streak: document.getElementById('sleep-streak')
+          meter: document.querySelector('[data-domain-meter="sleep"]')
         },
         fitness: {
           score: document.getElementById('fitness-score'),
-          meter: document.querySelector('[data-domain-meter="fitness"]'),
-          streak: document.getElementById('fitness-streak')
+          meter: document.querySelector('[data-domain-meter="fitness"]')
         },
         mind: {
           score: document.getElementById('mind-score'),
-          meter: document.querySelector('[data-domain-meter="mind"]'),
-          streak: document.getElementById('mind-streak')
+          meter: document.querySelector('[data-domain-meter="mind"]')
         },
         spirit: {
           score: document.getElementById('spirit-score'),
-          meter: document.querySelector('[data-domain-meter="spirit"]'),
-          streak: document.getElementById('spirit-streak')
+          meter: document.querySelector('[data-domain-meter="spirit"]')
         }
       },
       inputs: {
@@ -397,10 +393,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (display.meter) {
           display.meter.setAttribute('aria-valuenow', scoreText === '—' ? '0' : scoreText);
           // Score rings are now static CSS - no JavaScript manipulation needed
-        }
-        if (display.streak) {
-          const streakText = streaks && streaks[domain] ? streaks[domain] : '0 of 7 days';
-          display.streak.textContent = streakText;
         }
 
         if (previousValue !== null && previousValue !== scoreText && scoreText !== '—') {
