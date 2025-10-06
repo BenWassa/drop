@@ -225,6 +225,72 @@ QUnit.module('Overlay Behavior', function(hooks) {
   });
 });
 
+QUnit.module('Data Management', function(hooks) {
+
+  hooks.before(function() {
+    this.dropApp = window.DropApp || {};
+    this.testHooks = this.dropApp.testHooks;
+
+    if (!this.testHooks) {
+      throw new Error('DropApp test hooks are not available.');
+    }
+
+    this.testHooks.initStore();
+  });
+
+  hooks.beforeEach(function() {
+    this.testHooks.clearAllData();
+  });
+
+  QUnit.test('clearAllData resets state to defaults', function(assert) {
+    const today = new Date().toISOString().slice(0, 10);
+    const payload = this.testHooks.getDefaults();
+    payload.wake = '06:15';
+    payload.run = 8;
+    payload.lastEntryDate = today;
+    payload.dailyTimestamps = { wake: today, run: today };
+    payload.history = [{ date: today, scores: { sleep: 90, fitness: 80, mind: 70, spirit: 60 } }];
+
+    this.testHooks.merge(payload);
+
+    let state = this.testHooks.getState();
+    assert.equal(state.wake, '06:15', 'Wake time imported');
+    assert.equal(state.run, 8, 'Run distance imported');
+    assert.ok(Array.isArray(state.history) && state.history.length === 1, 'History imported');
+
+    this.testHooks.clearAllData();
+    state = this.testHooks.getState();
+
+    assert.equal(state.wake, '', 'Wake time reset');
+    assert.equal(state.run, 0, 'Run distance reset');
+    assert.deepEqual(state.history, [], 'History cleared');
+  });
+
+  QUnit.test('validateImport rejects invalid payloads', function(assert) {
+    const payload = this.testHooks.getDefaults();
+    payload.run = 'five';
+
+    assert.notOk(this.testHooks.validateImport(payload), 'String values for numeric fields are rejected');
+  });
+
+  QUnit.test('validateImport accepts valid payloads and merge applies data', function(assert) {
+    const today = new Date().toISOString().slice(0, 10);
+    const payload = this.testHooks.getDefaults();
+    payload.wake = '05:45';
+    payload.strength = true;
+    payload.dailyTimestamps = { wake: today, strength: today };
+    payload.lastEntryDate = today;
+
+    assert.ok(this.testHooks.validateImport(payload), 'Valid payload passes validation');
+
+    this.testHooks.merge(payload);
+    const state = this.testHooks.getState();
+
+    assert.equal(state.wake, '05:45', 'Wake time updated from import');
+    assert.strictEqual(state.strength, true, 'Boolean fields import correctly');
+  });
+});
+
 QUnit.module('Accessibility Features', function(hooks) {
   
   hooks.beforeEach(function() {

@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
       visionMindFocus: '', visionSpiritFocus: '',
       history: [],
       lastEntryDate: '',
-      dailyTimestamps: {}
+      dailyTimestamps: {},
+      entries: {}
     },
 
     init() {
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.state = { ...this.defaults, ...savedData };
       this.ensureHistory();
       this.ensureDailyTimestamps();
+      this.ensureEntries();
       this.checkForNewDay();
       this.save();
     },
@@ -46,6 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
       this.state.dailyTimestamps = sanitized;
+    },
+
+    ensureEntries() {
+      if (!this.state.entries || typeof this.state.entries !== 'object' || Array.isArray(this.state.entries)) {
+        this.state.entries = {};
+      }
+    },
+
+    cloneDefaults() {
+      return JSON.parse(JSON.stringify(this.defaults));
     },
 
     getToday() {
@@ -178,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.state = { ...this.defaults, ...this.state, ...payload };
       this.ensureHistory();
       this.ensureDailyTimestamps();
+      this.ensureEntries();
       const handled = this.checkForNewDay();
       if (!handled) {
         this.save();
@@ -190,6 +203,15 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
+    },
+
+    clearAllData() {
+      this.state = this.cloneDefaults();
+      this.ensureHistory();
+      this.ensureDailyTimestamps();
+      this.ensureEntries();
+      delete this.state.currentDate;
+      this.save();
     },
 
     recordHistory(scores) {
@@ -247,7 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
         exportBtn: document.getElementById('settings-export-btn'),
         importBtn: document.getElementById('settings-import-btn'),
         importInput: document.getElementById('settings-import-input'),
-        historyBtn: document.getElementById('settings-history-btn')
+        historyBtn: document.getElementById('settings-history-btn'),
+        clearBtn: document.getElementById('settings-clear-btn')
       },
       historyOverlay: {
         overlay: document.getElementById('history-overlay'),
@@ -624,7 +647,6 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPage: 'home',
 
     init() {
-      Store.init();
       UI.initDate();
       UI.removeDevElements();
       UI.setVisionFields(Store.state);
@@ -819,6 +841,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    handleDataClear() {
+      const confirmationMessage = 'This will remove all saved data, including history. Do you want to continue?';
+      const confirmed = window.confirm(confirmationMessage);
+
+      if (!confirmed) {
+        return false;
+      }
+
+      Store.clearAllData();
+      UI.setVisionFields(Store.state);
+      this.syncDailyUI();
+
+      const zeroScores = { sleep: 0, fitness: 0, mind: 0, spirit: 0 };
+      const streaks = this.calculateStreaks();
+      UI.renderScores(zeroScores, streaks);
+
+      UI.notify('All data cleared');
+      return true;
+    },
+
     bindEvents() {
       // Open overlays
       UI.elements.cards.forEach(card => {
@@ -943,7 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     bindSettingsMenu() {
-      const { menu, openBtn, closeBtn, backdrop, installBtn, exportBtn, importBtn, importInput } = UI.elements.settingsMenu;
+      const { menu, openBtn, closeBtn, backdrop, installBtn, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
       
       if (!menu || !openBtn) return;
 
@@ -1015,6 +1057,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
+      if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+          const cleared = this.handleDataClear();
+          if (cleared) {
+            closeSettings();
+          }
+        });
+      }
+
       // History view from settings
       const { historyBtn } = UI.elements.settingsMenu;
       if (historyBtn) {
@@ -1027,8 +1078,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openHistoryView() {
       const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
-      
+
       if (!overlay) return;
+
+      Store.ensureEntries();
 
       // Current page state
       let currentPage = 0;
@@ -1036,7 +1089,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Render history entries
       const renderHistory = () => {
-        const allDates = Object.keys(Store.state.entries).sort((a, b) => new Date(b) - new Date(a));
+        const entries = Store.state.entries || {};
+        const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
         const startIdx = currentPage * entriesPerPage;
         const endIdx = startIdx + entriesPerPage;
         const datesToShow = allDates.slice(startIdx, endIdx);
@@ -1063,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
           } else {
             list.innerHTML = datesToShow.map(dateKey => {
-              const entry = Store.state.entries[dateKey];
+              const entry = entries[dateKey];
               const scores = this.calculateDomainScores(entry);
               const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
 
@@ -1509,14 +1563,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const testHooks = {
+    initStore: () => Store.init(),
+    clearAllData: () => Store.clearAllData(),
+    getState: () => JSON.parse(JSON.stringify(Store.state)),
+    getDefaults: () => Store.cloneDefaults(),
+    validateImport: (payload) => Store.validateImport(payload),
+    merge: (payload) => Store.merge(payload),
+    update: (key, value) => Store.update(key, value)
+  };
+
+  if (typeof window !== 'undefined') {
+    window.DropApp = window.DropApp || {};
+    window.DropApp.Store = Store;
+    window.DropApp.App = App;
+    window.DropApp.UI = UI;
+    window.DropApp.testHooks = testHooks;
+  }
+
+  const isTestEnvironment = document.body && document.body.dataset && document.body.dataset.dropTest === 'true';
+
+  if (isTestEnvironment) {
+    return;
+  }
+
   // Initialize app with resource checks
   (async () => {
     const resourceCheck = await App.checkCriticalResources();
-    
+
     if (!resourceCheck.allOk) {
       console.warn('Some resources failed to load, but continuing...');
     }
 
+    Store.init();
     App.init();
     App.setupDevPill();
   })();
