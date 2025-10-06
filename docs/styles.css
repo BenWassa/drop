@@ -255,15 +255,14 @@ body {
 
 .score-ring__track {
   stroke: rgba(240, 242, 245, 0.12);
-  stroke-dasharray: none;
 }
 
 .score-ring__arc {
   stroke-linecap: round;
-  transition: stroke-dashoffset var(--transition-slow);
+  /* Solid full circles - no animation, no fill logic */
 }
 
-/* Static domain colors - always visible, always colored */
+/* Static domain colors - always solid, always visible */
 .score-item[data-domain="sleep"] .score-ring__arc { stroke: var(--sleep); }
 .score-item[data-domain="fitness"] .score-ring__arc { stroke: var(--fitness); }
 .score-item[data-domain="mind"] .score-ring__arc { stroke: var(--mind); }

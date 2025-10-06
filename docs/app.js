@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (display.meter) {
           display.meter.setAttribute('aria-valuenow', scoreText === '—' ? '0' : scoreText);
-          this.updateScoreRing(display.meter, scoreText === '—' ? 0 : clampedScore);
+          // Score rings are now static CSS - no JavaScript manipulation needed
         }
         if (display.streak) {
           const streakText = streaks && streaks[domain] ? streaks[domain] : '0 of 7 days';
@@ -435,19 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     updateScoreRing(meter, score) {
-      const arc = meter.querySelector('.score-ring__arc');
-      if (!arc) return;
-      const radius = (arc.r && arc.r.baseVal ? arc.r.baseVal.value : parseFloat(arc.getAttribute('r'))) || 52;
-      const circumference = 2 * Math.PI * radius;
-      
-      // Static full circle (360 degrees) - always visible
-      arc.style.strokeDasharray = `${circumference.toFixed(2)}`;
-
-      const clamped = Math.max(0, Math.min(100, Number(score) || 0));
-
-      // Animate fill based on score percentage
-      const dashOffset = (100 - clamped) / 100 * circumference;
-      arc.style.strokeDashoffset = `${dashOffset.toFixed(2)}`;
+      // Score rings are now static CSS - no JavaScript manipulation needed
+      // Keeping this function stub for backwards compatibility
     },
 
     showLoading(show = true) {
