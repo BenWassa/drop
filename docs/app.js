@@ -1488,40 +1488,47 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const today = Store.getToday();
       const last7Days = [];
-      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      const fullDayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
       // 1. Get the last 7 calendar days to ensure a full week display
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const dayOfWeek = dayNames[d.getDay()].charAt(0);
+        const dayOfWeek = dayNames[d.getDay()];
+        const fullDayName = fullDayNames[d.getDay()];
         
         // Find history entry for this date or use an empty scores object
         const entry = history.find(e => e.date === dateKey) || { date: dateKey, scores: { sleep: 0, fitness: 0, mind: 0, spirit: 0 } };
         
         last7Days.push({
           dayLabel: dayOfWeek,
+          fullDayName: fullDayName,
           dateKey: dateKey,
           scores: entry.scores || { sleep: 0, fitness: 0, mind: 0, spirit: 0 },
           isToday: dateKey === today
         });
       }
       
-      // 2. Generate HTML
-      let headerHTML = last7Days.map(day => 
-        `<span class="day-label" title="${day.isToday ? 'Today' : day.dateKey}">${day.dayLabel}</span>`
-      ).join('');
-      
+      // 2. Generate HTML - simple grid layout
       let gridHTML = '';
       let activeDaysCount = 0;
       
+      // Header row - empty cell for label column, then day labels
+      gridHTML += '<div></div>'; // Empty top-left corner
+      last7Days.forEach(day => {
+        gridHTML += `<div class="day-label" title="${day.isToday ? 'Today' : day.dateKey}">${day.dayLabel}</div>`;
+      });
+      
+      // Data rows - one per domain
       domains.forEach(domain => {
-        const iconSrc = `icons/${domain}.svg`;
-        const iconAlt = domain.charAt(0).toUpperCase() + domain.slice(1);
+        const domainName = domain.charAt(0).toUpperCase() + domain.slice(1);
         
-        gridHTML += `<div class="domain-icon-label" data-domain="${domain}"><img src="${iconSrc}" alt="${iconAlt}" title="${iconAlt} Score"></div>`;
+        // Domain label
+        gridHTML += `<div class="domain-label">${domainName}</div>`;
         
+        // Cells for each day
         last7Days.forEach(day => {
           // Use the raw activity score stored in history (0-100)
           const score = Number(day.scores[domain]) || 0; 
@@ -1531,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             activeDaysCount++;
           }
           
-          gridHTML += `<div class="heatmap-cell" data-intensity="${intensity}" title="${iconAlt} on ${day.dayLabel}: ${score} pts"></div>`;
+          gridHTML += `<div class="heatmap-cell" data-intensity="${intensity}" title="${domainName} on ${day.fullDayName}: ${score} pts"></div>`;
         });
       });
       
@@ -1540,10 +1547,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `<div style="padding: 24px 0; font-style: italic; color: var(--color-text-tertiary);">Track your domains to view weekly trajectory.</div>`;
         summaryEl.textContent = 'Ready to start? Log an entry now to begin your weekly momentum.';
       } else {
-        container.innerHTML = `
-          <div class="heatmap-header">${headerHTML}</div>
-          <div class="heatmap-grid">${gridHTML}</div>
-        `;
+        container.innerHTML = gridHTML;
         // Generate summary based on the aggregated data
         summaryEl.textContent = this.generateHeatmapSummary(last7Days);
       }
