@@ -19,6 +19,46 @@ Unit tests for DOM structure, accessibility, and component behavior.
 - Screen reader announcements
 - Navigation accessibility
 
+### 3. Sample Data
+Test data files for import/export functionality testing.
+
+**Files:**
+- `sample-data-1month.json` - 30 days of realistic tracking data with varying scores across all domains
+
+**Usage:**
+- Use in DOM tests for data import validation
+- Manual testing of import/export features
+- Development/demo data
+
+**Data Structure:**
+```json
+{
+  "wake": "06:30",
+  "rest": "22:00",
+  "run": 5,
+  "strength": true,
+  "skill": false,
+  "read": true,
+  "write": false,
+  "quadrant": 2,
+  "meditation": true,
+  "visionTheme": "Build healthy habits...",
+  "lastEntryDate": "2024-10-06",
+  "history": [
+    {
+      "date": "2024-09-07",
+      "scores": {
+        "sleep": 85,
+        "fitness": 75,
+        "mind": 80,
+        "spirit": 70
+      }
+    }
+    // ... 29 more entries
+  ]
+}
+```
+
 ### 2. Visual Regression Tests (Playwright)
 Screenshot-based tests to catch unintended UI changes.
 
