@@ -1571,7 +1571,7 @@ body {
 /* === WEEKLY HEATMAP COMPONENT (Dynamic) === */
 .weekly-heatmap {
   margin-top: 24px;
-  padding: 20px;
+  padding: 16px;
   background: var(--color-surface-2);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
@@ -1583,42 +1583,43 @@ body {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-text-secondary);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   text-align: center;
 }
 
 .heatmap-container {
-  max-width: 380px;
-  margin: 0 auto;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 /* Single grid for the entire heatmap */
 .heatmap-grid {
   display: grid;
-  grid-template-columns: 70px repeat(7, 1fr);
+  grid-template-columns: 60px 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   gap: 3px;
-  row-gap: 3px;
-  column-gap: 3px;
+  row-gap: 4px;
+  width: 100%;
 }
 
 .day-label {
-  font-size: 10px;
-  opacity: 0.6;
+  font-size: 12px;
+  opacity: 0.7;
   text-align: center;
   color: var(--color-text-tertiary);
   font-weight: 600;
   letter-spacing: 0.5px;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 
 .domain-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text-secondary);
   text-align: right;
-  padding-right: 8px;
+  padding-right: 6px;
   font-family: var(--font-mono);
   text-transform: capitalize;
   display: flex;
@@ -1627,9 +1628,9 @@ body {
 }
 
 .heatmap-cell {
-  aspect-ratio: 1;
-  min-height: 28px;
-  border-radius: 3px;
+  width: 100%;
+  height: 40px;
+  border-radius: 4px;
   transition: all 0.2s ease;
   cursor: pointer;
 }
