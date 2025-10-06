@@ -145,11 +145,35 @@ document.addEventListener('DOMContentLoaded', () => {
           this.state.lastEntryDate = this.getToday();
           this.ensureDailyTimestamps();
           this.state.dailyTimestamps[key] = this.state.lastEntryDate;
+          // Save current daily data to entries for history view
+          this.saveCurrentEntry();
         }
         this.save();
         if (!key.startsWith('vision')) {
           App.updateScores();
         }
+      }
+    },
+
+    saveCurrentEntry() {
+      this.ensureEntries();
+      const today = this.getToday();
+      const entry = {};
+      
+      // Save all daily keys to the entry
+      this.dailyKeys.forEach(key => {
+        entry[key] = this.state[key];
+      });
+      
+      // Only save if there's actual data (not all defaults)
+      const hasData = this.dailyKeys.some(key => {
+        const value = this.state[key];
+        const defaultValue = this.defaults[key];
+        return !Object.is(value, defaultValue);
+      });
+      
+      if (hasData) {
+        this.state.entries[today] = entry;
       }
     },
 
@@ -1104,20 +1128,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // History view from settings
       const { historyBtn } = UI.elements.settingsMenu;
+      console.log('🔍 History button found:', historyBtn);
       if (historyBtn) {
         historyBtn.addEventListener('click', () => {
+          console.log('📅 History button clicked');
           closeSettings();
           this.openHistoryView();
         });
+      } else {
+        console.log('❌ History button NOT found');
       }
     },
 
     openHistoryView() {
+      console.log('🔓 Opening history view...');
       const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
 
-      if (!overlay) return;
+      console.log('📊 History overlay elements:', { overlay, closeBtn, list, dateRange, prevBtn, nextBtn });
+
+      if (!overlay) {
+        console.log('❌ History overlay element not found!');
+        return;
+      }
 
       Store.ensureEntries();
+      
+      // Migrate: if entries is empty but we have history, populate entries from history
+      const entries = Store.state.entries || {};
+      const history = Store.state.history || [];
+      if (Object.keys(entries).length === 0 && history.length > 0) {
+        console.log('🔄 Migrating history to entries format...');
+        history.forEach(histEntry => {
+          if (histEntry.date) {
+            // Create a minimal entry from history scores
+            entries[histEntry.date] = {
+              wake: '', 
+              rest: '', 
+              run: 0, 
+              strength: false, 
+              skill: false,
+              read: false, 
+              write: false, 
+              quadrant: 0, 
+              meditation: false
+            };
+          }
+        });
+        Store.state.entries = entries;
+        Store.save();
+        console.log(`✅ Migrated ${history.length} history entries`);
+      }
+
+      console.log('📝 Store entries:', Store.state.entries);
 
       // Current page state
       let currentPage = 0;
@@ -1241,12 +1303,15 @@ document.addEventListener('DOMContentLoaded', () => {
       // Close handler
       if (closeBtn) {
         closeBtn.addEventListener('click', () => {
+          console.log('❌ Closing history overlay');
           overlay.classList.remove('active');
         });
       }
 
       // Open overlay and render
+      console.log('✅ Adding active class to overlay');
       overlay.classList.add('active');
+      console.log('🎨 Rendering history...');
       renderHistory();
     },
 
