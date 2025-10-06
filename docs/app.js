@@ -1494,16 +1494,26 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const today = Store.getToday();
       const last7Days = [];
-      const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-      const fullDayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+      const fullDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-      // 1. Get the last 7 calendar days to ensure a full week display
-      for (let i = 6; i >= 0; i--) {
+      // 1. Get the current week (Monday to Sunday)
+      console.log('🗓️ Weekly Heatmap Debug - Building current week (Mon-Sun):');
+      const now = new Date();
+      const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      
+      // Calculate days since last Monday (adjusting so Monday = 0, Sunday = 6)
+      const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+      
+      // Start from Monday of the current week
+      for (let i = 0; i < 7; i++) {
         const d = new Date();
-        d.setDate(d.getDate() - i);
+        d.setDate(d.getDate() - daysSinceMonday + i);
         const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         const dayOfWeek = dayNames[d.getDay()];
         const fullDayName = fullDayNames[d.getDay()];
+        
+        console.log(`  Day ${i}: ${dateKey} | getDay()=${d.getDay()} | Label="${dayOfWeek}" | Full="${fullDayName}"`);
         
         // Find history entry for this date or use an empty scores object
         const entry = history.find(e => e.date === dateKey) || { date: dateKey, scores: { sleep: 0, fitness: 0, mind: 0, spirit: 0 } };
@@ -1516,6 +1526,7 @@ document.addEventListener('DOMContentLoaded', () => {
           isToday: dateKey === today
         });
       }
+      console.log('📊 Final last7Days order:', last7Days.map(d => d.dayLabel).join(' '));
       
       // 2. Generate HTML - simple grid layout
       let gridHTML = '';
