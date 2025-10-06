@@ -6,14 +6,15 @@
   <title>drop - QUnit Test Suite</title>
   <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.19.4.css">
 </head>
-<body>
+<body data-drop-test="true">
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
-  
+
   <!-- Load QUnit library -->
   <script src="https://code.jquery.com/qunit/qunit-2.19.4.js"></script>
-  
+
   <!-- Load test modules -->
-  <script src="dom.test.js"></script>
+  <script src="../app.js" defer></script>
+  <script src="dom.test.js" defer></script>
 </body>
 </html>
