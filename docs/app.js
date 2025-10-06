@@ -400,10 +400,10 @@ document.addEventListener('DOMContentLoaded', () => {
           baselineCard.id = 'baseline-message-card';
           baselineCard.className = 'baseline-card';
           
-          // Insert after score grid
-          const scoreGrid = document.querySelector('.score-grid');
-          if (scoreGrid && scoreGrid.parentNode) {
-            scoreGrid.parentNode.insertBefore(baselineCard, scoreGrid.nextSibling);
+          // Insert before weekly heatmap in the home page section
+          const weeklyHeatmap = document.getElementById('weekly-heatmap');
+          if (weeklyHeatmap && weeklyHeatmap.parentNode) {
+            weeklyHeatmap.parentNode.insertBefore(baselineCard, weeklyHeatmap);
           }
         }
         
