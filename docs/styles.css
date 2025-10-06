@@ -378,6 +378,88 @@ body {
   margin-top: 16px;
 }
 
+/* === BASELINE MESSAGE CARD === */
+.baseline-card {
+  max-width: 480px;
+  margin: 24px auto;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(79, 138, 245, 0.08) 0%, rgba(79, 138, 245, 0.02) 100%);
+  border: 1px solid rgba(79, 138, 245, 0.15);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  animation: fadeIn 400ms ease;
+}
+
+.baseline-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.baseline-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.baseline-text {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.baseline-text strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.baseline-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.baseline-progress-bar {
+  height: 8px;
+  background: rgba(240, 242, 245, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.baseline-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4f8af5 0%, #7c3aed 100%);
+  border-radius: 999px;
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(79, 138, 245, 0.4);
+}
+
+.baseline-progress-label {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.baseline-encouragement {
+  font-size: 14px;
+  color: rgba(79, 138, 245, 0.9);
+  font-weight: 500;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(79, 138, 245, 0.1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 360px) {
   :root {
     --score-ring-size: 88px;

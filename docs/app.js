@@ -339,37 +339,100 @@ document.addEventListener('DOMContentLoaded', () => {
 
     renderScores(scores, streaks = {}) {
       const announcements = [];
+      const history = Array.isArray(Store.state.history) ? Store.state.history : [];
+      const daysLogged = history.length;
+      const needsBaseline = daysLogged < 7;
+
       for (const domain in scores) {
         const display = this.elements.scoreDisplays[domain];
         if (!display) continue;
 
+        const score = scores[domain];
         const previousValue = display.score ? display.score.textContent : null;
-        const numericScore = Number.isFinite(scores[domain]) ? scores[domain] : 0;
-        const clampedScore = Math.max(0, Math.min(100, Math.round(numericScore)));
-        const scoreText = String(clampedScore);
+        
+        // Show dash if score is null (insufficient data)
+        let scoreText;
+        let clampedScore;
+        
+        if (score === null || score === undefined || !Number.isFinite(score)) {
+          scoreText = '—'; // Em dash
+          clampedScore = 0;
+        } else {
+          clampedScore = Math.max(0, Math.min(100, Math.round(score)));
+          scoreText = String(clampedScore);
+        }
 
         if (display.score) {
           display.score.textContent = scoreText;
         }
         if (display.meter) {
-          display.meter.setAttribute('aria-valuenow', scoreText);
-          this.updateScoreRing(display.meter, clampedScore);
+          display.meter.setAttribute('aria-valuenow', scoreText === '—' ? '0' : scoreText);
+          this.updateScoreRing(display.meter, scoreText === '—' ? 0 : clampedScore);
         }
         if (display.streak) {
           const streakText = streaks && streaks[domain] ? streaks[domain] : '0 of 7 days';
           display.streak.textContent = streakText;
         }
 
-        if (previousValue !== null && previousValue !== scoreText) {
+        if (previousValue !== null && previousValue !== scoreText && scoreText !== '—') {
           announcements.push(`${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${scoreText}`);
         }
       }
+
+      // Show/hide baseline message
+      this.updateBaselineMessage(daysLogged, needsBaseline);
 
       if (announcements.length > 0 && this.elements.scoreAnnouncer) {
         this.elements.scoreAnnouncer.textContent = announcements.join('. ');
       }
 
       this.renderGratitude(scores);
+    },
+
+    updateBaselineMessage(daysLogged, needsBaseline) {
+      let baselineCard = document.getElementById('baseline-message-card');
+      
+      if (needsBaseline) {
+        // Create card if it doesn't exist
+        if (!baselineCard) {
+          baselineCard = document.createElement('div');
+          baselineCard.id = 'baseline-message-card';
+          baselineCard.className = 'baseline-card';
+          
+          // Insert after score grid
+          const scoreGrid = document.querySelector('.score-grid');
+          if (scoreGrid && scoreGrid.parentNode) {
+            scoreGrid.parentNode.insertBefore(baselineCard, scoreGrid.nextSibling);
+          }
+        }
+        
+        const remaining = 7 - daysLogged;
+        const dayWord = remaining === 1 ? 'day' : 'days';
+        
+        baselineCard.innerHTML = `
+          <div class="baseline-icon">📊</div>
+          <h3 class="baseline-title">Building Your Baseline</h3>
+          <p class="baseline-text">
+            Log your daily activities for <strong>${remaining} more ${dayWord}</strong> to establish your personal baseline.
+          </p>
+          <div class="baseline-progress">
+            <div class="baseline-progress-bar">
+              <div class="baseline-progress-fill" style="width: ${(daysLogged / 7) * 100}%"></div>
+            </div>
+            <span class="baseline-progress-label">${daysLogged} of 7 days</span>
+          </div>
+          <p class="baseline-encouragement">
+            ✨ You're on your way! Each day of data helps drop understand your unique patterns.
+          </p>
+        `;
+        
+        baselineCard.style.display = 'block';
+      } else {
+        // Hide or remove card when baseline is established
+        if (baselineCard) {
+          baselineCard.style.display = 'none';
+        }
+      }
     },
 
     updateScoreRing(meter, score) {
@@ -1264,13 +1327,15 @@ document.addEventListener('DOMContentLoaded', () => {
      * 2. 7-day weighted average (60% weight) - recent days weighted more heavily
      * 3. Baseline adjustment to center around 80 for typical performance
      * 4. Floor and ceiling to prevent extreme values (never 0 or 100)
+     * 
+     * Returns null if insufficient data (< 7 days) to establish baseline
      */
     calcTrendScore(domain, rawScore) {
       const history = Array.isArray(Store.state.history) ? Store.state.history.slice(-7) : [];
       
-      // If no history, return adjusted raw score
-      if (history.length === 0) {
-        return this.adjustToRealisticRange(rawScore);
+      // Require at least 7 days of data to establish baseline trend
+      if (history.length < 7) {
+        return null; // Not enough data - will display as dash
       }
 
       // Calculate 7-day weighted average (more recent = higher weight)
