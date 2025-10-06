@@ -256,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
       navButtons: document.querySelectorAll('.nav-btn'),
       pages: document.querySelectorAll('[data-page]'),
       loadingOverlay: document.getElementById('loading-overlay'),
-      installButton: document.getElementById('install-button'),
       devPill: document.getElementById('dev-pill'),
       devToast: document.getElementById('dev-toast'),
       appToast: document.getElementById('app-toast'),
@@ -472,18 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!el) return;
       if (show) el.classList.remove('hidden');
       else el.classList.add('hidden');
-    },
-
-    showInstallButton(show = true) {
-      const btn = this.elements.installButton;
-      if (!btn) return;
-      if (show) {
-        btn.removeAttribute('hidden');
-        btn.disabled = false;
-      } else {
-        btn.setAttribute('hidden', '');
-        btn.disabled = false;
-      }
     },
 
     removeDevElements() {
@@ -791,57 +778,55 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     initInstallPrompt() {
-      const installBtn = UI.elements.installButton;
       const settingsInstallBtn = UI.elements.settingsMenu.installBtn;
-      if (!installBtn) return;
+      if (!settingsInstallBtn) return;
 
-      UI.showInstallButton(false);
+      // Hide install button by default
+      settingsInstallBtn.hidden = true;
 
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       if (isStandalone) {
+        // App is already installed, keep button hidden
         return;
       }
 
       window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
         this.deferredInstallPrompt = event;
-        UI.showInstallButton(true);
         
-        // Also show install button in settings menu
-        if (settingsInstallBtn) {
-          settingsInstallBtn.hidden = false;
-        }
+        // Show install button in settings menu
+        settingsInstallBtn.hidden = false;
       });
 
       window.addEventListener('appinstalled', () => {
         this.deferredInstallPrompt = null;
-        UI.showInstallButton(false);
+        if (settingsInstallBtn) {
+          settingsInstallBtn.hidden = true;
+        }
         UI.toast('drop installed');
       });
 
-      installBtn.addEventListener('click', async () => {
+      settingsInstallBtn.addEventListener('click', async () => {
         const promptEvent = this.deferredInstallPrompt;
         if (!promptEvent) {
-          UI.showInstallButton(false);
+          settingsInstallBtn.hidden = true;
           return;
         }
 
-        installBtn.disabled = true;
+        settingsInstallBtn.disabled = true;
         promptEvent.prompt();
 
         try {
           const { outcome } = await promptEvent.userChoice;
           if (outcome === 'accepted') {
             UI.toast('Installation started');
-            UI.showInstallButton(false);
+            settingsInstallBtn.hidden = true;
           } else {
-            installBtn.disabled = false;
-            UI.showInstallButton(true);
+            settingsInstallBtn.disabled = false;
           }
         } catch (error) {
           console.error('Install prompt failed:', error);
-          installBtn.disabled = false;
-          UI.showInstallButton(true);
+          settingsInstallBtn.disabled = false;
         }
 
         this.deferredInstallPrompt = null;
@@ -1087,7 +1072,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`User response to install prompt: ${outcome}`);
             
             installBtn.hidden = true;
-            UI.elements.installButton.hidden = true;
             this.deferredInstallPrompt = null;
           }
           closeSettings();
