@@ -1719,10 +1719,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const domains = ['sleep', 'fitness', 'mind', 'spirit'];
       const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
 
-      // Build day labels header
-      const headerHTML = last7Days.map(day => {
+      // Build day labels as individual elements
+      const dayLabelsHTML = last7Days.map(day => {
         const tooltip = day.isToday ? 'Today' : day.fullDayName;
-        return `<span class="day-label" title="${tooltip}">${day.dayLabel}</span>`;
+        return `<div class="day-label" title="${tooltip}">${day.dayLabel}</div>`;
       }).join('');
 
       // Build rows for each domain
@@ -1734,20 +1734,15 @@ document.addEventListener('DOMContentLoaded', () => {
           return `<div class="heatmap-cell" data-intensity="${intensity}" title="${tooltip}"></div>`;
         }).join('');
 
-        return `
-          <div class="heatmap-row">
-            <div class="domain-label">${formatDomain(domain)}</div>
-            <div class="domain-cells">${cellsHTML}</div>
-          </div>
-        `;
+        return `<div class="domain-label">${formatDomain(domain)}</div>${cellsHTML}`;
       }).join('');
 
       container.innerHTML = `
-        <div class="heatmap-header-row">
-          <div class="domain-label-spacer"></div>
-          <div class="heatmap-header">${headerHTML}</div>
+        <div class="heatmap-grid">
+          <div></div>
+          ${dayLabelsHTML}
+          ${rowsHTML}
         </div>
-        <div class="heatmap-rows">${rowsHTML}</div>
       `;
 
       container.setAttribute('data-mode', mode);
