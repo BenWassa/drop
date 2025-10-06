@@ -844,8 +844,10 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     handleDataClear() {
+      console.log('handleDataClear called');
       const confirmationMessage = 'This will remove all saved data, including history. Do you want to continue?';
       const confirmed = window.confirm(confirmationMessage);
+      console.log('User confirmed:', confirmed);
 
       if (!confirmed) {
         return false;
@@ -1060,12 +1062,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (clearBtn) {
+        console.log('Clear button found, binding event');
         clearBtn.addEventListener('click', () => {
+          console.log('Clear button clicked');
           const cleared = this.handleDataClear();
           if (cleared) {
             closeSettings();
           }
         });
+      } else {
+        console.log('Clear button not found');
       }
 
       // History view from settings
