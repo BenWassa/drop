@@ -378,19 +378,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const track = meter.querySelector('.score-ring__track');
       const radius = (arc.r && arc.r.baseVal ? arc.r.baseVal.value : parseFloat(arc.getAttribute('r'))) || 52;
       const circumference = 2 * Math.PI * radius;
-      const rootStyles = getComputedStyle(document.documentElement);
-      const gapValue = parseFloat(rootStyles.getPropertyValue('--score-ring-gap'));
-      const gapFraction = Number.isFinite(gapValue) ? Math.min(Math.max(gapValue, 0), 0.6) : 0.22;
-      const visibleLength = circumference * (1 - gapFraction);
-      const gapLength = circumference - visibleLength;
-      const dashArray = `${visibleLength.toFixed(2)} ${gapLength.toFixed(2)}`;
       
-      // Set arc dasharray with gap
-      arc.style.strokeDasharray = dashArray;
+      // Always use complete circle (no gap)
+      arc.style.strokeDasharray = `${circumference.toFixed(2)}`;
       
       // Keep track as complete circle (no gap)
       if (track) {
-        track.style.strokeDasharray = 'none';
+        track.style.strokeDasharray = `${circumference.toFixed(2)}`;
       }
 
       const clamped = Math.max(0, Math.min(100, Number(score) || 0));
@@ -405,7 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
         arc.style.opacity = '';
       }
 
-      const dashOffset = visibleLength - (clamped / 100) * visibleLength;
+      // For complete circle: offset starts from 0 (full circle) and increases to hide portions
+      const dashOffset = (100 - clamped) / 100 * circumference;
       arc.style.strokeDashoffset = `${dashOffset.toFixed(2)}`;
     },
 

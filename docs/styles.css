@@ -25,7 +25,6 @@
 
   --score-ring-size: 96px;
   --score-ring-stroke: 10px;
-  --score-ring-gap: 0.22;
 
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 var(--color-surface-inset);
@@ -287,6 +286,7 @@ body {
 
 .score-ring__track {
   stroke: rgba(240, 242, 245, 0.12);
+  stroke-dasharray: none;
 }
 
 .score-ring__arc {
