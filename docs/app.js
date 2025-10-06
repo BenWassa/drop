@@ -520,11 +520,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const state = Store.state;
       switch (domain) {
         case 'sleep':
-          this.elements.inputs.wakeTime.value = state.wake;
-          this.elements.inputs.restTime.value = state.rest;
+          if (this.elements.inputs.wakeTime) this.elements.inputs.wakeTime.value = state.wake;
+          if (this.elements.inputs.restTime) this.elements.inputs.restTime.value = state.rest;
           break;
         case 'fitness':
-          this.elements.inputs.runValue.textContent = state.run;
+          if (this.elements.inputs.runValue) this.elements.inputs.runValue.textContent = state.run;
           this.updateToggleButton('strength', state.strength);
           this.updateToggleButton('skill', state.skill);
           break;
@@ -540,9 +540,11 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     initDate() {
-      this.elements.dateDisplay.textContent = new Date().toLocaleDateString('en-US', {
-        weekday: 'long', month: 'long', day: 'numeric'
-      });
+      if (this.elements.dateDisplay) {
+        this.elements.dateDisplay.textContent = new Date().toLocaleDateString('en-US', {
+          weekday: 'long', month: 'long', day: 'numeric'
+        });
+      }
     },
 
     setVisionFields(state) {
