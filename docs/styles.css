@@ -300,6 +300,15 @@ body {
 .score-item[data-domain="mind"] .score-ring__arc { stroke: var(--mind); }
 .score-item[data-domain="spirit"] .score-ring__arc { stroke: var(--spirit); }
 
+.score-item[data-domain] .score-meter:not([data-score-active="true"]) .score-ring__arc {
+  stroke: rgba(240, 242, 245, 0.32);
+  opacity: 0.45;
+}
+
+.score-item[data-domain] .score-meter[data-score-active="true"] .score-ring__arc {
+  opacity: 1;
+}
+
 .score-item[data-domain="fitness"] .score-meter__icon img {
   filter: brightness(0) saturate(100%) invert(34%) sepia(91%) saturate(5453%) hue-rotate(352deg) brightness(103%) contrast(105%);
 }
@@ -722,51 +731,22 @@ body {
   50% { opacity: 0.8; transform: scale(1.15); }
 }
 
-.loading-overlay.hidden { 
-  opacity: 0; 
-  pointer-events: none; 
-  visibility: hidden; 
-}
-
-.loading-frame { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 60px 24px;
-  position: relative;
-  z-index: 1;
-}
-
-/* Spacious container with room for breathing animation */
-.loading-circle {
-  width: 100%;
-  max-width: 400px;
-  min-height: 400px;
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 48px;
-  position: relative;
-  background: linear-gradient(145deg, #1C1C21 0%, #16161B 100%);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(79, 138, 245, 0.2);
-  box-shadow: 
-    0 40px 100px rgba(0, 0, 0, 0.9), 
-    0 0 80px rgba(79, 138, 245, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
-  padding: 32px 24px;
+.loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
 }
 
 .loading-logo {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
   display: block;
+  position: relative;
+  z-index: 1;
   border-radius: 50%;
   background: transparent;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(79, 138, 245, 0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.75), 0 0 46px rgba(79, 138, 245, 0.18);
   transform: translateZ(0) scale(1);
   transition: transform 420ms cubic-bezier(0.2, 0.9, 0.22, 1);
   will-change: transform;
@@ -781,56 +761,24 @@ body {
   100% { transform: scale(0.96); } /* hold at exhale */
 }
 
-/* loading word styling (synchronized with the logo breath) */
-.loading-word {
-  margin-top: 0;
-  font-family: var(--font-sans);
-  font-weight: 400;
-  letter-spacing: 4px;
-  color: var(--color-text-primary);
-  font-size: 26px;
-  text-transform: lowercase;
-  opacity: 0.95;
-  animation: breath 5000ms ease-in-out 1 forwards;
-  transform-origin: center center;
-  display: block;
-  width: 100%;
-  text-align: center;
-  flex-shrink: 0;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-}
-
 /* Mobile adjustments for loading screen */
 @media (max-height: 700px) {
-  .loading-circle {
-    min-height: 350px;
-    gap: 32px;
-    padding: 24px 20px;
-  }
-  
   .loading-logo {
-    width: 100px;
-    height: 100px;
+    width: 110px;
+    height: 110px;
   }
-  
+
   @keyframes breath {
     0% { transform: scale(1); }
     45% { transform: scale(1.25); } /* smaller scale for mobile */
     90% { transform: scale(0.96); }
     100% { transform: scale(0.96); }
   }
-  
-  .loading-word {
-    font-size: 22px;
-    letter-spacing: 3px;
-  }
 }
 
 /* Respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .loading-circle::before { animation: none; }
   .loading-logo { transition: none; animation: none; }
-  .loading-word { animation: none; }
 }
 
 /* Developer UI: small pill and toast */
