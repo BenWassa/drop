@@ -7,16 +7,18 @@
 const createMockStore = () => ({
   DB_KEY: 'lifeTrackerData_test',
   state: {
-    wake: '06:00', rest: '22:00', run: 5, strength: true, skill: false,
+    wake: '06:00', rest: '22:00', run: 5, strength: true, skill: ['Mobility'],
     read: true, write: false, quadrant: 1, meditation: true,
     visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
-    visionMindFocus: '', visionSpiritFocus: ''
+    visionMindFocus: '', visionSpiritFocus: '',
+    skillOptions: []
   },
   defaults: {
-    wake: '', rest: '', run: 0, strength: false, skill: false,
+    wake: '', rest: '', run: 0, strength: false, skill: [],
     read: false, write: false, quadrant: 0, meditation: false,
     visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
-    visionMindFocus: '', visionSpiritFocus: ''
+    visionMindFocus: '', visionSpiritFocus: '',
+    skillOptions: []
   },
   init() {},
   save() {},

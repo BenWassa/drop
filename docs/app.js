@@ -3,14 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
   const DEV_MODE = true;
+  const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 
   const Store = {
     DB_KEY: 'lifeTrackerData',
     state: {},
     dailyKeys: ['wake', 'rest', 'run', 'strength', 'skill', 'read', 'write', 'quadrant', 'meditation'],
     defaults: {
-      wake: '', rest: '', run: 0, strength: false, skill: false,
+      wake: '', rest: '', run: 0, strength: false, skill: [],
       read: false, write: false, quadrant: 0, meditation: false,
+      skillOptions: [],
       visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
       visionMindFocus: '', visionSpiritFocus: '',
       history: [],
@@ -21,10 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init() {
       const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
-      this.state = { ...this.defaults, ...savedData };
+      this.state = { ...this.cloneDefaults(), ...savedData };
       this.ensureHistory();
       this.ensureDailyTimestamps();
       this.ensureEntries();
+      this.ensureSkillCollections();
       this.checkForNewDay();
       this.save();
     },
@@ -56,6 +59,93 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    ensureSkillCollections() {
+      const selections = this.sanitizeStringArray(this.state.skill);
+      let options = this.sanitizeStringArray(this.state.skillOptions);
+      const baseLower = new Set(BASE_SKILL_OPTIONS.map(opt => opt.toLowerCase()));
+      const optionLower = new Set(options.map(opt => opt.toLowerCase()));
+      selections.forEach(option => {
+        const lower = option.toLowerCase();
+        if (!baseLower.has(lower) && !optionLower.has(lower)) {
+          options.push(option);
+          optionLower.add(lower);
+        }
+      });
+      this.state.skill = selections;
+      this.state.skillOptions = this.sanitizeStringArray(options);
+    },
+
+    sanitizeStringArray(value) {
+      if (!Array.isArray(value)) {
+        return [];
+      }
+      const cleaned = value
+        .map(item => (typeof item === 'string' ? item : String(item ?? '')).trim())
+        .filter(Boolean);
+      return Array.from(new Set(cleaned)).sort((a, b) => a.localeCompare(b));
+    },
+
+    valuesEqual(a, b) {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i += 1) {
+          if (a[i] !== b[i]) return false;
+        }
+        return true;
+      }
+      return Object.is(a, b);
+    },
+
+    getSkillOptions() {
+      const baseOptions = BASE_SKILL_OPTIONS
+        .map(opt => (typeof opt === 'string' ? opt.trim() : ''))
+        .filter(Boolean);
+      const baseLower = baseOptions.map(opt => opt.toLowerCase());
+      const customOptions = Array.isArray(this.state.skillOptions)
+        ? this.sanitizeStringArray(this.state.skillOptions)
+        : [];
+      const merged = [...baseOptions];
+      customOptions.forEach(option => {
+        if (!baseLower.includes(option.toLowerCase())) {
+          merged.push(option);
+        }
+      });
+      return merged;
+    },
+
+    toggleSkill(option) {
+      if (!option) return;
+      const normalized = String(option).trim();
+      if (!normalized) return;
+      const current = Array.isArray(this.state.skill) ? [...this.state.skill] : [];
+      const index = current.indexOf(normalized);
+      if (index >= 0) {
+        current.splice(index, 1);
+      } else {
+        current.push(normalized);
+      }
+      this.update('skill', current);
+    },
+
+    addSkillOption(option) {
+      if (!option) return false;
+      const normalized = String(option).trim();
+      if (!normalized) return false;
+      const lower = normalized.toLowerCase();
+      const baseLower = BASE_SKILL_OPTIONS.map(opt => opt.toLowerCase());
+      if (baseLower.includes(lower)) {
+        return false;
+      }
+      const options = Array.isArray(this.state.skillOptions) ? [...this.state.skillOptions] : [];
+      if (options.some(opt => opt.toLowerCase() === lower)) {
+        return false;
+      }
+      options.push(normalized);
+      this.state.skillOptions = this.sanitizeStringArray(options);
+      this.save();
+      return true;
+    },
+
     cloneDefaults() {
       return JSON.parse(JSON.stringify(this.defaults));
     },
@@ -78,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasTimestamp = Object.prototype.hasOwnProperty.call(this.state.dailyTimestamps, key);
         const defaultValue = this.defaults[key];
         const currentValue = this.state[key];
-        const valueDifferent = !Object.is(currentValue, defaultValue);
+        const valueDifferent = !this.valuesEqual(currentValue, defaultValue);
 
         if (lastLogged !== today && (hasTimestamp || valueDifferent)) {
           if (key in this.defaults) {
@@ -97,10 +187,18 @@ document.addEventListener('DOMContentLoaded', () => {
     resetDailyData() {
       this.dailyKeys.forEach(key => {
         if (key in this.defaults) {
-          this.state[key] = this.defaults[key];
+          const defaultValue = this.defaults[key];
+          if (Array.isArray(defaultValue)) {
+            this.state[key] = [...defaultValue];
+          } else if (defaultValue && typeof defaultValue === 'object') {
+            this.state[key] = JSON.parse(JSON.stringify(defaultValue));
+          } else {
+            this.state[key] = defaultValue;
+          }
         }
       });
       this.state.dailyTimestamps = {};
+      this.ensureSkillCollections();
     },
 
     checkForNewDay() {
@@ -140,7 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
     update(key, value) {
       this.checkForNewDay();
       if (key in this.state) {
-        this.state[key] = value;
+        let newValue = value;
+        if (key === 'skill' || key === 'skillOptions') {
+          newValue = this.sanitizeStringArray(Array.isArray(value) ? value : [value]);
+        } else if (Array.isArray(value)) {
+          newValue = [...value];
+        }
+        this.state[key] = newValue;
         if (this.dailyKeys.includes(key)) {
           this.state.lastEntryDate = this.getToday();
           this.ensureDailyTimestamps();
@@ -162,14 +266,18 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Save all daily keys to the entry
       this.dailyKeys.forEach(key => {
-        entry[key] = this.state[key];
+        const value = this.state[key];
+        entry[key] = Array.isArray(value) ? [...value] : value;
       });
-      
+
       // Only save if there's actual data (not all defaults)
       const hasData = this.dailyKeys.some(key => {
         const value = this.state[key];
         const defaultValue = this.defaults[key];
-        return !Object.is(value, defaultValue);
+        if (Array.isArray(defaultValue)) {
+          return !this.valuesEqual(value, defaultValue);
+        }
+        return !this.valuesEqual(value, defaultValue);
       });
       
       if (hasData) {
@@ -215,6 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.ensureHistory();
       this.ensureDailyTimestamps();
       this.ensureEntries();
+      this.ensureSkillCollections();
       const handled = this.checkForNewDay();
       if (!handled) {
         this.save();
@@ -234,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.ensureHistory();
       this.ensureDailyTimestamps();
       this.ensureEntries();
+      this.ensureSkillCollections();
       delete this.state.currentDate;
       this.save();
     },
@@ -355,6 +465,19 @@ document.addEventListener('DOMContentLoaded', () => {
         wakeTime: document.getElementById('wake-time'),
         restTime: document.getElementById('rest-time'),
         runValue: document.getElementById('run-value'),
+      },
+      home: {
+        actionSection: document.querySelector('.home-actions'),
+        sleepStatus: document.getElementById('sleep-status'),
+        fitnessSummary: document.getElementById('fitness-summary'),
+        mindStatus: document.getElementById('mind-status'),
+        spiritStatus: document.getElementById('spirit-status'),
+        fitnessDropdown: document.getElementById('fitness-dropdown'),
+        spiritDropdown: document.getElementById('spirit-dropdown'),
+        skillContainer: document.getElementById('skill-chip-row'),
+        moodDot: document.getElementById('mood-dot'),
+        energySlider: document.getElementById('energy-slider'),
+        moodSlider: document.getElementById('mood-slider'),
       },
       heatmapContainer: document.getElementById('heatmap-container'),
       heatmapSummary: document.getElementById('heatmap-summary')
@@ -506,6 +629,173 @@ document.addEventListener('DOMContentLoaded', () => {
       }, ms);
     },
 
+    renderSkillChips() {
+      const container = this.elements.home?.skillContainer;
+      if (!container) return;
+      const options = Store.getSkillOptions();
+      const selected = new Set(Array.isArray(Store.state.skill) ? Store.state.skill : []);
+      container.innerHTML = '';
+      options.forEach(option => {
+        const chip = document.createElement('button');
+        chip.className = 'skill-chip';
+        chip.type = 'button';
+        chip.dataset.skillOption = option;
+        chip.textContent = option;
+        const isActive = selected.has(option);
+        if (isActive) chip.classList.add('is-active');
+        chip.setAttribute('aria-pressed', String(isActive));
+        container.appendChild(chip);
+      });
+      const addButton = document.createElement('button');
+      addButton.className = 'skill-chip skill-chip--add';
+      addButton.type = 'button';
+      addButton.id = 'skill-add-btn';
+      addButton.textContent = '+ Add';
+      container.appendChild(addButton);
+    },
+
+    updateSkillChips(selected) {
+      const container = this.elements.home?.skillContainer;
+      if (!container) return;
+      const selectedSet = new Set(Array.isArray(selected) ? selected : []);
+      container.querySelectorAll('.skill-chip').forEach(chip => {
+        if (chip.classList.contains('skill-chip--add')) return;
+        const option = chip.dataset.skillOption || '';
+        const isActive = selectedSet.has(option);
+        chip.classList.toggle('is-active', isActive);
+        chip.setAttribute('aria-pressed', String(isActive));
+      });
+    },
+
+    setToggleState(key, value) {
+      const toggles = document.querySelectorAll(`[data-toggle-key="${key}"]`);
+      toggles.forEach(toggle => {
+        const isActive = Boolean(value);
+        toggle.classList.toggle('is-active', isActive);
+        toggle.setAttribute('aria-pressed', String(isActive));
+      });
+    },
+
+    flashButton(button, className = 'is-flashing', duration = 420) {
+      if (!button) return;
+      if (button.__flashTimer) {
+        window.clearTimeout(button.__flashTimer);
+        button.__flashTimer = null;
+      }
+      button.classList.remove(className);
+      window.requestAnimationFrame(() => {
+        button.classList.add(className);
+        if (Number.isFinite(duration) && duration > 0) {
+          button.__flashTimer = window.setTimeout(() => {
+            button.classList.remove(className);
+            button.__flashTimer = null;
+          }, duration);
+        }
+      });
+    },
+
+    updateRunDisplay(value) {
+      const display = this.elements.inputs.runValue;
+      if (!display) return;
+      const numeric = Number.isFinite(Number(value)) ? Number(value) : 0;
+      display.textContent = String(Math.max(0, Math.round(numeric)));
+    },
+
+    updateSleepStatus(hours) {
+      const status = this.elements.home?.sleepStatus;
+      if (!status) return;
+      if (hours === null || hours === undefined || !Number.isFinite(hours)) {
+        status.textContent = 'No sleep window logged yet.';
+        return;
+      }
+      const formatted = Number(hours).toFixed(1).replace(/\.0$/, '');
+      status.textContent = `${formatted} hr window logged.`;
+    },
+
+    updateFitnessSummary() {
+      const summary = this.elements.home?.fitnessSummary;
+      if (!summary) return;
+      const parts = [];
+      const runDistance = Number(Store.state.run);
+      if (Number.isFinite(runDistance) && runDistance > 0) {
+        parts.push(`${runDistance} km run`);
+      }
+      if (Store.state.strength) {
+        parts.push('Strength session');
+      }
+      const skills = Array.isArray(Store.state.skill) ? Store.state.skill : [];
+      if (skills.length > 0) {
+        parts.push(`Skill: ${skills.join(', ')}`);
+      }
+      summary.textContent = parts.length ? parts.join(' · ') : 'No training logged yet.';
+    },
+
+    updateMindStatus() {
+      const status = this.elements.home?.mindStatus;
+      if (!status) return;
+      const { read, write } = Store.state;
+      if (read && write) {
+        status.textContent = 'Reading and writing logged.';
+      } else if (read) {
+        status.textContent = 'Reading logged.';
+      } else if (write) {
+        status.textContent = 'Writing logged.';
+      } else {
+        status.textContent = 'Nothing logged yet.';
+      }
+    },
+
+    updateSpiritSummary(quadrant, meditation, energy = 0, mood = 0) {
+      const status = this.elements.home?.spiritStatus;
+      if (!status) return;
+      const descriptors = [];
+      const quadrantLabel = App.describeQuadrant(quadrant);
+      if (quadrantLabel) {
+        descriptors.push(quadrantLabel);
+        const energyTone = energy > 40 ? 'High energy' : energy < -40 ? 'Low energy' : 'Balanced energy';
+        const moodTone = mood > 40 ? 'Bright mood' : mood < -40 ? 'Grounded mood' : 'Steady mood';
+        descriptors.push(`${energyTone}`, `${moodTone}`);
+      }
+      if (meditation) {
+        descriptors.push('Meditation logged');
+      }
+      status.textContent = descriptors.length ? descriptors.join(' · ') : 'No mood logged yet.';
+    },
+
+    setFitnessPane(pane) {
+      const dropdown = this.elements.home?.fitnessDropdown;
+      if (!dropdown) return;
+      const targetPane = pane || 'run';
+      dropdown.querySelectorAll('.fitness-pane').forEach(section => {
+        section.hidden = section.dataset.pane !== targetPane;
+      });
+      dropdown.querySelectorAll('.fitness-mode-btn').forEach(btn => {
+        const isSelected = btn.dataset.pane === targetPane;
+        btn.setAttribute('aria-selected', String(isSelected));
+      });
+    },
+
+    positionMoodDot(energy, mood) {
+      const dot = this.elements.home?.moodDot;
+      if (!dot) return;
+      const clamp = (value) => Math.max(-100, Math.min(100, Number(value) || 0));
+      const xPercent = (clamp(energy) + 100) / 2;
+      const yPercent = 100 - ((clamp(mood) + 100) / 2);
+      dot.style.setProperty('--mood-x', `${xPercent}%`);
+      dot.style.setProperty('--mood-y', `${yPercent}%`);
+    },
+
+    setMoodSliders(energy, mood) {
+      const { energySlider, moodSlider } = this.elements.home || {};
+      const clampValue = (value) => Math.max(-100, Math.min(100, Math.round(Number(value) || 0)));
+      if (energySlider) {
+        energySlider.value = String(clampValue(energy));
+      }
+      if (moodSlider) {
+        moodSlider.value = String(clampValue(mood));
+      }
+    },
+
     toggleOverlay(domain, show = true) {
       const overlay = document.getElementById(`${domain}-overlay`);
       if (overlay) {
@@ -566,7 +856,10 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'fitness':
           if (this.elements.inputs.runValue) this.elements.inputs.runValue.textContent = state.run;
           this.updateToggleButton('strength', state.strength);
-          this.updateToggleButton('skill', state.skill);
+          {
+            const skillActive = Array.isArray(state.skill) ? state.skill.length > 0 : Boolean(state.skill);
+            this.updateToggleButton('skill', skillActive);
+          }
           break;
         case 'mind':
           this.updateToggleButton('read', state.read);
@@ -693,11 +986,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const App = {
     deferredInstallPrompt: null,
     currentPage: 'home',
+    moodAxes: { energy: 0, mood: 0 },
 
     init() {
       UI.initDate();
       UI.removeDevElements();
       UI.setVisionFields(Store.state);
+      this.moodAxes = this.getQuadrantPreset(Store.state.quadrant);
       this.syncDailyUI();
 
       // Check if loading overlay should be skipped (dev mode toggle)
@@ -754,16 +1049,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     syncDailyUI() {
       const { inputs } = UI.elements;
-      if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake;
-      if (inputs.restTime) inputs.restTime.value = Store.state.rest;
-      if (inputs.runValue) inputs.runValue.textContent = Store.state.run;
+      UI.renderSkillChips();
+      if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake || '';
+      if (inputs.restTime) inputs.restTime.value = Store.state.rest || '';
 
-      UI.updateToggleButton('strength', Store.state.strength);
-      UI.updateToggleButton('skill', Store.state.skill);
-      UI.updateToggleButton('read', Store.state.read);
-      UI.updateToggleButton('write', Store.state.write);
-      UI.updateToggleButton('meditation', Store.state.meditation);
-      UI.updateToggleButton('quadrant', Store.state.quadrant, true);
+      UI.updateRunDisplay(Store.state.run);
+      UI.setToggleState('strength', Store.state.strength);
+      UI.setToggleState('read', Store.state.read);
+      UI.setToggleState('write', Store.state.write);
+      UI.setToggleState('meditation', Store.state.meditation);
+
+      UI.updateSkillChips(Store.state.skill);
+      UI.updateSleepStatus(this.calculateSleepHours());
+      UI.updateFitnessSummary();
+      UI.updateMindStatus();
+
+      const fallbackAxes = this.getQuadrantPreset(Store.state.quadrant);
+      const currentAxes = this.moodAxes || { energy: 0, mood: 0 };
+      const currentQuadrant = this.resolveQuadrant(currentAxes.energy, currentAxes.mood);
+      if (!this.moodAxes || currentQuadrant !== Store.state.quadrant) {
+        this.moodAxes = { ...fallbackAxes };
+      }
+      const axes = this.moodAxes;
+      UI.setMoodSliders(axes.energy, axes.mood);
+      UI.positionMoodDot(axes.energy, axes.mood);
+      UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
     },
 
     updateScores() {
@@ -777,6 +1087,173 @@ document.addEventListener('DOMContentLoaded', () => {
       const streaks = this.calculateStreaks();
       UI.renderScores(scores, streaks);
       this.renderWeeklyHeatmap();
+    },
+
+    handleMoodInput() {
+      const { energySlider, moodSlider } = UI.elements.home || {};
+      if (!energySlider || !moodSlider) return;
+      const energy = Number(energySlider.value) || 0;
+      const mood = Number(moodSlider.value) || 0;
+      this.moodAxes = { energy, mood };
+      UI.positionMoodDot(energy, mood);
+      const quadrant = this.resolveQuadrant(energy, mood);
+      if (quadrant !== Store.state.quadrant) {
+        Store.update('quadrant', quadrant);
+      }
+      UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, energy, mood);
+    },
+
+    bindHomeActions() {
+      const { inputs, home } = UI.elements;
+
+      document.querySelectorAll('.log-current-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          if (!targetId) return;
+          const input = document.getElementById(targetId);
+          if (!input) return;
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const timeValue = `${hours}:${minutes}`;
+          input.value = timeValue;
+          if (targetId === 'wake-time') {
+            Store.update('wake', timeValue);
+          } else if (targetId === 'rest-time') {
+            Store.update('rest', timeValue);
+          }
+          UI.updateSleepStatus(this.calculateSleepHours());
+          UI.flashButton(btn);
+        });
+      });
+
+      if (inputs.wakeTime) {
+        inputs.wakeTime.addEventListener('change', (event) => {
+          Store.update('wake', event.target.value);
+          UI.updateSleepStatus(this.calculateSleepHours());
+        });
+      }
+      if (inputs.restTime) {
+        inputs.restTime.addEventListener('change', (event) => {
+          Store.update('rest', event.target.value);
+          UI.updateSleepStatus(this.calculateSleepHours());
+        });
+      }
+
+      document.querySelectorAll('.dropdown-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          if (!targetId) return;
+          const dropdown = document.getElementById(targetId);
+          if (!dropdown) return;
+          const willOpen = dropdown.hidden;
+          document.querySelectorAll('.domain-dropdown').forEach(section => {
+            const sectionBtn = document.querySelector(`.dropdown-toggle-btn[data-target="${section.id}"]`);
+            if (section.id === targetId) {
+              section.hidden = !willOpen;
+              if (sectionBtn) {
+                sectionBtn.setAttribute('aria-expanded', String(willOpen));
+              }
+            } else {
+              section.hidden = true;
+              if (sectionBtn) {
+                sectionBtn.setAttribute('aria-expanded', 'false');
+              }
+            }
+          });
+        });
+      });
+
+      if (home.fitnessDropdown) {
+        UI.setFitnessPane('run');
+        const modeGroup = home.fitnessDropdown.querySelector('.fitness-mode');
+        if (modeGroup) {
+          modeGroup.addEventListener('click', (event) => {
+            const button = event.target.closest('.fitness-mode-btn');
+            if (!button) return;
+            const pane = button.dataset.pane || 'run';
+            UI.setFitnessPane(pane);
+          });
+        }
+
+        home.fitnessDropdown.addEventListener('click', (event) => {
+          const presetBtn = event.target.closest('.run-preset');
+          if (presetBtn) {
+            const value = Number(presetBtn.dataset.runValue);
+            const newValue = Number.isFinite(value) ? value : 0;
+            Store.update('run', newValue);
+            UI.updateRunDisplay(newValue);
+            UI.updateFitnessSummary();
+            return;
+          }
+          const stepBtn = event.target.closest('.run-step');
+          if (stepBtn) {
+            const step = Number(stepBtn.dataset.runStep) || 0;
+            const current = Number(Store.state.run) || 0;
+            const newValue = Math.max(0, Math.min(200, current + step));
+            Store.update('run', newValue);
+            UI.updateRunDisplay(newValue);
+            UI.updateFitnessSummary();
+          }
+        });
+      }
+
+      if (home.actionSection) {
+        home.actionSection.addEventListener('click', (event) => {
+          const toggle = event.target.closest('.pill-toggle[data-toggle-key]');
+          if (toggle) {
+            const key = toggle.dataset.toggleKey;
+            if (!(key in Store.state)) return;
+            const newValue = !Boolean(Store.state[key]);
+            Store.update(key, newValue);
+            UI.setToggleState(key, newValue);
+            if (key === 'strength') {
+              UI.updateFitnessSummary();
+            }
+            if (key === 'read' || key === 'write') {
+              UI.updateMindStatus();
+            }
+            if (key === 'meditation') {
+              UI.updateSpiritSummary(Store.state.quadrant, newValue, this.moodAxes.energy, this.moodAxes.mood);
+            }
+            return;
+          }
+
+          const skillChip = event.target.closest('.skill-chip');
+          if (skillChip) {
+            if (skillChip.classList.contains('skill-chip--add')) {
+              const name = window.prompt('Add a skill focus');
+              const trimmed = name ? name.trim() : '';
+              if (!trimmed) return;
+              const added = Store.addSkillOption(trimmed);
+              if (added) {
+                UI.renderSkillChips();
+                Store.toggleSkill(trimmed);
+                UI.updateSkillChips(Store.state.skill);
+                UI.updateFitnessSummary();
+                UI.notify(`Added "${trimmed}" to skills`);
+              } else {
+                UI.notify('Skill already exists.');
+              }
+              return;
+            }
+            const option = skillChip.dataset.skillOption;
+            if (option) {
+              Store.toggleSkill(option);
+              UI.updateSkillChips(Store.state.skill);
+              UI.updateFitnessSummary();
+            }
+          }
+        });
+      }
+
+      const { energySlider, moodSlider } = home;
+      if (energySlider) {
+        energySlider.addEventListener('input', () => this.handleMoodInput());
+      }
+      if (moodSlider) {
+        moodSlider.addEventListener('input', () => this.handleMoodInput());
+      }
     },
 
     initInstallPrompt() {
@@ -911,6 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     bindEvents() {
+      this.bindHomeActions();
       // Open overlays
       UI.elements.cards.forEach(card => {
         card.addEventListener('click', () => {
@@ -1459,7 +1937,8 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (run >= 1) fitnessScore += 10;
       
       if (entry.strength) fitnessScore += 35;
-      if (entry.skill) fitnessScore += 20;
+      const skillLogged = Array.isArray(entry.skill) ? entry.skill.length > 0 : Boolean(entry.skill);
+      if (skillLogged) fitnessScore += 20;
       fitnessScore = Math.min(100, fitnessScore);
 
       // Calculate mind score
@@ -1531,7 +2010,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (Store.state.strength) rawScore += 35;
       
       // Skill practice: 20 points
-      if (Store.state.skill) rawScore += 20;
+      const skillSelections = Array.isArray(Store.state.skill) ? Store.state.skill : [];
+      if (skillSelections.length > 0) rawScore += 20;
       
       return this.calcTrendScore('fitness', Math.min(100, rawScore));
     },
@@ -1551,7 +2031,7 @@ document.addEventListener('DOMContentLoaded', () => {
     calcSpirit() {
       let rawScore = 0;
       const { quadrant, meditation } = Store.state;
-      
+
       // Mood quadrant: up to 50 points
       // Q1 (motivated/energized) & Q2 (calm/content) = optimal states
       if (quadrant === 1 || quadrant === 2) {
@@ -1568,6 +2048,49 @@ document.addEventListener('DOMContentLoaded', () => {
       if (meditation) rawScore += 50;
       
       return this.calcTrendScore('spirit', Math.min(100, rawScore));
+    },
+
+    getQuadrantPreset(quadrant) {
+      switch (quadrant) {
+        case 1:
+          return { energy: 65, mood: 70 };
+        case 2:
+          return { energy: -60, mood: 70 };
+        case 3:
+          return { energy: 65, mood: -65 };
+        case 4:
+          return { energy: -60, mood: -65 };
+        default:
+          return { energy: 0, mood: 0 };
+      }
+    },
+
+    resolveQuadrant(energy, mood) {
+      const threshold = 10;
+      const e = Number(energy) || 0;
+      const m = Number(mood) || 0;
+      if (Math.abs(e) < threshold && Math.abs(m) < threshold) {
+        return 0;
+      }
+      if (e >= 0 && m >= 0) return 1;
+      if (e < 0 && m >= 0) return 2;
+      if (e >= 0 && m < 0) return 3;
+      return 4;
+    },
+
+    describeQuadrant(quadrant) {
+      switch (quadrant) {
+        case 1:
+          return 'High energy · Positive';
+        case 2:
+          return 'Low energy · Positive';
+        case 3:
+          return 'High energy · Challenged';
+        case 4:
+          return 'Low energy · Challenged';
+        default:
+          return '';
+      }
     },
 
     calculateSleepHours() {
