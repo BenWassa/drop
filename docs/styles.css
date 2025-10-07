@@ -2318,6 +2318,38 @@ body {
   transform: scale(0.98);
 }
 
+.settings-info {
+  padding: 16px;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.settings-info p {
+  margin: 0 0 12px 0;
+}
+
+.settings-info p:last-child {
+  margin-bottom: 0;
+}
+
+.settings-info strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.settings-info a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.settings-info a:hover {
+  text-decoration: underline;
+}
+
 .settings-btn__icon {
   font-size: 20px;
   line-height: 1;
