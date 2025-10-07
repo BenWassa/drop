@@ -481,16 +481,11 @@ body {
   margin-top: 24px;
 }
 
-.adaptive-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-@media (min-width: 520px) {
-  .adaptive-grid {
-    gap: 24px;
-  }
+/* NEW: Replaces .adaptive-grid with a vertical list wrapper */
+.action-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Spacing between the full-width cards */
 }
 
 .action-card {
@@ -503,7 +498,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 220px;
+  min-height: auto; /* Allow height to adapt to content in vertical layout */
   transition: var(--transition-fast);
   overflow: hidden;
 }
@@ -531,7 +526,12 @@ body {
 .action-card__header {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Spreads icon/title and the dropdown button */
   gap: 14px;
+}
+
+.action-card__header > div {
+  flex-grow: 1;
 }
 
 .action-card__icon {
