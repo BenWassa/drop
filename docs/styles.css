@@ -539,6 +539,27 @@ body {
   height: 40px;
 }
 
+/* Domain-specific icon colors */
+.sleep-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(73%) saturate(2446%) hue-rotate(188deg) brightness(102%) contrast(101%);
+  /* Applies --sleep: #1e90ff blue */
+}
+
+.fitness-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(7471%) hue-rotate(355deg) brightness(102%) contrast(104%);
+  /* Applies --fitness: #ff3b30 red */
+}
+
+.mind-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(30%) sepia(93%) saturate(4234%) hue-rotate(260deg) brightness(97%) contrast(95%);
+  /* Applies --mind: #7c3aed purple */
+}
+
+.spirit-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(52%) sepia(93%) saturate(1834%) hue-rotate(102deg) brightness(94%) contrast(87%);
+  /* Applies --spirit: #16a34a green */
+}
+
 .action-card__title {
   font-size: 18px;
   font-weight: 600;
