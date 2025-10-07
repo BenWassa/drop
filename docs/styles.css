@@ -707,10 +707,15 @@ body {
   transition: var(--transition-fast);
 }
 
-.fitness-mode-btn[aria-selected="true"] {
-  background: rgba(79, 138, 245, 0.2);
+.fitness-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: var(--color-text-primary);
-  box-shadow: 0 6px 16px rgba(79, 138, 245, 0.25);
+}
+
+.fitness-mode-btn[aria-selected="true"] {
+  background: rgba(255, 59, 48, 0.2); /* Fitness red theme */
+  color: var(--color-text-primary);
+  box-shadow: 0 6px 16px rgba(255, 59, 48, 0.25);
 }
 
 .fitness-pane {

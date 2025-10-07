@@ -472,8 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fitnessSummary: document.getElementById('fitness-summary'),
         mindStatus: document.getElementById('mind-status'),
         spiritStatus: document.getElementById('spirit-status'),
-        fitnessDropdown: document.getElementById('fitness-dropdown'),
-        spiritDropdown: document.getElementById('spirit-dropdown'),
+        fitnessCard: document.querySelector('.fitness-card'),
+        spiritCard: document.querySelector('.spirit-card'),
         skillContainer: document.getElementById('skill-chip-row'),
         moodDot: document.getElementById('mood-dot'),
         energySlider: document.getElementById('energy-slider'),
@@ -763,13 +763,13 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     setFitnessPane(pane) {
-      const dropdown = this.elements.home?.fitnessDropdown;
-      if (!dropdown) return;
+      const fitnessCard = this.elements.home?.fitnessCard;
+      if (!fitnessCard) return;
       const targetPane = pane || 'run';
-      dropdown.querySelectorAll('.fitness-pane').forEach(section => {
+      fitnessCard.querySelectorAll('.fitness-pane').forEach(section => {
         section.hidden = section.dataset.pane !== targetPane;
       });
-      dropdown.querySelectorAll('.fitness-mode-btn').forEach(btn => {
+      fitnessCard.querySelectorAll('.fitness-mode-btn').forEach(btn => {
         const isSelected = btn.dataset.pane === targetPane;
         btn.setAttribute('aria-selected', String(isSelected));
       });
@@ -1174,9 +1174,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      if (home.fitnessDropdown) {
-        UI.setFitnessPane('run');
-        const modeGroup = home.fitnessDropdown.querySelector('.fitness-mode');
+      if (home.fitnessCard) {
+        // Don't auto-select any tab - let user choose
+        const modeGroup = home.fitnessCard.querySelector('.fitness-mode');
         if (modeGroup) {
           modeGroup.addEventListener('click', (event) => {
             const button = event.target.closest('.fitness-mode-btn');
@@ -1186,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
 
-        home.fitnessDropdown.addEventListener('click', (event) => {
+        home.fitnessCard.addEventListener('click', (event) => {
           const presetBtn = event.target.closest('.run-preset');
           if (presetBtn) {
             const value = Number(presetBtn.dataset.runValue);
