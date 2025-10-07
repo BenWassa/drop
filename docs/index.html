@@ -45,24 +45,24 @@
   <div class="app-toast" id="app-toast" aria-live="polite" role="status"></div>
 
   <header class="app-header">
-    <!-- Row 1: Menu Icon (Left) + App Title (Center) -->
+    <!-- Row 1: Menu Icon (Left) + App Title (Center) + Progress Labels (Right) -->
     <div class="header-row header-row--identity">
       <button class="menu-icon-btn" id="settings-icon-btn" aria-label="Open settings menu">
-        <img src="icons/drop_rounded.png" alt="Menu" class="menu-icon">
+        <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </button>
       <h1 class="app-title">drop</h1>
+      <div class="quarter-progress__labels">
+        <span class="quarter-label" id="quarter-label">Q1</span>
+        <span class="label-divider">·</span>
+        <span class="week-label" id="week-label">Wk 0</span>
+      </div>
     </div>
 
-    <!-- Row 2: Quarterly Progress Bar & Status -->
+    <!-- Row 2: Quarterly Progress Bar -->
     <div class="header-row header-row--progress">
       <div class="quarter-progress">
-        <div class="quarter-progress__header">
-          <div class="quarter-progress__labels">
-            <span class="quarter-label" id="quarter-label">Q1</span>
-            <span class="label-divider">·</span>
-            <span class="week-label" id="week-label">Wk 0</span>
-          </div>
-        </div>
         <div class="quarter-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="52" aria-valuenow="0" aria-label="Weekly progress">
           <div class="quarter-progress__fill" id="quarter-progress-fill"></div>
         </div>

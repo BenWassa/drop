@@ -136,29 +136,31 @@ body {
 
 /* Row 1: Menu Icon (Left) + App Title (Center) */
 .header-row--identity {
-  justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   position: relative;
-  padding: 8px 0;
+  padding: 8px 16px;
   margin-bottom: 12px;
+  gap: 12px;
 }
 
 .menu-icon-btn {
-  position: absolute;
-  left: 0;
   background: none;
   border: none;
-  padding: 0;
+  padding: 6px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform var(--transition-fast);
+  transition: all 0.2s ease;
   -webkit-tap-highlight-color: transparent;
-  min-width: 44px;
-  min-height: 44px;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .menu-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
   transform: scale(1.05);
 }
 
@@ -167,9 +169,14 @@ body {
 }
 
 .menu-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.2s ease;
+}
+
+.menu-icon-btn:hover .menu-icon {
+  color: rgba(255, 255, 255, 1);
 }
 
 .app-title {
@@ -180,6 +187,8 @@ body {
   color: var(--color-text-primary);
   margin: 0;
   font-family: var(--font-sans);
+  flex-grow: 1;
+  text-align: center;
 }
 
 /* Row 2: Quarterly Progress Bar & Status */
@@ -253,12 +262,6 @@ body {
   z-index: 1;
 }
 
-.quarter-progress__header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 6px;
-}
-
 .quarter-progress__labels {
   display: flex;
   align-items: center;
@@ -269,6 +272,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--color-text-secondary);
+  flex-shrink: 0;
 }
 
 .quarter-label,
