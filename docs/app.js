@@ -1050,6 +1050,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake || '';
       if (inputs.restTime) inputs.restTime.value = Store.state.rest || '';
 
+      // Update button text based on whether times are set
+      UI.updateTimeButton('wake-time');
+      UI.updateTimeButton('rest-time');
+
       UI.updateRunDisplay(Store.state.run);
       UI.setToggleState('strength', Store.state.strength);
       UI.setToggleState('read', Store.state.read);
@@ -1100,6 +1104,15 @@ document.addEventListener('DOMContentLoaded', () => {
       UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, energy, mood);
     },
 
+    updateTimeButton(inputId) {
+      const input = document.getElementById(inputId);
+      const btn = document.querySelector(`[data-target="${inputId}"]`);
+      if (!input || !btn) return;
+      
+      // Update button text based on whether input has a value
+      btn.textContent = input.value ? 'Clear' : 'Now';
+    },
+
     bindHomeActions() {
       const { inputs, home } = UI.elements;
 
@@ -1109,18 +1122,33 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!targetId) return;
           const input = document.getElementById(targetId);
           if (!input) return;
-          const now = new Date();
-          const hours = String(now.getHours()).padStart(2, '0');
-          const minutes = String(now.getMinutes()).padStart(2, '0');
-          const timeValue = `${hours}:${minutes}`;
-          input.value = timeValue;
-          if (targetId === 'wake-time') {
-            Store.update('wake', timeValue);
-          } else if (targetId === 'rest-time') {
-            Store.update('rest', timeValue);
+          
+          // Toggle between setting time and clearing
+          if (input.value) {
+            // Clear the value
+            input.value = '';
+            if (targetId === 'wake-time') {
+              Store.update('wake', '');
+            } else if (targetId === 'rest-time') {
+              Store.update('rest', '');
+            }
+          } else {
+            // Set to current time
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeValue = `${hours}:${minutes}`;
+            input.value = timeValue;
+            if (targetId === 'wake-time') {
+              Store.update('wake', timeValue);
+            } else if (targetId === 'rest-time') {
+              Store.update('rest', timeValue);
+            }
+            UI.flashButton(btn);
           }
+          
+          UI.updateTimeButton(targetId);
           UI.updateSleepStatus(this.calculateSleepHours());
-          UI.flashButton(btn);
         });
       });
 
@@ -1128,12 +1156,14 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.wakeTime.addEventListener('change', (event) => {
           Store.update('wake', event.target.value);
           UI.updateSleepStatus(this.calculateSleepHours());
+          UI.updateTimeButton('wake-time');
         });
       }
       if (inputs.restTime) {
         inputs.restTime.addEventListener('change', (event) => {
           Store.update('rest', event.target.value);
           UI.updateSleepStatus(this.calculateSleepHours());
+          UI.updateTimeButton('rest-time');
         });
       }
 
