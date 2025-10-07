@@ -230,7 +230,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: calc(12px * var(--header-scale));
-  padding-bottom: calc(28px * var(--header-scale));
+  padding-bottom: calc(2px * var(--header-scale));
   position: relative;
 }
 
@@ -697,7 +697,7 @@ body {
   flex-direction: column; /* Stacks the pills vertically */
   gap: 0; /* Remove gap - dropdowns will provide spacing */
   width: 100%;
-  max-width: 220px; /* Constrain the pills slightly for aesthetic */
+  max-width: 280px; /* Unified width for all pill stacks (was 220px) */
   margin: 0 auto;
 }
 
@@ -727,6 +727,8 @@ body {
   padding: 10px 0;
 }
 
+
+
 .fitness-card .pill-toggle-stack .pill-toggle.is-active {
   background: rgba(255, 59, 48, 0.22); /* Fitness red theme */
   border-color: rgba(255, 59, 48, 0.45);
@@ -749,20 +751,24 @@ body {
 /* === FITNESS & SPIRIT INLINE CONTROLS === */
 .run-presets {
   display: flex;
-  gap: 10px;
+  gap: 6px; /* Reduced from 10px to fit all three in one row */
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .run-preset {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
-  padding: 10px 16px;
+  padding: 10px 14px; /* Slightly reduced padding from 16px to 14px */
   color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-fast);
+  flex: 1; /* Allow buttons to grow equally */
+  text-align: center;
+  min-width: 0; /* Allow flex shrinking */
 }
 
 .run-preset:hover {
