@@ -765,7 +765,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setFitnessPane(pane) {
       const fitnessCard = this.elements.home?.fitnessCard;
       if (!fitnessCard) return;
-      const targetPane = pane || 'run';
+      
+      // If pane is null/undefined, hide all panes
+      if (!pane) {
+        fitnessCard.querySelectorAll('.fitness-pane').forEach(section => {
+          section.hidden = true;
+        });
+        fitnessCard.querySelectorAll('.fitness-mode-btn').forEach(btn => {
+          btn.setAttribute('aria-selected', 'false');
+        });
+        return;
+      }
+      
+      const targetPane = pane;
       fitnessCard.querySelectorAll('.fitness-pane').forEach(section => {
         section.hidden = section.dataset.pane !== targetPane;
       });
@@ -1182,7 +1194,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const button = event.target.closest('.fitness-mode-btn');
             if (!button) return;
             const pane = button.dataset.pane || 'run';
-            UI.setFitnessPane(pane);
+            
+            // Toggle: if clicking the currently selected tab, close it
+            const isCurrentlySelected = button.getAttribute('aria-selected') === 'true';
+            if (isCurrentlySelected) {
+              UI.setFitnessPane(null); // Close all panes
+            } else {
+              UI.setFitnessPane(pane); // Open the selected pane
+            }
           });
         }
 
