@@ -138,14 +138,15 @@ body {
 .header-row--identity {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   position: relative;
   padding: 8px 16px;
   margin-bottom: 12px;
-  gap: 12px;
 }
 
 .menu-icon-btn {
+  position: absolute;
+  left: 16px;
   background: none;
   border: none;
   padding: 6px;
@@ -187,7 +188,6 @@ body {
   color: var(--color-text-primary);
   margin: 0;
   font-family: var(--font-sans);
-  flex-grow: 1;
   text-align: center;
 }
 
@@ -263,6 +263,8 @@ body {
 }
 
 .quarter-progress__labels {
+  position: absolute;
+  right: 16px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -272,7 +274,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--color-text-secondary);
-  flex-shrink: 0;
 }
 
 .quarter-label,
