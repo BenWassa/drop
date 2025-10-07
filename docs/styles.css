@@ -47,6 +47,13 @@
   --fitness: #ff3b30; /* Red */
   --mind: #7c3aed; /* Purple */
   --spirit: #16a34a; /* Green */
+  
+  /* Spirit widget mood colors */
+  --color-mantra: #fbff00; /* Yellow mantra text */
+  --grad-e-high-soft: rgba(255, 99, 71, 0.5); /* High energy (tomato red) */
+  --grad-e-low-soft: rgba(74, 222, 128, 0.6); /* Low energy (soft green) */
+  --grad-m-pos-soft: rgba(255, 204, 0, 0.6); /* Positive mood (yellow) */
+  --grad-m-neg-soft: rgba(0, 150, 255, 0.5); /* Negative mood (blue) */
 }
 
 html { 
@@ -1341,32 +1348,281 @@ body {
   padding: 16px;
 }
 
+/* Section headers */
+.action-card.spirit-card .section-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+/* Meditation Timer Section */
 .action-card.spirit-card .meditation-timer-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border);
+  margin-bottom: 16px;
 }
 
-.action-card.spirit-card .timer-button-wrapper { position: relative; width: 100%; height: 56px; }
+.action-card.spirit-card .timer-button-wrapper {
+  position: relative;
+  width: 100%;
+  height: 56px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .action-card.spirit-card .timer-action-btn {
-  width: 100%; height: 100%; border-radius: 999px; border: 2px solid var(--spirit); background: var(--color-surface-1); color: var(--spirit); font-weight:700; font-family:var(--font-mono); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; box-shadow:0 0 10px rgba(22,163,74,0.18);
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  border: 2px solid var(--spirit);
+  background: var(--color-surface-1);
+  color: var(--spirit);
+  font-weight: 700;
+  font-size: 16px;
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(22, 163, 74, 0.18);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.action-card.spirit-card .timer-action-btn .timer-fill { position:absolute; inset:0; background:var(--spirit); opacity:0.18; transform:scaleX(0); transform-origin:left; border-radius:inherit; transition:transform 2s linear; z-index:1; }
-.action-card.spirit-card .timer-action-btn.long-pressing .timer-fill { transform:scaleX(1); }
-.action-card.spirit-card .timer-action-btn.logged-success { background:var(--spirit); color:var(--color-text-primary); }
 
-.action-card.spirit-card .mood-log-container { display:flex; flex-direction:column; gap:12px; padding-top:8px; }
-.action-card.spirit-card .mood-grid-container { position:relative; width:100%; aspect-ratio:1; border-radius:var(--radius-lg); overflow:hidden; border:1px solid rgba(255,255,255,0.06); background-image: linear-gradient(to top, rgba(74,222,128,0.45), rgba(255,99,71,0.35)), linear-gradient(to right, rgba(0,150,255,0.32), rgba(255,204,0,0.38)); background-blend-mode:multiply; }
-.action-card.spirit-card .mood-grid-container::before, .action-card.spirit-card .mood-grid-container::after { content:''; position:absolute; background:rgba(255,255,255,0.18); z-index:1; }
-.action-card.spirit-card .mood-grid-container::before { width:1px; height:100%; left:50%; top:0; }
-.action-card.spirit-card .mood-grid-container::after { height:1px; width:100%; top:50%; left:0; }
+.action-card.spirit-card .timer-action-btn:hover {
+  box-shadow: 0 0 16px rgba(22, 163, 74, 0.3);
+  transform: scale(1.01);
+}
 
-.action-card.spirit-card .mood-dot { position:absolute; width:22px; height:22px; border-radius:50%; background:var(--color-text-primary); border:4px solid var(--color-bg); left:var(--mood-x,75%); bottom:var(--mood-y,75%); transform:translate(-50%,-50%); cursor:grab; z-index:10; transition:all 0.12s ease-out; }
-.action-card.spirit-card .mood-description { color:var(--color-text-secondary); font-size:13px; }
+.action-card.spirit-card .timer-action-btn .timer-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--spirit);
+  opacity: 0.18;
+  transform: scaleX(0);
+  transform-origin: left;
+  border-radius: inherit;
+  transition: transform 2s linear;
+  z-index: 1;
+}
 
-.action-card.spirit-card input[type="range"]::-webkit-slider-thumb { background:var(--color-text-primary); border:2px solid var(--color-text-secondary); }
+.action-card.spirit-card .timer-action-btn.long-pressing .timer-fill {
+  transform: scaleX(1);
+}
+
+.action-card.spirit-card .timer-action-btn[data-state="running"] {
+  font-size: 24px;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px rgba(79, 138, 245, 0.35);
+}
+
+.action-card.spirit-card .timer-action-btn[data-state="paused"] {
+  border-color: var(--color-text-secondary);
+  color: var(--color-text-secondary);
+  box-shadow: 0 0 6px rgba(160, 174, 192, 0.2);
+}
+
+.action-card.spirit-card .timer-action-btn.logged-success {
+  background: var(--spirit);
+  color: var(--color-text-primary);
+  border-color: var(--spirit);
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.5);
+  font-size: 18px;
+}
+
+/* Mantra text styling */
+.action-card.spirit-card #spirit-mantra-text {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(251, 255, 0, 0.4);
+}
+
+/* Mood & Energy Log Section */
+.action-card.spirit-card .mood-log-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-card.spirit-card .mood-grid-container {
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-image:
+    linear-gradient(to top, var(--grad-e-low-soft), var(--grad-e-high-soft)),
+    linear-gradient(to right, var(--grad-m-neg-soft), var(--grad-m-pos-soft));
+  background-blend-mode: multiply;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Axis lines (subtle cross-hair) */
+.action-card.spirit-card .mood-grid-container::before,
+.action-card.spirit-card .mood-grid-container::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.18);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.action-card.spirit-card .mood-grid-container::before {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+  top: 0;
+}
+
+.action-card.spirit-card .mood-grid-container::after {
+  height: 1px;
+  width: 100%;
+  top: 50%;
+  left: 0;
+}
+
+/* Axis labels (positioned at edges) */
+.action-card.spirit-card .mood-axis-label {
+  position: absolute;
+  font-size: 10px;
+  color: var(--color-text-primary);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  font-weight: 600;
+  z-index: 2;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action-card.spirit-card .label-e-high {
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.action-card.spirit-card .label-e-low {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.action-card.spirit-card .label-m-neg {
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+}
+
+.action-card.spirit-card .label-m-pos {
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
+/* Draggable mood dot */
+.action-card.spirit-card .mood-dot {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  border: 4px solid var(--color-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.1);
+  left: var(--mood-x, 75%);
+  bottom: var(--mood-y, 75%);
+  transform: translate(-50%, 50%);
+  cursor: grab;
+  z-index: 10;
+  transition: all 0.12s ease-out;
+}
+
+.action-card.spirit-card .mood-dot:active {
+  cursor: grabbing;
+  transform: translate(-50%, 50%) scale(1.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 0 3px rgba(255, 255, 255, 0.15);
+}
+
+/* Mood description text */
+.action-card.spirit-card .mood-description {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  text-align: center;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+/* Slider styling */
+.action-card.spirit-card .slider-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.action-card.spirit-card .slider-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-card.spirit-card .slider-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.action-card.spirit-card input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.action-card.spirit-card input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  border: 2px solid var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-card.spirit-card input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.action-card.spirit-card input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+  border: 2px solid var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-card.spirit-card input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
 
 
 /* === GRATITUDE PAGE === */
