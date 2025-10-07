@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
-  const DEV_MODE = true;
+  const DEV_MODE = false;
   const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 
   const Store = {
@@ -1900,8 +1900,10 @@ document.addEventListener('DOMContentLoaded', () => {
       this.currentPage = page;
       this.updateNavState(page);
 
+      // Add data attribute to app-main for CSS targeting
       const main = document.querySelector('.app-main');
       if (main) {
+        main.setAttribute('data-current-page', page);
         main.scrollTo({ top: 0, behavior: 'smooth' });
       }
     },

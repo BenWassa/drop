@@ -371,6 +371,12 @@ body {
   padding: 12px 0 16px;
   background: linear-gradient(180deg, rgba(28, 28, 33, 0.5) 0%, transparent 100%);
   border-radius: var(--radius-xl);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Hide scores section when not on home page */
+.app-main:not([data-current-page="home"]) .scores-section {
+  display: none;
 }
 
 .scores-grid {
@@ -1290,6 +1296,23 @@ body {
   width: 40px;
   height: 40px;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+}
+
+/* Domain-specific icon colors in vision cards */
+.vision-card[data-domain="sleep"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(50%) sepia(98%) saturate(2843%) hue-rotate(199deg) brightness(101%) contrast(101%);
+}
+
+.vision-card[data-domain="fitness"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(29%) sepia(97%) saturate(6193%) hue-rotate(357deg) brightness(102%) contrast(106%);
+}
+
+.vision-card[data-domain="mind"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(32%) sepia(74%) saturate(3456%) hue-rotate(257deg) brightness(94%) contrast(95%);
+}
+
+.vision-card[data-domain="spirit"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(46%) sepia(94%) saturate(1445%) hue-rotate(100deg) brightness(91%) contrast(91%);
 }
 
 .vision-prompts {
