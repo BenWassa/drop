@@ -10,7 +10,7 @@
   "theme_color": "#1C1C21",
   "icons": [
     {
-      "src": "icons/drop_app_icon.png",
+      "src": "icons/drop_rounded_app_icon.png",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
