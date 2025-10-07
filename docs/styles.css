@@ -508,10 +508,10 @@ body {
   overflow: hidden;
 }
 
-.action-card.sleep-card { border-left: 3px solid rgba(79, 138, 245, 0.65); }
-.action-card.fitness-card { border-left: 3px solid rgba(255, 125, 92, 0.65); }
-.action-card.mind-card { border-left: 3px solid rgba(171, 111, 255, 0.6); }
-.action-card.spirit-card { border-left: 3px solid rgba(104, 247, 180, 0.55); }
+.action-card.sleep-card { border-left: 3px solid var(--sleep); }
+.action-card.fitness-card { border-left: 3px solid var(--fitness); }
+.action-card.mind-card { border-left: 3px solid var(--mind); }
+.action-card.spirit-card { border-left: 3px solid var(--spirit); }
 
 .action-card::before {
   content: '';
