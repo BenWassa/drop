@@ -509,6 +509,27 @@ body {
   display: block;
 }
 
+/* Domain-specific icon colors */
+.score-item[data-domain="sleep"] .score-meter__icon img {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(73%) saturate(2446%) hue-rotate(188deg) brightness(102%) contrast(101%);
+  /* Applies --sleep: #1e90ff blue */
+}
+
+.score-item[data-domain="fitness"] .score-meter__icon img {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(7471%) hue-rotate(355deg) brightness(102%) contrast(104%);
+  /* Applies --fitness: #ff3b30 red */
+}
+
+.score-item[data-domain="mind"] .score-meter__icon img {
+  filter: brightness(0) saturate(100%) invert(30%) sepia(93%) saturate(4234%) hue-rotate(260deg) brightness(97%) contrast(95%);
+  /* Applies --mind: #7c3aed purple */
+}
+
+.score-item[data-domain="spirit"] .score-meter__icon img {
+  filter: brightness(0) saturate(100%) invert(52%) sepia(93%) saturate(1834%) hue-rotate(102deg) brightness(94%) contrast(87%);
+  /* Applies --spirit: #16a34a green */
+}
+
 .score-name {
   font-size: calc(11px * var(--header-scale));
   color: var(--color-text-tertiary);
@@ -718,6 +739,27 @@ body {
 .action-card__icon {
   width: 40px;
   height: 40px;
+}
+
+/* Domain-specific icon colors */
+.sleep-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(73%) saturate(2446%) hue-rotate(188deg) brightness(102%) contrast(101%);
+  /* Applies --sleep: #1e90ff blue */
+}
+
+.fitness-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(7471%) hue-rotate(355deg) brightness(102%) contrast(104%);
+  /* Applies --fitness: #ff3b30 red */
+}
+
+.mind-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(30%) sepia(93%) saturate(4234%) hue-rotate(260deg) brightness(97%) contrast(95%);
+  /* Applies --mind: #7c3aed purple */
+}
+
+.spirit-card .action-card__icon {
+  filter: brightness(0) saturate(100%) invert(52%) sepia(93%) saturate(1834%) hue-rotate(102deg) brightness(94%) contrast(87%);
+  /* Applies --spirit: #16a34a green */
 }
 
 .action-card__title {
@@ -1288,6 +1330,27 @@ body {
   width: 40px;
   height: 40px;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+}
+
+/* Domain-specific icon colors in vision cards */
+.vision-card[data-domain="sleep"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(73%) saturate(2446%) hue-rotate(188deg) brightness(102%) contrast(101%) drop-shadow(0 0 8px var(--sleep));
+  /* Applies --sleep: #1e90ff blue with glow */
+}
+
+.vision-card[data-domain="fitness"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(7471%) hue-rotate(355deg) brightness(102%) contrast(104%) drop-shadow(0 0 8px var(--fitness));
+  /* Applies --fitness: #ff3b30 red with glow */
+}
+
+.vision-card[data-domain="mind"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(30%) sepia(93%) saturate(4234%) hue-rotate(260deg) brightness(97%) contrast(95%) drop-shadow(0 0 8px var(--mind));
+  /* Applies --mind: #7c3aed purple with glow */
+}
+
+.vision-card[data-domain="spirit"] .vision-card__header img {
+  filter: brightness(0) saturate(100%) invert(52%) sepia(93%) saturate(1834%) hue-rotate(102deg) brightness(94%) contrast(87%) drop-shadow(0 0 8px var(--spirit));
+  /* Applies --spirit: #16a34a green with glow */
 }
 
 .vision-prompts {
