@@ -778,9 +778,19 @@ document.addEventListener('DOMContentLoaded', () => {
     positionMoodDot(energy, mood) {
       const dot = this.elements.home?.moodDot;
       if (!dot) return;
+      
+      // Clamp values to -100 to +100 range
       const clamp = (value) => Math.max(-100, Math.min(100, Number(value) || 0));
-      const xPercent = (clamp(energy) + 100) / 2;
-      const yPercent = 100 - ((clamp(mood) + 100) / 2);
+      const clampedEnergy = clamp(energy);
+      const clampedMood = clamp(mood);
+      
+      // Map slider values to CSS positioning:
+      // Mood (X-axis): -100 (Negative/Left) to +100 (Positive/Right) -> 0% to 100% left
+      const xPercent = (clampedMood + 100) / 2;
+      
+      // Energy (Y-axis): -100 (Low/Bottom) to +100 (High/Top) -> 0% to 100% bottom
+      const yPercent = (clampedEnergy + 100) / 2;
+      
       dot.style.setProperty('--mood-x', `${xPercent}%`);
       dot.style.setProperty('--mood-y', `${yPercent}%`);
     },
