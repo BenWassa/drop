@@ -1300,19 +1300,19 @@ body {
 
 /* Domain-specific icon colors in vision cards */
 .vision-card[data-domain="sleep"] .vision-card__header img {
-  filter: brightness(0) saturate(100%) invert(50%) sepia(98%) saturate(2843%) hue-rotate(199deg) brightness(101%) contrast(101%);
+  filter: brightness(0) saturate(100%) invert(50%) sepia(98%) saturate(2843%) hue-rotate(199deg) brightness(101%) contrast(101%) drop-shadow(0 0 8px var(--sleep)) brightness(1.2);
 }
 
 .vision-card[data-domain="fitness"] .vision-card__header img {
-  filter: brightness(0) saturate(100%) invert(29%) sepia(97%) saturate(6193%) hue-rotate(357deg) brightness(102%) contrast(106%);
+  filter: brightness(0) saturate(100%) invert(29%) sepia(97%) saturate(6193%) hue-rotate(357deg) brightness(102%) contrast(106%) drop-shadow(0 0 8px var(--fitness)) brightness(1.2);
 }
 
 .vision-card[data-domain="mind"] .vision-card__header img {
-  filter: brightness(0) saturate(100%) invert(32%) sepia(74%) saturate(3456%) hue-rotate(257deg) brightness(94%) contrast(95%);
+  filter: brightness(0) saturate(100%) invert(32%) sepia(74%) saturate(3456%) hue-rotate(257deg) brightness(94%) contrast(95%) drop-shadow(0 0 8px var(--mind)) brightness(1.2);
 }
 
 .vision-card[data-domain="spirit"] .vision-card__header img {
-  filter: brightness(0) saturate(100%) invert(46%) sepia(94%) saturate(1445%) hue-rotate(100deg) brightness(91%) contrast(91%);
+  filter: brightness(0) saturate(100%) invert(46%) sepia(94%) saturate(1445%) hue-rotate(100deg) brightness(91%) contrast(91%) drop-shadow(0 0 8px var(--spirit)) brightness(1.2);
 }
 
 .vision-prompts {
