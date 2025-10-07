@@ -762,31 +762,6 @@ document.addEventListener('DOMContentLoaded', () => {
       status.textContent = descriptors.length ? descriptors.join(' · ') : 'No mood logged yet.';
     },
 
-    setFitnessPane(pane) {
-      const fitnessCard = this.elements.home?.fitnessCard;
-      if (!fitnessCard) return;
-      
-      // If pane is null/undefined, hide all panes
-      if (!pane) {
-        fitnessCard.querySelectorAll('.fitness-pane').forEach(section => {
-          section.hidden = true;
-        });
-        fitnessCard.querySelectorAll('.fitness-mode-btn').forEach(btn => {
-          btn.setAttribute('aria-selected', 'false');
-        });
-        return;
-      }
-      
-      const targetPane = pane;
-      fitnessCard.querySelectorAll('.fitness-pane').forEach(section => {
-        section.hidden = section.dataset.pane !== targetPane;
-      });
-      fitnessCard.querySelectorAll('.fitness-mode-btn').forEach(btn => {
-        const isSelected = btn.dataset.pane === targetPane;
-        btn.setAttribute('aria-selected', String(isSelected));
-      });
-    },
-
     positionMoodDot(energy, mood) {
       const dot = this.elements.home?.moodDot;
       if (!dot) return;
@@ -1187,25 +1162,32 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (home.fitnessCard) {
-        // Don't auto-select any tab - let user choose
-        const modeGroup = home.fitnessCard.querySelector('.fitness-mode');
-        if (modeGroup) {
-          modeGroup.addEventListener('click', (event) => {
-            const button = event.target.closest('.fitness-mode-btn');
-            if (!button) return;
-            const pane = button.dataset.pane || 'run';
-            
-            // Toggle: if clicking the currently selected tab, close it
-            const isCurrentlySelected = button.getAttribute('aria-selected') === 'true';
-            if (isCurrentlySelected) {
-              UI.setFitnessPane(null); // Close all panes
-            } else {
-              UI.setFitnessPane(pane); // Open the selected pane
-            }
-          });
-        }
-
+        // Handle fitness pill toggles (Run, Strength, Skill)
         home.fitnessCard.addEventListener('click', (event) => {
+          // Handle fitness toggles with dropdowns (Run and Skill)
+          const fitnessToggle = event.target.closest('[data-fitness-toggle]');
+          if (fitnessToggle) {
+            const toggleType = fitnessToggle.dataset.fitnessToggle;
+            const isActive = fitnessToggle.classList.contains('is-active');
+            
+            // Close all fitness dropdowns first
+            home.fitnessCard.querySelectorAll('.fitness-dropdown').forEach(dd => dd.hidden = true);
+            home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
+              btn.classList.remove('is-active');
+              btn.setAttribute('aria-pressed', 'false');
+            });
+            
+            // If wasn't active, open the dropdown
+            if (!isActive) {
+              fitnessToggle.classList.add('is-active');
+              fitnessToggle.setAttribute('aria-pressed', 'true');
+              const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
+              if (dropdown) dropdown.hidden = false;
+            }
+            return;
+          }
+          
+          // Handle run preset buttons
           const presetBtn = event.target.closest('.run-preset');
           if (presetBtn) {
             const value = Number(presetBtn.dataset.runValue);
@@ -1215,6 +1197,8 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.updateFitnessSummary();
             return;
           }
+          
+          // Handle run step buttons
           const stepBtn = event.target.closest('.run-step');
           if (stepBtn) {
             const step = Number(stepBtn.dataset.runStep) || 0;

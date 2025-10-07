@@ -685,49 +685,38 @@ body {
   box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
 }
 
-/* === FITNESS & SPIRIT INLINE CONTROLS === */
+/* === FITNESS WIDGET === */
 
-.fitness-mode {
-  display: inline-flex;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 6px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Fitness Widget Specific Styles (mirrors Mind widget) */
+.fitness-widget-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 0;
 }
 
-.fitness-mode-btn {
-  background: transparent;
-  border: 0;
-  color: var(--color-text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: var(--transition-fast);
+.fitness-card .pill-toggle-stack .pill-toggle.is-active {
+  background: rgba(255, 59, 48, 0.22); /* Fitness red theme */
+  border-color: rgba(255, 59, 48, 0.45);
+  box-shadow: 0 6px 18px rgba(255, 59, 48, 0.25);
 }
 
-.fitness-mode-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text-primary);
-}
-
-.fitness-mode-btn[aria-selected="true"] {
-  background: rgba(255, 59, 48, 0.2); /* Fitness red theme */
-  color: var(--color-text-primary);
-  box-shadow: 0 6px 16px rgba(255, 59, 48, 0.25);
-}
-
-.fitness-pane {
+/* Fitness dropdowns for Run and Skill */
+.fitness-dropdown {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 8px;
 }
 
-.fitness-pane[hidden] {
+.fitness-dropdown[hidden] {
   display: none;
 }
 
+/* === FITNESS & SPIRIT INLINE CONTROLS === */
 .run-presets {
   display: flex;
   gap: 10px;

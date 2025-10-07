@@ -169,13 +169,17 @@
               </div>
             </header>
             
-            <div class="fitness-mode" role="tablist" aria-label="Fitness practice types">
-              <button class="fitness-mode-btn" type="button" data-pane="run" aria-selected="false">Run</button>
-              <button class="fitness-mode-btn" type="button" data-pane="strength" aria-selected="false">Strength</button>
-              <button class="fitness-mode-btn" type="button" data-pane="skill" aria-selected="false">Skill</button>
+            <!-- NEW: Fitness pill toggles similar to Mind section -->
+            <div class="fitness-widget-body">
+              <div class="pill-toggle-stack" role="group" aria-label="Fitness activities">
+                <button class="pill-toggle" type="button" data-fitness-toggle="run" aria-pressed="false">Run</button>
+                <button class="pill-toggle" type="button" data-toggle-key="strength" aria-pressed="false">Strength</button>
+                <button class="pill-toggle" type="button" data-fitness-toggle="skill" aria-pressed="false">Skill</button>
+              </div>
             </div>
 
-            <div class="fitness-pane" data-pane="run" hidden aria-live="polite">
+            <!-- Run dropdown (hidden by default) -->
+            <div class="fitness-dropdown" data-fitness-dropdown="run" hidden>
               <div class="run-presets" role="group" aria-label="Quick distance presets">
                 <button class="run-preset" type="button" data-run-value="5">5 km</button>
                 <button class="run-preset" type="button" data-run-value="10">10 km</button>
@@ -188,13 +192,8 @@
               </div>
             </div>
 
-            <div class="fitness-pane" data-pane="strength" hidden aria-live="polite">
-              <p class="pane-label">Strength training today?</p>
-              <button class="pill-toggle" type="button" data-toggle-key="strength" aria-pressed="false">Strength Session</button>
-            </div>
-
-            <div class="fitness-pane" data-pane="skill" hidden aria-live="polite">
-              <p class="pane-label">Which skills did you sharpen?</p>
+            <!-- Skill dropdown (hidden by default) -->
+            <div class="fitness-dropdown" data-fitness-dropdown="skill" hidden>
               <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
                 <!-- Skill chips injected by UI.renderSkillChips() -->
                 <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
