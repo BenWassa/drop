@@ -463,7 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       quarterProgress: {
         fill: document.getElementById('quarter-progress-fill'),
-        label: document.getElementById('quarter-progress-label')
+        quarterLabel: document.getElementById('quarter-label'),
+        weekLabel: document.getElementById('week-label')
       },
       inputs: {
         wakeTime: document.getElementById('wake-time'),
@@ -898,11 +899,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * Calculate and display weekly progress (week of year, 1-52)
-     * Progress bar moves by day for granular tracking, label shows week
+     * Progress bar moves by day for granular tracking, labels show quarter and week
      */
     updateQuarterProgress() {
       const { quarterProgress } = this.elements;
-      if (!quarterProgress || !quarterProgress.fill || !quarterProgress.label) return;
+      if (!quarterProgress || !quarterProgress.fill || !quarterProgress.quarterLabel || !quarterProgress.weekLabel) return;
 
       const TOTAL_WEEKS = 52;
       const DAYS_IN_YEAR = 365; // Approximate (ignoring leap years for simplicity)
@@ -913,14 +914,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const dayOfYear = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
       const currentWeek = Math.ceil(dayOfYear / 7);
       
+      // Calculate current quarter (Q1-Q4 based on week)
+      const currentQuarter = Math.ceil(currentWeek / 13);
+      
       // Calculate percentage for progress bar based on DAYS (more granular)
       const percentComplete = (dayOfYear / DAYS_IN_YEAR) * 100;
 
       // Update progress bar (moves by day)
       quarterProgress.fill.style.width = `${percentComplete}%`;
       
-      // Update label (shows week)
-      quarterProgress.label.textContent = `Week ${currentWeek} of ${TOTAL_WEEKS}`;
+      // Update labels
+      quarterProgress.quarterLabel.textContent = `Q${currentQuarter}`;
+      quarterProgress.weekLabel.textContent = `Wk ${currentWeek}`;
       
       // Update aria attribute
       const progressBar = document.querySelector('.quarter-progress__bar');
