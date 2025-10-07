@@ -37,7 +37,7 @@ Test data files for import/export functionality testing.
   "rest": "22:00",
   "run": 5,
   "strength": true,
-  "skill": false,
+  "skill": [],
   "read": true,
   "write": false,
   "quadrant": 2,

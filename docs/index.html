@@ -131,24 +131,141 @@
       </section>
       <!-- ** END NEW COMPONENT ** -->
       
-      <div class="main-grid">
-        <div class="card" data-domain="sleep">
-          <img src="icons/sleep.svg" class="card-icon" alt="Sleep">
-          <div class="card-title">Sleep</div>
+      <section class="home-actions" aria-label="Daily actions">
+        <div class="adaptive-grid" id="home-action-grid">
+          <article class="action-card sleep-card" data-card="sleep">
+            <header class="action-card__header">
+              <img src="icons/sleep.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Sleep</h2>
+                <p class="action-card__subtitle">Log rest and wake</p>
+              </div>
+            </header>
+            <div class="sleep-card__inputs">
+              <div class="time-input-row">
+                <label for="wake-time">Wake</label>
+                <div class="time-input-control">
+                  <input type="time" id="wake-time" autocomplete="off">
+                  <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+                </div>
+              </div>
+              <div class="time-input-row">
+                <label for="rest-time">Rest</label>
+                <div class="time-input-control">
+                  <input type="time" id="rest-time" autocomplete="off">
+                  <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+                </div>
+              </div>
+            </div>
+            <p class="text-status" id="sleep-status">No sleep window logged yet.</p>
+          </article>
+
+          <article class="action-card fitness-card" data-card="fitness">
+            <header class="action-card__header">
+              <img src="icons/fitness.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Fitness</h2>
+                <p class="action-card__subtitle">Track movement focus</p>
+              </div>
+              <button class="dropdown-toggle-btn" type="button" data-target="fitness-dropdown" aria-expanded="false">
+                Configure
+              </button>
+            </header>
+            <p class="text-status" id="fitness-summary">No training logged yet.</p>
+          </article>
+
+          <article class="action-card mind-card" data-card="mind">
+            <header class="action-card__header">
+              <img src="icons/mind.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Mind</h2>
+                <p class="action-card__subtitle">Capture the reps</p>
+              </div>
+            </header>
+            <div class="pill-toggle-row" role="group" aria-label="Mind activities">
+              <button class="pill-toggle" type="button" data-toggle-key="read" aria-pressed="false">Read</button>
+              <button class="pill-toggle" type="button" data-toggle-key="write" aria-pressed="false">Write</button>
+            </div>
+            <p class="text-status" id="mind-status">Nothing logged yet.</p>
+          </article>
+
+          <article class="action-card spirit-card" data-card="spirit">
+            <header class="action-card__header">
+              <img src="icons/spirit.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Spirit</h2>
+                <p class="action-card__subtitle">Mood &amp; presence</p>
+              </div>
+              <button class="dropdown-toggle-btn" type="button" data-target="spirit-dropdown" aria-expanded="false">
+                Adjust
+              </button>
+            </header>
+            <p class="text-status" id="spirit-status">No mood logged yet.</p>
+          </article>
         </div>
-        <div class="card" data-domain="fitness">
-          <img src="icons/fitness.svg" class="card-icon" alt="Fitness">
-          <div class="card-title">Fitness</div>
+
+        <div class="dropdown-region">
+          <section class="domain-dropdown" id="fitness-dropdown" hidden aria-label="Fitness logging">
+            <div class="dropdown-header">
+              <h3>Fitness practice</h3>
+              <div class="fitness-mode" role="tablist" aria-label="Fitness practice types">
+                <button class="fitness-mode-btn" type="button" data-pane="run" aria-selected="true">Run</button>
+                <button class="fitness-mode-btn" type="button" data-pane="strength" aria-selected="false">Strength</button>
+                <button class="fitness-mode-btn" type="button" data-pane="skill" aria-selected="false">Skill</button>
+              </div>
+            </div>
+
+            <div class="fitness-pane" data-pane="run" aria-live="polite">
+              <div class="run-presets" role="group" aria-label="Quick distance presets">
+                <button class="run-preset" type="button" data-run-value="5">5 km</button>
+                <button class="run-preset" type="button" data-run-value="10">10 km</button>
+                <button class="run-preset" type="button" data-run-value="20">20 km</button>
+              </div>
+              <div class="run-adjust" role="group" aria-label="Adjust distance">
+                <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
+                <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
+                <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+              </div>
+            </div>
+
+            <div class="fitness-pane" data-pane="strength" hidden aria-live="polite">
+              <p class="pane-label">Strength training today?</p>
+              <button class="pill-toggle" type="button" data-toggle-key="strength" aria-pressed="false">Strength Session</button>
+            </div>
+
+            <div class="fitness-pane" data-pane="skill" hidden aria-live="polite">
+              <p class="pane-label">Which skills did you sharpen?</p>
+              <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
+                <!-- Skill chips injected by UI.renderSkillChips() -->
+                <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="domain-dropdown" id="spirit-dropdown" hidden aria-label="Spirit logging">
+            <div class="mood-dot-area">
+              <div class="mood-grid" id="mood-grid" aria-hidden="true">
+                <div class="mood-axis mood-axis--vertical"></div>
+                <div class="mood-axis mood-axis--horizontal"></div>
+                <div class="mood-dot" id="mood-dot"></div>
+                <div class="mood-label mood-label--top">Positive</div>
+                <div class="mood-label mood-label--bottom">Negative</div>
+                <div class="mood-label mood-label--left">Low Energy</div>
+                <div class="mood-label mood-label--right">High Energy</div>
+              </div>
+              <div class="slider-stack">
+                <label class="slider-label" for="energy-slider">Energy</label>
+                <input type="range" id="energy-slider" min="-100" max="100" value="0" aria-describedby="spirit-status">
+                <label class="slider-label" for="mood-slider">Mood</label>
+                <input type="range" id="mood-slider" min="-100" max="100" value="0" aria-describedby="spirit-status">
+              </div>
+            </div>
+            <div class="spirit-controls">
+              <button class="pill-toggle" type="button" data-toggle-key="meditation" aria-pressed="false">Meditation</button>
+            </div>
+          </section>
         </div>
-        <div class="card" data-domain="mind">
-          <img src="icons/mind.svg" class="card-icon" alt="Mind">
-          <div class="card-title">Mind</div>
-        </div>
-        <div class="card" data-domain="spirit">
-          <img src="icons/spirit.svg" class="card-icon" alt="Spirit">
-          <div class="card-title">Spirit</div>
-        </div>
-      </div>
+      </section>
     </section>
 
     <section class="page page--vision" data-page="vision" aria-labelledby="vision-heading">
@@ -333,105 +450,6 @@
   </footer>
   
   <!-- Overlays -->
-  <div class="overlay" id="sleep-overlay" data-domain="sleep">
-    <div class="overlay-content-wrapper">
-      <header class="overlay-header">
-        <h2 class="overlay-title">Sleep</h2>
-        <button class="close-btn" aria-label="Close sleep overlay">&times;</button>
-      </header>
-      <div class="overlay-content">
-        <div class="input-group">
-          <label class="input-label" for="wake-time">Wake Time</label>
-          <input type="time" class="time-input" id="wake-time">
-        </div>
-        <div class="input-group">
-          <label class="input-label" for="rest-time">Rest Time</label>
-          <input type="time" class="time-input" id="rest-time">
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="overlay" id="fitness-overlay" data-domain="fitness">
-    <div class="overlay-content-wrapper">
-      <header class="overlay-header">
-        <h2 class="overlay-title">Fitness</h2>
-        <button class="close-btn" aria-label="Close fitness overlay">&times;</button>
-      </header>
-      <div class="overlay-content">
-        <div class="input-group">
-          <label class="input-label">Run Distance (km)</label>
-          <div class="preset-group">
-            <button class="preset-btn" data-action="adjustRun" data-delta="-5" aria-label="Decrease run distance">-</button>
-            <div class="preset-value" id="run-value">0</div>
-            <button class="preset-btn" data-action="adjustRun" data-delta="5" aria-label="Increase run distance">+</button>
-          </div>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Strength Training</label>
-          <div class="btn-group" data-type="strength" data-toggle="true">
-            <button class="btn toggle-btn" type="button" aria-pressed="false">Strength</button>
-          </div>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Skill Practice</label>
-          <div class="btn-group" data-type="skill" data-toggle="true">
-            <button class="btn toggle-btn" type="button" aria-pressed="false">Skill</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="overlay" id="mind-overlay" data-domain="mind">
-    <div class="overlay-content-wrapper">
-      <header class="overlay-header">
-        <h2 class="overlay-title">Mind</h2>
-        <button class="close-btn" aria-label="Close mind overlay">&times;</button>
-      </header>
-      <div class="overlay-content">
-        <div class="input-group">
-          <label class="input-label">Read Today</label>
-          <div class="btn-group" data-type="read" data-toggle="true">
-            <button class="btn toggle-btn" type="button" aria-pressed="false">Read</button>
-          </div>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Write Today</label>
-          <div class="btn-group" data-type="write" data-toggle="true">
-            <button class="btn toggle-btn" type="button" aria-pressed="false">Write</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="overlay" id="spirit-overlay" data-domain="spirit">
-    <div class="overlay-content-wrapper">
-      <header class="overlay-header">
-        <h2 class="overlay-title">Spirit</h2>
-        <button class="close-btn" aria-label="Close spirit overlay">&times;</button>
-      </header>
-      <div class="overlay-content">
-        <div class="input-group">
-          <label class="input-label">Mood Quadrant</label>
-          <div class="quadrant-grid" data-type="quadrant">
-            <button class="quad-btn" data-value="1">High Energy<br>Positive</button>
-            <button class="quad-btn" data-value="2">Low Energy<br>Positive</button>
-            <button class="quad-btn" data-value="3">High Energy<br>Negative</button>
-            <button class="quad-btn" data-value="4">Low Energy<br>Negative</button>
-          </div>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Meditation</label>
-          <div class="btn-group" data-type="meditation" data-toggle="true">
-            <button class="btn toggle-btn" type="button" aria-pressed="false">Meditation</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- History overlay -->
   <div class="overlay" id="history-overlay">
     <div class="overlay-content-wrapper">
