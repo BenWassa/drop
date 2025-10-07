@@ -169,34 +169,37 @@
               </div>
             </header>
             
-            <!-- NEW: Fitness pill toggles similar to Mind section -->
+            <!-- NEW: Fitness pill toggles with inline dropdowns -->
             <div class="fitness-widget-body">
               <div class="pill-toggle-stack" role="group" aria-label="Fitness activities">
+                
+                <!-- Run button + dropdown -->
                 <button class="pill-toggle" type="button" data-fitness-toggle="run" aria-pressed="false">Run</button>
+                <div class="fitness-dropdown" data-fitness-dropdown="run" hidden>
+                  <div class="run-presets" role="group" aria-label="Quick distance presets">
+                    <button class="run-preset" type="button" data-run-value="5">5 km</button>
+                    <button class="run-preset" type="button" data-run-value="10">10 km</button>
+                    <button class="run-preset" type="button" data-run-value="20">20 km</button>
+                  </div>
+                  <div class="run-adjust" role="group" aria-label="Adjust distance">
+                    <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
+                    <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
+                    <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+                  </div>
+                </div>
+                
+                <!-- Strength button (no dropdown) -->
                 <button class="pill-toggle" type="button" data-toggle-key="strength" aria-pressed="false">Strength</button>
+                
+                <!-- Skill button + dropdown -->
                 <button class="pill-toggle" type="button" data-fitness-toggle="skill" aria-pressed="false">Skill</button>
-              </div>
-            </div>
-
-            <!-- Run dropdown (hidden by default) -->
-            <div class="fitness-dropdown" data-fitness-dropdown="run" hidden>
-              <div class="run-presets" role="group" aria-label="Quick distance presets">
-                <button class="run-preset" type="button" data-run-value="5">5 km</button>
-                <button class="run-preset" type="button" data-run-value="10">10 km</button>
-                <button class="run-preset" type="button" data-run-value="20">20 km</button>
-              </div>
-              <div class="run-adjust" role="group" aria-label="Adjust distance">
-                <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
-                <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
-                <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
-              </div>
-            </div>
-
-            <!-- Skill dropdown (hidden by default) -->
-            <div class="fitness-dropdown" data-fitness-dropdown="skill" hidden>
-              <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
-                <!-- Skill chips injected by UI.renderSkillChips() -->
-                <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                <div class="fitness-dropdown" data-fitness-dropdown="skill" hidden>
+                  <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
+                    <!-- Skill chips injected by UI.renderSkillChips() -->
+                    <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                  </div>
+                </div>
+                
               </div>
             </div>
             

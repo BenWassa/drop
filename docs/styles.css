@@ -668,7 +668,7 @@ body {
 .pill-toggle-stack {
   display: flex;
   flex-direction: column; /* Stacks the pills vertically */
-  gap: 12px;
+  gap: 0; /* Remove gap - dropdowns will provide spacing */
   width: 100%;
   max-width: 220px; /* Constrain the pills slightly for aesthetic */
   margin: 0 auto;
@@ -677,12 +677,14 @@ body {
 .pill-toggle-stack .pill-toggle {
   text-align: center;
   width: 100%; /* Pill toggles now take full available width of their container */
+  margin-bottom: 12px; /* Space between buttons */
 }
 
 .pill-toggle-stack .pill-toggle.is-active {
   background: rgba(124, 58, 237, 0.22); /* Mind purple with transparency */
   border-color: rgba(124, 58, 237, 0.45);
   box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
+  margin-bottom: 8px; /* Reduced margin when active (dropdown follows) */
 }
 
 /* === FITNESS WIDGET === */
@@ -708,8 +710,9 @@ body {
 .fitness-dropdown {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-bottom: 12px; /* Space after dropdown before next button */
+  width: 100%;
 }
 
 .fitness-dropdown[hidden] {
