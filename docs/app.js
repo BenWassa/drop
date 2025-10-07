@@ -897,46 +897,36 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     /**
-     * Calculate and display quarterly progress (13-week commitment cycle)
-     * Uses localStorage 'quarterStartDate' to track when the quarter began
+     * Calculate and display weekly progress (week of year, 1-52)
+     * Progress bar moves by day for granular tracking, label shows week
      */
     updateQuarterProgress() {
       const { quarterProgress } = this.elements;
       if (!quarterProgress || !quarterProgress.fill || !quarterProgress.label) return;
 
-      const QUARTER_WEEKS = 13;
-      const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+      const TOTAL_WEEKS = 52;
+      const DAYS_IN_YEAR = 365; // Approximate (ignoring leap years for simplicity)
       
-      // Get or initialize quarter start date
-      let startDate = localStorage.getItem('quarterStartDate');
-      if (!startDate) {
-        // Initialize to today if not set
-        startDate = new Date().toISOString().split('T')[0];
-        localStorage.setItem('quarterStartDate', startDate);
-      }
-
-      const start = new Date(startDate);
+      // Calculate current day and week of the year
       const now = new Date();
-      const elapsed = now - start;
-      const weeksElapsed = Math.floor(elapsed / MS_PER_WEEK);
-      const currentWeek = Math.min(weeksElapsed + 1, QUARTER_WEEKS); // Week 1-13
-      const percentComplete = (currentWeek / QUARTER_WEEKS) * 100;
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const dayOfYear = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
+      const currentWeek = Math.ceil(dayOfYear / 7);
+      
+      // Calculate percentage for progress bar based on DAYS (more granular)
+      const percentComplete = (dayOfYear / DAYS_IN_YEAR) * 100;
 
-      // Update progress bar
+      // Update progress bar (moves by day)
       quarterProgress.fill.style.width = `${percentComplete}%`;
       
-      // Update label
-      quarterProgress.label.textContent = `Week ${currentWeek} of ${QUARTER_WEEKS}`;
+      // Update label (shows week)
+      quarterProgress.label.textContent = `Week ${currentWeek} of ${TOTAL_WEEKS}`;
       
       // Update aria attribute
       const progressBar = document.querySelector('.quarter-progress__bar');
       if (progressBar) {
         progressBar.setAttribute('aria-valuenow', currentWeek);
-      }
-
-      // If quarter is complete, could optionally reset or show completion message
-      if (currentWeek >= QUARTER_WEEKS) {
-        quarterProgress.label.textContent = `Quarter Complete! 🎉`;
+        progressBar.setAttribute('aria-valuemax', TOTAL_WEEKS);
       }
     },
 
