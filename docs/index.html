@@ -252,34 +252,95 @@
               <img src="icons/spirit.svg" alt="" class="action-card__icon" aria-hidden="true">
               <div>
                 <h2 class="action-card__title">Spirit</h2>
-                <p class="action-card__subtitle">Mood &amp; Presence</p>
+                <p class="action-card__subtitle">Root your presence.</p>
               </div>
             </header>
-            
-            <div class="mood-dot-area">
-              <div class="mood-grid" id="mood-grid" aria-hidden="true">
-                <div class="mood-axis mood-axis--vertical"></div>
-                <div class="mood-axis mood-axis--horizontal"></div>
-                <div class="mood-dot" id="mood-dot"></div>
-                <div class="mood-label mood-label--top">Positive</div>
-                <div class="mood-label mood-label--bottom">Negative</div>
-                <div class="mood-label mood-label--left">Low Energy</div>
-                <div class="mood-label mood-label--right">High Energy</div>
+
+            <!-- Meditation / Mindfulness Timer -->
+            <div class="meditation-timer-section">
+              <div class="section-header">Mindfulness Practice</div>
+              <div class="timer-button-wrapper">
+                <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
+                  <span id="spirit-timer-text">Start Session</span>
+                  <span id="spirit-mantra-text" style="opacity:0;position:absolute;color:var(--color-mantra);">ॐ मणि पद्मे हूँ</span>
+                  <div class="timer-fill" id="spirit-timer-fill"></div>
+                </button>
               </div>
-              <div class="slider-stack">
-                <label class="slider-label" for="energy-slider">Energy</label>
-                <input type="range" id="energy-slider" min="-100" max="100" value="0" aria-describedby="spirit-status">
-                <label class="slider-label" for="mood-slider">Mood</label>
-                <input type="range" id="mood-slider" min="-100" max="100" value="0" aria-describedby="spirit-status">
+              <p class="text-status" id="spirit-timer-instruction">Press and hold to begin a session.</p>
+            </div>
+
+            <!-- Mood & Energy Log (continuous quadrant) -->
+            <div class="mood-log-container spirit-mood">
+              <div class="section-header">Mood & Energy Log</div>
+              <div class="mood-grid-container" id="spirit-mood-grid" role="img" aria-label="Mood quadrant">
+                <div class="mood-dot" id="spirit-mood-dot" style="--mood-x:75%; --mood-y:75%;"></div>
+                <span class="mood-axis-label label-e-high">High Energy</span>
+                <span class="mood-axis-label label-e-low">Low Energy</span>
+                <span class="mood-axis-label label-m-neg">Negative</span>
+                <span class="mood-axis-label label-m-pos">Positive</span>
+              </div>
+              <p class="mood-description" id="spirit-mood-label">High Energy · Positive Mood</p>
+              <div class="slider-wrapper">
+                <div class="slider-stack">
+                  <label class="slider-label" for="spirit-mood-slider">Mood (Valence)</label>
+                  <input type="range" id="spirit-mood-slider" min="0" max="100" value="75">
+                </div>
+                <div class="slider-stack">
+                  <label class="slider-label" for="spirit-energy-slider">Energy (Arousal)</label>
+                  <input type="range" id="spirit-energy-slider" min="0" max="100" value="80">
+                </div>
               </div>
             </div>
-            <div class="spirit-controls">
-              <button class="pill-toggle" type="button" data-toggle-key="meditation" aria-pressed="false">Meditation</button>
-            </div>
-            
-            <p class="text-status" id="spirit-status">No mood logged yet.</p>
+
+            <p class="text-status" id="spirit-combined-status" style="border-top:1px solid var(--color-border);padding-top:10px;">Status: Meditation pending</p>
           </article>
         </div>
+        <script>
+        (function(){
+          // Self-contained spirit widget wiring
+          const btn = document.getElementById('spirit-timer-btn');
+          const text = document.getElementById('spirit-timer-text');
+          const mantra = document.getElementById('spirit-mantra-text');
+          const fill = document.getElementById('spirit-timer-fill');
+          const instruction = document.getElementById('spirit-timer-instruction');
+          const moodDot = document.getElementById('spirit-mood-dot');
+          const moodGrid = document.getElementById('spirit-mood-grid');
+          const moodSlider = document.getElementById('spirit-mood-slider');
+          const energySlider = document.getElementById('spirit-energy-slider');
+          const moodLabel = document.getElementById('spirit-mood-label');
+
+          const LONG = 2000;
+          let timer = null, running = false, seconds = 0, wasLong = false;
+
+          const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+
+          function startTimer(){ running=true; btn.dataset.state='running'; instruction.textContent='Session running. Tap to pause.'; timer = setInterval(()=>{ seconds++; text.textContent = fmt(seconds); },1000); }
+          function pauseTimer(){ clearInterval(timer); running=false; btn.dataset.state='paused'; instruction.textContent = `Paused at ${fmt(seconds)}. Tap to resume. Hold to log.`; }
+          function stopAndLog(){ clearInterval(timer); running=false; const logged = fmt(seconds); btn.classList.add('logged-success'); text.textContent = `✓ Logged ${logged}`; instruction.textContent='Session complete.'; setTimeout(()=>{ btn.classList.remove('logged-success'); text.textContent='Start Session'; seconds=0; btn.dataset.state='stopped'; instruction.textContent='Press and hold to begin a new session.'; },2500); }
+
+          // Long-press handling
+          let pressTimer=null;
+          function pressStart(){ if(pressTimer) return; wasLong=false; btn.classList.add('long-pressing'); text.style.opacity=0; mantra.style.opacity=1; pressTimer = setTimeout(()=>{ wasLong=true; btn.classList.remove('long-pressing'); mantra.style.opacity=0; text.style.opacity=1; if(!running) startTimer(); else stopAndLog(); pressTimer=null; setTimeout(()=>{ wasLong=false; },50); }, LONG); }
+          function pressEnd(){ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; btn.classList.remove('long-pressing'); text.style.opacity=1; mantra.style.opacity=0; } }
+
+          btn.addEventListener('mousedown', ()=>{ if(!running) pressStart(); else pressStart(); });
+          btn.addEventListener('touchstart', ()=>{ if(!running) pressStart(); else pressStart(); },{passive:true});
+          btn.addEventListener('mouseup', pressEnd); btn.addEventListener('touchend', pressEnd); window.addEventListener('blur', pressEnd);
+          btn.addEventListener('click', (e)=>{ if(wasLong) return; if(running) pauseTimer(); else if(btn.dataset.state==='paused') startTimer(); });
+
+          // Mood controls: sliders update the dot position and label
+          function updateMood(){ const m = Number(moodSlider.value); const e = Number(energySlider.value); const x = m + '%'; const y = e + '%'; moodDot.style.setProperty('--mood-x', x); moodDot.style.setProperty('--mood-y', y); let moodText = (m>66?'Positive':m>33?'Neutral':'Negative') + ' · ' + (e>66?'High Energy':e>33?'Medium Energy':'Low Energy'); moodLabel.textContent = moodText; }
+          moodSlider.addEventListener('input', updateMood); energySlider.addEventListener('input', updateMood);
+          // Dragging the mood dot (pointer friendly)
+          let dragging=false;
+          moodDot.addEventListener('pointerdown', (ev)=>{ dragging=true; moodDot.setPointerCapture(ev.pointerId); });
+          window.addEventListener('pointerup', (ev)=>{ if(dragging){ dragging=false; moodDot.releasePointerCapture(ev.pointerId); } });
+          window.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const rect = moodGrid.getBoundingClientRect(); let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width); let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height); const mx = Math.round((px/rect.width)*100); const my = Math.round((py/rect.height)*100); moodSlider.value = mx; energySlider.value = my; updateMood(); });
+
+          // init
+          updateMood();
+        })();
+        </script>
       </section>
     </section>
 
