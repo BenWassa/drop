@@ -654,53 +654,7 @@ body {
   box-shadow: 0 6px 18px rgba(79, 138, 245, 0.25);
 }
 
-.dropdown-toggle-btn {
-  margin-left: auto;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
-
-.dropdown-toggle-btn[aria-expanded="true"] {
-  background: rgba(79, 138, 245, 0.15);
-  color: var(--color-text-primary);
-  border-color: rgba(79, 138, 245, 0.45);
-}
-
-.dropdown-region {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.domain-dropdown {
-  background: linear-gradient(150deg, rgba(27, 31, 44, 0.95), rgba(18, 20, 27, 0.92));
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-xl);
-  padding: 20px;
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.dropdown-header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.dropdown-header h3 {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0;
-}
+/* === FITNESS & SPIRIT INLINE CONTROLS === */
 
 .fitness-mode {
   display: inline-flex;

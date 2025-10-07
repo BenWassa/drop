@@ -167,52 +167,12 @@
                 <h2 class="action-card__title">Fitness</h2>
                 <p class="action-card__subtitle">Track movement focus</p>
               </div>
-              <button class="dropdown-toggle-btn" type="button" data-target="fitness-dropdown" aria-expanded="false">
-                Configure
-              </button>
             </header>
-            <p class="text-status" id="fitness-summary">No training logged yet.</p>
-          </article>
-
-          <article class="action-card mind-card" data-card="mind">
-            <header class="action-card__header">
-              <img src="icons/mind.svg" alt="" class="action-card__icon" aria-hidden="true">
-              <div>
-                <h2 class="action-card__title">Mind</h2>
-                <p class="action-card__subtitle">Capture the reps</p>
-              </div>
-            </header>
-            <div class="pill-toggle-row" role="group" aria-label="Mind activities">
-              <button class="pill-toggle" type="button" data-toggle-key="read" aria-pressed="false">Read</button>
-              <button class="pill-toggle" type="button" data-toggle-key="write" aria-pressed="false">Write</button>
-            </div>
-            <p class="text-status" id="mind-status">Nothing logged yet.</p>
-          </article>
-
-          <article class="action-card spirit-card" data-card="spirit">
-            <header class="action-card__header">
-              <img src="icons/spirit.svg" alt="" class="action-card__icon" aria-hidden="true">
-              <div>
-                <h2 class="action-card__title">Spirit</h2>
-                <p class="action-card__subtitle">Mood &amp; presence</p>
-              </div>
-              <button class="dropdown-toggle-btn" type="button" data-target="spirit-dropdown" aria-expanded="false">
-                Adjust
-              </button>
-            </header>
-            <p class="text-status" id="spirit-status">No mood logged yet.</p>
-          </article>
-        </div>
-
-        <div class="dropdown-region">
-          <section class="domain-dropdown" id="fitness-dropdown" hidden aria-label="Fitness logging">
-            <div class="dropdown-header">
-              <h3>Fitness practice</h3>
-              <div class="fitness-mode" role="tablist" aria-label="Fitness practice types">
-                <button class="fitness-mode-btn" type="button" data-pane="run" aria-selected="true">Run</button>
-                <button class="fitness-mode-btn" type="button" data-pane="strength" aria-selected="false">Strength</button>
-                <button class="fitness-mode-btn" type="button" data-pane="skill" aria-selected="false">Skill</button>
-              </div>
+            
+            <div class="fitness-mode" role="tablist" aria-label="Fitness practice types">
+              <button class="fitness-mode-btn" type="button" data-pane="run" aria-selected="true">Run</button>
+              <button class="fitness-mode-btn" type="button" data-pane="strength" aria-selected="false">Strength</button>
+              <button class="fitness-mode-btn" type="button" data-pane="skill" aria-selected="false">Skill</button>
             </div>
 
             <div class="fitness-pane" data-pane="run" aria-live="polite">
@@ -240,9 +200,34 @@
                 <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
               </div>
             </div>
-          </section>
+            
+            <p class="text-status" id="fitness-summary">No training logged yet.</p>
+          </article>
 
-          <section class="domain-dropdown" id="spirit-dropdown" hidden aria-label="Spirit logging">
+          <article class="action-card mind-card" data-card="mind">
+            <header class="action-card__header">
+              <img src="icons/mind.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Mind</h2>
+                <p class="action-card__subtitle">Capture the reps</p>
+              </div>
+            </header>
+            <div class="pill-toggle-row" role="group" aria-label="Mind activities">
+              <button class="pill-toggle" type="button" data-toggle-key="read" aria-pressed="false">Read</button>
+              <button class="pill-toggle" type="button" data-toggle-key="write" aria-pressed="false">Write</button>
+            </div>
+            <p class="text-status" id="mind-status">Nothing logged yet.</p>
+          </article>
+
+          <article class="action-card spirit-card" data-card="spirit">
+            <header class="action-card__header">
+              <img src="icons/spirit.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Spirit</h2>
+                <p class="action-card__subtitle">Mood &amp; presence</p>
+              </div>
+            </header>
+            
             <div class="mood-dot-area">
               <div class="mood-grid" id="mood-grid" aria-hidden="true">
                 <div class="mood-axis mood-axis--vertical"></div>
@@ -263,7 +248,9 @@
             <div class="spirit-controls">
               <button class="pill-toggle" type="button" data-toggle-key="meditation" aria-pressed="false">Meditation</button>
             </div>
-          </section>
+            
+            <p class="text-status" id="spirit-status">No mood logged yet.</p>
+          </article>
         </div>
       </section>
     </section>
