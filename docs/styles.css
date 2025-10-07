@@ -100,7 +100,7 @@ body {
 .app-main {
   flex: 1 1 auto;
   display: block;
-  padding: 16px;
+  padding: 8px 16px 16px;
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
   background: radial-gradient(circle at top, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
   width: 100%;
@@ -118,7 +118,7 @@ body {
 
 @media (min-width: 480px) {
   .app-main {
-    padding: 24px;
+    padding: 12px 24px 24px;
   }
 }
 
@@ -358,8 +358,8 @@ body {
 /* === DOMAIN SCORES SECTION === */
 .scores-section {
   width: 100%;
-  margin-bottom: 24px;
-  padding: 20px 0;
+  margin-bottom: 20px;
+  padding: 12px 0 16px;
   background: linear-gradient(180deg, rgba(28, 28, 33, 0.5) 0%, transparent 100%);
   border-radius: var(--radius-xl);
 }
