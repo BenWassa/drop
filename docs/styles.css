@@ -724,6 +724,10 @@ body {
   gap: 16px;
 }
 
+.fitness-pane[hidden] {
+  display: none;
+}
+
 .run-presets {
   display: flex;
   gap: 10px;
