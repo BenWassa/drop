@@ -8,7 +8,7 @@ const urlsToCache = [
   './styles.css',
   './app.js',
   './manifest.json',
-  './icons/drop_app_icon.png',
+  './icons/drop_rounded_app_icon.png',
   './icons/drop_rounded.png',
   './icons/drop_icon.svg',
   './icons/vision.svg',
