@@ -679,6 +679,12 @@ body {
   width: 100%; /* Pill toggles now take full available width of their container */
 }
 
+.pill-toggle-stack .pill-toggle.is-active {
+  background: rgba(124, 58, 237, 0.22); /* Mind purple with transparency */
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.25);
+}
+
 /* === FITNESS & SPIRIT INLINE CONTROLS === */
 
 .fitness-mode {
