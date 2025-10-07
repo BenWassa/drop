@@ -50,10 +50,16 @@
   
   /* Spirit widget mood colors */
   --color-mantra: #fbff00; /* Yellow mantra text */
-  --grad-e-high-soft: rgba(255, 99, 71, 0.5); /* High energy (tomato red) */
-  --grad-e-low-soft: rgba(74, 222, 128, 0.6); /* Low energy (soft green) */
-  --grad-m-pos-soft: rgba(255, 204, 0, 0.6); /* Positive mood (yellow) */
-  --grad-m-neg-soft: rgba(0, 150, 255, 0.5); /* Negative mood (blue) */
+  
+  /* Mood quadrant corner colors:
+     Top-Right (High Energy + Positive) = Yellow
+     Top-Left (High Energy + Negative) = Red
+     Bottom-Right (Low Energy + Positive) = Green
+     Bottom-Left (Low Energy + Negative) = Blue */
+  --mood-high-energy-positive: rgba(255, 204, 0, 0.7);    /* Yellow - top right */
+  --mood-high-energy-negative: rgba(255, 71, 71, 0.7);    /* Red - top left */
+  --mood-low-energy-positive: rgba(74, 222, 128, 0.7);    /* Green - bottom right */
+  --mood-low-energy-negative: rgba(59, 130, 246, 0.7);    /* Blue - bottom left */
 }
 
 html { 
@@ -1459,10 +1465,12 @@ body {
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background-image:
-    linear-gradient(to top, var(--grad-e-low-soft), var(--grad-e-high-soft)),
-    linear-gradient(to right, var(--grad-m-neg-soft), var(--grad-m-pos-soft));
-  background-blend-mode: multiply;
+  background: 
+    radial-gradient(circle at 100% 100%, var(--mood-high-energy-positive) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, var(--mood-high-energy-negative) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, var(--mood-low-energy-positive) 0%, transparent 50%),
+    radial-gradient(circle at 0% 0%, var(--mood-low-energy-negative) 0%, transparent 50%),
+    rgba(20, 20, 25, 0.8);
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
