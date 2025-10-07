@@ -1360,9 +1360,10 @@ document.addEventListener('DOMContentLoaded', () => {
       window.addEventListener('beforeinstallprompt', (event) => {
         event.preventDefault();
         this.deferredInstallPrompt = event;
-        
+
         // Show install button in settings menu
         settingsInstallBtn.hidden = false;
+        settingsInstallBtn.disabled = false;
       });
 
       window.addEventListener('appinstalled', () => {
@@ -1388,6 +1389,10 @@ document.addEventListener('DOMContentLoaded', () => {
           if (outcome === 'accepted') {
             UI.toast('Installation started');
             settingsInstallBtn.hidden = true;
+            const settingsMenu = UI.elements.settingsMenu.menu;
+            if (settingsMenu) {
+              settingsMenu.classList.remove('active');
+            }
           } else {
             settingsInstallBtn.disabled = false;
           }
@@ -1600,7 +1605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     bindSettingsMenu() {
-      const { menu, openBtn, closeBtn, backdrop, installBtn, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
+      const { menu, openBtn, closeBtn, backdrop, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
       
       if (!menu || !openBtn) return;
 
@@ -1630,21 +1635,6 @@ document.addEventListener('DOMContentLoaded', () => {
           closeSettings();
         }
       });
-
-      // Install app from settings
-      if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-          if (this.deferredInstallPrompt) {
-            this.deferredInstallPrompt.prompt();
-            const { outcome } = await this.deferredInstallPrompt.userChoice;
-            console.log(`User response to install prompt: ${outcome}`);
-            
-            installBtn.hidden = true;
-            this.deferredInstallPrompt = null;
-          }
-          closeSettings();
-        });
-      }
 
       // Export data from settings
       if (exportBtn) {
