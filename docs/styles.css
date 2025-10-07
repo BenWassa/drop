@@ -1464,12 +1464,12 @@ body {
   margin: 0 auto;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: none;
   background: 
-    radial-gradient(circle at 100% 100%, var(--mood-high-energy-positive) 0%, transparent 50%),
-    radial-gradient(circle at 0% 100%, var(--mood-high-energy-negative) 0%, transparent 50%),
-    radial-gradient(circle at 100% 0%, var(--mood-low-energy-positive) 0%, transparent 50%),
-    radial-gradient(circle at 0% 0%, var(--mood-low-energy-negative) 0%, transparent 50%),
+    radial-gradient(circle at 100% 0%, var(--mood-high-energy-positive) 0%, transparent 50%),
+    radial-gradient(circle at 0% 0%, var(--mood-high-energy-negative) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, var(--mood-low-energy-positive) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, var(--mood-low-energy-negative) 0%, transparent 50%),
     rgba(20, 20, 25, 0.8);
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
 }
