@@ -712,6 +712,15 @@ document.addEventListener('DOMContentLoaded', () => {
       status.textContent = `${formatted} hr window logged.`;
     },
 
+    updateTimeButton(inputId) {
+      const input = document.getElementById(inputId);
+      const btn = document.querySelector(`[data-target="${inputId}"]`);
+      if (!input || !btn) return;
+      
+      // Update button text based on whether input has a value
+      btn.textContent = input.value ? 'Clear' : 'Now';
+    },
+
     updateFitnessSummary() {
       const summary = this.elements.home?.fitnessSummary;
       if (!summary) return;
@@ -1102,15 +1111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Store.update('quadrant', quadrant);
       }
       UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, energy, mood);
-    },
-
-    updateTimeButton(inputId) {
-      const input = document.getElementById(inputId);
-      const btn = document.querySelector(`[data-target="${inputId}"]`);
-      if (!input || !btn) return;
-      
-      // Update button text based on whether input has a value
-      btn.textContent = input.value ? 'Clear' : 'Now';
     },
 
     bindHomeActions() {
