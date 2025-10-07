@@ -654,6 +654,31 @@ body {
   box-shadow: 0 6px 18px rgba(79, 138, 245, 0.25);
 }
 
+/* Mind Widget Specific Styles */
+.mind-widget-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Pushes status text to the bottom */
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 0;
+}
+
+.pill-toggle-stack {
+  display: flex;
+  flex-direction: column; /* Stacks the pills vertically */
+  gap: 12px;
+  width: 100%;
+  max-width: 220px; /* Constrain the pills slightly for aesthetic */
+  margin: 0 auto;
+}
+
+.pill-toggle-stack .pill-toggle {
+  text-align: center;
+  width: 100%; /* Pill toggles now take full available width of their container */
+}
+
 /* === FITNESS & SPIRIT INLINE CONTROLS === */
 
 .fitness-mode {

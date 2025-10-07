@@ -212,10 +212,15 @@
                 <p class="action-card__subtitle">Capture the reps</p>
               </div>
             </header>
-            <div class="pill-toggle-row" role="group" aria-label="Mind activities">
-              <button class="pill-toggle" type="button" data-toggle-key="read" aria-pressed="false">Read</button>
-              <button class="pill-toggle" type="button" data-toggle-key="write" aria-pressed="false">Write</button>
+            
+            <!-- NEW: Centralized, vertically-stacked toggles -->
+            <div class="mind-widget-body">
+              <div class="pill-toggle-stack" role="group" aria-label="Mind activities">
+                <button class="pill-toggle" type="button" data-toggle-key="read" aria-pressed="false">Read</button>
+                <button class="pill-toggle" type="button" data-toggle-key="write" aria-pressed="false">Write</button>
+              </div>
             </div>
+            
             <p class="text-status" id="mind-status">Nothing logged yet.</p>
           </article>
 
