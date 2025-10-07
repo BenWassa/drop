@@ -45,12 +45,25 @@
   <div class="app-toast" id="app-toast" aria-live="polite" role="status"></div>
 
   <header class="app-header">
-    <div class="app-header__top">
-      <button class="settings-icon-btn" id="settings-icon-btn" aria-label="Open settings menu">
-        <img src="icons/drop_rounded.png" alt="Settings" class="settings-icon">
+    <!-- Row 1: Menu Icon (Left) + App Title (Center) -->
+    <div class="header-row header-row--identity">
+      <button class="menu-icon-btn" id="settings-icon-btn" aria-label="Open settings menu">
+        <img src="icons/drop_rounded.png" alt="Menu" class="menu-icon">
       </button>
-      <div class="date" id="date-display"></div>
+      <h1 class="app-title">drop</h1>
     </div>
+
+    <!-- Row 2: Quarterly Progress Bar & Status -->
+    <div class="header-row header-row--progress">
+      <div class="quarter-progress">
+        <div class="quarter-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="13" aria-valuenow="0" aria-label="Quarterly progress">
+          <div class="quarter-progress__fill" id="quarter-progress-fill"></div>
+        </div>
+        <div class="quarter-progress__label" id="quarter-progress-label">Week 0 of 13</div>
+      </div>
+    </div>
+
+    <!-- Row 3: Original Circular Score Meters -->
     <!-- Screen reader announcements for score updates -->
     <div class="sr-announce" id="score-announcer" aria-live="polite" aria-atomic="true"></div>
     <div class="scores-grid">

@@ -127,15 +127,24 @@ body {
 }
 
 /* === HEADER === */
-.app-header__top {
+/* Three-row header: Identity, Quarterly Progress, Compact Scores */
+.header-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  width: 100%;
 }
 
-.settings-icon-btn {
+/* Row 1: Menu Icon (Left) + App Title (Center) */
+.header-row--identity {
+  justify-content: center;
+  position: relative;
+  padding: 8px 0;
+  margin-bottom: 12px;
+}
+
+.menu-icon-btn {
+  position: absolute;
+  left: 0;
   background: none;
   border: none;
   padding: 0;
@@ -145,22 +154,93 @@ body {
   justify-content: center;
   transition: transform var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
+  min-width: 44px;
+  min-height: 44px;
 }
 
-.settings-icon-btn:hover {
+.menu-icon-btn:hover {
   transform: scale(1.05);
 }
 
-.settings-icon-btn:active {
+.menu-icon-btn:active {
   transform: scale(0.95);
 }
 
-.settings-icon {
+.menu-icon {
   width: 36px;
   height: 36px;
   border-radius: 8px;
 }
 
+.app-title {
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: lowercase;
+  color: var(--color-text-primary);
+  margin: 0;
+  font-family: var(--font-sans);
+}
+
+/* Row 2: Quarterly Progress Bar & Status */
+.header-row--progress {
+  margin-bottom: 16px;
+}
+
+.quarter-progress {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quarter-progress__bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.quarter-progress__fill {
+  height: 100%;
+  background: var(--color-primary-gradient);
+  border-radius: 999px;
+  width: 0%;
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px var(--color-shadow-primary);
+}
+
+.quarter-progress__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+/* OLD HEADER STYLES - DEPRECATED */
+/* Kept for reference but can be removed after verification */
+.app-header__top {
+  display: none; /* Deprecated: replaced by header-row--identity */
+}
+
+.settings-icon-btn {
+  display: none; /* Deprecated: replaced by menu-icon-btn */
+}
+
+.settings-icon {
+  display: none;
+}
+
+.date { 
+  display: none; /* Date moved to footer or removed */
+}
+
+/* === DATA CONTROLS & TOAST === */
 .data-controls {
   display: flex;
   flex-wrap: wrap;
@@ -214,8 +294,6 @@ body {
   opacity: 1;
   transform: translate(-50%, -8px);
 }
-
-.date { font-size: 14px; color: var(--color-text-secondary); font-weight: 500; }
 
 .scores-grid {
   display: grid;

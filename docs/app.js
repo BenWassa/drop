@@ -461,6 +461,10 @@ document.addEventListener('DOMContentLoaded', () => {
           meter: document.querySelector('[data-domain-meter="spirit"]')
         }
       },
+      quarterProgress: {
+        fill: document.getElementById('quarter-progress-fill'),
+        label: document.getElementById('quarter-progress-label')
+      },
       inputs: {
         wakeTime: document.getElementById('wake-time'),
         restTime: document.getElementById('rest-time'),
@@ -892,6 +896,50 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
 
+    /**
+     * Calculate and display quarterly progress (13-week commitment cycle)
+     * Uses localStorage 'quarterStartDate' to track when the quarter began
+     */
+    updateQuarterProgress() {
+      const { quarterProgress } = this.elements;
+      if (!quarterProgress || !quarterProgress.fill || !quarterProgress.label) return;
+
+      const QUARTER_WEEKS = 13;
+      const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+      
+      // Get or initialize quarter start date
+      let startDate = localStorage.getItem('quarterStartDate');
+      if (!startDate) {
+        // Initialize to today if not set
+        startDate = new Date().toISOString().split('T')[0];
+        localStorage.setItem('quarterStartDate', startDate);
+      }
+
+      const start = new Date(startDate);
+      const now = new Date();
+      const elapsed = now - start;
+      const weeksElapsed = Math.floor(elapsed / MS_PER_WEEK);
+      const currentWeek = Math.min(weeksElapsed + 1, QUARTER_WEEKS); // Week 1-13
+      const percentComplete = (currentWeek / QUARTER_WEEKS) * 100;
+
+      // Update progress bar
+      quarterProgress.fill.style.width = `${percentComplete}%`;
+      
+      // Update label
+      quarterProgress.label.textContent = `Week ${currentWeek} of ${QUARTER_WEEKS}`;
+      
+      // Update aria attribute
+      const progressBar = document.querySelector('.quarter-progress__bar');
+      if (progressBar) {
+        progressBar.setAttribute('aria-valuenow', currentWeek);
+      }
+
+      // If quarter is complete, could optionally reset or show completion message
+      if (currentWeek >= QUARTER_WEEKS) {
+        quarterProgress.label.textContent = `Quarter Complete! 🎉`;
+      }
+    },
+
     setVisionFields(state) {
       const { visionInputs } = this.elements;
       if (!visionInputs) return;
@@ -996,6 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init() {
       UI.initDate();
+      UI.updateQuarterProgress();
       UI.removeDevElements();
       UI.setVisionFields(Store.state);
       this.moodAxes = this.getQuadrantPreset(Store.state.quadrant);
@@ -1056,6 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     syncDailyUI() {
       const { inputs } = UI.elements;
       UI.renderSkillChips();
+      UI.updateQuarterProgress(); // Update quarterly progress bar
       if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake || '';
       if (inputs.restTime) inputs.restTime.value = Store.state.rest || '';
 
