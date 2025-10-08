@@ -565,7 +565,14 @@ const UI = {
    */
   updateQuarterProgress() {
     const { quarterProgress } = this.elements;
-    if (!quarterProgress || !quarterProgress.fill || !quarterProgress.quarterLabel || !quarterProgress.weekLabel) return;
+    
+    console.log('🔍 updateQuarterProgress called');
+    console.log('quarterProgress elements:', quarterProgress);
+    
+    if (!quarterProgress || !quarterProgress.fill || !quarterProgress.quarterLabel || !quarterProgress.weekLabel) {
+      console.error('❌ Quarter progress elements not found!', quarterProgress);
+      return;
+    }
 
     const TOTAL_WEEKS = 52;
     const DAYS_IN_YEAR = 365; // Approximate (ignoring leap years for simplicity)
@@ -582,12 +589,16 @@ const UI = {
     // Calculate percentage for progress bar based on DAYS (more granular)
     const percentComplete = (dayOfYear / DAYS_IN_YEAR) * 100;
 
+    console.log('📊 Quarter/Week calculated:', { dayOfYear, currentWeek, currentQuarter, percentComplete });
+
     // Update progress bar (moves by day)
     quarterProgress.fill.style.width = `${percentComplete}%`;
 
     // Update labels
     quarterProgress.quarterLabel.textContent = `Q${currentQuarter}`;
     quarterProgress.weekLabel.textContent = `Wk ${currentWeek}`;
+
+    console.log('✅ Quarter/Week updated:', `Q${currentQuarter}`, `Wk ${currentWeek}`);
 
     // Update aria attribute
     const progressBar = document.querySelector('.quarter-progress__bar');
