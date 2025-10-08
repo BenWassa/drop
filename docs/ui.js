@@ -107,8 +107,8 @@ const UI = {
       spiritCard: document.querySelector('.spirit-card'),
       skillContainer: document.getElementById('skill-chip-row'),
       moodDot: document.getElementById('mood-dot'),
-      energySlider: document.getElementById('energy-slider'),
-      moodSlider: document.getElementById('mood-slider'),
+      energySlider: document.getElementById('spirit-energy-slider'),
+      moodSlider: document.getElementById('spirit-mood-slider'),
     },
     heatmapContainer: document.getElementById('heatmap-container'),
     heatmapSummary: document.getElementById('heatmap-summary')
@@ -438,20 +438,11 @@ const UI = {
     const clampedEnergy = clampValue(energy);
     const clampedMood = clampValue(mood);
 
-    console.log('🎚️ setMoodSliders called with:', energy, mood, '-> clamped:', clampedEnergy, clampedMood);
-
     if (energySlider) {
       energySlider.value = String(clampedEnergy);
-      console.log('🎚️ energy slider set to:', clampedEnergy);
-    } else {
-      console.warn('⚠️ energy slider not found');
     }
-    
     if (moodSlider) {
       moodSlider.value = String(clampedMood);
-      console.log('🎚️ mood slider set to:', clampedMood);
-    } else {
-      console.warn('⚠️ mood slider not found');
     }
 
     // Also update the dot position and summary when setting sliders
@@ -905,8 +896,6 @@ const UI = {
     const storedEnergy = Store.state.energy || 0;
     const storedMood = Store.state.mood || 0;
     
-    console.log('🔄 syncDailyUI: stored energy/mood:', storedEnergy, storedMood);
-    
     // Check if App is available (it might not be during initial load)
     const hasApp = typeof App !== 'undefined';
     
@@ -916,15 +905,12 @@ const UI = {
       // Use stored slider values
       axes = { energy: storedEnergy, mood: storedMood };
       if (hasApp) App.moodAxes = { ...axes };
-      console.log('🔄 syncDailyUI: using stored values');
     } else {
       // Fall back to quadrant preset if no slider data
       axes = Scoring.getQuadrantPreset(Store.state.quadrant);
       if (hasApp) App.moodAxes = { ...axes };
-      console.log('🔄 syncDailyUI: using quadrant preset');
     }
     
-    console.log('🔄 syncDailyUI: setting sliders to:', axes.energy, axes.mood);
     UI.setMoodSliders(axes.energy, axes.mood);
     // Note: positionMoodDot and updateSpiritSummary are now called within setMoodSliders
   },
