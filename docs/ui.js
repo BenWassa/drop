@@ -529,10 +529,6 @@ const UI = {
       case 'fitness':
         if (this.elements.inputs.runValue) this.elements.inputs.runValue.textContent = state.run;
         this.updateToggleButton('strength', state.strength);
-        {
-          const skillActive = Array.isArray(state.skill) ? state.skill.length > 0 : Boolean(state.skill);
-          this.updateToggleButton('skill', skillActive);
-        }
         break;
       case 'mind':
         this.updateToggleButton('read', state.read);
@@ -1084,45 +1080,17 @@ const UI = {
           
           // Close all fitness dropdowns first
           home.fitnessCard.querySelectorAll('.fitness-dropdown').forEach(dd => dd.hidden = true);
+          home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-pressed', 'false');
+          });
           
-          // For skill button, handle dropdown state separately from selection state
-          if (toggleType === 'skill') {
-            // Check if skills are actually selected (preserve this highlighting)
-            const skillActive = Array.isArray(Store.state.skill) ? Store.state.skill.length > 0 : Boolean(Store.state.skill);
-            
-            // Remove dropdown active state from all fitness toggles
-            home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
-              btn.classList.remove('is-active');
-              btn.setAttribute('aria-pressed', 'false');
-            });
-            
-            // If wasn't active (dropdown closed), open the dropdown
-            if (!isActive) {
-              fitnessToggle.classList.add('is-active');
-              fitnessToggle.setAttribute('aria-pressed', 'true');
-              const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
-              if (dropdown) dropdown.hidden = false;
-            }
-            
-            // Always restore skill selection highlighting if skills are selected
-            if (skillActive) {
-              fitnessToggle.classList.add('is-active');
-              fitnessToggle.setAttribute('aria-pressed', 'true');
-            }
-          } else {
-            // For run button, use the original logic
-            home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
-              btn.classList.remove('is-active');
-              btn.setAttribute('aria-pressed', 'false');
-            });
-            
-            // If wasn't active, open the dropdown
-            if (!isActive) {
-              fitnessToggle.classList.add('is-active');
-              fitnessToggle.setAttribute('aria-pressed', 'true');
-              const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
-              if (dropdown) dropdown.hidden = false;
-            }
+          // If wasn't active, open the dropdown
+          if (!isActive) {
+            fitnessToggle.classList.add('is-active');
+            fitnessToggle.setAttribute('aria-pressed', 'true');
+            const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
+            if (dropdown) dropdown.hidden = false;
           }
           return;
         }
@@ -1185,9 +1153,6 @@ const UI = {
               UI.renderSkillChips();
               Store.toggleSkill(trimmed);
               UI.updateSkillChips(Store.state.skill);
-              // Update skill button highlighting since we added and selected a skill
-              const skillActive = Array.isArray(Store.state.skill) ? Store.state.skill.length > 0 : Boolean(Store.state.skill);
-              UI.updateToggleButton('skill', skillActive);
               UI.updateFitnessSummary();
               UI.notify(`Added "${trimmed}" to skills`);
             } else {
@@ -1199,9 +1164,6 @@ const UI = {
           if (option) {
             Store.toggleSkill(option);
             UI.updateSkillChips(Store.state.skill);
-            // Update skill button highlighting based on whether any skills are selected
-            const skillActive = Array.isArray(Store.state.skill) ? Store.state.skill.length > 0 : Boolean(Store.state.skill);
-            UI.updateToggleButton('skill', skillActive);
             UI.updateFitnessSummary();
           }
         }
