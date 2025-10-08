@@ -324,16 +324,13 @@ document.addEventListener('DOMContentLoaded', () => {
       this.ensureDailyTimestamps();
       this.ensureEntries();
       this.ensureSkillCollections();
-      const handled = this.checkForNewDay();
-      if (!handled) {
-        this.save();
-        if (typeof App !== 'undefined') {
-          if (typeof App.syncDailyUI === 'function') {
-            App.syncDailyUI();
-          }
-          if (typeof App.updateScores === 'function') {
-            App.updateScores();
-          }
+      this.save();
+      if (typeof App !== 'undefined') {
+        if (typeof App.syncDailyUI === 'function') {
+          App.syncDailyUI();
+        }
+        if (typeof App.updateScores === 'function') {
+          App.updateScores();
         }
       }
     },
