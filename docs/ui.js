@@ -573,8 +573,9 @@ const UI = {
     console.log('🔍 updateQuarterProgress called');
     console.log('quarterProgress elements:', quarterProgress);
     
-    if (!quarterProgress || !quarterProgress.fill || !quarterProgress.quarterLabel || !quarterProgress.weekLabel) {
-      console.error('❌ Quarter progress elements not found!', quarterProgress);
+    // Check if we have at least the labels (progress bar fill is optional since it may be hidden)
+    if (!quarterProgress || !quarterProgress.quarterLabel || !quarterProgress.weekLabel) {
+      console.error('❌ Quarter/Week labels not found!', quarterProgress);
       return;
     }
 
@@ -595,16 +596,18 @@ const UI = {
 
     console.log('📊 Quarter/Week calculated:', { dayOfYear, currentWeek, currentQuarter, percentComplete });
 
-    // Update progress bar (moves by day)
-    quarterProgress.fill.style.width = `${percentComplete}%`;
+    // Update progress bar (moves by day) - only if it exists
+    if (quarterProgress.fill) {
+      quarterProgress.fill.style.width = `${percentComplete}%`;
+    }
 
-    // Update labels
+    // Update labels (these should always exist)
     quarterProgress.quarterLabel.textContent = `Q${currentQuarter}`;
     quarterProgress.weekLabel.textContent = `Wk ${currentWeek}`;
 
     console.log('✅ Quarter/Week updated:', `Q${currentQuarter}`, `Wk ${currentWeek}`);
 
-    // Update aria attribute
+    // Update aria attribute - only if progress bar exists
     const progressBar = document.querySelector('.quarter-progress__bar');
     if (progressBar) {
       progressBar.setAttribute('aria-valuenow', currentWeek);
