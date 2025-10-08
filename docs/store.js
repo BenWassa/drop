@@ -17,6 +17,7 @@ const Store = {
     history: [],
     lastEntryDate: '',
     dailyTimestamps: {},
+    actionTimestamps: {},
     entries: {}
   },
 
@@ -412,11 +413,17 @@ const Store = {
         continue;
       }
       
-      // Validate objects
+      // Validate objects (but be lenient for entries and history)
       if (defaultType === 'object') {
         if (!value || typeof value !== 'object' || Array.isArray(value)) {
           console.error(`❌ Import validation failed: "${key}" should be object, got ${typeof value}`);
           return false;
+        }
+        // For entries and history, just check it's an object - don't validate internal structure
+        // This allows backwards compatibility with older data formats
+        if (key === 'entries' || key === 'history') {
+          console.log(`✅ Import: "${key}" is valid object (internal structure not validated)`);
+          continue;
         }
         continue;
       }
