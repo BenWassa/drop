@@ -445,6 +445,25 @@ const UI = {
       moodSlider.value = String(clampedMood);
     }
 
+    // Update App.moodAxes if App is available
+    if (typeof App !== 'undefined') {
+      App.moodAxes = { energy: clampedEnergy, mood: clampedMood };
+    }
+
+    // Persist energy and mood to Store (only if different to avoid unnecessary updates)
+    if (clampedEnergy !== Store.state.energy) {
+      Store.update('energy', clampedEnergy);
+    }
+    if (clampedMood !== Store.state.mood) {
+      Store.update('mood', clampedMood);
+    }
+
+    // Update quadrant if it changed
+    const quadrant = Scoring.resolveQuadrant(clampedEnergy, clampedMood);
+    if (quadrant !== Store.state.quadrant) {
+      Store.update('quadrant', quadrant);
+    }
+
     // Also update the dot position and summary when setting sliders
     this.positionMoodDot(clampedEnergy, clampedMood);
     this.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, clampedEnergy, clampedMood);
