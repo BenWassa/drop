@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
   const DEV_MODE = true;
+  window.DEV_MODE = DEV_MODE; // Make accessible to other modules
 
   const App = {
     currentPage: 'home',
@@ -69,16 +70,34 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     updateScores() {
+      console.log('🎯 App.updateScores called');
+      console.log('📊 Current state:', {
+        wake: Store.state.wake,
+        rest: Store.state.rest,
+        run: Store.state.run,
+        strength: Store.state.strength,
+        skill: Store.state.skill,
+        read: Store.state.read,
+        write: Store.state.write,
+        meditation: Store.state.meditation,
+        quadrant: Store.state.quadrant
+      });
+      
       const scores = {
         sleep: Scoring.calcSleep(Store.state, Store),
         fitness: Scoring.calcFitness(Store.state, Store),
         mind: Scoring.calcMind(Store.state, Store),
         spirit: Scoring.calcSpirit(Store.state, Store)
       };
+      
+      console.log('📈 Calculated scores:', scores);
+      
       Store.recordHistory(scores);
       const streaks = Analytics.calculateStreaks();
       UI.renderScores(scores, streaks);
       Analytics.renderWeeklyHeatmap();
+      
+      console.log('✅ Scores updated and rendered');
     },
 
     bindEvents() {

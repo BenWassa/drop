@@ -21,8 +21,24 @@ const Store = {
   },
 
   init() {
+    console.log('🔧 Store.init called');
     const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
+    console.log('💾 Loaded from localStorage:', Object.keys(savedData).length, 'keys');
+    
     this.state = { ...this.cloneDefaults(), ...savedData };
+    console.log('📋 Initial state created with', Object.keys(this.state).length, 'keys');
+    console.log('📊 Daily values:', {
+      wake: this.state.wake,
+      rest: this.state.rest,
+      run: this.state.run,
+      strength: this.state.strength,
+      skill: this.state.skill,
+      read: this.state.read,
+      write: this.state.write,
+      meditation: this.state.meditation,
+      quadrant: this.state.quadrant
+    });
+    
     this.ensureHistory();
     this.ensureDailyTimestamps();
     this.ensureEntries();
@@ -263,6 +279,8 @@ const Store = {
 
   update(key, value) {
     this.checkForNewDay();
+    console.log('📝 Store.update called:', key, '=', value);
+    
     if (key in this.state) {
       let newValue = value;
       if (key === 'skill' || key === 'skillOptions') {
@@ -271,11 +289,14 @@ const Store = {
         newValue = [...value];
       }
       this.state[key] = newValue;
+      console.log('✅ State updated:', key, '=', this.state[key]);
+      
       if (this.dailyKeys.includes(key)) {
         // Use sleep day for daily tracking (00:00-03:59 counts as previous day)
         this.state.lastEntryDate = this.getSleepDay();
         this.ensureDailyTimestamps();
         this.state.dailyTimestamps[key] = this.state.lastEntryDate;
+        console.log('📅 Daily key logged for:', this.state.lastEntryDate);
         // Add timestamp when data is logged
         if (!this.state.actionTimestamps) {
           this.state.actionTimestamps = {};
@@ -285,9 +306,14 @@ const Store = {
         this.saveCurrentEntry();
       }
       this.save();
+      console.log('💾 State saved to localStorage');
+      
       if (!key.startsWith('vision')) {
+        console.log('🔄 Triggering score update for key:', key);
         App.updateScores();
       }
+    } else {
+      console.warn('⚠️ Key not found in state:', key);
     }
   },
 

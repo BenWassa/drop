@@ -229,7 +229,11 @@ const UI = {
   },
 
   removeDevElements() {
-    if (DEV_MODE) return;
+    // Check if DEV_MODE exists globally or on window
+    const devMode = (typeof DEV_MODE !== 'undefined' && DEV_MODE) || 
+                    (typeof window.DEV_MODE !== 'undefined' && window.DEV_MODE);
+    
+    if (devMode) return;
 
     const devElements = [
       this.elements.devPill,

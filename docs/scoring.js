@@ -30,8 +30,13 @@ const Scoring = {
    * @returns {number|null} Score (60-95) or null if insufficient data
    */
   calcSleep(state, Store) {
+    console.log('😴 calcSleep called with state:', { wake: state.wake, rest: state.rest });
+    
     const { wake, rest } = state;
-    if (!wake || !rest) return this.calcTrendScore('sleep', 0, Store);
+    if (!wake || !rest) {
+      console.log('⚠️ Sleep: Missing wake or rest time, returning trend score with 0');
+      return this.calcTrendScore('sleep', 0, Store);
+    }
     
     const [wh, wm] = wake.split(':').map(Number);
     const [rh, rm] = rest.split(':').map(Number);
@@ -39,6 +44,8 @@ const Scoring = {
     const restMins = rh * 60 + rm;
     const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
     const hours = duration / 60;
+    
+    console.log('😴 Sleep calculated:', { hours, wakeMins, restMins, duration });
     
     // Raw scoring: optimal sleep (7-9 hours) = 100, poor sleep = lower
     let rawScore;
