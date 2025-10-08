@@ -2575,6 +2575,80 @@ body {
   line-height: 1.6;
 }
 
+/* History month/week grouping */
+.history-month {
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.history-month__header {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color var(--transition-fast);
+}
+
+.history-month__header:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.history-month__header:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.history-month__title {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.history-month__toggle {
+  font-size: 12px;
+  opacity: 0.7;
+  transition: transform var(--transition-fast);
+}
+
+.history-month__content {
+  padding: 0;
+}
+
+.history-week {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.history-week:last-child {
+  border-bottom: none;
+}
+
+.history-week__header {
+  padding: 12px 20px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.history-week__entries {
+  padding: 8px 0;
+}
+
 /* === WEEKLY HEATMAP COMPONENT (Dynamic) === */
 .weekly-heatmap {
   margin-top: 24px;

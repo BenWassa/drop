@@ -1333,32 +1333,40 @@ const UI = {
 
     console.log('📝 Store entries:', Store.state.entries);
 
-    // Current page state
-    let currentPage = 0;
-    const entriesPerPage = 7;
-
-    // Render history entries
+    // Render history entries grouped by month and week
     const renderHistory = () => {
       const entries = Store.state.entries || {};
       const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
-      const startIdx = currentPage * entriesPerPage;
-      const endIdx = startIdx + entriesPerPage;
-      const datesToShow = allDates.slice(startIdx, endIdx);
 
-      // Update navigation buttons
-      if (prevBtn) prevBtn.disabled = currentPage === 0;
-      if (nextBtn) nextBtn.disabled = endIdx >= allDates.length;
+      // Group entries by month-year and then by week of year
+      const groupedEntries = {};
+      allDates.forEach(dateKey => {
+        const date = new Date(dateKey);
+        const monthYear = `${date.toLocaleDateString('en-US', { month: 'long' })} - ${date.getFullYear()}`;
+        const weekOfYear = getWeekOfYear(date);
 
-      // Update date range text
-      if (dateRange && datesToShow.length > 0) {
-        const firstDate = new Date(datesToShow[datesToShow.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const lastDate = new Date(datesToShow[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        dateRange.textContent = datesToShow.length === 1 ? lastDate : `${firstDate} - ${lastDate}`;
+        if (!groupedEntries[monthYear]) {
+          groupedEntries[monthYear] = {};
+        }
+        if (!groupedEntries[monthYear][weekOfYear]) {
+          groupedEntries[monthYear][weekOfYear] = [];
+        }
+        groupedEntries[monthYear][weekOfYear].push(dateKey);
+      });
+
+      // Update date range text to show total entries
+      if (dateRange) {
+        const totalEntries = allDates.length;
+        dateRange.textContent = `${totalEntries} ${totalEntries === 1 ? 'entry' : 'entries'}`;
       }
 
-      // Render entries
+      // Disable navigation buttons since we show all entries
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+
+      // Render grouped entries
       if (list) {
-        if (datesToShow.length === 0) {
+        if (allDates.length === 0) {
           list.innerHTML = `
             <div class="history-empty">
               <div class="history-empty__icon">📅</div>
@@ -1366,58 +1374,102 @@ const UI = {
             </div>
           `;
         } else {
-          list.innerHTML = datesToShow.map(dateKey => {
-            const entry = entries[dateKey];
-            const scores = Scoring.calculateDomainScores(entry);
-            const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+          list.innerHTML = Object.keys(groupedEntries).map(monthYear => {
+            const monthWeeks = groupedEntries[monthYear];
+            const weekKeys = Object.keys(monthWeeks).sort((a, b) => Number(b) - Number(a)); // Sort weeks descending
 
-            const date = new Date(dateKey);
-            const formattedDate = date.toLocaleDateString('en-US', { 
-              weekday: 'short', 
-              month: 'short', 
-              day: 'numeric',
-              year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-            });
-            
             return `
-              <div class="history-entry" data-date="${dateKey}">
-                <div class="history-entry__header">
-                  <div class="history-entry__date">${formattedDate}</div>
-                  <div class="history-entry__total">${totalScore}</div>
-                </div>
-                <div class="history-entry__domains">
-                  <div class="history-domain">
-                    <img src="icons/sleep.svg" alt="" class="history-domain__icon">
-                    <div class="history-domain__info">
-                      <div class="history-domain__name">Sleep</div>
-                      <div class="history-domain__score">${scores.sleep}</div>
-                    </div>
-                  </div>
-                  <div class="history-domain">
-                    <img src="icons/fitness.svg" alt="" class="history-domain__icon">
-                    <div class="history-domain__info">
-                      <div class="history-domain__name">Fitness</div>
-                      <div class="history-domain__score">${scores.fitness}</div>
-                    </div>
-                  </div>
-                  <div class="history-domain">
-                    <img src="icons/mind.svg" alt="" class="history-domain__icon">
-                    <div class="history-domain__info">
-                      <div class="history-domain__name">Mind</div>
-                      <div class="history-domain__score">${scores.mind}</div>
-                    </div>
-                  </div>
-                  <div class="history-domain">
-                    <img src="icons/spirit.svg" alt="" class="history-domain__icon">
-                    <div class="history-domain__info">
-                      <div class="history-domain__name">Spirit</div>
-                      <div class="history-domain__score">${scores.spirit}</div>
-                    </div>
-                  </div>
+              <div class="history-month" data-month="${monthYear}">
+                <button class="history-month__header" aria-expanded="true">
+                  <span class="history-month__title">${monthYear}</span>
+                  <span class="history-month__toggle" aria-hidden="true">▼</span>
+                </button>
+                <div class="history-month__content">
+                  ${weekKeys.map(weekNum => {
+                    const weekDates = monthWeeks[weekNum].sort((a, b) => new Date(b) - new Date(a));
+                    const weekStart = new Date(weekDates[weekDates.length - 1]);
+                    const weekEnd = new Date(weekDates[0]);
+                    const weekRange = weekStart.toDateString() === weekEnd.toDateString()
+                      ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+                    return `
+                      <div class="history-week">
+                        <div class="history-week__header">Week ${weekNum} • ${weekRange}</div>
+                        <div class="history-week__entries">
+                          ${weekDates.map(dateKey => {
+                            const entry = entries[dateKey];
+                            const scores = Scoring.calculateDomainScores(entry);
+                            const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+
+                            const date = new Date(dateKey);
+                            const formattedDate = date.toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric'
+                            });
+
+                            return `
+                              <div class="history-entry" data-date="${dateKey}">
+                                <div class="history-entry__header">
+                                  <div class="history-entry__date">${formattedDate}</div>
+                                  <div class="history-entry__total">${totalScore}</div>
+                                </div>
+                                <div class="history-entry__domains">
+                                  <div class="history-domain">
+                                    <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                                    <div class="history-domain__info">
+                                      <div class="history-domain__name">Sleep</div>
+                                      <div class="history-domain__score">${scores.sleep}</div>
+                                    </div>
+                                  </div>
+                                  <div class="history-domain">
+                                    <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                                    <div class="history-domain__info">
+                                      <div class="history-domain__name">Fitness</div>
+                                      <div class="history-domain__score">${scores.fitness}</div>
+                                    </div>
+                                  </div>
+                                  <div class="history-domain">
+                                    <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                                    <div class="history-domain__info">
+                                      <div class="history-domain__name">Mind</div>
+                                      <div class="history-domain__score">${scores.mind}</div>
+                                    </div>
+                                  </div>
+                                  <div class="history-domain">
+                                    <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                                    <div class="history-domain__info">
+                                      <div class="history-domain__name">Spirit</div>
+                                      <div class="history-domain__score">${scores.spirit}</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            `;
+                          }).join('')}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
                 </div>
               </div>
             `;
           }).join('');
+
+          // Add click handlers for month headers (collapsible)
+          list.querySelectorAll('.history-month__header').forEach(header => {
+            header.addEventListener('click', () => {
+              const monthEl = header.closest('.history-month');
+              const content = monthEl.querySelector('.history-month__content');
+              const toggle = header.querySelector('.history-month__toggle');
+              const isExpanded = header.getAttribute('aria-expanded') === 'true';
+
+              header.setAttribute('aria-expanded', !isExpanded);
+              content.style.display = isExpanded ? 'none' : 'block';
+              toggle.textContent = isExpanded ? '▶' : '▼';
+            });
+          });
 
           // Add click handlers to entries
           list.querySelectorAll('.history-entry').forEach(entryEl => {
@@ -1437,22 +1489,14 @@ const UI = {
       }
     };
 
-    // Navigation handlers
-    if (prevBtn) {
-      prevBtn.addEventListener('click', () => {
-        currentPage++;
-        renderHistory();
-      });
-    }
-
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => {
-        if (currentPage > 0) {
-          currentPage--;
-          renderHistory();
-        }
-      });
-    }
+    // Helper function to get week of year
+    const getWeekOfYear = (date) => {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    };
 
     // Close handler
     if (closeBtn) {
