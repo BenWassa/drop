@@ -887,20 +887,23 @@ const UI = {
     const storedMood = Store.state.mood || 0;
     const hasStoredSliders = storedEnergy !== 0 || storedMood !== 0;
     
+    // Check if App is available (it might not be during initial load)
+    const hasApp = typeof App !== 'undefined';
+    
     if (hasStoredSliders) {
       // Use stored slider values
-      App.moodAxes = { energy: storedEnergy, mood: storedMood };
+      if (hasApp) App.moodAxes = { energy: storedEnergy, mood: storedMood };
     } else {
       // Fall back to quadrant preset if no slider data
       const fallbackAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
-      const currentAxes = App.moodAxes || { energy: 0, mood: 0 };
+      const currentAxes = (hasApp && App.moodAxes) ? App.moodAxes : { energy: 0, mood: 0 };
       const currentQuadrant = Scoring.resolveQuadrant(currentAxes.energy, currentAxes.mood);
-      if (!App.moodAxes || currentQuadrant !== Store.state.quadrant) {
+      if (hasApp && (!App.moodAxes || currentQuadrant !== Store.state.quadrant)) {
         App.moodAxes = { ...fallbackAxes };
       }
     }
     
-    const axes = App.moodAxes;
+    const axes = (hasApp && App.moodAxes) ? App.moodAxes : { energy: storedEnergy, mood: storedMood };
     UI.setMoodSliders(axes.energy, axes.mood);
     UI.positionMoodDot(axes.energy, axes.mood);
     UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
@@ -911,7 +914,11 @@ const UI = {
     if (!energySlider || !moodSlider) return;
     const energy = Number(energySlider.value) || 0;
     const mood = Number(moodSlider.value) || 0;
-    App.moodAxes = { energy, mood };
+    
+    // Update App.moodAxes if App is available
+    if (typeof App !== 'undefined') {
+      App.moodAxes = { energy, mood };
+    }
     
     // Persist energy and mood to Store
     if (energy !== Store.state.energy) {
@@ -1089,7 +1096,9 @@ const UI = {
             UI.updateMindStatus();
           }
           if (key === 'meditation') {
-            UI.updateSpiritSummary(Store.state.quadrant, newValue, App.moodAxes.energy, App.moodAxes.mood);
+            const energy = (typeof App !== 'undefined' && App.moodAxes) ? App.moodAxes.energy : Store.state.energy || 0;
+            const mood = (typeof App !== 'undefined' && App.moodAxes) ? App.moodAxes.mood : Store.state.mood || 0;
+            UI.updateSpiritSummary(Store.state.quadrant, newValue, energy, mood);
           }
           return;
         }
@@ -1155,7 +1164,9 @@ const UI = {
       section.classList.toggle('active', section.dataset.page === page);
     });
 
-    App.currentPage = page;
+    if (typeof App !== 'undefined') {
+      App.currentPage = page;
+    }
     UI.updateNavState(page);
 
     // Add data attribute to app-main for CSS targeting
@@ -1391,7 +1402,9 @@ const UI = {
               // Switch to the date and show home page
               Store.state.currentDate = dateKey;
               UI.updateDateDisplay();
-              App.updateScores();
+              if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
+                App.updateScores();
+              }
               UI.showPage('home');
             });
           });

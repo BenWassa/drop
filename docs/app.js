@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
       UI.removeDevElements();
       UI.setVisionFields(Store.state);
       this.moodAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
+      
+      // Expose App globally BEFORE syncDailyUI() so ui.js can access it
+      if (typeof window !== 'undefined') {
+        window.App = App;
+      }
+      
       UI.syncDailyUI();
 
       // Check if loading overlay should be skipped (dev mode toggle)
