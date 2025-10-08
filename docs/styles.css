@@ -977,7 +977,7 @@ body {
   color: #c4b5fd; /* Lighter purple text */
 }
 
-/* Fitness-specific tier button styling */
+/* Domain-specific tier button styling */
 .mind-card .tier-btn.selected {
   background: rgba(124, 58, 237, 0.22); /* Mind purple */
   border-color: rgba(124, 58, 237, 0.45);
@@ -990,6 +990,20 @@ body {
   border-color: rgba(255, 59, 48, 0.45);
   box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
   color: #fca5a5; /* Lighter red text */
+}
+
+.spirit-card .tier-btn.selected {
+  background: rgba(22, 163, 74, 0.22); /* Spirit green */
+  border-color: rgba(22, 163, 74, 0.45);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  color: #86efac; /* Lighter green text */
+}
+
+.sleep-card .tier-btn.selected {
+  background: rgba(30, 144, 255, 0.22); /* Sleep blue */
+  border-color: rgba(30, 144, 255, 0.45);
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.25);
+  color: #93c5fd; /* Lighter blue text */
 }
 
 .tier-btn:focus {
