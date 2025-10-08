@@ -947,14 +947,14 @@ body {
 }
 
 .tier-btn {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--color-text-primary);
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
   font-family: var(--font-sans);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: var(--transition-fast);
   flex: 1;
@@ -963,11 +963,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.tier-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .tier-btn.selected {
@@ -1078,8 +1073,8 @@ body {
 .run-preset {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
-  padding: 10px 14px;
+  border-radius: 999px;
+  padding: 9px 16px;
   color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 600;
@@ -1089,11 +1084,6 @@ body {
   flex: 1;
   text-align: center;
   min-width: 0;
-}
-
-.run-preset:hover {
-  border-color: rgba(255, 59, 48, 0.35); /* Fitness red */
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .run-adjust {
