@@ -918,6 +918,132 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* === COLLAPSIBLE PRACTICE SECTIONS === */
+.collapsible-practice {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.collapsible-practice.is-expanded {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Practice Header - Clickable to expand/collapse */
+.practice-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.practice-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.practice-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+
+.chevron-icon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--color-text-secondary);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.2s ease;
+}
+
+.collapsible-practice.is-expanded .chevron-icon {
+  transform: rotate(180deg);
+}
+
+/* Practice Content - Hidden by default */
+.practice-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+  padding: 0 18px;
+}
+
+.collapsible-practice.is-expanded .practice-content {
+  max-height: 500px;
+  padding: 0 18px 18px 18px;
+}
+
+/* === LOGGED STATE - Domain-colored glow === */
+.collapsible-practice.is-logged .practice-name {
+  font-weight: 700;
+}
+
+.collapsible-practice.is-logged .chevron-icon {
+  stroke-width: 2.5;
+}
+
+/* Sleep (Blue) */
+.sleep-card .collapsible-practice.is-logged {
+  background: rgba(30, 144, 255, 0.08);
+  border-color: rgba(30, 144, 255, 0.3);
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.15), inset 0 1px 0 rgba(30, 144, 255, 0.2);
+}
+
+.sleep-card .collapsible-practice.is-logged .practice-name,
+.sleep-card .collapsible-practice.is-logged .chevron-icon {
+  color: #93c5fd;
+  stroke: #93c5fd;
+}
+
+/* Fitness (Red) */
+.fitness-card .collapsible-practice.is-logged {
+  background: rgba(255, 59, 48, 0.08);
+  border-color: rgba(255, 59, 48, 0.3);
+  box-shadow: 0 0 20px rgba(255, 59, 48, 0.15), inset 0 1px 0 rgba(255, 59, 48, 0.2);
+}
+
+.fitness-card .collapsible-practice.is-logged .practice-name,
+.fitness-card .collapsible-practice.is-logged .chevron-icon {
+  color: #fca5a5;
+  stroke: #fca5a5;
+}
+
+/* Mind (Purple) */
+.mind-card .collapsible-practice.is-logged {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.15), inset 0 1px 0 rgba(124, 58, 237, 0.2);
+}
+
+.mind-card .collapsible-practice.is-logged .practice-name,
+.mind-card .collapsible-practice.is-logged .chevron-icon {
+  color: #c4b5fd;
+  stroke: #c4b5fd;
+}
+
+/* Spirit (Green) */
+.spirit-card .collapsible-practice.is-logged {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.3);
+  box-shadow: 0 0 20px rgba(22, 163, 74, 0.15), inset 0 1px 0 rgba(22, 163, 74, 0.2);
+}
+
+.spirit-card .collapsible-practice.is-logged .practice-name,
+.spirit-card .collapsible-practice.is-logged .chevron-icon {
+  color: #86efac;
+  stroke: #86efac;
+}
+
 /* Control wrappers for non-tier-button content */
 .run-controls,
 .skill-controls,

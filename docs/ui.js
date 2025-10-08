@@ -349,6 +349,10 @@ const UI = {
     }
     const formatted = Number(hours).toFixed(1).replace(/\.0$/, '');
     status.textContent = `${formatted} hr window logged.`;
+    
+    // Update practice states for sleep
+    UI.updatePracticeState('wake', !!Store.state.wake);
+    UI.updatePracticeState('rest', !!Store.state.rest);
   },
 
   updateTimeButton(inputId) {
@@ -378,6 +382,11 @@ const UI = {
       parts.push(`Skill: ${skills.join(', ')}`);
     }
     summary.textContent = parts.length ? parts.join(' · ') : 'No training logged yet.';
+    
+    // Update practice states for fitness
+    UI.updatePracticeState('run', runDistance > 0);
+    UI.updatePracticeState('strength', strengthLevel > 0);
+    UI.updatePracticeState('skill', skills.length > 0);
   },
 
   updateMindStatus() {
@@ -396,6 +405,10 @@ const UI = {
     }
     
     status.textContent = parts.length ? parts.join(' · ') : 'Nothing logged yet.';
+    
+    // Update practice states for mind
+    UI.updatePracticeState('reading', read_level > 0);
+    UI.updatePracticeState('writing', write_level > 0);
   },
 
   updateMindTierButtons(type, selectedValue) {
@@ -437,6 +450,10 @@ const UI = {
       descriptors.push('Meditation logged');
     }
     status.textContent = descriptors.length ? descriptors.join(' · ') : 'No mood logged yet.';
+    
+    // Update practice states for spirit
+    UI.updatePracticeState('mindfulness', !!meditation);
+    UI.updatePracticeState('mood', quadrant > 0);
   },
 
   positionMoodDot(energy, mood) {
@@ -918,6 +935,9 @@ const UI = {
     UI.updateFitnessSummary();
     UI.updateMindStatus();
 
+    // Update collapsible practice states
+    UI.updatePracticeStates();
+
     // Restore slider positions from Store
     const storedEnergy = Store.state.energy || 0;
     const storedMood = Store.state.mood || 0;
@@ -953,10 +973,69 @@ const UI = {
     UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
   },
 
+  // === COLLAPSIBLE PRACTICE SECTIONS ===
+  bindCollapsiblePractices() {
+    document.querySelectorAll('.practice-header').forEach(header => {
+      header.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const practice = header.closest('.collapsible-practice');
+        if (!practice) return;
+        
+        const isExpanded = practice.classList.contains('is-expanded');
+        
+        // Optional: Close other practices in the same card (accordion behavior)
+        // const card = practice.closest('.action-card');
+        // if (card) {
+        //   card.querySelectorAll('.collapsible-practice.is-expanded').forEach(p => {
+        //     if (p !== practice) p.classList.remove('is-expanded');
+        //   });
+        // }
+        
+        // Toggle this practice
+        practice.classList.toggle('is-expanded', !isExpanded);
+      });
+    });
+
+    // Initialize practice states on load
+    UI.updatePracticeStates();
+  },
+
+  updatePracticeStates() {
+    const state = Store.state;
+
+    // Sleep practices
+    UI.updatePracticeState('wake', !!state.wake);
+    UI.updatePracticeState('rest', !!state.rest);
+
+    // Fitness practices
+    UI.updatePracticeState('run', state.run > 0);
+    UI.updatePracticeState('strength', (state.strength_level || 0) > 0);
+    const hasSkill = Array.isArray(state.skill) && state.skill.length > 0;
+    UI.updatePracticeState('skill', hasSkill);
+
+    // Mind practices
+    UI.updatePracticeState('reading', (state.read_level || 0) > 0);
+    UI.updatePracticeState('writing', (state.write_level || 0) > 0);
+
+    // Spirit practices
+    UI.updatePracticeState('mindfulness', !!state.meditation);
+    UI.updatePracticeState('mood', state.quadrant > 0);
+  },
+
+  updatePracticeState(practiceId, isLogged) {
+    const practice = document.querySelector(`[data-practice="${practiceId}"]`);
+    if (!practice) return;
+    
+    practice.classList.toggle('is-logged', isLogged);
+  },
+
 
 
   bindHomeActions() {
     const { inputs, home } = UI.elements;
+
+    // === COLLAPSIBLE PRACTICE SECTIONS ===
+    UI.bindCollapsiblePractices();
 
     document.querySelectorAll('.log-current-btn').forEach(btn => {
       btn.addEventListener('click', () => {

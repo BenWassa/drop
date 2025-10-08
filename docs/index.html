@@ -168,23 +168,37 @@
               <div class="tiered-selection-group">
                 
                 <!-- Wake with tiered label -->
-                <div class="tiered-selection" data-sleep-section="wake">
-                  <label class="tiered-label">Wake</label>
-                  <div class="wake-controls">
-                    <div class="time-input-control">
-                      <input type="time" id="wake-time" autocomplete="off">
-                      <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+                <div class="tiered-selection collapsible-practice" data-sleep-section="wake" data-practice="wake">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Wake</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="wake-controls">
+                      <div class="time-input-control">
+                        <input type="time" id="wake-time" autocomplete="off">
+                        <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Rest with tiered label -->
-                <div class="tiered-selection" data-sleep-section="rest">
-                  <label class="tiered-label">Rest</label>
-                  <div class="rest-controls">
-                    <div class="time-input-control">
-                      <input type="time" id="rest-time" autocomplete="off">
-                      <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+                <div class="tiered-selection collapsible-practice" data-sleep-section="rest" data-practice="rest">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Rest</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="rest-controls">
+                      <div class="time-input-control">
+                        <input type="time" id="rest-time" autocomplete="off">
+                        <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -208,39 +222,60 @@
               <div class="tiered-selection-group">
                 
                 <!-- Run with tiered label -->
-                <div class="tiered-selection" data-fitness-section="run">
-                  <label class="tiered-label">Run</label>
-                  <div class="run-controls">
-                    <div class="run-presets" role="group" aria-label="Quick distance presets">
-                      <button class="run-preset" type="button" data-run-value="5">5 km</button>
-                      <button class="run-preset" type="button" data-run-value="10">10 km</button>
-                      <button class="run-preset" type="button" data-run-value="20">20 km</button>
-                    </div>
-                    <div class="run-adjust" role="group" aria-label="Adjust distance">
-                      <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
-                      <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
-                      <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+                <div class="tiered-selection collapsible-practice" data-fitness-section="run" data-practice="run">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Run</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="run-controls">
+                      <div class="run-presets" role="group" aria-label="Quick distance presets">
+                        <button class="run-preset" type="button" data-run-value="5">5 km</button>
+                        <button class="run-preset" type="button" data-run-value="10">10 km</button>
+                        <button class="run-preset" type="button" data-run-value="20">20 km</button>
+                      </div>
+                      <div class="run-adjust" role="group" aria-label="Adjust distance">
+                        <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
+                        <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
+                        <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+                      </div>
                     </div>
                   </div>
                 </div>
                 
                 <!-- Strength tiered selection -->
-                <div class="tiered-selection" data-fitness-tier="strength">
-                  <label class="tiered-label">Strength</label>
-                  <div class="tier-buttons" role="group" aria-label="Strength training tiers">
-                    <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Movement</button>
-                    <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Session</button>
-                    <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Training</button>
+                <div class="tiered-selection collapsible-practice" data-fitness-tier="strength" data-practice="strength">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Strength</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="tier-buttons" role="group" aria-label="Strength training tiers">
+                      <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Movement</button>
+                      <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Session</button>
+                      <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Training</button>
+                    </div>
                   </div>
                 </div>
                 
                 <!-- Skill with tiered label -->
-                <div class="tiered-selection" data-fitness-section="skill">
-                  <label class="tiered-label">Skill</label>
-                  <div class="skill-controls">
-                    <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
-                      <!-- Skill chips injected by UI.renderSkillChips() -->
-                      <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                <div class="tiered-selection collapsible-practice" data-fitness-section="skill" data-practice="skill">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Skill</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="skill-controls">
+                      <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
+                        <!-- Skill chips injected by UI.renderSkillChips() -->
+                        <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -263,20 +298,34 @@
             <!-- Tiered selections for Reading and Writing -->
             <div class="mind-widget-body">
               <div class="tiered-selection-group">
-                <div class="tiered-selection" data-mind-tier="reading">
-                  <label class="tiered-label">Reading</label>
-                  <div class="tier-buttons" role="group" aria-label="Reading quality tiers">
-                    <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Leisure</button>
-                    <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Perspicacity</button>
-                    <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Erudition</button>
+                <div class="tiered-selection collapsible-practice" data-mind-tier="reading" data-practice="reading">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Reading</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="tier-buttons" role="group" aria-label="Reading quality tiers">
+                      <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Leisure</button>
+                      <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Perspicacity</button>
+                      <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Erudition</button>
+                    </div>
                   </div>
                 </div>
-                <div class="tiered-selection" data-mind-tier="writing">
-                  <label class="tiered-label">Writing</label>
-                  <div class="tier-buttons" role="group" aria-label="Writing depth tiers">
-                    <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Journal</button>
-                    <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Editorial</button>
-                    <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Treatise</button>
+                <div class="tiered-selection collapsible-practice" data-mind-tier="writing" data-practice="writing">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Writing</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="tier-buttons" role="group" aria-label="Writing depth tiers">
+                      <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Journal</button>
+                      <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Editorial</button>
+                      <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Treatise</button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -299,33 +348,47 @@
               <div class="tiered-selection-group">
                 
                 <!-- Mindfulness with tiered label -->
-                <div class="tiered-selection" data-spirit-section="mindfulness">
-                  <label class="tiered-label">Mindfulness</label>
-                  <div class="mindfulness-controls">
-                    <div class="timer-button-wrapper">
-                      <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
-                        <span id="spirit-timer-text">Start Session</span>
-                        <span id="spirit-mantra-text" class="mantra-text">ॐ मणि पद्मे हूँ</span>
-                        <div class="timer-fill" id="spirit-timer-fill"></div>
-                      </button>
+                <div class="tiered-selection collapsible-practice" data-spirit-section="mindfulness" data-practice="mindfulness">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Mindfulness</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="mindfulness-controls">
+                      <div class="timer-button-wrapper">
+                        <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
+                          <span id="spirit-timer-text">Start Session</span>
+                          <span id="spirit-mantra-text" class="mantra-text">ॐ मणि पद्मे हूँ</span>
+                          <div class="timer-fill" id="spirit-timer-fill"></div>
+                        </button>
+                      </div>
+                      <p class="text-status" id="spirit-timer-instruction">Press and hold to begin a session.</p>
                     </div>
-                    <p class="text-status" id="spirit-timer-instruction">Press and hold to begin a session.</p>
                   </div>
                 </div>
 
                 <!-- Mood & Energy with tiered label -->
-                <div class="tiered-selection" data-spirit-section="mood-energy">
-                  <label class="tiered-label">Mood & Energy</label>
-                  <div class="mood-energy-controls">
-                    <div class="mood-grid-container" id="spirit-mood-grid" role="img" aria-label="Mood quadrant">
-                      <div class="mood-dot" id="spirit-mood-dot" style="--mood-x:50%; --mood-y:50%;"></div>
-                      <span class="mood-axis-label label-e-high">High Energy</span>
-                      <span class="mood-axis-label label-e-low">Low Energy</span>
-                      <span class="mood-axis-label label-m-neg">Negative</span>
-                      <span class="mood-axis-label label-m-pos">Positive</span>
+                <div class="tiered-selection collapsible-practice" data-spirit-section="mood-energy" data-practice="mood">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Mood & Energy</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="mood-energy-controls">
+                      <div class="mood-grid-container" id="spirit-mood-grid" role="img" aria-label="Mood quadrant">
+                        <div class="mood-dot" id="spirit-mood-dot" style="--mood-x:50%; --mood-y:50%;"></div>
+                        <span class="mood-axis-label label-e-high">High Energy</span>
+                        <span class="mood-axis-label label-e-low">Low Energy</span>
+                        <span class="mood-axis-label label-m-neg">Negative</span>
+                        <span class="mood-axis-label label-m-pos">Positive</span>
+                      </div>
+                      <p class="mood-description" id="spirit-mood-label">Neutral · Medium Energy</p>
+                      <p class="mood-instruction">Click anywhere to reflect on mood for the day</p>
                     </div>
-                    <p class="mood-description" id="spirit-mood-label">Neutral · Medium Energy</p>
-                    <p class="mood-instruction">Click anywhere to reflect on mood for the day</p>
                   </div>
                 </div>
                 
