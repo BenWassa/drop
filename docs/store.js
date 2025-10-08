@@ -416,6 +416,107 @@ const Store = {
     this.state.history = history;
     this.state.lastEntryDate = today;
     this.save();
+  },
+
+  handleExport() {
+    try {
+      const data = JSON.stringify(this.state, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `drop-life-tracker-${timestamp}.json`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
+        UI.notify('Data exported');
+      }
+    } catch (error) {
+      console.error('Data export failed:', error);
+      if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
+        UI.notify('Export failed');
+      }
+    }
+  },
+
+  handleImport(file) {
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const raw = event.target?.result;
+          const payload = JSON.parse(raw);
+
+          if (!this.validateImport(payload)) {
+            throw new Error('Invalid schema');
+          }
+
+          this.merge(payload);
+          if (typeof UI !== 'undefined') {
+            if (typeof UI.setVisionFields === 'function') {
+              UI.setVisionFields(this.state);
+            }
+            if (typeof UI.notify === 'function') {
+              UI.notify('Data imported');
+            }
+          }
+        } catch (error) {
+          console.error('Data import failed:', error);
+          if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
+            UI.notify('Import failed');
+          }
+        }
+      };
+
+      reader.onerror = () => {
+        if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
+          UI.notify('Import failed');
+        }
+      };
+
+      reader.readAsText(file);
+    } catch (error) {
+      console.error('Failed to read import file:', error);
+      if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
+        UI.notify('Import failed');
+      }
+    }
+  },
+
+  handleDataClear() {
+    console.log('handleDataClear called');
+    const confirmationMessage = 'This will remove all saved data, including history. Do you want to continue?';
+    const confirmed = window.confirm(confirmationMessage);
+    console.log('User confirmed:', confirmed);
+
+    if (!confirmed) {
+      return false;
+    }
+
+    this.clearAllData();
+    if (typeof UI !== 'undefined') {
+      if (typeof UI.setVisionFields === 'function') {
+        UI.setVisionFields(this.state);
+      }
+      if (typeof UI.syncDailyUI === 'function') {
+        UI.syncDailyUI();
+      }
+      if (typeof UI.renderScores === 'function') {
+        const zeroScores = { sleep: 0, fitness: 0, mind: 0, spirit: 0 };
+        const streaks = typeof Analytics !== 'undefined' && typeof Analytics.calculateStreaks === 'function' 
+          ? Analytics.calculateStreaks() 
+          : {};
+        UI.renderScores(zeroScores, streaks);
+      }
+      if (typeof UI.notify === 'function') {
+        UI.notify('All data cleared');
+      }
+    }
+    return true;
   }
 };
 

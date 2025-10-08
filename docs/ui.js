@@ -843,5 +843,835 @@ const UI = {
       meditationSummary,
       momentum
     };
-  }
+  },
+
+  syncDailyUI() {
+    const { inputs } = UI.elements;
+    UI.renderSkillChips();
+    UI.updateQuarterProgress(); // Update quarterly progress bar
+    if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake || '';
+    if (inputs.restTime) inputs.restTime.value = Store.state.rest || '';
+
+    // Update button text based on whether times are set
+    UI.updateTimeButton('wake-time');
+    UI.updateTimeButton('rest-time');
+
+    UI.updateRunDisplay(Store.state.run);
+    UI.setToggleState('strength', Store.state.strength);
+    UI.setToggleState('read', Store.state.read);
+    UI.setToggleState('write', Store.state.write);
+    UI.setToggleState('meditation', Store.state.meditation);
+
+    UI.updateSkillChips(Store.state.skill);
+    UI.updateSleepStatus(UI.calculateSleepHours());
+    UI.updateFitnessSummary();
+    UI.updateMindStatus();
+
+    // Restore slider positions from Store if available
+    const storedEnergy = Store.state.energy || 0;
+    const storedMood = Store.state.mood || 0;
+    const hasStoredSliders = storedEnergy !== 0 || storedMood !== 0;
+    
+    if (hasStoredSliders) {
+      // Use stored slider values
+      App.moodAxes = { energy: storedEnergy, mood: storedMood };
+    } else {
+      // Fall back to quadrant preset if no slider data
+      const fallbackAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
+      const currentAxes = App.moodAxes || { energy: 0, mood: 0 };
+      const currentQuadrant = Scoring.resolveQuadrant(currentAxes.energy, currentAxes.mood);
+      if (!App.moodAxes || currentQuadrant !== Store.state.quadrant) {
+        App.moodAxes = { ...fallbackAxes };
+      }
+    }
+    
+    const axes = App.moodAxes;
+    UI.setMoodSliders(axes.energy, axes.mood);
+    UI.positionMoodDot(axes.energy, axes.mood);
+    UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
+  },
+
+  handleMoodInput() {
+    const { energySlider, moodSlider } = UI.elements.home || {};
+    if (!energySlider || !moodSlider) return;
+    const energy = Number(energySlider.value) || 0;
+    const mood = Number(moodSlider.value) || 0;
+    App.moodAxes = { energy, mood };
+    
+    // Persist energy and mood to Store
+    if (energy !== Store.state.energy) {
+      Store.update('energy', energy);
+    }
+    if (mood !== Store.state.mood) {
+      Store.update('mood', mood);
+    }
+    
+    UI.positionMoodDot(energy, mood);
+    const quadrant = Scoring.resolveQuadrant(energy, mood);
+    if (quadrant !== Store.state.quadrant) {
+      Store.update('quadrant', quadrant);
+    }
+    UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, energy, mood);
+  },
+
+  bindHomeActions() {
+    const { inputs, home } = UI.elements;
+
+    document.querySelectorAll('.log-current-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        if (!targetId) return;
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        
+        // Toggle between setting time and clearing
+        if (input.value) {
+          // Clear the value
+          input.value = '';
+          if (targetId === 'wake-time') {
+            Store.update('wake', '');
+          } else if (targetId === 'rest-time') {
+            Store.update('rest', '');
+          }
+        } else {
+          // Set to current time
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const timeValue = `${hours}:${minutes}`;
+          input.value = timeValue;
+          if (targetId === 'wake-time') {
+            Store.update('wake', timeValue);
+          } else if (targetId === 'rest-time') {
+            Store.update('rest', timeValue);
+          }
+          UI.flashButton(btn);
+        }
+        
+        UI.updateTimeButton(targetId);
+        UI.updateSleepStatus(UI.calculateSleepHours());
+      });
+    });
+
+    if (inputs.wakeTime) {
+      inputs.wakeTime.addEventListener('change', (event) => {
+        const timeValue = event.target.value;
+        if (timeValue) {
+          const [hours] = timeValue.split(':').map(Number);
+          // Wake times expected between 04:00-12:00
+          if (hours < 4 || hours > 12) {
+            UI.notify('Wake times are typically between 04:00-12:00. Please verify.');
+          }
+        }
+        Store.update('wake', timeValue);
+        UI.updateSleepStatus(UI.calculateSleepHours());
+        UI.updateTimeButton('wake-time');
+      });
+    }
+    if (inputs.restTime) {
+      inputs.restTime.addEventListener('change', (event) => {
+        const timeValue = event.target.value;
+        if (timeValue) {
+          const [hours] = timeValue.split(':').map(Number);
+          // Rest times expected between 20:00-02:00 (20-23 or 0-2)
+          if (hours < 20 && hours > 2) {
+            UI.notify('Rest times are typically between 20:00-02:00. Please verify.');
+          }
+        }
+        Store.update('rest', timeValue);
+        UI.updateSleepStatus(UI.calculateSleepHours());
+        UI.updateTimeButton('rest-time');
+      });
+    }
+
+    document.querySelectorAll('.dropdown-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        if (!targetId) return;
+        const dropdown = document.getElementById(targetId);
+        if (!dropdown) return;
+        const willOpen = dropdown.hidden;
+        document.querySelectorAll('.domain-dropdown').forEach(section => {
+          const sectionBtn = document.querySelector(`.dropdown-toggle-btn[data-target="${section.id}"]`);
+          if (section.id === targetId) {
+            section.hidden = !willOpen;
+            if (sectionBtn) {
+              sectionBtn.setAttribute('aria-expanded', String(willOpen));
+            }
+          } else {
+            section.hidden = true;
+            if (sectionBtn) {
+              sectionBtn.setAttribute('aria-expanded', 'false');
+            }
+          }
+        });
+      });
+    });
+
+    if (home.fitnessCard) {
+      // Handle fitness pill toggles (Run, Strength, Skill)
+      home.fitnessCard.addEventListener('click', (event) => {
+        // Handle fitness toggles with dropdowns (Run and Skill)
+        const fitnessToggle = event.target.closest('[data-fitness-toggle]');
+        if (fitnessToggle) {
+          const toggleType = fitnessToggle.dataset.fitnessToggle;
+          const isActive = fitnessToggle.classList.contains('is-active');
+          
+          // Close all fitness dropdowns first
+          home.fitnessCard.querySelectorAll('.fitness-dropdown').forEach(dd => dd.hidden = true);
+          home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-pressed', 'false');
+          });
+          
+          // If wasn't active, open the dropdown
+          if (!isActive) {
+            fitnessToggle.classList.add('is-active');
+            fitnessToggle.setAttribute('aria-pressed', 'true');
+            const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
+            if (dropdown) dropdown.hidden = false;
+          }
+          return;
+        }
+        
+        // Handle run preset buttons
+        const presetBtn = event.target.closest('.run-preset');
+        if (presetBtn) {
+          const value = Number(presetBtn.dataset.runValue);
+          const newValue = Number.isFinite(value) ? value : 0;
+          Store.update('run', newValue);
+          UI.updateRunDisplay(newValue);
+          UI.updateFitnessSummary();
+          return;
+        }
+        
+        // Handle run step buttons
+        const stepBtn = event.target.closest('.run-step');
+        if (stepBtn) {
+          const step = Number(stepBtn.dataset.runStep) || 0;
+          const current = Number(Store.state.run) || 0;
+          const newValue = Math.max(0, Math.min(200, current + step));
+          Store.update('run', newValue);
+          UI.updateRunDisplay(newValue);
+          UI.updateFitnessSummary();
+        }
+      });
+    }
+
+    if (home.actionSection) {
+      home.actionSection.addEventListener('click', (event) => {
+        const toggle = event.target.closest('.pill-toggle[data-toggle-key]');
+        if (toggle) {
+          const key = toggle.dataset.toggleKey;
+          if (!(key in Store.state)) return;
+          const newValue = !Boolean(Store.state[key]);
+          Store.update(key, newValue);
+          UI.setToggleState(key, newValue);
+          if (key === 'strength') {
+            UI.updateFitnessSummary();
+          }
+          if (key === 'read' || key === 'write') {
+            UI.updateMindStatus();
+          }
+          if (key === 'meditation') {
+            UI.updateSpiritSummary(Store.state.quadrant, newValue, App.moodAxes.energy, App.moodAxes.mood);
+          }
+          return;
+        }
+
+        const skillChip = event.target.closest('.skill-chip');
+        if (skillChip) {
+          if (skillChip.classList.contains('skill-chip--add')) {
+            const name = window.prompt('Add a skill focus');
+            const trimmed = name ? name.trim() : '';
+            if (!trimmed) return;
+            const added = Store.addSkillOption(trimmed);
+            if (added) {
+              UI.renderSkillChips();
+              Store.toggleSkill(trimmed);
+              UI.updateSkillChips(Store.state.skill);
+              UI.updateFitnessSummary();
+              UI.notify(`Added "${trimmed}" to skills`);
+            } else {
+              UI.notify('Skill already exists.');
+            }
+            return;
+          }
+          const option = skillChip.dataset.skillOption;
+          if (option) {
+            Store.toggleSkill(option);
+            UI.updateSkillChips(Store.state.skill);
+            UI.updateFitnessSummary();
+          }
+        }
+      });
+    }
+
+    const { energySlider, moodSlider } = home;
+    if (energySlider) {
+      energySlider.addEventListener('input', () => UI.handleMoodInput());
+    }
+    if (moodSlider) {
+      moodSlider.addEventListener('input', () => UI.handleMoodInput());
+    }
+  },
+
+  bindSettingsMenu() {
+    const { menu, openBtn, closeBtn, backdrop, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
+    
+    if (!menu || !openBtn) return;
+
+    // Open settings
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        menu.classList.add('active');
+      });
+    }
+
+    // Close settings
+    const closeSettings = () => {
+      menu.classList.remove('active');
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeSettings);
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener('click', closeSettings);
+    }
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('active')) {
+        closeSettings();
+      }
+    });
+
+    // Export data from settings
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        App.handleExport();
+        closeSettings();
+      });
+    }
+
+    // Import data from settings
+    if (importBtn && importInput) {
+      importBtn.addEventListener('click', () => {
+        importInput.value = '';
+        importInput.click();
+      });
+
+      importInput.addEventListener('change', () => {
+        const [file] = importInput.files || [];
+        if (file) {
+          App.handleImport(file);
+        }
+        importInput.value = '';
+        closeSettings();
+      });
+    }
+
+    if (clearBtn) {
+      console.log('Clear button found, binding event');
+      clearBtn.addEventListener('click', () => {
+        console.log('Clear button clicked');
+        const cleared = App.handleDataClear();
+        if (cleared) {
+          closeSettings();
+        }
+      });
+    } else {
+      console.log('Clear button not found');
+    }
+
+    // History view from settings
+    const { historyBtn } = UI.elements.settingsMenu;
+    console.log('🔍 History button found:', historyBtn);
+    if (historyBtn) {
+      historyBtn.addEventListener('click', () => {
+        console.log('📅 History button clicked');
+        closeSettings();
+        UI.openHistoryView();
+      });
+    } else {
+      console.log('❌ History button NOT found');
+    }
+  },
+
+  openHistoryView() {
+    console.log('🔓 Opening history view...');
+    const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
+
+    console.log('📊 History overlay elements:', { overlay, closeBtn, list, dateRange, prevBtn, nextBtn });
+
+    if (!overlay) {
+      console.log('❌ History overlay element not found!');
+      return;
+    }
+
+    Store.ensureEntries();
+    
+    // Migrate: if entries is empty but we have history, populate entries from history
+    const entries = Store.state.entries || {};
+    const history = Store.state.history || [];
+    if (Object.keys(entries).length === 0 && history.length > 0) {
+      console.log('🔄 Migrating history to entries format...');
+      history.forEach(histEntry => {
+        if (histEntry.date) {
+          // Create a minimal entry from history scores
+          entries[histEntry.date] = {
+            wake: '', 
+            rest: '', 
+            run: 0, 
+            strength: false, 
+            skill: false,
+            read: false, 
+            write: false, 
+            quadrant: 0, 
+            meditation: false
+          };
+        }
+      });
+      Store.state.entries = entries;
+      Store.save();
+      console.log(`✅ Migrated ${history.length} history entries`);
+    }
+
+    console.log('📝 Store entries:', Store.state.entries);
+
+    // Current page state
+    let currentPage = 0;
+    const entriesPerPage = 7;
+
+    // Render history entries
+    const renderHistory = () => {
+      const entries = Store.state.entries || {};
+      const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
+      const startIdx = currentPage * entriesPerPage;
+      const endIdx = startIdx + entriesPerPage;
+      const datesToShow = allDates.slice(startIdx, endIdx);
+
+      // Update navigation buttons
+      if (prevBtn) prevBtn.disabled = currentPage === 0;
+      if (nextBtn) nextBtn.disabled = endIdx >= allDates.length;
+
+      // Update date range text
+      if (dateRange && datesToShow.length > 0) {
+        const firstDate = new Date(datesToShow[datesToShow.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const lastDate = new Date(datesToShow[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        dateRange.textContent = datesToShow.length === 1 ? lastDate : `${firstDate} - ${lastDate}`;
+      }
+
+      // Render entries
+      if (list) {
+        if (datesToShow.length === 0) {
+          list.innerHTML = `
+            <div class="history-empty">
+              <div class="history-empty__icon">📅</div>
+              <p class="history-empty__text">No entries yet. Start tracking your daily progress!</p>
+            </div>
+          `;
+        } else {
+          list.innerHTML = datesToShow.map(dateKey => {
+            const entry = entries[dateKey];
+            const scores = Scoring.calculateDomainScores(entry);
+            const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+
+            const date = new Date(dateKey);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+              weekday: 'short', 
+              month: 'short', 
+              day: 'numeric',
+              year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+            });
+            
+            return `
+              <div class="history-entry" data-date="${dateKey}">
+                <div class="history-entry__header">
+                  <div class="history-entry__date">${formattedDate}</div>
+                  <div class="history-entry__total">${totalScore}</div>
+                </div>
+                <div class="history-entry__domains">
+                  <div class="history-domain">
+                    <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Sleep</div>
+                      <div class="history-domain__score">${scores.sleep}</div>
+                    </div>
+                  </div>
+                  <div class="history-domain">
+                    <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Fitness</div>
+                      <div class="history-domain__score">${scores.fitness}</div>
+                    </div>
+                  </div>
+                  <div class="history-domain">
+                    <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Mind</div>
+                      <div class="history-domain__score">${scores.mind}</div>
+                    </div>
+                  </div>
+                  <div class="history-domain">
+                    <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Spirit</div>
+                      <div class="history-domain__score">${scores.spirit}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Add click handlers to entries
+          list.querySelectorAll('.history-entry').forEach(entryEl => {
+            entryEl.addEventListener('click', () => {
+              const dateKey = entryEl.dataset.date;
+              overlay.classList.remove('active');
+              // Switch to the date and show home page
+              Store.state.currentDate = dateKey;
+              UI.updateDateDisplay();
+              App.updateScores();
+              UI.showPage('home');
+            });
+          });
+        }
+      }
+    };
+
+    // Navigation handlers
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        currentPage++;
+        renderHistory();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          renderHistory();
+        }
+      });
+    }
+
+    // Close handler
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        console.log('❌ Closing history overlay');
+        overlay.classList.remove('active');
+      });
+    }
+
+    // Open overlay and render
+    console.log('✅ Adding active class to overlay');
+    overlay.classList.add('active');
+    console.log('🎨 Rendering history...');
+    renderHistory();
+  },
+
+  mapVisionKey(key) {
+    switch (key) {
+      case 'theme':
+        return 'visionTheme';
+      case 'sleep':
+        return 'visionSleepFocus';
+      case 'fitness':
+        return 'visionFitnessFocus';
+      case 'mind':
+        return 'visionMindFocus';
+      case 'spirit':
+        return 'visionSpiritFocus';
+      default:
+        return null;
+    }
+  },
+
+  showPage(page) {
+    if (!page) return;
+
+    UI.elements.pages.forEach(section => {
+      section.classList.toggle('active', section.dataset.page === page);
+    });
+
+    App.currentPage = page;
+    UI.updateNavState(page);
+
+    // Add data attribute to app-main for CSS targeting
+    const main = document.querySelector('.app-main');
+    if (main) {
+      main.setAttribute('data-current-page', page);
+      main.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  },
+
+  updateNavState(page) {
+    UI.elements.navButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.page === page);
+    });
+  },
+
+  bindSettingsMenu() {
+    const { menu, openBtn, closeBtn, backdrop, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
+    
+    if (!menu || !openBtn) return;
+
+    // Open settings
+    if (openBtn) {
+      openBtn.addEventListener('click', () => {
+        menu.classList.add('active');
+      });
+    }
+
+    // Close settings
+    const closeSettings = () => {
+      menu.classList.remove('active');
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeSettings);
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener('click', closeSettings);
+    }
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && menu.classList.contains('active')) {
+        closeSettings();
+      }
+    });
+
+    // Export data from settings
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        Store.handleExport();
+        closeSettings();
+      });
+    }
+
+    // Import data from settings
+    if (importBtn && importInput) {
+      importBtn.addEventListener('click', () => {
+        importInput.value = '';
+        importInput.click();
+      });
+
+      importInput.addEventListener('change', () => {
+        const [file] = importInput.files || [];
+        if (file) {
+          Store.handleImport(file);
+        }
+        importInput.value = '';
+        closeSettings();
+      });
+    }
+
+    if (clearBtn) {
+      console.log('Clear button found, binding event');
+      clearBtn.addEventListener('click', () => {
+        console.log('Clear button clicked');
+        const cleared = Store.handleDataClear();
+        if (cleared) {
+          closeSettings();
+        }
+      });
+    } else {
+      console.log('Clear button not found');
+    }
+
+    // History view from settings
+    const { historyBtn } = UI.elements.settingsMenu;
+    console.log('🔍 History button found:', historyBtn);
+    if (historyBtn) {
+      historyBtn.addEventListener('click', () => {
+        console.log('📅 History button clicked');
+        closeSettings();
+        UI.openHistoryView();
+      });
+    } else {
+      console.log('❌ History button NOT found');
+    }
+  },
+
+  openHistoryView() {
+    console.log('🔓 Opening history view...');
+    const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
+
+    console.log('📊 History overlay elements:', { overlay, closeBtn, list, dateRange, prevBtn, nextBtn });
+
+    if (!overlay) {
+      console.log('❌ History overlay element not found!');
+      return;
+    }
+
+    Store.ensureEntries();
+    
+    // Migrate: if entries is empty but we have history, populate entries from history
+    const entries = Store.state.entries || {};
+    const history = Store.state.history || [];
+    if (Object.keys(entries).length === 0 && history.length > 0) {
+      console.log('🔄 Migrating history to entries format...');
+      history.forEach(histEntry => {
+        if (histEntry.date) {
+          // Create a minimal entry from history scores
+          entries[histEntry.date] = {
+            wake: '', 
+            rest: '', 
+            run: 0, 
+            strength: false, 
+            skill: false,
+            read: false, 
+            write: false, 
+            quadrant: 0, 
+            meditation: false
+          };
+        }
+      });
+      Store.state.entries = entries;
+      Store.save();
+      console.log(`✅ Migrated ${history.length} history entries`);
+    }
+
+    console.log('📝 Store entries:', Store.state.entries);
+
+    // Current page state
+    let currentPage = 0;
+    const entriesPerPage = 7;
+
+    // Render history entries
+    const renderHistory = () => {
+      const entries = Store.state.entries || {};
+      const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
+      const startIdx = currentPage * entriesPerPage;
+      const endIdx = startIdx + entriesPerPage;
+      const datesToShow = allDates.slice(startIdx, endIdx);
+
+      // Update navigation buttons
+      if (prevBtn) prevBtn.disabled = currentPage === 0;
+      if (nextBtn) nextBtn.disabled = endIdx >= allDates.length;
+
+      // Update date range text
+      if (dateRange && datesToShow.length > 0) {
+        const firstDate = new Date(datesToShow[datesToShow.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const lastDate = new Date(datesToShow[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        dateRange.textContent = datesToShow.length === 1 ? lastDate : `${firstDate} - ${lastDate}`;
+      }
+
+      // Render entries
+      if (list) {
+        if (datesToShow.length === 0) {
+          list.innerHTML = `
+            <div class="history-empty">
+              <div class="history-empty__icon">📅</div>
+              <p class="history-empty__text">No entries yet. Start tracking your daily progress!</p>
+            </div>
+          `;
+        } else {
+          list.innerHTML = datesToShow.map(dateKey => {
+            const entry = entries[dateKey];
+            const scores = Scoring.calculateDomainScores(entry);
+            const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+
+            const date = new Date(dateKey);
+            const formattedDate = date.toLocaleDateString('en-US', { 
+              weekday: 'short', 
+              month: 'short', 
+              day: 'numeric',
+              year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+            });
+
+            return `
+              <div class="history-entry" data-date="${dateKey}">
+                <div class="history-entry__header">
+                  <div class="history-entry__date">${formattedDate}</div>
+                  <div class="history-entry__total">${totalScore}</div>
+                </div>
+                <div class="history-entry__domains">
+                  <div class="history-domain">
+                    <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Sleep</div>
+                      <div class="history-domain__score">${scores.sleep}</div>
+                    </div>
+                  </div>
+                  <div class="history-domain">
+                    <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Fitness</div>
+                      <div class="history-domain__score">${scores.fitness}</div>
+                    </div>
+                  </div>
+                  <div class="history-domain">
+                    <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Mind</div>
+                      <div class="history-domain__score">${scores.mind}</div>
+                    </div>
+                  </div>
+                  <div class="history-domain">
+                    <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                    <div class="history-domain__info">
+                      <div class="history-domain__name">Spirit</div>
+                      <div class="history-domain__score">${scores.spirit}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Add click handlers to entries
+          list.querySelectorAll('.history-entry').forEach(entryEl => {
+            entryEl.addEventListener('click', () => {
+              const dateKey = entryEl.dataset.date;
+              overlay.classList.remove('active');
+              // Switch to the date and show home page
+              Store.state.currentDate = dateKey;
+              UI.updateDateDisplay();
+              App.render();
+              UI.showPage('home');
+            });
+          });
+        }
+      }
+    };
+
+    // Navigation handlers
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        currentPage++;
+        renderHistory();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          renderHistory();
+        }
+      });
+    }
+
+    // Close handler
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        console.log('❌ Closing history overlay');
+        overlay.classList.remove('active');
+      });
+    }
+
+    // Open overlay and render
+    console.log('✅ Adding active class to overlay');
+    overlay.classList.add('active');
+    console.log('🎨 Rendering history...');
+    renderHistory();
+  },
 };

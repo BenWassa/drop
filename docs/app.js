@@ -6,8 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 
   const App = {
-    deferredInstallPrompt: null,
-    installEventsBound: false,
     currentPage: 'home',
     moodAxes: { energy: 0, mood: 0 },
 
@@ -17,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       UI.removeDevElements();
       UI.setVisionFields(Store.state);
       this.moodAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
-      this.syncDailyUI();
+      UI.syncDailyUI();
 
       // Check if loading overlay should be skipped (dev mode toggle)
       const skipLoader = DEV_MODE && localStorage.getItem('dev_disable_loader') === 'true';
@@ -34,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
-      this.initInstallPrompt();
-      this.showPage('home');
+      Install.initInstallPrompt();
+      UI.showPage('home');
 
       // Skip loading animation logic if disabled
       if (skipLoader) {
@@ -71,52 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
       fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
     },
 
-    syncDailyUI() {
-      const { inputs } = UI.elements;
-      UI.renderSkillChips();
-      UI.updateQuarterProgress(); // Update quarterly progress bar
-      if (inputs.wakeTime) inputs.wakeTime.value = Store.state.wake || '';
-      if (inputs.restTime) inputs.restTime.value = Store.state.rest || '';
-
-      // Update button text based on whether times are set
-      UI.updateTimeButton('wake-time');
-      UI.updateTimeButton('rest-time');
-
-      UI.updateRunDisplay(Store.state.run);
-      UI.setToggleState('strength', Store.state.strength);
-      UI.setToggleState('read', Store.state.read);
-      UI.setToggleState('write', Store.state.write);
-      UI.setToggleState('meditation', Store.state.meditation);
-
-      UI.updateSkillChips(Store.state.skill);
-      UI.updateSleepStatus(this.calculateSleepHours());
-      UI.updateFitnessSummary();
-      UI.updateMindStatus();
-
-      // Restore slider positions from Store if available
-      const storedEnergy = Store.state.energy || 0;
-      const storedMood = Store.state.mood || 0;
-      const hasStoredSliders = storedEnergy !== 0 || storedMood !== 0;
-      
-      if (hasStoredSliders) {
-        // Use stored slider values
-        this.moodAxes = { energy: storedEnergy, mood: storedMood };
-      } else {
-        // Fall back to quadrant preset if no slider data
-        const fallbackAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
-        const currentAxes = this.moodAxes || { energy: 0, mood: 0 };
-        const currentQuadrant = Scoring.resolveQuadrant(currentAxes.energy, currentAxes.mood);
-        if (!this.moodAxes || currentQuadrant !== Store.state.quadrant) {
-          this.moodAxes = { ...fallbackAxes };
-        }
-      }
-      
-      const axes = this.moodAxes;
-      UI.setMoodSliders(axes.energy, axes.mood);
-      UI.positionMoodDot(axes.energy, axes.mood);
-      UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
-    },
-
     updateScores() {
       const scores = {
         sleep: Scoring.calcSleep(Store.state, Store),
@@ -125,387 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
         spirit: Scoring.calcSpirit(Store.state, Store)
       };
       Store.recordHistory(scores);
-      const streaks = this.calculateStreaks();
+      const streaks = Analytics.calculateStreaks();
       UI.renderScores(scores, streaks);
-      this.renderWeeklyHeatmap();
-    },
-
-    handleMoodInput() {
-      const { energySlider, moodSlider } = UI.elements.home || {};
-      if (!energySlider || !moodSlider) return;
-      const energy = Number(energySlider.value) || 0;
-      const mood = Number(moodSlider.value) || 0;
-      this.moodAxes = { energy, mood };
-      
-      // Persist energy and mood to Store
-      if (energy !== Store.state.energy) {
-        Store.update('energy', energy);
-      }
-      if (mood !== Store.state.mood) {
-        Store.update('mood', mood);
-      }
-      
-      UI.positionMoodDot(energy, mood);
-      const quadrant = Scoring.resolveQuadrant(energy, mood);
-      if (quadrant !== Store.state.quadrant) {
-        Store.update('quadrant', quadrant);
-      }
-      UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, energy, mood);
-    },
-
-    bindHomeActions() {
-      const { inputs, home } = UI.elements;
-
-      document.querySelectorAll('.log-current-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const targetId = btn.dataset.target;
-          if (!targetId) return;
-          const input = document.getElementById(targetId);
-          if (!input) return;
-          
-          // Toggle between setting time and clearing
-          if (input.value) {
-            // Clear the value
-            input.value = '';
-            if (targetId === 'wake-time') {
-              Store.update('wake', '');
-            } else if (targetId === 'rest-time') {
-              Store.update('rest', '');
-            }
-          } else {
-            // Set to current time
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const timeValue = `${hours}:${minutes}`;
-            input.value = timeValue;
-            if (targetId === 'wake-time') {
-              Store.update('wake', timeValue);
-            } else if (targetId === 'rest-time') {
-              Store.update('rest', timeValue);
-            }
-            UI.flashButton(btn);
-          }
-          
-          UI.updateTimeButton(targetId);
-          UI.updateSleepStatus(this.calculateSleepHours());
-        });
-      });
-
-      if (inputs.wakeTime) {
-        inputs.wakeTime.addEventListener('change', (event) => {
-          const timeValue = event.target.value;
-          if (timeValue) {
-            const [hours] = timeValue.split(':').map(Number);
-            // Wake times expected between 04:00-12:00
-            if (hours < 4 || hours > 12) {
-              UI.notify('Wake times are typically between 04:00-12:00. Please verify.');
-            }
-          }
-          Store.update('wake', timeValue);
-          UI.updateSleepStatus(this.calculateSleepHours());
-          UI.updateTimeButton('wake-time');
-        });
-      }
-      if (inputs.restTime) {
-        inputs.restTime.addEventListener('change', (event) => {
-          const timeValue = event.target.value;
-          if (timeValue) {
-            const [hours] = timeValue.split(':').map(Number);
-            // Rest times expected between 20:00-02:00 (20-23 or 0-2)
-            if (hours < 20 && hours > 2) {
-              UI.notify('Rest times are typically between 20:00-02:00. Please verify.');
-            }
-          }
-          Store.update('rest', timeValue);
-          UI.updateSleepStatus(this.calculateSleepHours());
-          UI.updateTimeButton('rest-time');
-        });
-      }
-
-      document.querySelectorAll('.dropdown-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const targetId = btn.dataset.target;
-          if (!targetId) return;
-          const dropdown = document.getElementById(targetId);
-          if (!dropdown) return;
-          const willOpen = dropdown.hidden;
-          document.querySelectorAll('.domain-dropdown').forEach(section => {
-            const sectionBtn = document.querySelector(`.dropdown-toggle-btn[data-target="${section.id}"]`);
-            if (section.id === targetId) {
-              section.hidden = !willOpen;
-              if (sectionBtn) {
-                sectionBtn.setAttribute('aria-expanded', String(willOpen));
-              }
-            } else {
-              section.hidden = true;
-              if (sectionBtn) {
-                sectionBtn.setAttribute('aria-expanded', 'false');
-              }
-            }
-          });
-        });
-      });
-
-      if (home.fitnessCard) {
-        // Handle fitness pill toggles (Run, Strength, Skill)
-        home.fitnessCard.addEventListener('click', (event) => {
-          // Handle fitness toggles with dropdowns (Run and Skill)
-          const fitnessToggle = event.target.closest('[data-fitness-toggle]');
-          if (fitnessToggle) {
-            const toggleType = fitnessToggle.dataset.fitnessToggle;
-            const isActive = fitnessToggle.classList.contains('is-active');
-            
-            // Close all fitness dropdowns first
-            home.fitnessCard.querySelectorAll('.fitness-dropdown').forEach(dd => dd.hidden = true);
-            home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
-              btn.classList.remove('is-active');
-              btn.setAttribute('aria-pressed', 'false');
-            });
-            
-            // If wasn't active, open the dropdown
-            if (!isActive) {
-              fitnessToggle.classList.add('is-active');
-              fitnessToggle.setAttribute('aria-pressed', 'true');
-              const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
-              if (dropdown) dropdown.hidden = false;
-            }
-            return;
-          }
-          
-          // Handle run preset buttons
-          const presetBtn = event.target.closest('.run-preset');
-          if (presetBtn) {
-            const value = Number(presetBtn.dataset.runValue);
-            const newValue = Number.isFinite(value) ? value : 0;
-            Store.update('run', newValue);
-            UI.updateRunDisplay(newValue);
-            UI.updateFitnessSummary();
-            return;
-          }
-          
-          // Handle run step buttons
-          const stepBtn = event.target.closest('.run-step');
-          if (stepBtn) {
-            const step = Number(stepBtn.dataset.runStep) || 0;
-            const current = Number(Store.state.run) || 0;
-            const newValue = Math.max(0, Math.min(200, current + step));
-            Store.update('run', newValue);
-            UI.updateRunDisplay(newValue);
-            UI.updateFitnessSummary();
-          }
-        });
-      }
-
-      if (home.actionSection) {
-        home.actionSection.addEventListener('click', (event) => {
-          const toggle = event.target.closest('.pill-toggle[data-toggle-key]');
-          if (toggle) {
-            const key = toggle.dataset.toggleKey;
-            if (!(key in Store.state)) return;
-            const newValue = !Boolean(Store.state[key]);
-            Store.update(key, newValue);
-            UI.setToggleState(key, newValue);
-            if (key === 'strength') {
-              UI.updateFitnessSummary();
-            }
-            if (key === 'read' || key === 'write') {
-              UI.updateMindStatus();
-            }
-            if (key === 'meditation') {
-              UI.updateSpiritSummary(Store.state.quadrant, newValue, this.moodAxes.energy, this.moodAxes.mood);
-            }
-            return;
-          }
-
-          const skillChip = event.target.closest('.skill-chip');
-          if (skillChip) {
-            if (skillChip.classList.contains('skill-chip--add')) {
-              const name = window.prompt('Add a skill focus');
-              const trimmed = name ? name.trim() : '';
-              if (!trimmed) return;
-              const added = Store.addSkillOption(trimmed);
-              if (added) {
-                UI.renderSkillChips();
-                Store.toggleSkill(trimmed);
-                UI.updateSkillChips(Store.state.skill);
-                UI.updateFitnessSummary();
-                UI.notify(`Added "${trimmed}" to skills`);
-              } else {
-                UI.notify('Skill already exists.');
-              }
-              return;
-            }
-            const option = skillChip.dataset.skillOption;
-            if (option) {
-              Store.toggleSkill(option);
-              UI.updateSkillChips(Store.state.skill);
-              UI.updateFitnessSummary();
-            }
-          }
-        });
-      }
-
-      const { energySlider, moodSlider } = home;
-      if (energySlider) {
-        energySlider.addEventListener('input', () => this.handleMoodInput());
-      }
-      if (moodSlider) {
-        moodSlider.addEventListener('input', () => this.handleMoodInput());
-      }
-    },
-
-    setupInstallPromptEvents() {
-      if (this.installEventsBound) return;
-      this.installEventsBound = true;
-
-      window.addEventListener('beforeinstallprompt', (event) => {
-        event.preventDefault();
-        this.deferredInstallPrompt = event;
-        this.updateInstallButtonVisibility(true);
-      });
-
-      window.addEventListener('appinstalled', () => {
-        this.deferredInstallPrompt = null;
-        this.updateInstallButtonVisibility(false);
-        UI.toast('drop installed');
-      });
-    },
-
-    updateInstallButtonVisibility(forceShow = false) {
-      const settingsInstallBtn = UI.elements.settingsMenu.installBtn;
-      if (!settingsInstallBtn) return;
-
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-
-      if (isStandalone) {
-        settingsInstallBtn.hidden = true;
-        return;
-      }
-
-      if (forceShow || this.deferredInstallPrompt) {
-        settingsInstallBtn.hidden = false;
-        settingsInstallBtn.disabled = false;
-      } else {
-        settingsInstallBtn.hidden = true;
-      }
-    },
-
-    initInstallPrompt() {
-      const settingsInstallBtn = UI.elements.settingsMenu.installBtn;
-      if (!settingsInstallBtn) return;
-
-      // Ensure the button state reflects any prompt captured before initialization
-      this.updateInstallButtonVisibility();
-
-      settingsInstallBtn.addEventListener('click', async () => {
-        const promptEvent = this.deferredInstallPrompt;
-        if (!promptEvent) {
-          this.updateInstallButtonVisibility(false);
-          return;
-        }
-
-        settingsInstallBtn.disabled = true;
-        promptEvent.prompt();
-
-        try {
-          const { outcome } = await promptEvent.userChoice;
-          if (outcome === 'accepted') {
-            UI.toast('Installation started');
-            this.updateInstallButtonVisibility(false);
-            const settingsMenu = UI.elements.settingsMenu.menu;
-            if (settingsMenu) {
-              settingsMenu.classList.remove('active');
-            }
-          } else {
-            settingsInstallBtn.disabled = false;
-          }
-        } catch (error) {
-          console.error('Install prompt failed:', error);
-          settingsInstallBtn.disabled = false;
-        }
-
-        this.deferredInstallPrompt = null;
-      });
-    },
-
-    handleExport() {
-      try {
-        const data = JSON.stringify(Store.state, null, 2);
-        const blob = new Blob([data], { type: 'application/json' });
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `drop-life-tracker-${timestamp}.json`;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        UI.notify('Data exported');
-      } catch (error) {
-        console.error('Data export failed:', error);
-        UI.notify('Export failed');
-      }
-    },
-
-    handleImport(file) {
-      try {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const raw = event.target?.result;
-            const payload = JSON.parse(raw);
-
-            if (!Store.validateImport(payload)) {
-              throw new Error('Invalid schema');
-            }
-
-            Store.merge(payload);
-            UI.setVisionFields(Store.state);
-            UI.notify('Data imported');
-          } catch (error) {
-            console.error('Data import failed:', error);
-            UI.notify('Import failed');
-          }
-        };
-
-        reader.onerror = () => {
-          UI.notify('Import failed');
-        };
-
-        reader.readAsText(file);
-      } catch (error) {
-        console.error('Failed to read import file:', error);
-        UI.notify('Import failed');
-      }
-    },
-
-    handleDataClear() {
-      console.log('handleDataClear called');
-      const confirmationMessage = 'This will remove all saved data, including history. Do you want to continue?';
-      const confirmed = window.confirm(confirmationMessage);
-      console.log('User confirmed:', confirmed);
-
-      if (!confirmed) {
-        return false;
-      }
-
-      Store.clearAllData();
-      UI.setVisionFields(Store.state);
-      this.syncDailyUI();
-
-      const zeroScores = { sleep: 0, fitness: 0, mind: 0, spirit: 0 };
-      const streaks = this.calculateStreaks();
-      UI.renderScores(zeroScores, streaks);
-
-      UI.notify('All data cleared');
-      return true;
+      Analytics.renderWeeklyHeatmap();
     },
 
     bindEvents() {
-      this.bindHomeActions();
+      UI.bindHomeActions();
       // Open overlays
       UI.elements.cards.forEach(card => {
         card.addEventListener('click', () => {
@@ -572,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
           const page = btn.dataset.page;
           if (!page) return;
-          this.showPage(page);
+          UI.showPage(page);
         });
       });
 
@@ -594,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!input) return;
         input.addEventListener('input', (event) => {
           const value = event.target.value.trim();
-          const storeKey = this.mapVisionKey(key);
+          const storeKey = UI.mapVisionKey(key);
           UI.updateVisionHint(event.target, event.target.value);
           if (storeKey) {
             Store.update(storeKey, value);
@@ -605,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const { exportBtn, importBtn, importInput } = UI.elements.dataControls;
       if (exportBtn) {
         exportBtn.addEventListener('click', () => {
-          this.handleExport();
+          Store.handleExport();
         });
       }
 
@@ -618,315 +196,17 @@ document.addEventListener('DOMContentLoaded', () => {
         importInput.addEventListener('change', () => {
           const [file] = importInput.files || [];
           if (file) {
-            this.handleImport(file);
+            Store.handleImport(file);
           }
           importInput.value = '';
         });
       }
 
       // Settings menu bindings
-      this.bindSettingsMenu();
+      UI.bindSettingsMenu();
     },
 
-    bindSettingsMenu() {
-      const { menu, openBtn, closeBtn, backdrop, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
-      
-      if (!menu || !openBtn) return;
 
-      // Open settings
-      if (openBtn) {
-        openBtn.addEventListener('click', () => {
-          menu.classList.add('active');
-        });
-      }
-
-      // Close settings
-      const closeSettings = () => {
-        menu.classList.remove('active');
-      };
-
-      if (closeBtn) {
-        closeBtn.addEventListener('click', closeSettings);
-      }
-
-      if (backdrop) {
-        backdrop.addEventListener('click', closeSettings);
-      }
-
-      // Escape key to close
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && menu.classList.contains('active')) {
-          closeSettings();
-        }
-      });
-
-      // Export data from settings
-      if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-          this.handleExport();
-          closeSettings();
-        });
-      }
-
-      // Import data from settings
-      if (importBtn && importInput) {
-        importBtn.addEventListener('click', () => {
-          importInput.value = '';
-          importInput.click();
-        });
-
-        importInput.addEventListener('change', () => {
-          const [file] = importInput.files || [];
-          if (file) {
-            this.handleImport(file);
-          }
-          importInput.value = '';
-          closeSettings();
-        });
-      }
-
-      if (clearBtn) {
-        console.log('Clear button found, binding event');
-        clearBtn.addEventListener('click', () => {
-          console.log('Clear button clicked');
-          const cleared = this.handleDataClear();
-          if (cleared) {
-            closeSettings();
-          }
-        });
-      } else {
-        console.log('Clear button not found');
-      }
-
-      // History view from settings
-      const { historyBtn } = UI.elements.settingsMenu;
-      console.log('🔍 History button found:', historyBtn);
-      if (historyBtn) {
-        historyBtn.addEventListener('click', () => {
-          console.log('📅 History button clicked');
-          closeSettings();
-          this.openHistoryView();
-        });
-      } else {
-        console.log('❌ History button NOT found');
-      }
-    },
-
-    openHistoryView() {
-      console.log('🔓 Opening history view...');
-      const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
-
-      console.log('📊 History overlay elements:', { overlay, closeBtn, list, dateRange, prevBtn, nextBtn });
-
-      if (!overlay) {
-        console.log('❌ History overlay element not found!');
-        return;
-      }
-
-      Store.ensureEntries();
-      
-      // Migrate: if entries is empty but we have history, populate entries from history
-      const entries = Store.state.entries || {};
-      const history = Store.state.history || [];
-      if (Object.keys(entries).length === 0 && history.length > 0) {
-        console.log('🔄 Migrating history to entries format...');
-        history.forEach(histEntry => {
-          if (histEntry.date) {
-            // Create a minimal entry from history scores
-            entries[histEntry.date] = {
-              wake: '', 
-              rest: '', 
-              run: 0, 
-              strength: false, 
-              skill: false,
-              read: false, 
-              write: false, 
-              quadrant: 0, 
-              meditation: false
-            };
-          }
-        });
-        Store.state.entries = entries;
-        Store.save();
-        console.log(`✅ Migrated ${history.length} history entries`);
-      }
-
-      console.log('📝 Store entries:', Store.state.entries);
-
-      // Current page state
-      let currentPage = 0;
-      const entriesPerPage = 7;
-
-      // Render history entries
-      const renderHistory = () => {
-        const entries = Store.state.entries || {};
-        const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
-        const startIdx = currentPage * entriesPerPage;
-        const endIdx = startIdx + entriesPerPage;
-        const datesToShow = allDates.slice(startIdx, endIdx);
-
-        // Update navigation buttons
-        if (prevBtn) prevBtn.disabled = currentPage === 0;
-        if (nextBtn) nextBtn.disabled = endIdx >= allDates.length;
-
-        // Update date range text
-        if (dateRange && datesToShow.length > 0) {
-          const firstDate = new Date(datesToShow[datesToShow.length - 1]).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          const lastDate = new Date(datesToShow[0]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          dateRange.textContent = datesToShow.length === 1 ? lastDate : `${firstDate} - ${lastDate}`;
-        }
-
-        // Render entries
-        if (list) {
-          if (datesToShow.length === 0) {
-            list.innerHTML = `
-              <div class="history-empty">
-                <div class="history-empty__icon">📅</div>
-                <p class="history-empty__text">No entries yet. Start tracking your daily progress!</p>
-              </div>
-            `;
-          } else {
-            list.innerHTML = datesToShow.map(dateKey => {
-              const entry = entries[dateKey];
-              const scores = Scoring.calculateDomainScores(entry);
-              const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
-
-              const date = new Date(dateKey);
-              const formattedDate = date.toLocaleDateString('en-US', { 
-                weekday: 'short', 
-                month: 'short', 
-                day: 'numeric',
-                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-              });
-
-              return `
-                <div class="history-entry" data-date="${dateKey}">
-                  <div class="history-entry__header">
-                    <div class="history-entry__date">${formattedDate}</div>
-                    <div class="history-entry__total">${totalScore}</div>
-                  </div>
-                  <div class="history-entry__domains">
-                    <div class="history-domain">
-                      <img src="icons/sleep.svg" alt="" class="history-domain__icon">
-                      <div class="history-domain__info">
-                        <div class="history-domain__name">Sleep</div>
-                        <div class="history-domain__score">${scores.sleep}</div>
-                      </div>
-                    </div>
-                    <div class="history-domain">
-                      <img src="icons/fitness.svg" alt="" class="history-domain__icon">
-                      <div class="history-domain__info">
-                        <div class="history-domain__name">Fitness</div>
-                        <div class="history-domain__score">${scores.fitness}</div>
-                      </div>
-                    </div>
-                    <div class="history-domain">
-                      <img src="icons/mind.svg" alt="" class="history-domain__icon">
-                      <div class="history-domain__info">
-                        <div class="history-domain__name">Mind</div>
-                        <div class="history-domain__score">${scores.mind}</div>
-                      </div>
-                    </div>
-                    <div class="history-domain">
-                      <img src="icons/spirit.svg" alt="" class="history-domain__icon">
-                      <div class="history-domain__info">
-                        <div class="history-domain__name">Spirit</div>
-                        <div class="history-domain__score">${scores.spirit}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('');
-
-            // Add click handlers to entries
-            list.querySelectorAll('.history-entry').forEach(entryEl => {
-              entryEl.addEventListener('click', () => {
-                const dateKey = entryEl.dataset.date;
-                overlay.classList.remove('active');
-                // Switch to the date and show home page
-                Store.state.currentDate = dateKey;
-                UI.updateDateDisplay();
-                this.render();
-                UI.showPage('home');
-              });
-            });
-          }
-        }
-      };
-
-      // Navigation handlers
-      if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
-          currentPage++;
-          renderHistory();
-        });
-      }
-
-      if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
-          if (currentPage > 0) {
-            currentPage--;
-            renderHistory();
-          }
-        });
-      }
-
-      // Close handler
-      if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-          console.log('❌ Closing history overlay');
-          overlay.classList.remove('active');
-        });
-      }
-
-      // Open overlay and render
-      console.log('✅ Adding active class to overlay');
-      overlay.classList.add('active');
-      console.log('🎨 Rendering history...');
-      renderHistory();
-    },
-
-    mapVisionKey(key) {
-      switch (key) {
-        case 'theme':
-          return 'visionTheme';
-        case 'sleep':
-          return 'visionSleepFocus';
-        case 'fitness':
-          return 'visionFitnessFocus';
-        case 'mind':
-          return 'visionMindFocus';
-        case 'spirit':
-          return 'visionSpiritFocus';
-        default:
-          return null;
-      }
-    },
-
-    showPage(page) {
-      if (!page) return;
-
-      UI.elements.pages.forEach(section => {
-        section.classList.toggle('active', section.dataset.page === page);
-      });
-
-      this.currentPage = page;
-      this.updateNavState(page);
-
-      // Add data attribute to app-main for CSS targeting
-      const main = document.querySelector('.app-main');
-      if (main) {
-        main.setAttribute('data-current-page', page);
-        main.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    },
-
-    updateNavState(page) {
-      UI.elements.navButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.page === page);
-      });
-    },
 
     // --- SCORE CALCULATION LOGIC (Trend-based with 7-day weighted average) ---
     
@@ -953,175 +233,22 @@ document.addEventListener('DOMContentLoaded', () => {
       return UI.calculateSleepHours();
     },
 
-    calculateStreaks() {
-      const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
-      const recent = history.slice(-7);
-      const domains = ['sleep', 'fitness', 'mind', 'spirit'];
-      const streaks = {};
-      const denominator = recent.length === 0 ? 7 : recent.length;
 
-      domains.forEach(domain => {
-        const activeDays = recent.reduce((count, entry) => {
-          const value = Number(entry?.scores?.[domain]);
-          return count + (Number.isFinite(value) && value > 0 ? 1 : 0);
-        }, 0);
-        const labelDenominator = denominator === 1 ? 'day' : 'days';
-        const totalLabel = recent.length === 0 ? `7 ${labelDenominator}` : `${denominator} ${labelDenominator}`;
-        streaks[domain] = `${activeDays} of ${totalLabel}`;
-      });
-
-      return streaks;
-    },
 
     /**
      * Analyzes the last 7 days of historical data and determines the heatmap mode.
      */
-    getWeeklyData() {
-      const domains = ['sleep', 'fitness', 'mind', 'spirit'];
-      const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
-      const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
-      const today = Store.getToday();
-      const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-      const fullDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-      // Calculate the current week (Monday to Sunday)
-      const now = new Date();
-      const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-      
-      // Calculate days since last Monday (adjusting so Monday = 0, Sunday = 6)
-      const daysSinceMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-      
-      // Build array starting from Monday of the current week
-      const last7Days = [];
-      for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - daysSinceMonday + i);
-        const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        const dayIndex = d.getDay();
-        const entry = history.find(e => e.date === dateKey) || { date: dateKey, scores: {} };
-
-        last7Days.push({
-          dayLabel: dayNames[dayIndex],
-          fullDayName: fullDayNames[dayIndex],
-          dateKey,
-          scores: entry.scores || { sleep: 0, fitness: 0, mind: 0, spirit: 0 },
-          isToday: dateKey === today
-        });
-      }
-
-      const totalDays = last7Days.length || 1;
-      const activeDaySet = new Set();
-      const domainConsistencies = domains.map(domain => {
-        const activeDays = last7Days.reduce((count, day) => {
-          const score = Number(day.scores[domain]) || 0;
-          if (score >= 50) {
-            activeDaySet.add(day.dateKey);
-            return count + 1;
-          }
-          return count;
-        }, 0);
-        return {
-          domain,
-          count: activeDays,
-          consistency: activeDays / totalDays
-        };
-      });
-
-      const totalActiveDaysCount = activeDaySet.size;
-      const weakestDomain = domainConsistencies.reduce((min, curr) => {
-        if (!min || curr.consistency < min.consistency) return curr;
-        return min;
-      }, null) || { domain: 'sleep', count: 0, consistency: 0 };
-      const strongestDomain = domainConsistencies.reduce((max, curr) => {
-        if (!max || curr.consistency > max.consistency) return curr;
-        return max;
-      }, null) || { domain: 'sleep', count: 0, consistency: 0 };
-
-      const requiredDays = Math.ceil(totalDays * 0.5);
-      let mode = 'V1';
-
-      if (totalActiveDaysCount === 0) {
-        mode = 'V3';
-      } else if (weakestDomain.consistency < 0.5) {
-        mode = 'V2';
-      }
-
-      let summary = '';
-      if (mode === 'V3' || !domainConsistencies.length) {
-        summary = 'Ready to start? Log an entry now to begin your weekly momentum.';
-      } else if (mode === 'V2') {
-        const neededDays = Math.max(0, requiredDays - weakestDomain.count);
-        const deficitStatement = weakestDomain.count === 0
-          ? 'not logged this week'
-          : `only tracked ${weakestDomain.count} of ${totalDays} days`;
-        const actionStatement = neededDays > 0
-          ? `Hit it ${neededDays === 1 ? 'once' : `${neededDays} more times`} this week to rebound.`
-          : 'Focus on the missing action today to boost alignment.';
-        summary = `${formatDomain(weakestDomain.domain)} shows a clear deficit—${deficitStatement}. ${actionStatement}`;
-      } else {
-        const allEven = domainConsistencies.every(d => d.count === strongestDomain.count);
-        if (allEven) {
-          summary = `Exceptional consistency! All domains tracked on ${strongestDomain.count} of ${totalDays} days.`;
-        } else {
-          summary = `${formatDomain(strongestDomain.domain)} shows great consistency, tracked on ${strongestDomain.count} of ${totalDays} days. Keep pushing for ${formatDomain(weakestDomain.domain)}!`;
-        }
-      }
-
-      return { last7Days, mode, summary, weakestDomain, strongestDomain, domainConsistencies };
-    },
 
     /**
      * Renders the Weekly Trajectory Heatmap component based on the weekly data.
      */
-    renderWeeklyHeatmap() {
-      const container = UI.elements.heatmapContainer;
-      const summaryEl = UI.elements.heatmapSummary;
-      if (!container || !summaryEl) return;
 
-      const { last7Days, mode, summary } = this.getWeeklyData();
-      const domains = ['sleep', 'fitness', 'mind', 'spirit'];
-      const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
-
-      // Build day labels as individual elements
-      const dayLabelsHTML = last7Days.map(day => {
-        const tooltip = day.isToday ? 'Today' : day.fullDayName;
-        return `<div class="day-label" title="${tooltip}">${day.dayLabel}</div>`;
-      }).join('');
-
-      // Build rows for each domain
-      const rowsHTML = domains.map(domain => {
-        const cellsHTML = last7Days.map(day => {
-          const score = Number(day.scores[domain]) || 0;
-          const intensity = this.getHeatmapIntensity(score);
-          const tooltip = `${formatDomain(domain)} on ${day.fullDayName}${day.isToday ? ' (Today)' : ''}: ${score} pts`;
-          return `<div class="heatmap-cell" data-intensity="${intensity}" title="${tooltip}"></div>`;
-        }).join('');
-
-        return `<div class="domain-label">${formatDomain(domain)}</div>${cellsHTML}`;
-      }).join('');
-
-      container.innerHTML = `
-        <div class="heatmap-grid">
-          <div></div>
-          ${dayLabelsHTML}
-          ${rowsHTML}
-        </div>
-      `;
-
-      container.setAttribute('data-mode', mode);
-      summaryEl.textContent = summary;
-      summaryEl.setAttribute('data-mode', mode);
-    },
 
     /**
      * Maps raw activity score (0-100) to heatmap intensity level.
      */
-    getHeatmapIntensity(rawScore) {
-      if (!Number.isFinite(rawScore) || rawScore === 0) return 'none';
-      if (rawScore < 50) return 'low';
-      if (rawScore < 80) return 'med';
-      return 'high';
-    },
+
 
 
 
@@ -1318,12 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.DropApp = window.DropApp || {};
     window.DropApp.App = App;
     window.DropApp.UI = UI;
+    window.DropApp.Analytics = Analytics;
     window.DropApp.testHooks = testHooks;
   }
 
   const isTestEnvironment = document.body && document.body.dataset && document.body.dataset.dropTest === 'true';
 
-  App.setupInstallPromptEvents();
+  Install.setupInstallPromptEvents();
 
   if (isTestEnvironment) {
     return;
