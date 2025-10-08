@@ -163,20 +163,32 @@
                 <p class="action-card__subtitle">Recovery &amp; Rhythm</p>
               </div>
             </header>
-            <div class="sleep-card__inputs">
-              <div class="time-input-row">
-                <label for="wake-time">Wake</label>
-                <div class="time-input-control">
-                  <input type="time" id="wake-time" autocomplete="off">
-                  <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+            <!-- Sleep with tiered labels -->
+            <div class="sleep-widget-body">
+              <div class="tiered-selection-group">
+                
+                <!-- Wake with tiered label -->
+                <div class="tiered-selection" data-sleep-section="wake">
+                  <label class="tiered-label">Wake</label>
+                  <div class="wake-controls">
+                    <div class="time-input-control">
+                      <input type="time" id="wake-time" autocomplete="off">
+                      <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="time-input-row">
-                <label for="rest-time">Rest</label>
-                <div class="time-input-control">
-                  <input type="time" id="rest-time" autocomplete="off">
-                  <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+
+                <!-- Rest with tiered label -->
+                <div class="tiered-selection" data-sleep-section="rest">
+                  <label class="tiered-label">Rest</label>
+                  <div class="rest-controls">
+                    <div class="time-input-control">
+                      <input type="time" id="rest-time" autocomplete="off">
+                      <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+                    </div>
+                  </div>
                 </div>
+                
               </div>
             </div>
             <p class="text-status" id="sleep-status">No sleep window logged yet.</p>
@@ -191,22 +203,24 @@
               </div>
             </header>
             
-            <!-- NEW: Fitness pill toggles with inline tiered selections -->
+            <!-- NEW: Fitness with tiered labels -->
             <div class="fitness-widget-body">
-              <div class="pill-toggle-stack" role="group" aria-label="Fitness activities">
+              <div class="tiered-selection-group">
                 
-                <!-- Run button + dropdown -->
-                <button class="pill-toggle" type="button" data-fitness-toggle="run" aria-pressed="false">Run</button>
-                <div class="fitness-dropdown" data-fitness-dropdown="run" hidden>
-                  <div class="run-presets" role="group" aria-label="Quick distance presets">
-                    <button class="run-preset" type="button" data-run-value="5">5 km</button>
-                    <button class="run-preset" type="button" data-run-value="10">10 km</button>
-                    <button class="run-preset" type="button" data-run-value="20">20 km</button>
-                  </div>
-                  <div class="run-adjust" role="group" aria-label="Adjust distance">
-                    <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
-                    <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
-                    <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+                <!-- Run with tiered label -->
+                <div class="tiered-selection" data-fitness-section="run">
+                  <label class="tiered-label">Run</label>
+                  <div class="run-controls">
+                    <div class="run-presets" role="group" aria-label="Quick distance presets">
+                      <button class="run-preset" type="button" data-run-value="5">5 km</button>
+                      <button class="run-preset" type="button" data-run-value="10">10 km</button>
+                      <button class="run-preset" type="button" data-run-value="20">20 km</button>
+                    </div>
+                    <div class="run-adjust" role="group" aria-label="Adjust distance">
+                      <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
+                      <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
+                      <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+                    </div>
                   </div>
                 </div>
                 
@@ -220,12 +234,14 @@
                   </div>
                 </div>
                 
-                <!-- Skill button + dropdown -->
-                <button class="pill-toggle" type="button" data-fitness-toggle="skill" aria-pressed="false">Skill</button>
-                <div class="fitness-dropdown" data-fitness-dropdown="skill" hidden>
-                  <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
-                    <!-- Skill chips injected by UI.renderSkillChips() -->
-                    <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                <!-- Skill with tiered label -->
+                <div class="tiered-selection" data-fitness-section="skill">
+                  <label class="tiered-label">Skill</label>
+                  <div class="skill-controls">
+                    <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
+                      <!-- Skill chips injected by UI.renderSkillChips() -->
+                      <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                    </div>
                   </div>
                 </div>
                 
@@ -278,39 +294,50 @@
               </div>
             </header>
 
-            <!-- Meditation / Mindfulness Timer -->
-            <div class="meditation-timer-section">
-              <div class="section-header">Mindfulness Practice</div>
-              <div class="timer-button-wrapper">
-                <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
-                  <span id="spirit-timer-text">Start Session</span>
-                  <span id="spirit-mantra-text" class="mantra-text">ॐ मणि पद्मे हूँ</span>
-                  <div class="timer-fill" id="spirit-timer-fill"></div>
-                </button>
-              </div>
-              <p class="text-status" id="spirit-timer-instruction">Press and hold to begin a session.</p>
-            </div>
+            <!-- Spirit with tiered labels -->
+            <div class="spirit-widget-body">
+              <div class="tiered-selection-group">
+                
+                <!-- Mindfulness with tiered label -->
+                <div class="tiered-selection" data-spirit-section="mindfulness">
+                  <label class="tiered-label">Mindfulness</label>
+                  <div class="mindfulness-controls">
+                    <div class="timer-button-wrapper">
+                      <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
+                        <span id="spirit-timer-text">Start Session</span>
+                        <span id="spirit-mantra-text" class="mantra-text">ॐ मणि पद्मे हूँ</span>
+                        <div class="timer-fill" id="spirit-timer-fill"></div>
+                      </button>
+                    </div>
+                    <p class="text-status" id="spirit-timer-instruction">Press and hold to begin a session.</p>
+                  </div>
+                </div>
 
-            <!-- Mood & Energy Log (continuous quadrant) -->
-            <div class="mood-log-container spirit-mood">
-              <div class="section-header">Mood & Energy Log</div>
-              <div class="mood-grid-container" id="spirit-mood-grid" role="img" aria-label="Mood quadrant">
-                <div class="mood-dot" id="spirit-mood-dot" style="--mood-x:50%; --mood-y:50%;"></div>
-                <span class="mood-axis-label label-e-high">High Energy</span>
-                <span class="mood-axis-label label-e-low">Low Energy</span>
-                <span class="mood-axis-label label-m-neg">Negative</span>
-                <span class="mood-axis-label label-m-pos">Positive</span>
-              </div>
-              <p class="mood-description" id="spirit-mood-label">Neutral · Medium Energy</p>
-              <div class="slider-wrapper">
-                <div class="slider-stack">
-                  <label class="slider-label" for="spirit-mood-slider">Mood (Valence)</label>
-                  <input type="range" id="spirit-mood-slider" min="0" max="100" value="50">
+                <!-- Mood & Energy with tiered label -->
+                <div class="tiered-selection" data-spirit-section="mood-energy">
+                  <label class="tiered-label">Mood & Energy</label>
+                  <div class="mood-energy-controls">
+                    <div class="mood-grid-container" id="spirit-mood-grid" role="img" aria-label="Mood quadrant">
+                      <div class="mood-dot" id="spirit-mood-dot" style="--mood-x:50%; --mood-y:50%;"></div>
+                      <span class="mood-axis-label label-e-high">High Energy</span>
+                      <span class="mood-axis-label label-e-low">Low Energy</span>
+                      <span class="mood-axis-label label-m-neg">Negative</span>
+                      <span class="mood-axis-label label-m-pos">Positive</span>
+                    </div>
+                    <p class="mood-description" id="spirit-mood-label">Neutral · Medium Energy</p>
+                    <div class="slider-wrapper">
+                      <div class="slider-stack">
+                        <label class="slider-label" for="spirit-mood-slider">Mood (Valence)</label>
+                        <input type="range" id="spirit-mood-slider" min="0" max="100" value="50">
+                      </div>
+                      <div class="slider-stack">
+                        <label class="slider-label" for="spirit-energy-slider">Energy (Arousal)</label>
+                        <input type="range" id="spirit-energy-slider" min="0" max="100" value="50">
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="slider-stack">
-                  <label class="slider-label" for="spirit-energy-slider">Energy (Arousal)</label>
-                  <input type="range" id="spirit-energy-slider" min="0" max="100" value="50">
-                </div>
+                
               </div>
             </div>
 

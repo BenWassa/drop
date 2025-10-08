@@ -918,6 +918,28 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Control wrappers for non-tier-button content */
+.run-controls,
+.skill-controls,
+.mindfulness-controls,
+.mood-energy-controls,
+.wake-controls,
+.rest-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.run-controls {
+  gap: 12px;
+}
+
+.mood-energy-controls {
+  gap: 12px;
+}
+
 .tier-buttons {
   display: flex;
   gap: 6px;
