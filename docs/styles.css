@@ -1801,70 +1801,16 @@ body {
   margin: 8px 0;
 }
 
-/* Slider styling */
-.action-card.spirit-card .slider-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 8px;
-}
-
-.action-card.spirit-card .slider-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.action-card.spirit-card .slider-label {
-  font-size: 12px;
-  text-transform: uppercase;
+/* Mood instruction text */
+.action-card.spirit-card .mood-instruction {
   color: var(--color-text-secondary);
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 400;
+  margin: 4px 0 8px 0;
+  font-style: italic;
 }
 
-.action-card.spirit-card input[type="range"] {
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-  cursor: pointer;
-}
-
-.action-card.spirit-card input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-text-primary);
-  border: 2px solid var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.action-card.spirit-card input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
-
-.action-card.spirit-card input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--color-text-primary);
-  border: 2px solid var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.action-card.spirit-card input[type="range"]::-moz-range-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
 
 
 /* === GRATITUDE PAGE === */

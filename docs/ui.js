@@ -107,8 +107,6 @@ const UI = {
       spiritCard: document.querySelector('.spirit-card'),
       skillContainer: document.getElementById('skill-chip-row'),
       moodDot: document.getElementById('spirit-mood-dot'),
-      energySlider: document.getElementById('spirit-energy-slider'),
-      moodSlider: document.getElementById('spirit-mood-slider'),
     },
     heatmapContainer: document.getElementById('heatmap-container'),
     heatmapSummary: document.getElementById('heatmap-summary')
@@ -461,42 +459,7 @@ const UI = {
     dot.style.setProperty('--mood-y', `${yPercent}%`);
   },
 
-  setMoodSliders(energy, mood) {
-    const { energySlider, moodSlider } = this.elements.home || {};
-    const clampValue = (value) => Math.max(-100, Math.min(100, Math.round(Number(value) || 0)));
-    const clampedEnergy = clampValue(energy);
-    const clampedMood = clampValue(mood);
 
-    if (energySlider) {
-      energySlider.value = String(clampedEnergy);
-    }
-    if (moodSlider) {
-      moodSlider.value = String(clampedMood);
-    }
-
-    // Update App.moodAxes if App is available
-    if (typeof App !== 'undefined') {
-      App.moodAxes = { energy: clampedEnergy, mood: clampedMood };
-    }
-
-    // Persist energy and mood to Store (only if different to avoid unnecessary updates)
-    if (clampedEnergy !== Store.state.energy) {
-      Store.update('energy', clampedEnergy);
-    }
-    if (clampedMood !== Store.state.mood) {
-      Store.update('mood', clampedMood);
-    }
-
-    // Update quadrant if it changed
-    const quadrant = Scoring.resolveQuadrant(clampedEnergy, clampedMood);
-    if (quadrant !== Store.state.quadrant) {
-      Store.update('quadrant', quadrant);
-    }
-
-    // Also update the dot position and summary when setting sliders
-    this.positionMoodDot(clampedEnergy, clampedMood);
-    this.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, clampedEnergy, clampedMood);
-  },
 
   toggleOverlay(domain, show = true) {
     const overlay = document.getElementById(`${domain}-overlay`);
@@ -974,36 +937,23 @@ const UI = {
       if (hasApp) App.moodAxes = { ...axes };
     }
     
-    UI.setMoodSliders(axes.energy, axes.mood);
-    // Note: positionMoodDot and updateSpiritSummary are now called within setMoodSliders
-  },
-
-  handleMoodInput() {
-    const { energySlider, moodSlider } = UI.elements.home || {};
-    if (!energySlider || !moodSlider) return;
-    const energy = Number(energySlider.value) || 0;
-    const mood = Number(moodSlider.value) || 0;
-    
     // Update App.moodAxes if App is available
-    if (typeof App !== 'undefined') {
-      App.moodAxes = { energy, mood };
+    if (hasApp) {
+      App.moodAxes = { ...axes };
     }
-    
-    // Persist energy and mood to Store
-    if (energy !== Store.state.energy) {
-      Store.update('energy', energy);
-    }
-    if (mood !== Store.state.mood) {
-      Store.update('mood', mood);
-    }
-    
-    UI.positionMoodDot(energy, mood);
-    const quadrant = Scoring.resolveQuadrant(energy, mood);
+
+    // Update quadrant if it changed
+    const quadrant = Scoring.resolveQuadrant(axes.energy, axes.mood);
     if (quadrant !== Store.state.quadrant) {
       Store.update('quadrant', quadrant);
     }
-    UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, energy, mood);
+
+    // Update the dot position and summary
+    UI.positionMoodDot(axes.energy, axes.mood);
+    UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
   },
+
+
 
   bindHomeActions() {
     const { inputs, home } = UI.elements;
@@ -1232,12 +1182,51 @@ const UI = {
       });
     }
 
-    const { energySlider, moodSlider } = home;
-    if (energySlider) {
-      energySlider.addEventListener('input', () => UI.handleMoodInput());
-    }
-    if (moodSlider) {
-      moodSlider.addEventListener('input', () => UI.handleMoodInput());
+    // Add click handler for mood quadrant
+    const moodGrid = document.getElementById('spirit-mood-grid');
+    if (moodGrid) {
+      moodGrid.addEventListener('click', (event) => {
+        const rect = moodGrid.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Convert to percentage (0-100)
+        const xPercent = (x / rect.width) * 100;
+        const yPercent = (y / rect.height) * 100;
+        
+        // Convert to mood/energy values (-100 to 100)
+        // X axis: left = negative mood (-100), right = positive mood (100)
+        const mood = (xPercent - 50) * 2;
+        // Y axis: top = high energy (100), bottom = low energy (-100)
+        const energy = (50 - yPercent) * 2;
+        
+        // Clamp values
+        const clampedMood = Math.max(-100, Math.min(100, Math.round(mood)));
+        const clampedEnergy = Math.max(-100, Math.min(100, Math.round(energy)));
+        
+        // Update App.moodAxes if App is available
+        if (typeof App !== 'undefined') {
+          App.moodAxes = { energy: clampedEnergy, mood: clampedMood };
+        }
+        
+        // Persist energy and mood to Store
+        if (clampedEnergy !== Store.state.energy) {
+          Store.update('energy', clampedEnergy);
+        }
+        if (clampedMood !== Store.state.mood) {
+          Store.update('mood', clampedMood);
+        }
+        
+        // Update quadrant if it changed
+        const quadrant = Scoring.resolveQuadrant(clampedEnergy, clampedMood);
+        if (quadrant !== Store.state.quadrant) {
+          Store.update('quadrant', quadrant);
+        }
+        
+        // Update the dot position and summary
+        UI.positionMoodDot(clampedEnergy, clampedMood);
+        UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, clampedEnergy, clampedMood);
+      });
     }
   },
 
