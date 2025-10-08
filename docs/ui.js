@@ -435,12 +435,28 @@ const UI = {
   setMoodSliders(energy, mood) {
     const { energySlider, moodSlider } = this.elements.home || {};
     const clampValue = (value) => Math.max(-100, Math.min(100, Math.round(Number(value) || 0)));
+    const clampedEnergy = clampValue(energy);
+    const clampedMood = clampValue(mood);
+
+    console.log('🎚️ setMoodSliders called with:', energy, mood, '-> clamped:', clampedEnergy, clampedMood);
+
     if (energySlider) {
-      energySlider.value = String(clampValue(energy));
+      energySlider.value = String(clampedEnergy);
+      console.log('🎚️ energy slider set to:', clampedEnergy);
+    } else {
+      console.warn('⚠️ energy slider not found');
     }
+    
     if (moodSlider) {
-      moodSlider.value = String(clampValue(mood));
+      moodSlider.value = String(clampedMood);
+      console.log('🎚️ mood slider set to:', clampedMood);
+    } else {
+      console.warn('⚠️ mood slider not found');
     }
+
+    // Also update the dot position and summary when setting sliders
+    this.positionMoodDot(clampedEnergy, clampedMood);
+    this.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, clampedEnergy, clampedMood);
   },
 
   toggleOverlay(domain, show = true) {
@@ -885,31 +901,32 @@ const UI = {
     UI.updateFitnessSummary();
     UI.updateMindStatus();
 
-    // Restore slider positions from Store if available
+    // Restore slider positions from Store
     const storedEnergy = Store.state.energy || 0;
     const storedMood = Store.state.mood || 0;
-    const hasStoredSliders = storedEnergy !== 0 || storedMood !== 0;
+    
+    console.log('🔄 syncDailyUI: stored energy/mood:', storedEnergy, storedMood);
     
     // Check if App is available (it might not be during initial load)
     const hasApp = typeof App !== 'undefined';
     
-    if (hasStoredSliders) {
+    // Always use stored values if available, otherwise use quadrant preset
+    let axes;
+    if (storedEnergy !== 0 || storedMood !== 0) {
       // Use stored slider values
-      if (hasApp) App.moodAxes = { energy: storedEnergy, mood: storedMood };
+      axes = { energy: storedEnergy, mood: storedMood };
+      if (hasApp) App.moodAxes = { ...axes };
+      console.log('🔄 syncDailyUI: using stored values');
     } else {
       // Fall back to quadrant preset if no slider data
-      const fallbackAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
-      const currentAxes = (hasApp && App.moodAxes) ? App.moodAxes : { energy: 0, mood: 0 };
-      const currentQuadrant = Scoring.resolveQuadrant(currentAxes.energy, currentAxes.mood);
-      if (hasApp && (!App.moodAxes || currentQuadrant !== Store.state.quadrant)) {
-        App.moodAxes = { ...fallbackAxes };
-      }
+      axes = Scoring.getQuadrantPreset(Store.state.quadrant);
+      if (hasApp) App.moodAxes = { ...axes };
+      console.log('🔄 syncDailyUI: using quadrant preset');
     }
     
-    const axes = (hasApp && App.moodAxes) ? App.moodAxes : { energy: storedEnergy, mood: storedMood };
+    console.log('🔄 syncDailyUI: setting sliders to:', axes.energy, axes.mood);
     UI.setMoodSliders(axes.energy, axes.mood);
-    UI.positionMoodDot(axes.energy, axes.mood);
-    UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, axes.energy, axes.mood);
+    // Note: positionMoodDot and updateSpiritSummary are now called within setMoodSliders
   },
 
   handleMoodInput() {
