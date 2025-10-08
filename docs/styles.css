@@ -894,8 +894,7 @@ body {
   flex-direction: column;
   gap: 16px;
   width: 100%;
-  max-width: 280px;
-  margin: 0 auto;
+  margin: 0; /* Allow full width inside action-card */
 }
 
 .tiered-selection {
@@ -925,6 +924,8 @@ body {
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(255, 255, 255, 0.02);
+  width: 100%;
+  display: block;
 }
 
 .collapsible-practice.is-expanded {
@@ -938,7 +939,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 14px 20px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -974,13 +975,15 @@ body {
 .practice-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
-  padding: 0 18px;
+  transition: max-height 0.36s cubic-bezier(0.4, 0, 0.2, 1), padding 0.28s ease;
+  padding: 0 20px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .collapsible-practice.is-expanded .practice-content {
-  max-height: 500px;
-  padding: 0 18px 18px 18px;
+  max-height: 1000px; /* generous max to allow all content */
+  padding: 0 20px 20px 20px;
 }
 
 /* === LOGGED STATE - Domain-colored glow === */
