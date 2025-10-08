@@ -159,9 +159,33 @@ document.addEventListener('DOMContentLoaded', () => {
       return `${year}-${month}-${day}`;
     },
 
+    /**
+     * Get the "sleep day" - calendar day adjusted for sleep cycles.
+     * Hours 00:00-03:59 are considered part of the previous calendar day.
+     * This ensures that going to bed at 2 AM logs to "yesterday's" sleep cycle.
+     */
+    getSleepDay() {
+      const now = new Date();
+      const hours = now.getHours();
+      
+      // If it's between midnight and 4 AM, use previous calendar day
+      if (hours < 4) {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const year = yesterday.getFullYear();
+        const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+        const day = String(yesterday.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      
+      // Otherwise use current calendar day
+      return this.getToday();
+    },
+
     expireStaleDailyData() {
       this.ensureDailyTimestamps();
-      const today = this.getToday();
+      // Use sleep day for expiring data (00:00-03:59 counts as previous day)
+      const today = this.getSleepDay();
       let changed = false;
 
       this.dailyKeys.forEach(key => {
@@ -203,13 +227,16 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     checkForNewDay() {
-      const today = this.getToday();
+      // Use sleep day for checking new day (00:00-03:59 counts as previous day)
+      const today = this.getSleepDay();
       const staleDataCleared = this.expireStaleDailyData();
       let needsUpdate = false;
 
       if (this.state.lastEntryDate !== today) {
         this.resetDailyData();
         this.state.lastEntryDate = today;
+        // Clear action timestamps for new day
+        this.state.actionTimestamps = {};
         needsUpdate = true;
       }
 
@@ -247,9 +274,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         this.state[key] = newValue;
         if (this.dailyKeys.includes(key)) {
-          this.state.lastEntryDate = this.getToday();
+          // Use sleep day for daily tracking (00:00-03:59 counts as previous day)
+          this.state.lastEntryDate = this.getSleepDay();
           this.ensureDailyTimestamps();
           this.state.dailyTimestamps[key] = this.state.lastEntryDate;
+          // Add timestamp when data is logged
+          if (!this.state.actionTimestamps) {
+            this.state.actionTimestamps = {};
+          }
+          this.state.actionTimestamps[key] = new Date().toISOString();
           // Save current daily data to entries for history view
           this.saveCurrentEntry();
         }
@@ -262,7 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveCurrentEntry() {
       this.ensureEntries();
-      const today = this.getToday();
+      // Use sleep day for saving entries (00:00-03:59 counts as previous day)
+      const today = this.getSleepDay();
       const entry = {};
       
       // Save all daily keys to the entry
@@ -270,6 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const value = this.state[key];
         entry[key] = Array.isArray(value) ? [...value] : value;
       });
+
+      // Save action timestamps for this day
+      if (this.state.actionTimestamps) {
+        entry.timestamps = { ...this.state.actionTimestamps };
+      }
 
       // Only save if there's actual data (not all defaults)
       const hasData = this.dailyKeys.some(key => {
@@ -888,16 +927,46 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     initDate() {
+      this.updateDateDisplay();
+    },
+
+    /**
+     * Update date display to show current "sleep day"
+     * If viewing history (Store.state.currentDate is set), show that date
+     * Otherwise show current sleep day with note if in early morning hours
+     */
+    updateDateDisplay() {
       try {
-        // Query at runtime in case the cached reference isn't available yet
         const el = document.getElementById('date-display') || (this.elements && this.elements.dateDisplay);
         if (!el) return;
-        el.textContent = new Date().toLocaleDateString('en-US', {
+
+        // If viewing a historical date, show that
+        if (Store.state.currentDate) {
+          const dateObj = new Date(Store.state.currentDate + 'T12:00:00');
+          el.textContent = dateObj.toLocaleDateString('en-US', {
+            weekday: 'long', month: 'long', day: 'numeric'
+          }) + ' (History)';
+          return;
+        }
+
+        // Otherwise show current sleep day
+        const now = new Date();
+        const hours = now.getHours();
+        const sleepDay = Store.getSleepDay();
+        const dateObj = new Date(sleepDay + 'T12:00:00');
+        
+        let dateText = dateObj.toLocaleDateString('en-US', {
           weekday: 'long', month: 'long', day: 'numeric'
         });
+
+        // Add note if we're in early morning hours (logging to "yesterday")
+        if (hours < 4) {
+          dateText += ` (early ${now.toLocaleDateString('en-US', { weekday: 'short' })})`;
+        }
+
+        el.textContent = dateText;
       } catch (err) {
-        // Swallow to avoid breaking app init; log for debugging
-        console.warn('initDate failed to set date display:', err);
+        console.warn('updateDateDisplay failed:', err);
       }
     },
 
