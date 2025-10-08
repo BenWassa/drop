@@ -309,8 +309,9 @@
           const energySlider = document.getElementById('spirit-energy-slider');
           const moodLabel = document.getElementById('spirit-mood-label');
 
-          const LONG = 2000;
           const MIN_PRESS = 500; // Minimum 0.5s before animation starts
+          const FILL_DURATION = 2000; // Fill animation duration (matches CSS)
+          const TOTAL_DURATION = MIN_PRESS + FILL_DURATION; // Total: 2500ms
           let timer = null, running = false, seconds = 0, wasLong = false, pressStartTime = 0;
           let minPressTimer = null, longPressTimer = null;
 
@@ -363,11 +364,11 @@
               text.classList.add('fade-out');
               mantra.classList.add('fade-in');
               
-              // Continue holding for full LONG duration to trigger action
+              // Wait for full fill animation to complete (2000ms)
               longPressTimer = setTimeout(()=>{ 
                 wasLong=true; 
                 btn.classList.remove('long-pressing'); 
-                // Action happens here - timer/log starts
+                // Action happens here - timer/log starts AFTER fill completes
                 if(!running) {
                   startTimer(); 
                 } else {
@@ -375,7 +376,7 @@
                 }
                 longPressTimer=null; 
                 setTimeout(()=>{ wasLong=false; },50); 
-              }, LONG - MIN_PRESS); // Remaining time after MIN_PRESS
+              }, FILL_DURATION); // Full 2000ms for fill animation
             }, MIN_PRESS);
           }
           
