@@ -292,7 +292,7 @@
               </div>
             </div>
 
-            <p class="text-status" id="spirit-combined-status">Status: Meditation pending</p>
+            <p class="text-status" id="spirit-status">Status: Meditation pending</p>
           </article>
         </div>
         <script>
@@ -337,11 +337,13 @@
             const logged = fmt(seconds); 
             const loggedSeconds = seconds;
             
-            // Store the meditation session
-            if (typeof Store !== 'undefined') {
+            // Store the meditation session and update UI
+            if (typeof Store !== 'undefined' && typeof UI !== 'undefined' && typeof App !== 'undefined') {
               Store.update('meditation', true);
-              UI.setToggleState('meditation', true);
+              // Update the Spirit summary status text
               UI.updateSpiritSummary(Store.state.quadrant, true, Store.state.energy || 0, Store.state.mood || 0);
+              // Recalculate and update domain scores
+              App.updateScores();
             }
             
             btn.classList.add('logged-success'); 
