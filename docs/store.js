@@ -44,6 +44,7 @@ const Store = {
     this.ensureDailyTimestamps();
     this.ensureEntries();
     this.ensureSkillCollections();
+    this.migrateOldMindFields();
     this.checkForNewDay();
     this.save();
   },
@@ -89,6 +90,24 @@ const Store = {
     });
     this.state.skill = selections;
     this.state.skillOptions = this.sanitizeStringArray(options);
+  },
+
+  migrateOldMindFields() {
+    // Migrate old boolean read/write fields to new tiered system
+    if (this.state.read === true && this.state.read_level === undefined) {
+      this.state.read_level = 2; // Default to "Perspicacity" if they were reading
+    }
+    if (this.state.write === true && this.state.write_level === undefined) {
+      this.state.write_level = 2; // Default to "Editorial" if they were writing
+    }
+    
+    // Remove old boolean fields if they exist
+    if (this.state.read !== undefined && typeof this.state.read === 'boolean') {
+      delete this.state.read;
+    }
+    if (this.state.write !== undefined && typeof this.state.write === 'boolean') {
+      delete this.state.write;
+    }
   },
 
   sanitizeStringArray(value) {
