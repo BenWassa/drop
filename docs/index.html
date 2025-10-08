@@ -369,9 +369,10 @@
                 wasLong=true; 
                 btn.classList.remove('long-pressing'); 
                 // Action happens here - timer/log starts AFTER fill completes
-                if(!running) {
+                const state = btn.dataset.state;
+                if(state === 'stopped') {
                   startTimer(); 
-                } else {
+                } else if(state === 'running' || state === 'paused') {
                   stopAndLog(); 
                 }
                 longPressTimer=null; 
