@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     merge(payload) {
-      this.state = { ...this.defaults, ...this.state, ...payload };
+      this.state = { ...this.state, ...payload };
       this.ensureHistory();
       this.ensureDailyTimestamps();
       this.ensureEntries();

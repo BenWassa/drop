@@ -30,7 +30,7 @@
   --score-ring-size: calc(96px * var(--header-scale)); /* Base: 96px */
   --score-ring-stroke: calc(10px * var(--header-scale)); /* Base: 10px */
   --score-gap: calc(20px * var(--header-scale)); /* Base: 20px */
-  --header-padding: calc(16px * var(--header-scale)); /* Base: 16px */
+  --header-padding: calc(1px * var(--header-scale)); /* Base: 1px */
 
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 var(--color-surface-inset);
@@ -154,7 +154,7 @@ body {
   justify-content: center;
   position: relative;
   padding: 8px 16px;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .menu-icon-btn {
