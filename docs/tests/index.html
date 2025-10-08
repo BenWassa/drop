@@ -66,8 +66,15 @@
   <!-- Enhancement script to improve test output visualization -->
   <script src="qunit-enhance.js"></script>
 
+  <!-- Load app modules in order -->
+  <script src="../store.js"></script>
+  <script src="../scoring.js"></script>
+  <script src="../ui.js"></script>
+  <script src="../analytics.js"></script>
+  <script src="../install.js"></script>
+  <script src="../app.js"></script>
+  
   <!-- Load test modules -->
-  <script src="../app.js" defer></script>
-  <script src="dom.test.js" defer></script>
+  <script src="dom.test.js"></script>
 </body>
 </html>

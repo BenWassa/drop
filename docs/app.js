@@ -1,3 +1,20 @@
+// === TEST HOOKS (exposed immediately for test environment) ===
+if (typeof window !== 'undefined') {
+  window.DropApp = window.DropApp || {};
+  
+  // Expose test hooks immediately so tests can access them
+  // These will be available before DOMContentLoaded fires
+  window.DropApp.testHooks = {
+    initStore: () => Store.init(),
+    clearAllData: () => Store.clearAllData(),
+    getState: () => JSON.parse(JSON.stringify(Store.state)),
+    getDefaults: () => Store.cloneDefaults(),
+    validateImport: (payload) => Store.validateImport(payload),
+    merge: (payload) => Store.merge(payload),
+    update: (key, value) => Store.update(key, value)
+  };
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
   // === DEVELOPER MODE TOGGLE ===
@@ -455,22 +472,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const testHooks = {
-    initStore: () => Store.init(),
-    clearAllData: () => Store.clearAllData(),
-    getState: () => JSON.parse(JSON.stringify(Store.state)),
-    getDefaults: () => Store.cloneDefaults(),
-    validateImport: (payload) => Store.validateImport(payload),
-    merge: (payload) => Store.merge(payload),
-    update: (key, value) => Store.update(key, value)
-  };
-
+  // Expose App, UI, and Analytics to window (testHooks already exposed at top of file)
   if (typeof window !== 'undefined') {
     window.DropApp = window.DropApp || {};
     window.DropApp.App = App;
     window.DropApp.UI = UI;
     window.DropApp.Analytics = Analytics;
-    window.DropApp.testHooks = testHooks;
   }
 
   const isTestEnvironment = document.body && document.body.dataset && document.body.dataset.dropTest === 'true';
