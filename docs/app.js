@@ -1225,14 +1225,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (inputs.wakeTime) {
         inputs.wakeTime.addEventListener('change', (event) => {
-          Store.update('wake', event.target.value);
+          const timeValue = event.target.value;
+          if (timeValue) {
+            const [hours] = timeValue.split(':').map(Number);
+            // Wake times expected between 04:00-12:00
+            if (hours < 4 || hours > 12) {
+              UI.notify('Wake times are typically between 04:00-12:00. Please verify.');
+            }
+          }
+          Store.update('wake', timeValue);
           UI.updateSleepStatus(this.calculateSleepHours());
           UI.updateTimeButton('wake-time');
         });
       }
       if (inputs.restTime) {
         inputs.restTime.addEventListener('change', (event) => {
-          Store.update('rest', event.target.value);
+          const timeValue = event.target.value;
+          if (timeValue) {
+            const [hours] = timeValue.split(':').map(Number);
+            // Rest times expected between 20:00-02:00 (20-23 or 0-2)
+            if (hours < 20 && hours > 2) {
+              UI.notify('Rest times are typically between 20:00-02:00. Please verify.');
+            }
+          }
+          Store.update('rest', timeValue);
           UI.updateSleepStatus(this.calculateSleepHours());
           UI.updateTimeButton('rest-time');
         });

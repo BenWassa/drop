@@ -337,21 +337,21 @@
             const logged = fmt(seconds); 
             const loggedSeconds = seconds;
             
-            // Store the meditation session and update UI
-            if (typeof Store !== 'undefined' && typeof UI !== 'undefined' && typeof App !== 'undefined') {
-              Store.update('meditation', true);
-              // Update the Spirit summary status text
-              UI.updateSpiritSummary(Store.state.quadrant, true, Store.state.energy || 0, Store.state.mood || 0);
-              // Recalculate and update domain scores
-              App.updateScores();
-            }
-            
             btn.classList.add('logged-success'); 
             text.textContent = `✓ Logged ${logged}`; 
             // Reset text visibility
             text.classList.remove('fade-out');
             mantra.classList.remove('fade-in');
             instruction.textContent='Session complete.'; 
+            
+            // Store the meditation session after UI feedback starts
+            // Store.update() will automatically call App.updateScores() and save to daily entry
+            if (typeof Store !== 'undefined' && typeof UI !== 'undefined') {
+              Store.update('meditation', true);
+              // Update the Spirit summary status text
+              UI.updateSpiritSummary(Store.state.quadrant, true, Store.state.energy || 0, Store.state.mood || 0);
+            }
+            
             setTimeout(()=>{ 
               btn.classList.remove('logged-success'); 
               text.textContent='Start Session'; 
