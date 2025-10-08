@@ -901,6 +901,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-bottom: 12px; /* Match pill-toggle spacing */
+}
+
+.pill-toggle-stack .tiered-selection {
+  margin-bottom: 12px; /* Consistent spacing within pill stacks */
 }
 
 .tiered-label {
@@ -946,6 +951,21 @@ body {
   border-color: rgba(124, 58, 237, 0.45);
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
   color: #c4b5fd; /* Lighter purple text */
+}
+
+/* Fitness-specific tier button styling */
+.mind-card .tier-btn.selected {
+  background: rgba(124, 58, 237, 0.22); /* Mind purple */
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  color: #c4b5fd; /* Lighter purple text */
+}
+
+.fitness-card .tier-btn.selected {
+  background: rgba(255, 59, 48, 0.22); /* Fitness red */
+  border-color: rgba(255, 59, 48, 0.45);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
+  color: #fca5a5; /* Lighter red text */
 }
 
 .tier-btn:focus {
@@ -1097,43 +1117,6 @@ body {
   color: var(--color-text-primary);
   cursor: pointer;
   transition: var(--transition-fast);
-}
-
-.strength-tiers {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.strength-tier {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--color-text-primary);
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  text-align: center;
-  width: 100%;
-}
-
-.strength-tier:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.strength-tier.selected {
-  background: rgba(255, 59, 48, 0.22); /* Fitness red */
-  border-color: rgba(255, 59, 48, 0.45);
-  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
-  color: #fca5a5; /* Lighter red text */
-}
-
-.strength-tier:focus {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
 }
 
 .skill-chip.is-active {

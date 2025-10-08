@@ -191,7 +191,7 @@
               </div>
             </header>
             
-            <!-- NEW: Fitness pill toggles with inline dropdowns -->
+            <!-- NEW: Fitness pill toggles with inline tiered selections -->
             <div class="fitness-widget-body">
               <div class="pill-toggle-stack" role="group" aria-label="Fitness activities">
                 
@@ -210,13 +210,13 @@
                   </div>
                 </div>
                 
-                <!-- Strength button + tiered dropdown -->
-                <button class="pill-toggle" type="button" data-fitness-toggle="strength" aria-pressed="false">Strength</button>
-                <div class="fitness-dropdown" data-fitness-dropdown="strength" hidden>
-                  <div class="strength-tiers" role="group" aria-label="Strength training tiers">
-                    <button class="strength-tier" type="button" data-strength-value="1">Movement</button>
-                    <button class="strength-tier" type="button" data-strength-value="2">Session</button>
-                    <button class="strength-tier" type="button" data-strength-value="3">Training</button>
+                <!-- Strength tiered selection -->
+                <div class="tiered-selection" data-fitness-tier="strength">
+                  <label class="tiered-label">Strength</label>
+                  <div class="tier-buttons" role="group" aria-label="Strength training tiers">
+                    <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Movement</button>
+                    <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Session</button>
+                    <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Training</button>
                   </div>
                 </div>
                 
