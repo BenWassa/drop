@@ -1046,6 +1046,13 @@ body {
   color: var(--color-text-secondary);
 }
 
+.skill-chip--fitness.is-active {
+  background: rgba(255, 59, 48, 0.12); /* Less bright red background */
+  border-color: rgba(255, 59, 48, 0.6); /* More visible red border */
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.2); /* Subtle red glow */
+  color: #ff6b66; /* Slightly lighter red text */
+}
+
 .mood-dot-area {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
