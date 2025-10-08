@@ -243,8 +243,8 @@ const Store = {
     if (needsUpdate) {
       this.save();
       if (typeof App !== 'undefined') {
-        if (typeof App.syncDailyUI === 'function') {
-          App.syncDailyUI();
+        if (typeof UI !== 'undefined' && typeof UI.syncDailyUI === 'function') {
+          UI.syncDailyUI();
         }
         if (typeof App.updateScores === 'function') {
           App.updateScores();
@@ -362,8 +362,8 @@ const Store = {
     this.ensureSkillCollections();
     this.save();
     if (typeof App !== 'undefined') {
-      if (typeof App.syncDailyUI === 'function') {
-        App.syncDailyUI();
+      if (typeof UI !== 'undefined' && typeof UI.syncDailyUI === 'function') {
+        UI.syncDailyUI();
       }
       if (typeof App.updateScores === 'function') {
         App.updateScores();
