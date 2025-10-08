@@ -19,20 +19,21 @@
   "icons": [
     {
       "src": "icons/drop_rounded_app_icon.png",
-      "sizes": "720x720",
+      "sizes": "192x192 512x512 720x720",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
       "src": "icons/drop_rounded.png",
-      "sizes": "500x500",
+      "sizes": "192x192 512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "icons/drop_icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
