@@ -1,6 +1,8 @@
 // === STORE MODULE ===
 // Data persistence and state management for the drop life tracker app
 
+const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
+
 const Store = {
   DB_KEY: 'lifeTrackerData',
   state: {},

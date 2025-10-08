@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
   const DEV_MODE = false;
-  const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 
   const App = {
     currentPage: 'home',
