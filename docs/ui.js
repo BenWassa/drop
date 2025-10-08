@@ -414,12 +414,17 @@ const UI = {
 
   positionMoodDot(energy, mood) {
     const dot = this.elements.home?.moodDot;
-    if (!dot) return;
+    if (!dot) {
+      console.warn('⚠️ positionMoodDot: mood dot element not found');
+      return;
+    }
 
     // Clamp values to -100 to +100 range
     const clamp = (value) => Math.max(-100, Math.min(100, Number(value) || 0));
     const clampedEnergy = clamp(energy);
     const clampedMood = clamp(mood);
+
+    console.log('📍 positionMoodDot called with:', energy, mood, '-> clamped:', clampedEnergy, clampedMood);
 
     // Map slider values to CSS positioning:
     // Mood (X-axis): -100 (Negative/Left) to +100 (Positive/Right) -> 0% to 100% left
@@ -427,6 +432,8 @@ const UI = {
 
     // Energy (Y-axis): -100 (Low/Bottom) to +100 (High/Top) -> 0% to 100% bottom
     const yPercent = (clampedEnergy + 100) / 2;
+
+    console.log('📍 setting CSS vars: --mood-x:', xPercent + '%', '--mood-y:', yPercent + '%');
 
     dot.style.setProperty('--mood-x', `${xPercent}%`);
     dot.style.setProperty('--mood-y', `${yPercent}%`);
@@ -915,6 +922,8 @@ const UI = {
     const storedEnergy = Store.state.energy || 0;
     const storedMood = Store.state.mood || 0;
     
+    console.log('🔄 syncDailyUI: stored energy/mood:', storedEnergy, storedMood, 'quadrant:', Store.state.quadrant);
+    
     // Check if App is available (it might not be during initial load)
     const hasApp = typeof App !== 'undefined';
     
@@ -924,12 +933,15 @@ const UI = {
       // Use stored slider values
       axes = { energy: storedEnergy, mood: storedMood };
       if (hasApp) App.moodAxes = { ...axes };
+      console.log('🔄 syncDailyUI: using stored values');
     } else {
       // Fall back to quadrant preset if no slider data
       axes = Scoring.getQuadrantPreset(Store.state.quadrant);
       if (hasApp) App.moodAxes = { ...axes };
+      console.log('🔄 syncDailyUI: using quadrant preset:', axes);
     }
     
+    console.log('🔄 syncDailyUI: final axes:', axes);
     UI.setMoodSliders(axes.energy, axes.mood);
     // Note: positionMoodDot and updateSpiritSummary are now called within setMoodSliders
   },
