@@ -262,7 +262,7 @@
               <div class="timer-button-wrapper">
                 <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
                   <span id="spirit-timer-text">Start Session</span>
-                  <span id="spirit-mantra-text" style="opacity:0;position:absolute;color:var(--color-mantra);">ॐ मणि पद्मे हूँ</span>
+                  <span id="spirit-mantra-text" class="mantra-text">ॐ मणि पद्मे हूँ</span>
                   <div class="timer-fill" id="spirit-timer-fill"></div>
                 </button>
               </div>
@@ -316,9 +316,38 @@
 
           const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 
-          function startTimer(){ running=true; btn.dataset.state='running'; instruction.textContent='Session running. Tap to pause.'; timer = setInterval(()=>{ seconds++; text.textContent = fmt(seconds); },1000); }
+          function startTimer(){ 
+            running=true; 
+            btn.dataset.state='running'; 
+            instruction.textContent='Session running. Tap to pause.'; 
+            // Reset text display for running state
+            text.classList.remove('fade-out');
+            mantra.classList.remove('fade-in');
+            timer = setInterval(()=>{ 
+              seconds++; 
+              text.textContent = fmt(seconds); 
+            },1000); 
+          }
+          
           function pauseTimer(){ clearInterval(timer); running=false; btn.dataset.state='paused'; instruction.textContent = `Paused at ${fmt(seconds)}. Tap to resume. Hold to log.`; }
-          function stopAndLog(){ clearInterval(timer); running=false; const logged = fmt(seconds); btn.classList.add('logged-success'); text.textContent = `✓ Logged ${logged}`; instruction.textContent='Session complete.'; setTimeout(()=>{ btn.classList.remove('logged-success'); text.textContent='Start Session'; seconds=0; btn.dataset.state='stopped'; instruction.textContent='Press and hold to begin a new session.'; },2500); }
+          function stopAndLog(){ 
+            clearInterval(timer); 
+            running=false; 
+            const logged = fmt(seconds); 
+            btn.classList.add('logged-success'); 
+            text.textContent = `✓ Logged ${logged}`; 
+            // Reset text visibility
+            text.classList.remove('fade-out');
+            mantra.classList.remove('fade-in');
+            instruction.textContent='Session complete.'; 
+            setTimeout(()=>{ 
+              btn.classList.remove('logged-success'); 
+              text.textContent='Start Session'; 
+              seconds=0; 
+              btn.dataset.state='stopped'; 
+              instruction.textContent='Press and hold to begin a new session.'; 
+            },2500); 
+          }
 
           // Long-press handling with minimum press duration
           function pressStart(){ 
@@ -331,17 +360,19 @@
               minPressTimer = null;
               // Start the animation and mantra after minimum press duration
               btn.classList.add('long-pressing'); 
-              text.style.opacity=0; 
-              mantra.style.opacity=1; 
+              text.classList.add('fade-out');
+              mantra.classList.add('fade-in');
               
               // Continue holding for full LONG duration to trigger action
               longPressTimer = setTimeout(()=>{ 
                 wasLong=true; 
                 btn.classList.remove('long-pressing'); 
-                mantra.style.opacity=0; 
-                text.style.opacity=1; 
-                if(!running) startTimer(); 
-                else stopAndLog(); 
+                // Action happens here - timer/log starts
+                if(!running) {
+                  startTimer(); 
+                } else {
+                  stopAndLog(); 
+                }
                 longPressTimer=null; 
                 setTimeout(()=>{ wasLong=false; },50); 
               }, LONG - MIN_PRESS); // Remaining time after MIN_PRESS
@@ -357,8 +388,8 @@
               clearTimeout(longPressTimer); 
               longPressTimer=null; 
               btn.classList.remove('long-pressing'); 
-              text.style.opacity=1; 
-              mantra.style.opacity=0; 
+              text.classList.remove('fade-out');
+              mantra.classList.remove('fade-in');
             } 
           }
 
