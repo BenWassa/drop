@@ -15,20 +15,27 @@ Visit: **https://benwassa.github.io/drop/**
 
 ##  Project Structure
 
-`
+```
 drop/
- docs/                      # GitHub Pages root (live app)
-    index.html            # Main app entry point
-    app.js                # App logic & state management
-    styles.css            # Styling & design tokens
-    manifest.json         # PWA manifest
-    sw.js                 # Service worker for offline support
-    icons/                # App icons and domain SVGs
-    SPRINT_SUMMARY.md     # Sprint deliverables
-    VERIFICATION_CHECKLIST.md
- archive/                   # Old versions (V2.2, V3.0, V3.1)
- README.md                 # This file
-`
+├── docs/                      # GitHub Pages root (live app)
+│   ├── index.html            # Main app entry point
+│   ├── app.js                # Application coordination & initialization
+│   ├── store.js              # Data persistence & state management
+│   ├── ui.js                 # User interface & DOM manipulation
+│   ├── scoring.js            # Domain scoring algorithms
+│   ├── analytics.js          # Analytics & trend calculations
+│   ├── install.js            # PWA install prompt handling
+│   ├── styles.css            # Styling & design tokens
+│   ├── manifest.json         # PWA manifest
+│   ├── sw.js                 # Service worker for offline support
+│   ├── icons/                # App icons and domain SVGs
+│   ├── tests/                # QUnit test suite
+│   ├── documentation/        # Sprint docs & planning
+│   ├── SPRINT_SUMMARY.md     # Sprint deliverables
+│   └── VERIFICATION_CHECKLIST.md
+├── archive/                   # Old versions (V2.2, V3.0, V3.1)
+└── README.md                 # This file
+```
 
 ##  Architecture
 
@@ -38,11 +45,104 @@ drop/
 - No page reloads - uses classList.toggle('active')
 - State persisted in localStorage
 
+### Modular JavaScript Architecture
+The app follows a modular architecture with clear separation of concerns:
+
+#### Core Modules
+- **`app.js`** - Application coordinator and initialization
+  - Manages app lifecycle and page navigation
+  - Coordinates between modules
+  - Handles developer mode and test hooks
+
+- **`store.js`** - Data persistence and state management
+  - localStorage-based data persistence
+  - State management with defaults and validation
+  - History tracking and data migration
+  - Sleep day calculations (handles early morning logging)
+
+- **`ui.js`** - User interface and DOM manipulation
+  - DOM element management and updates
+  - User interaction handling
+  - Visual feedback and animations
+  - History view with month/week grouping
+
+- **`scoring.js`** - Domain scoring algorithms
+  - Calculates scores for Sleep, Fitness, Mind, Spirit domains
+  - Trend-based scoring with 7-day weighted averages
+  - Sleep duration from previous day's rest to today's wake
+  - Domain-specific scoring logic
+
+#### Supporting Modules
+- **`analytics.js`** - Analytics and trend calculations
+  - Streak calculations and momentum analysis
+  - Week-over-week change detection
+  - Insight generation and narrative creation
+
+- **`install.js`** - PWA install prompt handling
+  - Manages install prompt lifecycle
+  - Install button visibility and user guidance
+
 ### Score Calculation
-- **Sleep**: Hours between rest and wake time
-- **Fitness**: Run distance + strength + skill practice
-- **Mind**: Reading + writing activities
-- **Spirit**: Meditation + mood quadrant
+- **Sleep**: Hours between previous day's rest and today's wake time
+- **Fitness**: Run distance (45pts) + strength (35pts) + skill practice (20pts)
+- **Mind**: Reading (55pts) + writing (45pts) activities
+- **Spirit**: Meditation (50pts) + mood quadrant (50pts)
+
+### Data Flow
+1. User interactions → `ui.js` event handlers
+2. State updates → `store.js` persistence
+3. Score calculations → `scoring.js` algorithms
+4. UI updates → `ui.js` rendering
+5. Analytics → `analytics.js` insights
+
+##  JavaScript Documentation Standards
+
+### Module Structure
+Each JavaScript module follows consistent documentation patterns:
+
+#### File Headers
+```javascript
+/**
+ * ===========================
+ * MODULE NAME
+ * ===========================
+ * 
+ * Brief description of module purpose and responsibilities.
+ * 
+ * DEPENDENCIES:
+ * - Module: For specific functionality
+ * - Module: For other functionality
+ */
+```
+
+#### Function Documentation
+```javascript
+/**
+ * Function description and purpose.
+ * 
+ * @param {Type} paramName - Parameter description
+ * @returns {Type} Return value description
+ */
+functionName(param) {
+  // Implementation
+}
+```
+
+#### Key Documentation Areas
+- **Module Purpose**: Clear statement of responsibilities
+- **Dependencies**: Which other modules are used
+- **Data Flow**: How data moves through the module
+- **Business Logic**: Domain-specific calculations and rules
+- **Edge Cases**: Special handling for unusual scenarios
+
+### Module Responsibilities
+
+- **`app.js`**: Application lifecycle, module coordination
+- **`store.js`**: Data persistence, state validation, migrations
+- **`ui.js`**: DOM manipulation, user interactions, visual feedback
+- **`scoring.js`**: Domain algorithms, trend calculations
+- **`analytics.js`**: Insights, streaks, momentum analysis
+- **`install.js`**: PWA install UX, prompt management
 
 ### Accessibility
 - ARIA meter roles on score circles
@@ -89,11 +189,15 @@ Changes pushed to the selected branch automatically deploy.
 
 ##  Development Workflow
 
-`ash
+```bash
 # Work on dev branch
 git checkout dev
 
 # Make changes in docs/ folder
+
+# Run tests
+npm test                    # Unit tests (QUnit)
+npx playwright test         # E2E tests (Playwright)
 
 # Commit and push
 git add .
@@ -106,11 +210,30 @@ git merge dev
 git push origin main
 
 # GitHub Pages auto-deploys from docs/
-`
+```
 
 ##  Dependencies
 
-- None! Vanilla HTML/CSS/JS
+- **Runtime**: None! Vanilla HTML/CSS/JS
+- **Testing**: QUnit, Playwright (for E2E testing)
+- **Build**: None required (direct deployment from docs/)
+
+##  Testing
+
+### Unit Tests (QUnit)
+Located in `docs/tests/`:
+- `dom.test.js` - DOM manipulation and UI logic tests
+- `index.html` - QUnit test runner
+- Run with: `npm test` or open `docs/tests/index.html`
+
+### E2E Tests (Playwright)
+- `playwright.config.js` - Test configuration
+- Run with: `npx playwright test`
+- Visual regression testing and user flow validation
+
+### Test Data
+- `docs/sample-data-1month.json` - Comprehensive test data
+- `docs/sample-data-for-drop.json` - Additional test scenarios
 
 ##  Contributing
 
