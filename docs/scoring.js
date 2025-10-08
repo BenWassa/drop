@@ -22,27 +22,49 @@ const Scoring = {
   
   /**
    * Calculate Sleep score
-   * Based on sleep duration (wake time - rest time)
+   * Based on sleep duration from previous day's rest time to today's wake time
    * Optimal: 7-9 hours = 100 raw score
    * 
-   * @param {Object} state - Store.state object with wake and rest times
-   * @param {Object} Store - Store object for accessing history
+   * @param {Object} state - Store.state object with wake time
+   * @param {Object} Store - Store object for accessing historical entries
    * @returns {number|null} Score (60-95) or null if insufficient data
    */
   calcSleep(state, Store) {
-    console.log('😴 calcSleep called with state:', { wake: state.wake, rest: state.rest });
+    console.log('😴 calcSleep called with state:', { wake: state.wake });
     
-    const { wake, rest } = state;
-    if (!wake || !rest) {
-      console.log('⚠️ Sleep: Missing wake or rest time, returning trend score with 0');
+    const { wake } = state;
+    if (!wake) {
+      console.log('⚠️ Sleep: Missing wake time, returning trend score with 0');
       return this.calcTrendScore('sleep', 0, Store);
     }
     
+    // Get today's date and yesterday's date
+    const today = Store.getToday();
+    const todayDate = new Date(today + 'T12:00:00');
+    const yesterdayDate = new Date(todayDate);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = yesterdayDate.toISOString().split('T')[0];
+    
+    // Get yesterday's rest time from entries
+    const yesterdayEntry = Store.state.entries[yesterday];
+    const yesterdayRest = yesterdayEntry?.rest;
+    
+    if (!yesterdayRest) {
+      console.log('⚠️ Sleep: No rest time from yesterday, returning trend score with 0');
+      return this.calcTrendScore('sleep', 0, Store);
+    }
+    
+    console.log('😴 Sleep calculation:', { today, yesterday, wake, yesterdayRest });
+    
+    // Convert times to minutes since midnight
     const [wh, wm] = wake.split(':').map(Number);
-    const [rh, rm] = rest.split(':').map(Number);
+    const [rh, rm] = yesterdayRest.split(':').map(Number);
     const wakeMins = wh * 60 + wm;
     const restMins = rh * 60 + rm;
-    const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
+    
+    // Calculate duration: from yesterday's rest time to today's wake time
+    // This will typically span midnight, so we need to handle the day boundary
+    const duration = wakeMins + (1440 - restMins); // Add wake time to time from rest to midnight
     const hours = duration / 60;
     
     console.log('😴 Sleep calculated:', { hours, wakeMins, restMins, duration });

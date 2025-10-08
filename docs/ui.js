@@ -753,14 +753,32 @@ const UI = {
   },
 
   calculateSleepHours() {
-    const { wake, rest } = Store.state;
-    if (!wake || !rest) return null;
+    const { wake } = Store.state;
+    if (!wake) return null;
+    
+    // Get today's date and yesterday's date
+    const today = Store.getToday();
+    const todayDate = new Date(today + 'T12:00:00');
+    const yesterdayDate = new Date(todayDate);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = yesterdayDate.toISOString().split('T')[0];
+    
+    // Get yesterday's rest time from entries
+    const yesterdayEntry = Store.state.entries[yesterday];
+    const rest = yesterdayEntry?.rest;
+    
+    if (!rest) return null;
+    
     const [wh, wm] = wake.split(':').map(Number);
     const [rh, rm] = rest.split(':').map(Number);
     if ([wh, wm, rh, rm].some(v => isNaN(v))) return null;
+    
     const wakeMins = wh * 60 + wm;
     const restMins = rh * 60 + rm;
-    const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
+    
+    // Calculate duration: from yesterday's rest time to today's wake time
+    // This spans midnight, so add wake time to time from rest to midnight
+    const duration = wakeMins + (1440 - restMins);
     return Math.round((duration / 60) * 10) / 10;
   },
 
