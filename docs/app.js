@@ -8,10 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const Store = {
     DB_KEY: 'lifeTrackerData',
     state: {},
-    dailyKeys: ['wake', 'rest', 'run', 'strength', 'skill', 'read', 'write', 'quadrant', 'meditation'],
+    dailyKeys: ['wake', 'rest', 'run', 'strength', 'skill', 'read', 'write', 'quadrant', 'meditation', 'energy', 'mood'],
     defaults: {
       wake: '', rest: '', run: 0, strength: false, skill: [],
       read: false, write: false, quadrant: 0, meditation: false,
+      energy: 0, mood: 0,
       skillOptions: [],
       visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
       visionMindFocus: '', visionSpiritFocus: '',
@@ -490,7 +491,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderScores(scores, streaks = {}) {
       const announcements = [];
       const history = Array.isArray(Store.state.history) ? Store.state.history : [];
-      const daysLogged = history.length;
+      
+      // Count days with valid baseline data (must have wake AND rest)
+      const entries = Store.state.entries || {};
+      const daysLogged = Object.values(entries).filter(entry => {
+        return entry && entry.wake && entry.rest;
+      }).length;
+      
       const needsBaseline = daysLogged < 7;
 
       for (const domain in scores) {
@@ -1117,12 +1124,24 @@ document.addEventListener('DOMContentLoaded', () => {
       UI.updateFitnessSummary();
       UI.updateMindStatus();
 
-      const fallbackAxes = this.getQuadrantPreset(Store.state.quadrant);
-      const currentAxes = this.moodAxes || { energy: 0, mood: 0 };
-      const currentQuadrant = this.resolveQuadrant(currentAxes.energy, currentAxes.mood);
-      if (!this.moodAxes || currentQuadrant !== Store.state.quadrant) {
-        this.moodAxes = { ...fallbackAxes };
+      // Restore slider positions from Store if available
+      const storedEnergy = Store.state.energy || 0;
+      const storedMood = Store.state.mood || 0;
+      const hasStoredSliders = storedEnergy !== 0 || storedMood !== 0;
+      
+      if (hasStoredSliders) {
+        // Use stored slider values
+        this.moodAxes = { energy: storedEnergy, mood: storedMood };
+      } else {
+        // Fall back to quadrant preset if no slider data
+        const fallbackAxes = this.getQuadrantPreset(Store.state.quadrant);
+        const currentAxes = this.moodAxes || { energy: 0, mood: 0 };
+        const currentQuadrant = this.resolveQuadrant(currentAxes.energy, currentAxes.mood);
+        if (!this.moodAxes || currentQuadrant !== Store.state.quadrant) {
+          this.moodAxes = { ...fallbackAxes };
+        }
       }
+      
       const axes = this.moodAxes;
       UI.setMoodSliders(axes.energy, axes.mood);
       UI.positionMoodDot(axes.energy, axes.mood);
@@ -1148,6 +1167,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const energy = Number(energySlider.value) || 0;
       const mood = Number(moodSlider.value) || 0;
       this.moodAxes = { energy, mood };
+      
+      // Persist energy and mood to Store
+      if (energy !== Store.state.energy) {
+        Store.update('energy', energy);
+      }
+      if (mood !== Store.state.mood) {
+        Store.update('mood', mood);
+      }
+      
       UI.positionMoodDot(energy, mood);
       const quadrant = this.resolveQuadrant(energy, mood);
       if (quadrant !== Store.state.quadrant) {
