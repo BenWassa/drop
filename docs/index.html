@@ -335,6 +335,15 @@
             clearInterval(timer); 
             running=false; 
             const logged = fmt(seconds); 
+            const loggedSeconds = seconds;
+            
+            // Store the meditation session
+            if (typeof Store !== 'undefined') {
+              Store.update('meditation', true);
+              UI.setToggleState('meditation', true);
+              UI.updateSpiritSummary(Store.state.quadrant, true, Store.state.energy || 0, Store.state.mood || 0);
+            }
+            
             btn.classList.add('logged-success'); 
             text.textContent = `✓ Logged ${logged}`; 
             // Reset text visibility
