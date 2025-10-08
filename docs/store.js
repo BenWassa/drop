@@ -6,10 +6,10 @@ const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyo
 const Store = {
   DB_KEY: 'lifeTrackerData',
   state: {},
-  dailyKeys: ['wake', 'rest', 'run', 'strength', 'skill', 'read', 'write', 'quadrant', 'meditation', 'energy', 'mood'],
+  dailyKeys: ['wake', 'rest', 'run', 'strength', 'strength_level', 'skill', 'read_level', 'write_level', 'quadrant', 'meditation', 'energy', 'mood'],
   defaults: {
-    wake: '', rest: '', run: 0, strength: false, skill: [],
-    read: false, write: false, quadrant: 0, meditation: false,
+    wake: '', rest: '', run: 0, strength: false, strength_level: 0, skill: [],
+    read_level: 0, write_level: 0, quadrant: 0, meditation: false,
     energy: 0, mood: 0,
     skillOptions: [],
     visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',

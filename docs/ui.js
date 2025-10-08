@@ -370,8 +370,10 @@ const UI = {
     if (Number.isFinite(runDistance) && runDistance > 0) {
       parts.push(`${runDistance} km run`);
     }
-    if (Store.state.strength) {
-      parts.push('Strength session');
+    const strengthLevel = Store.state.strength_level || 0;
+    if (strengthLevel > 0) {
+      const levels = ['', 'Movement', 'Session', 'Training'];
+      parts.push(`Strength: ${levels[strengthLevel]}`);
     }
     const skills = Array.isArray(Store.state.skill) ? Store.state.skill : [];
     if (skills.length > 0) {
@@ -383,16 +385,43 @@ const UI = {
   updateMindStatus() {
     const status = this.elements.home?.mindStatus;
     if (!status) return;
-    const { read, write } = Store.state;
-    if (read && write) {
-      status.textContent = 'Reading and writing logged.';
-    } else if (read) {
-      status.textContent = 'Reading logged.';
-    } else if (write) {
-      status.textContent = 'Writing logged.';
-    } else {
-      status.textContent = 'Nothing logged yet.';
+    const { read_level, write_level } = Store.state;
+    const parts = [];
+    
+    if (read_level > 0) {
+      const levels = ['', 'Leisure', 'Perspicacity', 'Erudition'];
+      parts.push(`Reading: ${levels[read_level]}`);
     }
+    if (write_level > 0) {
+      const levels = ['', 'Journal', 'Editorial', 'Treatise'];
+      parts.push(`Writing: ${levels[write_level]}`);
+    }
+    
+    status.textContent = parts.length ? parts.join(' · ') : 'Nothing logged yet.';
+  },
+
+  updateMindTierButtons(type, selectedValue) {
+    const selector = type === 'reading' ? '[data-mind-tier="reading"]' : '[data-mind-tier="writing"]';
+    const container = document.querySelector(selector);
+    if (!container) return;
+    
+    const buttons = container.querySelectorAll('.tier-btn');
+    buttons.forEach(btn => {
+      const value = Number(btn.dataset.tierValue);
+      const isSelected = value === selectedValue;
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      btn.classList.toggle('selected', isSelected);
+    });
+  },
+
+  updateStrengthTierButtons(selectedValue) {
+    const buttons = document.querySelectorAll('.strength-tier');
+    buttons.forEach(btn => {
+      const value = Number(btn.dataset.strengthValue);
+      const isSelected = value === selectedValue;
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      btn.classList.toggle('selected', isSelected);
+    });
   },
 
   updateSpiritSummary(quadrant, meditation, energy = 0, mood = 0) {
@@ -916,8 +945,9 @@ const UI = {
 
     UI.updateRunDisplay(Store.state.run);
     UI.setToggleState('strength', Store.state.strength);
-    UI.setToggleState('read', Store.state.read);
-    UI.setToggleState('write', Store.state.write);
+    UI.updateMindTierButtons('reading', Store.state.read_level || 0);
+    UI.updateMindTierButtons('writing', Store.state.write_level || 0);
+    UI.updateStrengthTierButtons(Store.state.strength_level || 0);
     UI.setToggleState('meditation', Store.state.meditation);
 
     UI.updateSkillChips(Store.state.skill);
@@ -1166,6 +1196,35 @@ const UI = {
             UI.updateSkillChips(Store.state.skill);
             UI.updateFitnessSummary();
           }
+        }
+
+        // Handle mind tier buttons (reading and writing levels)
+        const tierBtn = event.target.closest('.tier-btn[data-tier-value]');
+        if (tierBtn) {
+          const tierValue = Number(tierBtn.dataset.tierValue);
+          const tierGroup = tierBtn.closest('.tiered-selection');
+          const tierType = tierGroup.dataset.mindTier; // 'reading' or 'writing'
+          
+          if (tierType === 'reading') {
+            Store.update('read_level', tierValue);
+            UI.updateMindTierButtons('reading', tierValue);
+            UI.updateMindStatus();
+          } else if (tierType === 'writing') {
+            Store.update('write_level', tierValue);
+            UI.updateMindTierButtons('writing', tierValue);
+            UI.updateMindStatus();
+          }
+          return;
+        }
+
+        // Handle strength tier buttons
+        const strengthTierBtn = event.target.closest('.strength-tier[data-strength-value]');
+        if (strengthTierBtn) {
+          const strengthValue = Number(strengthTierBtn.dataset.strengthValue);
+          Store.update('strength_level', strengthValue);
+          UI.updateStrengthTierButtons(strengthValue);
+          UI.updateFitnessSummary();
+          return;
         }
       });
     }

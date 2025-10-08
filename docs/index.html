@@ -210,8 +210,15 @@
                   </div>
                 </div>
                 
-                <!-- Strength button (no dropdown) -->
-                <button class="pill-toggle" type="button" data-toggle-key="strength" aria-pressed="false">Strength</button>
+                <!-- Strength button + tiered dropdown -->
+                <button class="pill-toggle" type="button" data-fitness-toggle="strength" aria-pressed="false">Strength</button>
+                <div class="fitness-dropdown" data-fitness-dropdown="strength" hidden>
+                  <div class="strength-tiers" role="group" aria-label="Strength training tiers">
+                    <button class="strength-tier" type="button" data-strength-value="1">Movement</button>
+                    <button class="strength-tier" type="button" data-strength-value="2">Session</button>
+                    <button class="strength-tier" type="button" data-strength-value="3">Training</button>
+                  </div>
+                </div>
                 
                 <!-- Skill button + dropdown -->
                 <button class="pill-toggle" type="button" data-fitness-toggle="skill" aria-pressed="false">Skill</button>
@@ -237,11 +244,25 @@
               </div>
             </header>
             
-            <!-- NEW: Centralized, vertically-stacked toggles -->
+            <!-- Tiered selections for Reading and Writing -->
             <div class="mind-widget-body">
-              <div class="pill-toggle-stack" role="group" aria-label="Mind activities">
-                <button class="pill-toggle" type="button" data-toggle-key="read" aria-pressed="false">Read</button>
-                <button class="pill-toggle" type="button" data-toggle-key="write" aria-pressed="false">Write</button>
+              <div class="tiered-selection-group">
+                <div class="tiered-selection" data-mind-tier="reading">
+                  <label class="tiered-label">Reading</label>
+                  <div class="tier-buttons" role="group" aria-label="Reading quality tiers">
+                    <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Leisure</button>
+                    <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Perspicacity</button>
+                    <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Erudition</button>
+                  </div>
+                </div>
+                <div class="tiered-selection" data-mind-tier="writing">
+                  <label class="tiered-label">Writing</label>
+                  <div class="tier-buttons" role="group" aria-label="Writing depth tiers">
+                    <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Journal</button>
+                    <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Editorial</button>
+                    <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Treatise</button>
+                  </div>
+                </div>
               </div>
             </div>
             
