@@ -351,35 +351,79 @@ const Store = {
 
   validateImport(payload) {
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+      console.error('❌ Import validation failed: payload is not an object');
       return false;
     }
 
     const allowedKeys = Object.keys(this.defaults);
-    return Object.keys(payload).every(key => {
-      if (!allowedKeys.includes(key)) return false;
+    
+    // Check each key in the payload
+    for (const key of Object.keys(payload)) {
+      // Skip keys that aren't in defaults (allow extra keys for backwards compatibility)
+      if (!allowedKeys.includes(key)) {
+        console.warn(`⚠️ Import: Ignoring unknown key "${key}"`);
+        continue;
+      }
+      
       const defaultValue = this.defaults[key];
       const value = payload[key];
 
-      if (value === null || value === undefined) return false;
+      // Allow null/undefined values (they'll be handled by merge)
+      if (value === null || value === undefined) {
+        console.warn(`⚠️ Import: Key "${key}" is null/undefined, will use default`);
+        continue;
+      }
 
       const defaultType = typeof defaultValue;
+      
+      // Validate arrays
       if (Array.isArray(defaultValue)) {
-        return Array.isArray(value);
+        if (!Array.isArray(value)) {
+          console.error(`❌ Import validation failed: "${key}" should be array, got ${typeof value}`);
+          return false;
+        }
+        continue;
       }
+      
+      // Validate booleans
       if (defaultType === 'boolean') {
-        return typeof value === 'boolean';
+        if (typeof value !== 'boolean') {
+          console.error(`❌ Import validation failed: "${key}" should be boolean, got ${typeof value}`);
+          return false;
+        }
+        continue;
       }
+      
+      // Validate numbers
       if (defaultType === 'number') {
-        return typeof value === 'number' && Number.isFinite(value);
+        if (typeof value !== 'number' || !Number.isFinite(value)) {
+          console.error(`❌ Import validation failed: "${key}" should be finite number, got ${typeof value}`);
+          return false;
+        }
+        continue;
       }
+      
+      // Validate strings
       if (defaultType === 'string') {
-        return typeof value === 'string';
+        if (typeof value !== 'string') {
+          console.error(`❌ Import validation failed: "${key}" should be string, got ${typeof value}`);
+          return false;
+        }
+        continue;
       }
+      
+      // Validate objects
       if (defaultType === 'object') {
-        return value && typeof value === 'object' && !Array.isArray(value);
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+          console.error(`❌ Import validation failed: "${key}" should be object, got ${typeof value}`);
+          return false;
+        }
+        continue;
       }
-      return false;
-    });
+    }
+    
+    console.log('✅ Import validation passed');
+    return true;
   },
 
   merge(payload) {
@@ -477,40 +521,47 @@ const Store = {
       reader.onload = (event) => {
         try {
           const raw = event.target?.result;
+          console.log('📥 Import: Reading file data...');
+          
           const payload = JSON.parse(raw);
+          console.log('📥 Import: JSON parsed, validating...');
 
           if (!this.validateImport(payload)) {
-            throw new Error('Invalid schema');
+            throw new Error('Import validation failed - check console for details');
           }
 
+          console.log('📥 Import: Merging data...');
           this.merge(payload);
+          
+          console.log('✅ Import: Data imported successfully');
           if (typeof UI !== 'undefined') {
             if (typeof UI.setVisionFields === 'function') {
               UI.setVisionFields(this.state);
             }
             if (typeof UI.notify === 'function') {
-              UI.notify('Data imported');
+              UI.notify('Data imported successfully!', 3000);
             }
           }
         } catch (error) {
-          console.error('Data import failed:', error);
+          console.error('❌ Data import failed:', error);
           if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-            UI.notify('Import failed');
+            UI.notify(`Import failed: ${error.message}`, 4000);
           }
         }
       };
 
-      reader.onerror = () => {
+      reader.onerror = (error) => {
+        console.error('❌ File read error:', error);
         if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-          UI.notify('Import failed');
+          UI.notify('Failed to read file', 3000);
         }
       };
 
       reader.readAsText(file);
     } catch (error) {
-      console.error('Failed to read import file:', error);
+      console.error('❌ Failed to read import file:', error);
       if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-        UI.notify('Import failed');
+        UI.notify(`Import error: ${error.message}`, 4000);
       }
     }
   },
