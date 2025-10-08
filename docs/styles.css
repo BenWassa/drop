@@ -1079,19 +1079,21 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
-  padding: 10px 14px; /* Slightly reduced padding from 16px to 14px */
+  padding: 10px 14px;
   color: var(--color-text-primary);
   font-size: 13px;
   font-weight: 600;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: var(--transition-fast);
-  flex: 1; /* Allow buttons to grow equally */
+  flex: 1;
   text-align: center;
-  min-width: 0; /* Allow flex shrinking */
+  min-width: 0;
 }
 
 .run-preset:hover {
-  border-color: rgba(79, 138, 245, 0.35);
+  border-color: rgba(255, 59, 48, 0.35); /* Fitness red */
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .run-adjust {
@@ -1110,8 +1112,18 @@ body {
   color: var(--color-text-primary);
   font-size: 20px;
   font-weight: 600;
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: var(--transition-fast);
+}
+
+.run-step:hover {
+  border-color: rgba(255, 59, 48, 0.35); /* Fitness red */
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.run-step:active {
+  background: rgba(255, 59, 48, 0.15);
 }
 
 .run-display {
@@ -1120,10 +1132,17 @@ body {
   gap: 4px;
   font-size: 24px;
   font-weight: 600;
+  font-family: var(--font-mono);
 }
 
 .run-display span {
   color: var(--color-text-primary);
+}
+
+.run-unit {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .run-unit {
@@ -1152,15 +1171,17 @@ body {
   padding: 9px 16px;
   font-size: 13px;
   font-weight: 600;
+  font-family: var(--font-sans);
   color: var(--color-text-primary);
   cursor: pointer;
   transition: var(--transition-fast);
 }
 
 .skill-chip.is-active {
-  background: rgba(79, 245, 207, 0.18);
-  border-color: rgba(79, 245, 207, 0.45);
-  box-shadow: 0 6px 18px rgba(79, 245, 207, 0.25);
+  background: rgba(255, 59, 48, 0.22); /* Fitness red */
+  border-color: rgba(255, 59, 48, 0.45);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
+  color: #fca5a5; /* Lighter red text */
 }
 
 .skill-chip--add {
@@ -1169,11 +1190,12 @@ body {
   color: var(--color-text-secondary);
 }
 
+/* Legacy style - now using unified fitness red above */
 .skill-chip--fitness.is-active {
-  background: rgba(255, 59, 48, 0.12); /* Less bright red background */
-  border-color: rgba(255, 59, 48, 0.6); /* More visible red border */
-  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.2); /* Subtle red glow */
-  color: #ff6b66; /* Slightly lighter red text */
+  background: rgba(255, 59, 48, 0.22);
+  border-color: rgba(255, 59, 48, 0.45);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25);
+  color: #fca5a5;
 }
 
 .mood-dot-area {

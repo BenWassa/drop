@@ -1203,7 +1203,8 @@ const UI = {
         if (tierBtn) {
           const tierValue = Number(tierBtn.dataset.tierValue);
           const tierGroup = tierBtn.closest('.tiered-selection');
-          const tierType = tierGroup.dataset.mindTier; // 'reading' or 'writing'
+          const tierType = tierGroup?.dataset.mindTier; // 'reading' or 'writing'
+          const fitnessTier = tierGroup?.dataset.fitnessTier; // 'strength'
           
           if (tierType === 'reading') {
             const currentValue = Store.state.read_level || 0;
@@ -1211,22 +1212,15 @@ const UI = {
             Store.update('read_level', newValue);
             UI.updateMindTierButtons('reading', newValue);
             UI.updateMindStatus();
+            return;
           } else if (tierType === 'writing') {
             const currentValue = Store.state.write_level || 0;
             const newValue = currentValue === tierValue ? 0 : tierValue; // Toggle off if same
             Store.update('write_level', newValue);
             UI.updateMindTierButtons('writing', newValue);
             UI.updateMindStatus();
-          }
-          return;
-        }
-
-        // Handle strength tier buttons
-        const strengthTierBtn = event.target.closest('.tier-btn[data-tier-value]');
-        if (strengthTierBtn) {
-          const tierGroup = strengthTierBtn.closest('.tiered-selection');
-          if (tierGroup && tierGroup.dataset.fitnessTier === 'strength') {
-            const tierValue = Number(strengthTierBtn.dataset.tierValue);
+            return;
+          } else if (fitnessTier === 'strength') {
             const currentValue = Store.state.strength_level || 0;
             const newValue = currentValue === tierValue ? 0 : tierValue; // Toggle off if same
             Store.update('strength_level', newValue);
