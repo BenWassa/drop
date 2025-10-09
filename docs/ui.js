@@ -183,7 +183,7 @@ const UI = {
       if (!baselineCard) {
         baselineCard = document.createElement('div');
         baselineCard.id = 'baseline-message-card';
-        baselineCard.className = 'baseline-card';
+  baselineCard.className = 'baseline-banner baseline-card';
 
         // Insert before weekly heatmap in the home page section
         const weeklyHeatmap = document.getElementById('weekly-heatmap');
@@ -196,19 +196,23 @@ const UI = {
       const dayWord = remaining === 1 ? 'day' : 'days';
 
       baselineCard.innerHTML = `
-        <h3 class="baseline-title">Building Your Baseline</h3>
-        <p class="baseline-text">
-          Log your daily activities for <strong>${remaining} more ${dayWord}</strong> to establish your personal baseline.
-        </p>
-        <div class="baseline-progress">
-          <div class="baseline-progress-bar">
-            <div class="baseline-progress-fill" style="width: ${(daysLogged / 7) * 100}%"></div>
+        <section class="baseline-banner__inner" role="region" aria-label="Baseline banner">
+          <div class="baseline-content">
+            <h1 class="baseline-banner__title">Building Your Baseline</h1>
+            <p class="baseline-banner__subtitle">Log your daily activities for <strong>${remaining} more ${dayWord}</strong> to establish your personal baseline.</p>
+
+            <div class="baseline-banner__progress">
+              <div class="baseline-progress-bar">
+                <div class="baseline-progress-fill" style="width: ${(daysLogged / 7) * 100}%"></div>
+              </div>
+              <div class="baseline-progress-meta">
+                <span class="baseline-progress-label">${daysLogged} of 7 days</span>
+              </div>
+            </div>
+
+            <p class="baseline-banner__note">✨ You're on your way! Each day of data helps Drop understand your unique patterns.</p>
           </div>
-          <span class="baseline-progress-label">${daysLogged} of 7 days</span>
-        </div>
-        <p class="baseline-encouragement">
-          You're on your way! Each day of data helps drop understand your unique patterns.
-        </p>
+        </section>
       `;
 
       baselineCard.style.display = 'block';
