@@ -1796,11 +1796,6 @@ body {
   visibility: hidden;
 }
 
-.mantra-text {
-  opacity: 0 !important;
-  visibility: hidden;
-}
-
 #spirit-mantra-text.fade-in {
   opacity: 1;
   transform: scale(1);
