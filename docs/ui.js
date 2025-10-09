@@ -349,10 +349,6 @@ const UI = {
     }
     const formatted = Number(hours).toFixed(1).replace(/\.0$/, '');
     status.textContent = `${formatted} hr window logged.`;
-    
-    // Update practice states for sleep
-    UI.updatePracticeState('wake', !!Store.state.wake);
-    UI.updatePracticeState('rest', !!Store.state.rest);
   },
 
   updateTimeButton(inputId) {
@@ -1004,10 +1000,6 @@ const UI = {
 
   updatePracticeStates() {
     const state = Store.state;
-
-    // Sleep practices
-    UI.updatePracticeState('wake', !!state.wake);
-    UI.updatePracticeState('rest', !!state.rest);
 
     // Fitness practices
     UI.updatePracticeState('run', state.run > 0);
