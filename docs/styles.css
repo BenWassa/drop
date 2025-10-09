@@ -544,7 +544,7 @@ body {
   max-width: 480px;
   margin: 24px auto;
   padding: 24px;
-  background: linear-gradient(135deg, rgba(79, 138, 245, 0.08) 0%, rgba(79, 138, 245, 0.02) 100%);
+  background: url('./icons/drop_baseline.png') center/cover no-repeat, linear-gradient(135deg, rgba(79, 138, 245, 0.08) 0%, rgba(79, 138, 245, 0.02) 100%);
   border: 1px solid rgba(79, 138, 245, 0.15);
   border-radius: var(--radius-lg);
   text-align: center;
