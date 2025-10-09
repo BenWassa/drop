@@ -983,13 +983,15 @@ const UI = {
         
         const isExpanded = practice.classList.contains('is-expanded');
         
-        // Optional: Close other practices in the same card (accordion behavior)
-        // const card = practice.closest('.action-card');
-        // if (card) {
-        //   card.querySelectorAll('.collapsible-practice.is-expanded').forEach(p => {
-        //     if (p !== practice) p.classList.remove('is-expanded');
-        //   });
-        // }
+        // Close other practices in the same card when opening this one (accordion behavior)
+        if (!isExpanded) {
+          const card = practice.closest('.action-card');
+          if (card) {
+            card.querySelectorAll('.collapsible-practice.is-expanded').forEach(p => {
+              if (p !== practice) p.classList.remove('is-expanded');
+            });
+          }
+        }
         
         // Toggle this practice
         practice.classList.toggle('is-expanded', !isExpanded);

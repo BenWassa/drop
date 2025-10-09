@@ -411,6 +411,11 @@
           const moodSlider = document.getElementById('spirit-mood-slider');
           const energySlider = document.getElementById('spirit-energy-slider');
           const moodLabel = document.getElementById('spirit-mood-label');
+          
+          if (!btn || !text || !mantra || !fill || !instruction || !moodDot || !moodGrid || !moodSlider || !energySlider || !moodLabel) {
+            console.error('Spirit timer elements not found');
+            return;
+          }
 
           const MIN_PRESS = 500; // Minimum 0.5s before animation starts
           const FILL_DURATION = 2000; // Fill animation duration (matches CSS)
