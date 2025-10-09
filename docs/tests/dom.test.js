@@ -300,7 +300,8 @@ QUnit.module('Accessibility Features', function(hooks) {
     this.fixture.innerHTML = `
       <div class="sr-announce" id="score-announcer" aria-live="polite" aria-atomic="true"></div>
       <button class="nav-btn" data-page="home" aria-label="Home">
-        <span class="nav-label">Home</span>
+        <img src="icons/drop_icon.svg" class="nav-icon" alt="">
+        <!-- <span class="nav-label">Home</span> -->
       </button>
     `;
   });
@@ -314,8 +315,8 @@ QUnit.module('Accessibility Features', function(hooks) {
 
   QUnit.test('Navigation buttons have accessible labels', function(assert) {
     const navBtn = this.fixture.querySelector('.nav-btn');
-    assert.ok(navBtn.hasAttribute('aria-label') || navBtn.querySelector('.nav-label'), 
-      'Nav button has accessible label');
+    assert.ok(navBtn.hasAttribute('aria-label'), 'Nav button has aria-label for accessibility');
+    assert.equal(navBtn.getAttribute('aria-label'), 'Home', 'Aria-label has correct value');
   });
 });
 
