@@ -36,41 +36,53 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') {
     return;
   }
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
 
-  if (event.request.mode === 'navigate') {
+  // Treat navigations and core assets as network-first so updates flow through quickly
+  const networkFirst = (
+    event.request.mode === 'navigate' ||
+    requestUrl.pathname.endsWith('.html') ||
+    requestUrl.pathname.endsWith('.css') ||
+    requestUrl.pathname.endsWith('.js') ||
+    requestUrl.pathname.endsWith('.json')
+  );
+
+  if (networkFirst) {
     event.respondWith(
       fetch(event.request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-          return response;
+        .then(networkResponse => {
+          // Cache successful same-origin responses (non-opaque)
+          if (networkResponse && networkResponse.ok && isSameOrigin && networkResponse.type !== 'opaque') {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          }
+          return networkResponse;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => {
+          // Fallback to cache for offline or failed network
+          return caches.match(event.request).then(cached => cached || caches.match('./index.html'));
+        })
     );
     return;
   }
 
+  // Default: cache-first for static assets (images, fonts, etc.) with network fallback
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(networkResponse => {
+        // Only cache same-origin, successful, non-opaque responses
+        if (networkResponse && networkResponse.ok && isSameOrigin && networkResponse.type !== 'opaque') {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
-
-        return fetch(event.request)
-          .then(networkResponse => {
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === 'opaque') {
-              return networkResponse;
-            }
-
-            // Only cache requests from the same origin to avoid chrome-extension errors
-            if (event.request.url.startsWith(self.location.origin)) {
-              const responseClone = networkResponse.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-            }
-            return networkResponse;
-          });
-      })
+        return networkResponse;
+      }).catch(() => {
+        // Nothing available
+        return;
+      });
+    })
   );
 });
 
