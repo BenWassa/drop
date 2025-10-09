@@ -543,14 +543,12 @@ body {
 .baseline-card {
   max-width: 480px;
   margin: 24px auto;
-  padding: 28px;
-  background: url('./icons/drop_baseline.png') center/cover no-repeat, linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%);
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(79, 138, 245, 0.08) 0%, rgba(79, 138, 245, 0.02) 100%);
+  border: 1px solid rgba(79, 138, 245, 0.15);
   border-radius: var(--radius-lg);
   text-align: center;
   animation: fadeIn 400ms ease;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .baseline-icon {
@@ -560,152 +558,62 @@ body {
 }
 
 .baseline-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
-  color: #0F172A;
-  margin-bottom: 14px;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
   letter-spacing: -0.02em;
-  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9), 0 0 1px rgba(255, 255, 255, 1);
 }
 
 .baseline-text {
-  font-size: 16px;
-  color: #1E293B;
-  line-height: 1.6;
-  margin-bottom: 24px;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 1px rgba(255, 255, 255, 1);
-  font-weight: 500;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
 }
 
 .baseline-text strong {
-  color: #6D28D9;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 3px 8px;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(109, 40, 217, 0.2);
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .baseline-progress {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-  background: rgba(255, 255, 255, 0.4);
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .baseline-progress-bar {
-  height: 10px;
-  background: rgba(0, 0, 0, 0.15);
+  height: 8px;
+  background: rgba(240, 242, 245, 0.08);
   border-radius: 999px;
   overflow: hidden;
   position: relative;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .baseline-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #7C3AED 0%, #A855F7 50%, #C084FC 100%);
+  background: var(--color-primary-gradient);
   border-radius: 999px;
   transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 12px rgba(124, 58, 237, 0.5), 0 2px 4px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 0 12px var(--color-shadow-primary);
 }
 
 .baseline-progress-label {
-  font-size: 14px;
-  color: var(--color-text-primary);
-  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  font-weight: 600;
   font-family: var(--font-mono);
-  letter-spacing: 0.5px;
 }
 
 .baseline-encouragement {
-  font-size: 15px;
-  color: #7C3AED;
-  font-weight: 600;
-  margin-top: 20px;
-  padding: 14px 18px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.05));
-  border-radius: 8px;
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
-}
-
-/* Baseline banner variant (hero-like) */
-.baseline-banner {
-  position: relative;
-  overflow: hidden;
-}
-
-.baseline-banner::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(11,11,15,0.6) 0%, rgba(11,11,15,0.2) 40%, rgba(11,11,15,0.6) 100%);
-  backdrop-filter: blur(2px);
-  z-index: 0;
-}
-
-.baseline-banner__inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-}
-
-.baseline-content {
-  max-width: 640px;
-  padding: 2rem;
-  text-align: center;
-}
-
-.baseline-banner__title {
-  font-family: var(--font-sans);
-  font-size: 1.8rem;
-  line-height: 1.05;
-  margin: 0 0 0.5rem 0;
-  color: var(--color-text-primary);
-}
-
-.baseline-banner__subtitle {
-  color: #374151; /* dark grey for readability */
-  font-size: 0.95rem; /* slightly smaller */
-  margin: 0 0 1rem 0;
+  font-size: 14px;
+  color: rgba(79, 138, 245, 0.9);
   font-weight: 500;
-  text-shadow: none;
-  display: inline-block;
-  max-width: 92%;
-  background: rgba(255,255,255,0.10);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  padding: 6px 12px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-}
-
-.baseline-banner__progress {
-  margin: 0 auto 1rem auto;
-  max-width: 360px;
-}
-
-.baseline-banner__note {
-  color: #374151;
-  font-size: 0.95rem;
-  margin-top: 0.5rem;
-  display: inline-block;
-  background: rgba(255,255,255,0.08);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
-  padding: 8px 12px;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(79, 138, 245, 0.1);
 }
 
 @keyframes fadeIn {
