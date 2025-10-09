@@ -196,7 +196,6 @@ const UI = {
       const dayWord = remaining === 1 ? 'day' : 'days';
 
       baselineCard.innerHTML = `
-        <div class="baseline-icon">📊</div>
         <h3 class="baseline-title">Building Your Baseline</h3>
         <p class="baseline-text">
           Log your daily activities for <strong>${remaining} more ${dayWord}</strong> to establish your personal baseline.
