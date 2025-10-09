@@ -1039,7 +1039,9 @@ const UI = {
     const formatTime = (time) => {
       if (!time) return '';
       const [hours, minutes] = time.split(':');
-      return `${hours}:${minutes}`;
+      const hour12 = hours % 12 || 12;
+      const ampm = hours < 12 ? 'AM' : 'PM';
+      return `${hour12}:${minutes} ${ampm}`;
     };
 
     // Sleep practices
