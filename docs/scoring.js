@@ -142,17 +142,26 @@ const Scoring = {
    */
   calcSpirit(state, Store) {
     let rawScore = 0;
-    const { energy, mood } = state; // Assumes energy and mood are on a -100 to 100 scale
+    const { energy, mood, quadrant } = state; // Assumes energy and mood are on a -100 to 100 scale
 
-    // Check if mood has been logged. Any non-zero value for energy/mood implies logging.
-    if (energy !== 0 || mood !== 0) {
+    // Check if mood has been logged. Any non-zero value for energy/mood OR quadrant selection implies logging.
+    if (energy !== 0 || mood !== 0 || quadrant > 0) {
       // Base score for showing up and logging mood
       rawScore += 70;
 
       // Bonus points (0-30) based on energy and mood
+      // If sliders haven't been moved but quadrant is selected, use quadrant preset values
+      let effectiveEnergy = energy;
+      let effectiveMood = mood;
+      if (energy === 0 && mood === 0 && quadrant > 0) {
+        const preset = this.getQuadrantPreset(quadrant);
+        effectiveEnergy = preset.energy;
+        effectiveMood = preset.mood;
+      }
+
       // Normalize values from [-100, 100] to [0, 1]
-      const normalizedEnergy = (energy + 100) / 200;
-      const normalizedMood = (mood + 100) / 200;
+      const normalizedEnergy = (effectiveEnergy + 100) / 200;
+      const normalizedMood = (effectiveMood + 100) / 200;
 
       // Calculate a combined metric. Mood is weighted slightly more.
       const combinedMetric = (normalizedEnergy * 0.4) + (normalizedMood * 0.6);
