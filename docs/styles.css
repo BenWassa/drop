@@ -543,13 +543,14 @@ body {
 .baseline-card {
   max-width: 480px;
   margin: 24px auto;
-  padding: 24px;
-  background: url('./icons/drop_baseline.png') center/cover no-repeat, linear-gradient(135deg, rgba(26, 28, 33, 0.85) 0%, rgba(26, 28, 33, 0.75) 100%);
-  border: 1px solid rgba(79, 138, 245, 0.2);
+  padding: 28px;
+  background: url('./icons/drop_baseline.png') center/cover no-repeat, linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.88) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.8);
   border-radius: var(--radius-lg);
   text-align: center;
   animation: fadeIn 400ms ease;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .baseline-icon {
@@ -559,67 +560,81 @@ body {
 }
 
 .baseline-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: #FFFFFF;
-  margin-bottom: 12px;
+  color: #0F172A;
+  margin-bottom: 14px;
   letter-spacing: -0.02em;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.9), 0 0 1px rgba(255, 255, 255, 1);
 }
 
 .baseline-text {
-  font-size: 15px;
-  color: #E2E8F0;
-  line-height: 1.5;
-  margin-bottom: 20px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-size: 16px;
+  color: #1E293B;
+  line-height: 1.6;
+  margin-bottom: 24px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 1px rgba(255, 255, 255, 1);
+  font-weight: 500;
 }
 
 .baseline-text strong {
-  color: #FFFFFF;
-  font-weight: 600;
+  color: #6D28D9;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 3px 8px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(109, 40, 217, 0.2);
 }
 
 .baseline-progress {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .baseline-progress-bar {
-  height: 8px;
-  background: rgba(255, 255, 255, 0.15);
+  height: 10px;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 999px;
   overflow: hidden;
   position: relative;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .baseline-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4F8AF5 0%, #6BB6FF 100%);
+  background: linear-gradient(90deg, #7C3AED 0%, #A855F7 50%, #C084FC 100%);
   border-radius: 999px;
   transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 8px rgba(79, 138, 245, 0.4);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.5), 0 2px 4px rgba(124, 58, 237, 0.3);
 }
 
 .baseline-progress-label {
-  font-size: 13px;
-  color: #CBD5E1;
-  font-weight: 600;
+  font-size: 14px;
+  color: #1A1C21;
+  font-weight: 700;
   font-family: var(--font-mono);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.5px;
 }
 
 .baseline-encouragement {
-  font-size: 14px;
-  color: #93C5FD;
-  font-weight: 500;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-size: 15px;
+  color: #7C3AED;
+  font-weight: 600;
+  margin-top: 20px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(168, 85, 247, 0.05));
+  border-radius: 8px;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
 }
 
 @keyframes fadeIn {
