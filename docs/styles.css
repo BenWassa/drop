@@ -1535,7 +1535,7 @@ body {
 
 /* === VISION PAGE === */
 .vision-intent {
-  background: url('./icons/vision_hero.png') 50% 20px/cover no-repeat, linear-gradient(135deg, rgba(31, 35, 47, 0.85), rgba(21, 23, 29, 0.75));
+  background: url('./icons/vision_hero.png') center/cover no-repeat, linear-gradient(135deg, rgba(31, 35, 47, 0.85), rgba(21, 23, 29, 0.75));
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   padding: 24px;
@@ -1566,7 +1566,9 @@ body {
 .vision-card h3 {
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-top: 4px;
+  color: var(--color-text-primary);
+  padding-bottom: 4px;
 }
 
 .vision-intent p,
@@ -2380,7 +2382,7 @@ body {
 
 /* === FORM ELEMENTS & BUTTONS === */
 .input-group { margin-bottom: 32px; }
-.input-label { display: block; margin-bottom: 12px; color: var(--color-text-secondary); font-size: 14px; font-weight: 600; }
+.input-label { display: block; margin-bottom: 1px; margin-top: 8px; color: var(--color-text-secondary); font-size: 14px; font-weight: 600; }
 .time-input {
   width: 100%;
   padding: 14px 16px;
