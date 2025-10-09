@@ -2293,7 +2293,7 @@ body {
   border-color: var(--color-primary);
   box-shadow: var(--shadow-sm);
 }
-.nav-icon { width: 28px; height: 28px; display: block; filter: invert(1); }
+.nav-icon { width: 36px; height: 36px; display: block; filter: brightness(0) invert(1); }
 .nav-btn.active .nav-icon { filter: invert(37%) sepia(96%) saturate(7451%) hue-rotate(210deg) brightness(104%) contrast(105%); }
 .nav-label { font-size: 12px; font-weight: 500; }
 
@@ -2662,6 +2662,7 @@ body {
   width: 20px;
   height: 20px;
   display: inline-block;
+  filter: brightness(0) invert(1);
 }
 
 .icon-database-export {
@@ -2672,6 +2673,7 @@ body {
   width: 20px;
   height: 20px;
   display: inline-block;
+  filter: brightness(0) invert(1);
 }
 
 .icon-database-import {
@@ -2682,6 +2684,7 @@ body {
   width: 20px;
   height: 20px;
   display: inline-block;
+  filter: brightness(0) invert(1);
 }
 
 .icon-database-delete {
@@ -2692,6 +2695,7 @@ body {
   width: 20px;
   height: 20px;
   display: inline-block;
+  filter: invert(15%) sepia(89%) saturate(7451%) hue-rotate(0deg) brightness(105%) contrast(105%);
 }
 
 .icon-install-app {
@@ -2702,6 +2706,7 @@ body {
   width: 20px;
   height: 20px;
   display: inline-block;
+  filter: brightness(0) invert(1);
 }
 
 /* === HISTORY VIEW === */
