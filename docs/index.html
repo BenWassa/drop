@@ -417,11 +417,9 @@
           const instruction = document.getElementById('spirit-timer-instruction');
           const moodDot = document.getElementById('spirit-mood-dot');
           const moodGrid = document.getElementById('spirit-mood-grid');
-          const moodSlider = document.getElementById('spirit-mood-slider');
-          const energySlider = document.getElementById('spirit-energy-slider');
           const moodLabel = document.getElementById('spirit-mood-label');
           
-          if (!btn || !text || !mantra || !fill || !instruction || !moodDot || !moodGrid || !moodSlider || !energySlider || !moodLabel) {
+          if (!btn || !text || !mantra || !fill || !instruction || !moodDot || !moodGrid || !moodLabel) {
             console.error('Spirit timer elements not found');
             return;
           }
@@ -528,14 +526,45 @@
           btn.addEventListener('mouseup', pressEnd); btn.addEventListener('touchend', pressEnd); window.addEventListener('blur', pressEnd);
           btn.addEventListener('click', (e)=>{ if(wasLong) return; if(running) pauseTimer(); else if(btn.dataset.state==='paused') startTimer(); });
 
-          // Mood controls: sliders update the dot position and label
-          function updateMood(){ const m = Number(moodSlider.value); const e = Number(energySlider.value); const x = m + '%'; const y = e + '%'; moodDot.style.setProperty('--mood-x', x); moodDot.style.setProperty('--mood-y', y); let moodText = (m>66?'Positive':m>33?'Neutral':'Negative') + ' · ' + (e>66?'High Energy':e>33?'Medium Energy':'Low Energy'); moodLabel.textContent = moodText; }
-          moodSlider.addEventListener('input', updateMood); energySlider.addEventListener('input', updateMood);
+          // Mood controls: update the dot position and label from state
+          function updateMood(){
+            const m = Store.state.mood || 50;
+            const e = Store.state.energy || 50;
+            const x = m + '%';
+            const y = e + '%';
+            moodDot.style.setProperty('--mood-x', x);
+            moodDot.style.setProperty('--mood-y', y);
+            let moodText = (m>66?'Positive':m>33?'Neutral':'Negative') + ' · ' + (e>66?'High Energy':e>33?'Medium Energy':'Low Energy');
+            moodLabel.textContent = moodText;
+          }
+          // Clicking on mood grid to set mood
+          moodGrid.addEventListener('click', (ev) => {
+            const rect = moodGrid.getBoundingClientRect();
+            let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width);
+            let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height);
+            const mx = Math.round((px/rect.width)*100);
+            const my = Math.round((py/rect.height)*100);
+            Store.update('mood', mx);
+            Store.update('energy', my);
+            updateMood();
+          });
+
           // Dragging the mood dot (pointer friendly)
           let dragging=false;
           moodDot.addEventListener('pointerdown', (ev)=>{ dragging=true; moodDot.setPointerCapture(ev.pointerId); });
           window.addEventListener('pointerup', (ev)=>{ if(dragging){ dragging=false; moodDot.releasePointerCapture(ev.pointerId); } });
-          window.addEventListener('pointermove', (ev)=>{ if(!dragging) return; const rect = moodGrid.getBoundingClientRect(); let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width); let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height); const mx = Math.round((px/rect.width)*100); const my = Math.round((py/rect.height)*100); moodSlider.value = mx; energySlider.value = my; updateMood(); });
+          window.addEventListener('pointermove', (ev)=>{
+            if(!dragging) return;
+            const rect = moodGrid.getBoundingClientRect();
+            let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width);
+            let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height);
+            const mx = Math.round((px/rect.width)*100);
+            const my = Math.round((py/rect.height)*100);
+            // Update store state
+            Store.update('mood', mx);
+            Store.update('energy', my);
+            updateMood();
+          });
 
           // init
           updateMood();
