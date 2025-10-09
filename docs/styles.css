@@ -2653,6 +2653,47 @@ body {
   line-height: 1;
 }
 
+/* SVG Icon backgrounds for settings buttons */
+.icon-calendar-search {
+  background-image: url('icons/calendar_search.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+.icon-database-export {
+  background-image: url('icons/database_export.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+.icon-database-import {
+  background-image: url('icons/database_import.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+.icon-database-delete {
+  background-image: url('icons/database_delete.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
 /* === HISTORY VIEW === */
 .history-controls {
   display: flex;
