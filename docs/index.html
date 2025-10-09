@@ -438,7 +438,8 @@
             instruction.textContent='Session running. Tap to pause.'; 
             // Reset text display for running state
             text.classList.remove('fade-out');
-            mantra.classList.remove('fade-in');
+            // Keep mantra visible during session
+            // mantra.classList.remove('fade-in');
             timer = setInterval(()=>{ 
               seconds++; 
               text.textContent = fmt(seconds); 

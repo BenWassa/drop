@@ -1059,8 +1059,10 @@ const UI = {
     }
 
     // Mind practices
-    UI.updatePracticeValue('reading', state.read_level ? `Level ${state.read_level}` : '');
-    UI.updatePracticeValue('writing', state.write_level ? `Level ${state.write_level}` : '');
+    const readingLevels = {1: 'Leisure', 2: 'Perspicacity', 3: 'Erudition'};
+    UI.updatePracticeValue('reading', state.read_level ? readingLevels[state.read_level] || `Level ${state.read_level}` : '');
+    const writingLevels = {1: 'Journal', 2: 'Editorial', 3: 'Treatise'};
+    UI.updatePracticeValue('writing', state.write_level ? writingLevels[state.write_level] || `Level ${state.write_level}` : '');
 
     // Spirit practices
     UI.updatePracticeValue('mindfulness', state.meditation ? 'Meditated' : '');
