@@ -78,18 +78,71 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Skip setting up animation listeners and timeout
       }
 
-      if (logo) {
-        const onAnimEnd = (e) => {
-          if (e.animationName === 'breath') {
-            logo.removeEventListener('animationend', onAnimEnd);
-            hideOverlay();
+      // Wait for CSS to load before hiding loading screen
+      const waitForCSS = () => {
+        return new Promise((resolve) => {
+          // Check if document is already fully loaded
+          if (document.readyState === 'complete') {
+            resolve();
+            return;
           }
-        };
-        logo.addEventListener('animationend', onAnimEnd);
-      }
 
-      // Fallback: ensure loading overlay hidden after animDurationMs
-      fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
+          // Check if CSS has loaded by testing if our styles are applied
+          const checkCSSLoaded = () => {
+            const testElement = document.createElement('div');
+            testElement.style.display = 'none';
+            document.body.appendChild(testElement);
+            
+            // Check if CSS custom properties are available (indicates our stylesheet loaded)
+            const hasCSS = getComputedStyle(testElement).getPropertyValue('--color-bg') !== '';
+            document.body.removeChild(testElement);
+            
+            return hasCSS;
+          };
+
+          // If CSS is already loaded, resolve immediately
+          if (checkCSSLoaded()) {
+            resolve();
+            return;
+          }
+
+          // Wait for window load event (includes all assets like CSS, images, etc.)
+          window.addEventListener('load', () => {
+            resolve();
+          });
+
+          // Also check periodically if CSS loads before window load
+          const cssCheckInterval = setInterval(() => {
+            if (checkCSSLoaded()) {
+              clearInterval(cssCheckInterval);
+              resolve();
+            }
+          }, 100);
+
+          // Fallback timeout in case load event doesn't fire
+          setTimeout(() => {
+            clearInterval(cssCheckInterval);
+            console.warn('CSS load timeout - hiding loading screen anyway');
+            resolve();
+          }, 10000); // 10 second fallback
+        });
+      };
+
+      // Wait for all assets to load, then hide loading screen with animation
+      waitForCSS().then(() => {
+        if (logo) {
+          const onAnimEnd = (e) => {
+            if (e.animationName === 'breath') {
+              logo.removeEventListener('animationend', onAnimEnd);
+              hideOverlay();
+            }
+          };
+          logo.addEventListener('animationend', onAnimEnd);
+        }
+
+        // Fallback: ensure loading overlay hidden after animDurationMs
+        fallbackTimeout = setTimeout(hideOverlay, animDurationMs);
+      });
     },
 
     updateScores() {
