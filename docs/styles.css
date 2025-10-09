@@ -1534,7 +1534,17 @@ body {
 /* === END WEEKLY HEATMAP COMPONENT === */
 
 /* === VISION PAGE === */
-.vision-intent,
+.vision-intent {
+  background: url('./icons/vision_hero.png') 50% 20px/cover no-repeat, linear-gradient(135deg, rgba(31, 35, 47, 0.85), rgba(21, 23, 29, 0.75));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  margin-bottom: 0; /* Remove bottom margin since grid handles spacing */
+  backdrop-filter: blur(8px);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
 .vision-card {
   background: linear-gradient(135deg, rgba(31, 35, 47, 0.85), rgba(21, 23, 29, 0.75));
   border: 1px solid rgba(255, 255, 255, 0.08);
