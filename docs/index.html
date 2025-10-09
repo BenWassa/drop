@@ -528,6 +528,7 @@
 
           // Mood controls: update the dot position and label from state
           function updateMood(){
+            if (typeof Store === 'undefined') return;
             const m = Store.state.mood || 50;
             const e = Store.state.energy || 50;
             const x = m + '%';
@@ -539,6 +540,7 @@
           }
           // Clicking on mood grid to set mood
           moodGrid.addEventListener('click', (ev) => {
+            if (typeof Store === 'undefined') return;
             const rect = moodGrid.getBoundingClientRect();
             let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width);
             let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height);
@@ -554,7 +556,7 @@
           moodDot.addEventListener('pointerdown', (ev)=>{ dragging=true; moodDot.setPointerCapture(ev.pointerId); });
           window.addEventListener('pointerup', (ev)=>{ if(dragging){ dragging=false; moodDot.releasePointerCapture(ev.pointerId); } });
           window.addEventListener('pointermove', (ev)=>{
-            if(!dragging) return;
+            if(!dragging || typeof Store === 'undefined') return;
             const rect = moodGrid.getBoundingClientRect();
             let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width);
             let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height);
