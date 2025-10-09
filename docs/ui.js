@@ -207,7 +207,7 @@ const UI = {
           <span class="baseline-progress-label">${daysLogged} of 7 days</span>
         </div>
         <p class="baseline-encouragement">
-          ✨ You're on your way! Each day of data helps drop understand your unique patterns.
+          You're on your way! Each day of data helps drop understand your unique patterns.
         </p>
       `;
 
