@@ -449,8 +449,26 @@ const UI = {
         const quadrantLabel = this.describeQuadrant(quadrant);
     if (quadrantLabel) {
       descriptors.push(quadrantLabel);
-      const energyTone = energy > 40 ? 'High energy' : energy < -40 ? 'Low energy' : 'Balanced energy';
-      const moodTone = mood > 40 ? 'Bright mood' : mood < -40 ? 'Grounded mood' : 'Steady mood';
+      // Three tiers for energy levels based on slider position
+      let energyTone;
+      if (energy > 70) energyTone = 'Very high energy';
+      else if (energy > 40) energyTone = 'High energy';
+      else if (energy > 10) energyTone = 'Moderately high energy';
+      else if (energy > -10) energyTone = 'Balanced energy';
+      else if (energy > -40) energyTone = 'Moderately low energy';
+      else if (energy > -70) energyTone = 'Low energy';
+      else energyTone = 'Very low energy';
+      
+      // Three tiers for mood levels
+      let moodTone;
+      if (mood > 70) moodTone = 'Very bright mood';
+      else if (mood > 40) moodTone = 'Bright mood';
+      else if (mood > 10) moodTone = 'Moderately bright mood';
+      else if (mood > -10) moodTone = 'Steady mood';
+      else if (mood > -40) moodTone = 'Moderately grounded mood';
+      else if (mood > -70) moodTone = 'Grounded mood';
+      else moodTone = 'Very grounded mood';
+      
       descriptors.push(`${energyTone}`, `${moodTone}`);
     }
     if (meditation) {
