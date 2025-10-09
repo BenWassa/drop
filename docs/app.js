@@ -464,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
               console.warn('Failed to clear cookies programmatically:', e);
             }
 
-            // If Store exists, call clearAllData
+            // Reset app state to defaults (after storage is cleared)
             if (window.DropApp && DropApp.Store && typeof DropApp.Store.clearAllData === 'function') {
               DropApp.Store.clearAllData();
             }
