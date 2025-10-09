@@ -1057,7 +1057,8 @@ const UI = {
 
     // Fitness practices
     UI.updatePracticeValue('run', state.run ? `${state.run}km` : '');
-    UI.updatePracticeValue('strength', state.strength_level ? 'Training' : '');
+    const strengthLevels = {1: 'Movement', 2: 'Session', 3: 'Training'};
+    UI.updatePracticeValue('strength', state.strength_level ? strengthLevels[state.strength_level] || `Level ${state.strength_level}` : '');
     
     if (Array.isArray(state.skill) && state.skill.length > 0) {
       const first = state.skill[0];
