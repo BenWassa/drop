@@ -2293,7 +2293,7 @@ body {
   border-color: var(--color-primary);
   box-shadow: var(--shadow-sm);
 }
-.nav-icon { width: 28px; height: 28px; display: block; filter: invert(0.7); }
+.nav-icon { width: 28px; height: 28px; display: block; filter: invert(1); }
 .nav-btn.active .nav-icon { filter: invert(37%) sepia(96%) saturate(7451%) hue-rotate(210deg) brightness(104%) contrast(105%); }
 .nav-label { font-size: 12px; font-weight: 500; }
 
@@ -2686,6 +2686,16 @@ body {
 
 .icon-database-delete {
   background-image: url('icons/database_delete.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+.icon-install-app {
+  background-image: url('icons/install_app.svg');
   background-size: 20px 20px;
   background-repeat: no-repeat;
   background-position: center;
