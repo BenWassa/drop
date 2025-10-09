@@ -331,6 +331,9 @@ const Store = {
       if (!key.startsWith('vision')) {
         console.log('🔄 Triggering score update for key:', key);
         App.updateScores();
+        if (typeof UI !== 'undefined') {
+          UI.updatePracticeValues();
+        }
       }
     } else {
       console.warn('⚠️ Key not found in state:', key);

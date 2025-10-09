@@ -1022,6 +1022,9 @@ const UI = {
     // Spirit practices
     UI.updatePracticeState('mindfulness', !!state.meditation);
     UI.updatePracticeState('mood', state.quadrant > 0);
+
+    // Update displayed values
+    UI.updatePracticeValues();
   },
 
   updatePracticeState(practiceId, isLogged) {
@@ -1029,6 +1032,49 @@ const UI = {
     if (!practice) return;
     
     practice.classList.toggle('is-logged', isLogged);
+  },
+
+  updatePracticeValues() {
+    const state = Store.state;
+    const formatTime = (time) => {
+      if (!time) return '';
+      const [hours, minutes] = time.split(':');
+      return `${hours}:${minutes}`;
+    };
+
+    // Sleep practices
+    UI.updatePracticeValue('wake', state.wake ? formatTime(state.wake) : '');
+    UI.updatePracticeValue('rest', state.rest ? formatTime(state.rest) : '');
+
+    // Fitness practices
+    UI.updatePracticeValue('run', state.run ? `${state.run}km` : '');
+    UI.updatePracticeValue('strength', state.strength_level ? 'Training' : '');
+    
+    if (Array.isArray(state.skill) && state.skill.length > 0) {
+      const first = state.skill[0];
+      const extra = state.skill.length - 1;
+      UI.updatePracticeValue('skill', extra > 0 ? `${first} + ${extra}` : first);
+    } else {
+      UI.updatePracticeValue('skill', '');
+    }
+
+    // Mind practices
+    UI.updatePracticeValue('reading', state.read_level ? `Level ${state.read_level}` : '');
+    UI.updatePracticeValue('writing', state.write_level ? `Level ${state.write_level}` : '');
+
+    // Spirit practices
+    UI.updatePracticeValue('mindfulness', state.meditation ? 'Meditated' : '');
+    UI.updatePracticeValue('mood', state.quadrant ? `Quadrant ${state.quadrant}` : '');
+  },
+
+  updatePracticeValue(practiceId, value) {
+    const practice = document.querySelector(`[data-practice="${practiceId}"]`);
+    if (!practice) return;
+    
+    const valueEl = practice.querySelector('.practice-value');
+    if (valueEl) {
+      valueEl.textContent = value;
+    }
   },
 
 

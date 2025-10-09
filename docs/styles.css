@@ -960,6 +960,29 @@ body {
   transition: color 0.2s ease;
 }
 
+.practice-value {
+  flex: 1;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  margin: 0 8px;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.practice-value:empty {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
 .chevron-icon {
   width: 20px;
   height: 20px;
