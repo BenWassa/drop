@@ -780,41 +780,6 @@ body {
   gap: 14px;
 }
 
-/* Direct sleep controls - single row layout */
-.sleep-direct-controls {
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.sleep-control-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.sleep-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.target-placeholder {
-  color: var(--color-text-tertiary);
-  font-style: italic;
-  text-align: center;
-  padding: 20px 0;
-  margin: 0;
-}
-
 .time-input-row {
   display: flex;
   flex-direction: column;

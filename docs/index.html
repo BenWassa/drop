@@ -163,39 +163,46 @@
                 <p class="action-card__subtitle">Recovery &amp; Rhythm</p>
               </div>
             </header>
-            <!-- Sleep with direct controls and collapsible target -->
+            <!-- Sleep with tiered labels -->
             <div class="sleep-widget-body">
-              <!-- Direct sleep logging row -->
-              <div class="sleep-direct-controls">
-                <div class="sleep-control-item">
-                  <span class="sleep-label">Wake</span>
-                  <div class="time-input-control">
-                    <input type="time" id="wake-time" autocomplete="off">
-                    <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
-                  </div>
-                </div>
-                <div class="sleep-control-item">
-                  <span class="sleep-label">Rest</span>
-                  <div class="time-input-control">
-                    <input type="time" id="rest-time" autocomplete="off">
-                    <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Collapsible target section -->
               <div class="tiered-selection-group">
-                <div class="tiered-selection collapsible-practice" data-sleep-section="target" data-practice="target">
+                
+                <!-- Wake with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-sleep-section="wake" data-practice="wake">
                   <button class="tiered-label practice-header" type="button">
-                    <span class="practice-name">Target</span>
+                    <span class="practice-name">Wake</span>
                     <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
                   </button>
                   <div class="practice-content">
-                    <p class="target-placeholder">Set your sleep target here</p>
+                    <div class="wake-controls">
+                      <div class="time-input-control">
+                        <input type="time" id="wake-time" autocomplete="off">
+                        <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                <!-- Rest with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-sleep-section="rest" data-practice="rest">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Rest</span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="rest-controls">
+                      <div class="time-input-control">
+                        <input type="time" id="rest-time" autocomplete="off">
+                        <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
               </div>
             </div>
             <p class="text-status" id="sleep-status">No sleep window logged yet.</p>
