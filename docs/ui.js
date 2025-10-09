@@ -210,7 +210,7 @@ const UI = {
               </div>
             </div>
 
-            <p class="baseline-banner__note">✨ You're on your way! Each day of data helps Drop understand your unique patterns.</p>
+            <p class="baseline-banner__note">You're on your way! Each day of data helps Drop understand your unique patterns.</p>
           </div>
         </section>
       `;
