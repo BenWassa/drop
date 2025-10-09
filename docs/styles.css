@@ -2260,28 +2260,39 @@ body {
 /* Developer UI: small pill and toast (styling kept further down) */
 
 /* === FOOTER NAVIGATION === */
-.bottom-nav { display: flex; justify-content: space-around; height: 80px; }
+.bottom-nav { 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  height: 80px; 
+  padding: 8px 24px;
+  gap: 12px;
+}
 .nav-btn {
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 4px;
   transition: var(--transition-fast);
-  padding: 12px 24px;
-  border-radius: var(--radius-lg);
+  padding: 8px;
+  border-radius: 12px;
   position: relative;
-  min-height: 48px;
-  min-width: 48px;
-  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.2);
+  flex: 1;
+  max-width: 90px;
+  -webkit-tap-highlight-color: rgba(79, 138, 245, 0.15);
   touch-action: manipulation;
 }
 .nav-btn:hover { 
-  background: var(--color-surface-2); 
-  border-color: var(--color-border-hover);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+.nav-btn:active {
+  transform: scale(0.95);
 }
 .nav-btn:focus-visible {
   outline: 2px solid var(--color-primary);
@@ -2289,12 +2300,36 @@ body {
 }
 .nav-btn.active { 
   color: var(--color-primary); 
-  background: var(--color-surface-1); 
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
+  background: rgba(79, 138, 245, 0.1);
+  transform: scale(1.15);
 }
-.nav-icon { width: 36px; height: 36px; display: block; filter: brightness(0) invert(1); }
-.nav-btn.active .nav-icon { filter: invert(37%) sepia(96%) saturate(7451%) hue-rotate(210deg) brightness(104%) contrast(105%); }
+.nav-btn.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 0 0 3px 3px;
+}
+.nav-icon { 
+  width: 42px; 
+  height: 42px; 
+  display: block; 
+  filter: brightness(0) invert(1);
+  transition: var(--transition-fast);
+}
+.nav-btn:hover .nav-icon {
+  filter: brightness(0) invert(1);
+  transform: scale(1.1);
+}
+.nav-btn.active .nav-icon { 
+  filter: invert(37%) sepia(96%) saturate(7451%) hue-rotate(210deg) brightness(104%) contrast(105%);
+  width: 48px;
+  height: 48px;
+}
 .nav-label { font-size: 12px; font-weight: 500; }
 
 /* === OVERLAY / MODAL === */
