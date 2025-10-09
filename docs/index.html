@@ -760,21 +760,136 @@
   <div class="overlay" id="history-overlay">
     <div class="overlay-content-wrapper">
       <header class="overlay-header">
-        <h2 class="overlay-title">History</h2>
+        <h2 class="overlay-title" id="history-title">History</h2>
         <button class="close-btn" aria-label="Close history overlay">&times;</button>
       </header>
       <div class="overlay-content">
-        <div class="history-controls">
-          <button class="history-nav-btn" id="history-prev-btn" aria-label="Previous entries">
-            <span aria-hidden="true">◀</span>
-          </button>
-          <div class="history-date-range" id="history-date-range">Last 7 Days</div>
-          <button class="history-nav-btn" id="history-next-btn" aria-label="Next entries" disabled>
-            <span aria-hidden="true">▶</span>
-          </button>
+        <!-- History List View -->
+        <div id="history-list-view">
+          <div class="history-controls">
+            <button class="history-nav-btn" id="history-prev-btn" aria-label="Previous entries">
+              <span aria-hidden="true">◀</span>
+            </button>
+            <div class="history-date-range" id="history-date-range">Last 7 Days</div>
+            <button class="history-nav-btn" id="history-next-btn" aria-label="Next entries" disabled>
+              <span aria-hidden="true">▶</span>
+            </button>
+          </div>
+          <div class="history-list" id="history-list">
+            <!-- History entries will be populated here -->
+          </div>
         </div>
-        <div class="history-list" id="history-list">
-          <!-- History entries will be populated here -->
+
+        <!-- History Edit View -->
+        <div id="history-edit-view" style="display: none;">
+          <div class="history-edit-header">
+            <button class="history-back-btn" id="history-back-btn" aria-label="Back to history list">← Back</button>
+            <div class="history-edit-date" id="history-edit-date"></div>
+          </div>
+          <form class="history-edit-form" id="history-edit-form">
+            <!-- Sleep Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/sleep.svg" alt="" class="edit-section-icon">
+                Sleep
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-wake">Wake Time</label>
+                  <input type="time" id="edit-wake" name="wake">
+                </div>
+                <div class="edit-field">
+                  <label for="edit-rest">Rest Time</label>
+                  <input type="time" id="edit-rest" name="rest">
+                </div>
+              </div>
+            </div>
+
+            <!-- Fitness Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/fitness.svg" alt="" class="edit-section-icon">
+                Fitness
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-run">Run Distance (km)</label>
+                  <input type="number" id="edit-run" name="run" min="0" step="0.1">
+                </div>
+                <div class="edit-field">
+                  <label for="edit-strength">Strength Level</label>
+                  <select id="edit-strength" name="strength_level">
+                    <option value="0">None</option>
+                    <option value="1">Light</option>
+                    <option value="2">Moderate</option>
+                    <option value="3">Intense</option>
+                  </select>
+                </div>
+                <div class="edit-field">
+                  <label for="edit-skill">Skills</label>
+                  <input type="text" id="edit-skill" name="skill" placeholder="e.g., Wrestling, Yoga">
+                </div>
+              </div>
+            </div>
+
+            <!-- Mind Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/mind.svg" alt="" class="edit-section-icon">
+                Mind
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-reading">Reading Level</label>
+                  <select id="edit-reading" name="read_level">
+                    <option value="0">None</option>
+                    <option value="1">Leisure</option>
+                    <option value="2">Perspicacity</option>
+                    <option value="3">Erudition</option>
+                  </select>
+                </div>
+                <div class="edit-field">
+                  <label for="edit-writing">Writing Level</label>
+                  <select id="edit-writing" name="write_level">
+                    <option value="0">None</option>
+                    <option value="1">Journal</option>
+                    <option value="2">Editorial</option>
+                    <option value="3">Treatise</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spirit Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/spirit.svg" alt="" class="edit-section-icon">
+                Spirit
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-meditation">Meditation</label>
+                  <select id="edit-meditation" name="meditation">
+                    <option value="false">Not logged</option>
+                    <option value="true">Completed</option>
+                  </select>
+                </div>
+                <div class="edit-field">
+                  <label for="edit-mood">Mood</label>
+                  <input type="number" id="edit-mood" name="mood" min="0" max="100" placeholder="0-100">
+                </div>
+                <div class="edit-field">
+                  <label for="edit-energy">Energy</label>
+                  <input type="number" id="edit-energy" name="energy" min="0" max="100" placeholder="0-100">
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-actions">
+              <button type="button" class="edit-cancel-btn" id="edit-cancel-btn">Cancel</button>
+              <button type="submit" class="edit-save-btn">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

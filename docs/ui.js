@@ -41,7 +41,14 @@ const UI = {
       list: document.getElementById('history-list'),
       dateRange: document.getElementById('history-date-range'),
       prevBtn: document.getElementById('history-prev-btn'),
-      nextBtn: document.getElementById('history-next-btn')
+      nextBtn: document.getElementById('history-next-btn'),
+      listView: document.getElementById('history-list-view'),
+      editView: document.getElementById('history-edit-view'),
+      backBtn: document.getElementById('history-back-btn'),
+      editDate: document.getElementById('history-edit-date'),
+      editForm: document.getElementById('history-edit-form'),
+      cancelBtn: document.getElementById('edit-cancel-btn'),
+      title: document.getElementById('history-title')
     },
     dataControls: {
       exportBtn: document.getElementById('export-data-btn'),
@@ -1671,14 +1678,7 @@ const UI = {
           list.querySelectorAll('.history-entry').forEach(entryEl => {
             entryEl.addEventListener('click', () => {
               const dateKey = entryEl.dataset.date;
-              overlay.classList.remove('active');
-              // Switch to the date and show home page
-              Store.state.currentDate = dateKey;
-              UI.updateDateDisplay();
-              if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
-                App.updateScores();
-              }
-              UI.showPage('home');
+              UI.showHistoryEditForm(dateKey);
             });
           });
         }
@@ -1698,7 +1698,27 @@ const UI = {
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
         console.log('❌ Closing history overlay');
+        UI.hideHistoryEditForm(); // Ensure edit form is hidden
         overlay.classList.remove('active');
+      });
+    }
+
+    // Edit form event listeners
+    const { backBtn, cancelBtn, editForm } = UI.elements.historyOverlay;
+    if (backBtn) {
+      backBtn.addEventListener('click', () => {
+        UI.hideHistoryEditForm();
+      });
+    }
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        UI.hideHistoryEditForm();
+      });
+    }
+    if (editForm) {
+      editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        UI.saveHistoryEdit();
       });
     }
 
@@ -1707,5 +1727,100 @@ const UI = {
     overlay.classList.add('active');
     console.log('🎨 Rendering history...');
     renderHistory();
+  },
+
+  showHistoryEditForm(dateKey) {
+    const { listView, editView, editDate, editForm, title } = UI.elements.historyOverlay;
+    const entries = Store.state.entries || {};
+    const entry = entries[dateKey];
+
+    if (!entry) return;
+
+    // Update title and date
+    title.textContent = 'Edit Entry';
+    const date = new Date(dateKey);
+    editDate.textContent = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Populate form with current values
+    const form = editForm;
+    form.dataset.dateKey = dateKey;
+
+    // Sleep fields
+    form.wake.value = entry.wake || '';
+    form.rest.value = entry.rest || '';
+
+    // Fitness fields
+    form.run.value = entry.run || '';
+    form.strength_level.value = entry.strength_level || 0;
+    form.skill.value = Array.isArray(entry.skill) ? entry.skill.join(', ') : (entry.skill || '');
+
+    // Mind fields
+    form.read_level.value = entry.read_level || 0;
+    form.write_level.value = entry.write_level || 0;
+
+    // Spirit fields
+    form.meditation.value = entry.meditation ? 'true' : 'false';
+    form.mood.value = entry.mood || '';
+    form.energy.value = entry.energy || '';
+
+    // Show edit view
+    listView.style.display = 'none';
+    editView.style.display = 'block';
+  },
+
+  hideHistoryEditForm() {
+    const { listView, editView, title } = UI.elements.historyOverlay;
+    title.textContent = 'History';
+    listView.style.display = 'block';
+    editView.style.display = 'none';
+  },
+
+  saveHistoryEdit() {
+    const { editForm } = UI.elements.historyOverlay;
+    const dateKey = editForm.dataset.dateKey;
+    const formData = new FormData(editForm);
+
+    // Build updated entry
+    const updatedEntry = {
+      wake: formData.get('wake') || '',
+      rest: formData.get('rest') || '',
+      run: parseFloat(formData.get('run')) || 0,
+      strength_level: parseInt(formData.get('strength_level')) || 0,
+      skill: formData.get('skill') ? formData.get('skill').split(',').map(s => s.trim()).filter(s => s) : [],
+      read_level: parseInt(formData.get('read_level')) || 0,
+      write_level: parseInt(formData.get('write_level')) || 0,
+      meditation: formData.get('meditation') === 'true',
+      mood: parseInt(formData.get('mood')) || 0,
+      energy: parseInt(formData.get('energy')) || 0,
+      quadrant: 0 // Will be recalculated
+    };
+
+    // Update the entry in store
+    if (!Store.state.entries) Store.state.entries = {};
+    Store.state.entries[dateKey] = updatedEntry;
+
+    // Recalculate quadrant
+    const { mood, energy } = updatedEntry;
+    if (mood > 0 && energy > 0) {
+      if (mood > 50 && energy > 50) updatedEntry.quadrant = 1; // High mood, high energy
+      else if (mood > 50 && energy <= 50) updatedEntry.quadrant = 2; // High mood, low energy
+      else if (mood <= 50 && energy > 50) updatedEntry.quadrant = 3; // Low mood, high energy
+      else updatedEntry.quadrant = 4; // Low mood, low energy
+    }
+
+    // Save and update
+    Store.save();
+    UI.hideHistoryEditForm();
+    UI.renderHistory(); // Re-render the list
+
+    // Show success feedback
+    if (typeof UI.showToast === 'function') {
+      UI.showToast('Entry updated successfully!');
+    }
   },
 };
