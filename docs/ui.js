@@ -447,11 +447,11 @@ const UI = {
     if (!status) return;
     const descriptors = [];
         const quadrantLabel = this.describeQuadrant(quadrant);
-    if (quadrantLabel) {
-      // If quadrant is selected, just show the quadrant label (which already includes energy/mood info)
+    if (quadrant > 0 && quadrantLabel) {
+      // If quadrant is explicitly selected (1-4), show only the quadrant label
       descriptors.push(quadrantLabel);
     } else if (energy !== 0 || mood !== 0) {
-      // If no quadrant but sliders moved, show detailed energy/mood breakdown
+      // If no quadrant selected but sliders moved, show detailed energy/mood breakdown
       // Three tiers for energy levels based on slider position
       let energyTone;
       if (energy > 70) energyTone = 'Very high energy';
