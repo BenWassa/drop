@@ -2155,8 +2155,9 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px; /* ensures space between logo and word at max scale */
+  gap: 12px; /* initial gap - logo and text start very close */
   z-index: 1;
+  animation: breathFrame 5000ms ease-in-out 1 forwards;
 }
 
 @keyframes breath {
@@ -2166,11 +2167,22 @@ body {
   100% { transform: scale(0.96); } /* hold at exhale */
 }
 
+@keyframes breathFrame {
+  0% { gap: 12px; } /* start very close */
+  45% { gap: 40px; } /* expand during inhale to prevent overlap */
+  90% { gap: 8px; } /* contract during exhale */
+  100% { gap: 8px; } /* end very close */
+}
+
 /* Mobile adjustments for loading screen */
 @media (max-height: 700px) {
   .loading-logo {
     width: 110px;
     height: 110px;
+  }
+  
+  .loading-frame {
+    gap: 10px; /* start with very small gap on mobile */
   }
 
   @keyframes breath {
@@ -2178,6 +2190,13 @@ body {
     45% { transform: scale(1.25); } /* smaller scale for mobile */
     90% { transform: scale(0.96); }
     100% { transform: scale(0.96); }
+  }
+  
+  @keyframes breathFrame {
+    0% { gap: 10px; } /* start very close on mobile */
+    45% { gap: 30px; } /* expand less during inhale */
+    90% { gap: 6px; } /* contract to tiny gap */
+    100% { gap: 6px; } /* end very close */
   }
 }
 
@@ -2188,7 +2207,7 @@ body {
 
 /* Loading word: simple, synced with logo breath animation */
 .loading-word {
-  margin-top: 12px;
+  margin-top: 0; /* remove extra margin since gap handles spacing */
   font-family: var(--font-sans);
   font-weight: 400;
   letter-spacing: 4.5px;
@@ -2211,7 +2230,16 @@ body {
 
 @media (min-width: 1200px) {
   .loading-word { font-size: 30px; letter-spacing: 5px; }
-  .loading-frame { gap: 20px; }
+  .loading-frame { 
+    gap: 16px; /* start with small gap on large screens */
+  }
+  
+  @keyframes breathFrame {
+    0% { gap: 16px; } /* start close on desktop */
+    45% { gap: 50px; } /* expand during inhale */
+    90% { gap: 12px; } /* contract during exhale */
+    100% { gap: 12px; } /* end very close */
+  }
 }
 
 /* Developer UI: small pill and toast */
