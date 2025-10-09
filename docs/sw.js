@@ -1,6 +1,6 @@
 // Service Worker for drop PWA
 
-const APP_VERSION = '3.0.1';
+const APP_VERSION = '3.0.2';
 const CACHE_NAME = `drop-cache-v${APP_VERSION.replace(/\./g, '-')}`;
 const urlsToCache = [
   './',
