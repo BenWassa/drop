@@ -2135,8 +2135,8 @@ body {
 }
 
 .loading-logo {
-  width: 180px;
-  height: 180px;
+  width: 280px;
+  height: 280px;
   object-fit: contain;
   display: block;
   position: relative;
@@ -2155,44 +2155,26 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0px; /* no gap - text right against the logo */
   z-index: 1;
-  animation: breathFrame 5000ms ease-in-out 1 forwards;
 }
 
 @keyframes breath {
   0% { transform: scale(1); }
-  50% { transform: scale(1.25); } /* smoother inhale peak - reduced from 1.35 */
+  50% { transform: scale(1.25); } /* smoother inhale peak */
   100% { transform: scale(1); } /* return to original size */
-}
-
-@keyframes breathFrame {
-  0% { gap: 0px; } /* text right against logo */
-  50% { gap: 28px; } /* expand at peak to prevent overlap */
-  100% { gap: 0px; } /* end with text against logo */
 }
 
 /* Mobile adjustments for loading screen */
 @media (max-height: 700px) {
   .loading-logo {
-    width: 100px;
-    height: 100px;
-  }
-  
-  .loading-frame {
-    gap: 0px; /* no gap on mobile either */
+    width: 160px;
+    height: 160px;
   }
 
   @keyframes breath {
     0% { transform: scale(1); }
     50% { transform: scale(1.2); } /* smaller peak for mobile */
     100% { transform: scale(1); }
-  }
-  
-  @keyframes breathFrame {
-    0% { gap: 0px; } /* text against logo */
-    50% { gap: 20px; } /* smaller expansion on mobile */
-    100% { gap: 0px; } /* end with text against logo */
   }
 }
 
@@ -2201,39 +2183,10 @@ body {
   .loading-logo { transition: none; animation: none; }
 }
 
-/* Loading word: simple, synced with logo breath animation */
-.loading-word {
-  margin-top: 0; /* remove extra margin since gap handles spacing */
-  font-family: var(--font-sans);
-  font-weight: 400;
-  letter-spacing: 4.5px;
-  color: var(--color-text-primary);
-  font-size: 28px;
-  text-transform: lowercase;
-  opacity: 0.95;
-  /* Use the same breath animation as the logo for clean sync */
-  animation: breath 5000ms ease-in-out 1 forwards;
-  transform-origin: center center;
-  will-change: transform;
-  display: block;
-  width: 100%;
-  text-align: center;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loading-word { animation: none; }
-}
-
 @media (min-width: 1200px) {
-  .loading-word { font-size: 30px; letter-spacing: 5px; }
-  .loading-frame { 
-    gap: 0px; /* no gap on desktop either */
-  }
-  
-  @keyframes breathFrame {
-    0% { gap: 0px; } /* text against logo */
-    50% { gap: 32px; } /* expand at peak */
-    100% { gap: 0px; } /* end with text against logo */
+  .loading-logo {
+    width: 320px;
+    height: 320px;
   }
 }
 
