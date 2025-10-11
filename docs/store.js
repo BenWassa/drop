@@ -295,6 +295,9 @@ const Store = {
 
   save() {
     localStorage.setItem(this.DB_KEY, JSON.stringify(this.state));
+    if (typeof Backup !== 'undefined' && typeof Backup.handleStoreSave === 'function') {
+      Backup.handleStoreSave();
+    }
   },
 
   update(key, value) {

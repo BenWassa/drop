@@ -29,6 +29,9 @@ const UI = {
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
       installBtn: document.getElementById('settings-install-btn'),
+      backupSetupBtn: document.getElementById('settings-backup-setup-btn'),
+      backupNowBtn: document.getElementById('settings-backup-now-btn'),
+      backupStatus: document.getElementById('settings-backup-status'),
       exportBtn: document.getElementById('settings-export-btn'),
       importBtn: document.getElementById('settings-import-btn'),
       importInput: document.getElementById('settings-import-input'),
@@ -273,6 +276,37 @@ const UI = {
     this.toastTimer = setTimeout(() => {
       toast.classList.remove('show');
     }, ms);
+  },
+
+  setBackupState({ statusText = '', ready, needsPermission = false, unsupported = false, busy = false } = {}) {
+    const { backupStatus, backupNowBtn, backupSetupBtn } = this.elements.settingsMenu;
+    const resolvedReady = typeof ready === 'boolean' ? ready : Boolean(!unsupported && !needsPermission);
+
+    if (backupStatus) {
+      backupStatus.textContent = statusText;
+      if (unsupported) {
+        backupStatus.dataset.state = 'unsupported';
+      } else if (needsPermission) {
+        backupStatus.dataset.state = 'permission';
+      } else if (resolvedReady) {
+        backupStatus.dataset.state = 'ready';
+      } else {
+        backupStatus.dataset.state = 'idle';
+      }
+    }
+
+    if (backupNowBtn) {
+      const disabled = !resolvedReady || busy;
+      backupNowBtn.disabled = disabled;
+      backupNowBtn.setAttribute('aria-disabled', String(disabled));
+      backupNowBtn.classList.toggle('is-busy', Boolean(busy));
+    }
+
+    if (backupSetupBtn) {
+      const disabled = Boolean(busy);
+      backupSetupBtn.disabled = disabled;
+      backupSetupBtn.setAttribute('aria-disabled', String(disabled));
+    }
   },
 
   renderSkillChips() {
@@ -1411,7 +1445,18 @@ const UI = {
   },
 
   bindSettingsMenu() {
-    const { menu, openBtn, closeBtn, backdrop, exportBtn, importBtn, importInput, clearBtn } = UI.elements.settingsMenu;
+    const {
+      menu,
+      openBtn,
+      closeBtn,
+      backdrop,
+      exportBtn,
+      importBtn,
+      importInput,
+      clearBtn,
+      backupSetupBtn,
+      backupNowBtn
+    } = UI.elements.settingsMenu;
     
     if (!menu || !openBtn) return;
 
@@ -1447,6 +1492,34 @@ const UI = {
       exportBtn.addEventListener('click', () => {
         Store.handleExport();
         closeSettings();
+      });
+    }
+
+    if (backupSetupBtn) {
+      backupSetupBtn.addEventListener('click', async () => {
+        if (typeof Backup === 'undefined' || typeof Backup.chooseDirectory !== 'function') {
+          UI.notify('Local folder backups are not supported on this device.');
+          return;
+        }
+        try {
+          await Backup.chooseDirectory();
+        } catch (error) {
+          console.error('Backup setup failed:', error);
+        }
+      });
+    }
+
+    if (backupNowBtn) {
+      backupNowBtn.addEventListener('click', async () => {
+        if (typeof Backup === 'undefined' || typeof Backup.manualBackup !== 'function') {
+          UI.notify('Local folder backups are not supported on this device.');
+          return;
+        }
+        try {
+          await Backup.manualBackup();
+        } catch (error) {
+          console.error('Manual backup failed:', error);
+        }
       });
     }
 
