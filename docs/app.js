@@ -550,6 +550,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     Store.init();
+    if (typeof Backup !== 'undefined' && typeof Backup.init === 'function') {
+      try {
+        await Backup.init({ getState: () => Store.state });
+      } catch (error) {
+        console.error('Backup initialization failed:', error);
+      }
+    }
     App.init();
     App.setupDevPill();
   })();

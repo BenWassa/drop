@@ -22,6 +22,10 @@
   --color-primary: #4F8AF5;
   --color-primary-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
   --color-shadow-primary: rgba(79, 138, 245, 0.2);
+  --color-success: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #f87171;
+  --color-info: #38bdf8;
 
   /* === HEADER SIZE CONTROLS === */
   /* Adjust --header-scale to resize the entire header/scores section (0.7 = 70%, 1.0 = 100%, etc.) */
@@ -2630,6 +2634,20 @@ body {
   touch-action: manipulation;
 }
 
+.settings-btn:disabled,
+.settings-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.settings-btn.is-busy::after {
+  content: '…';
+  margin-left: auto;
+  font-size: 20px;
+  opacity: 0.6;
+}
+
 .settings-btn:hover {
   background: var(--color-surface-2);
   border-color: var(--color-border-hover);
@@ -2674,6 +2692,27 @@ body {
 .settings-btn__icon {
   font-size: 20px;
   line-height: 1;
+}
+
+.settings-helper-text {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 44px;
+  line-height: 1.4;
+  max-width: 320px;
+}
+
+.settings-helper-text[data-state="ready"] {
+  color: var(--color-success);
+}
+
+.settings-helper-text[data-state="permission"] {
+  color: var(--color-warning);
+}
+
+.settings-helper-text[data-state="unsupported"],
+.settings-helper-text[data-state="error"] {
+  color: var(--color-danger);
 }
 
 /* SVG Icon backgrounds for settings buttons */
@@ -2723,6 +2762,17 @@ body {
 
 .icon-install-app {
   background-image: url('icons/install_app.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  filter: brightness(0) invert(1);
+}
+
+.icon-folder-sync {
+  background-image: url('icons/folder_sync.svg');
   background-size: 20px 20px;
   background-repeat: no-repeat;
   background-position: center;
