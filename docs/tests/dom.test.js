@@ -7,18 +7,36 @@
 const createMockStore = () => ({
   DB_KEY: 'lifeTrackerData_test',
   state: {
-    wake: '06:00', rest: '22:00', run: 5, strength: true, skill: ['Mobility'],
-    read: true, write: false, quadrant: 1, meditation: true,
+    wake: '06:00', rest: '22:00', run: 5, strength: true, strength_level: 1, skill: ['Mobility'],
+    read_level: 2, write_level: 1, quadrant: 1, meditation: true,
+    energy: 70, mood: 65,
     visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
     visionMindFocus: '', visionSpiritFocus: '',
-    skillOptions: []
+    skillOptions: [],
+    lastEntryDate: '',
+    actionTimestamps: {},
+    entries: {},
+    archivedEntries: {},
+    meta: {
+      _version: 2,
+      _schemaDate: '2024-05-01'
+    }
   },
   defaults: {
-    wake: '', rest: '', run: 0, strength: false, skill: [],
-    read: false, write: false, quadrant: 0, meditation: false,
+    wake: '', rest: '', run: 0, strength: false, strength_level: 0, skill: [],
+    read_level: 0, write_level: 0, quadrant: 0, meditation: false,
+    energy: 0, mood: 0,
     visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
     visionMindFocus: '', visionSpiritFocus: '',
-    skillOptions: []
+    skillOptions: [],
+    lastEntryDate: '',
+    actionTimestamps: {},
+    entries: {},
+    archivedEntries: {},
+    meta: {
+      _version: 2,
+      _schemaDate: '2024-05-01'
+    }
   },
   init() {},
   save() {},
@@ -26,7 +44,15 @@ const createMockStore = () => ({
     if (key in this.state) {
       this.state[key] = value;
     }
-  }
+  },
+  recordHistory(scores) {},
+  getHistory() { return []; },
+  getEntry(date) { return null; },
+  setEntry(date, entry) {},
+  clearAllData() {},
+  validateImport(payload) { return true; },
+  merge(payload) {},
+  cloneDefaults() { return JSON.parse(JSON.stringify(this.defaults)); }
 });
 
 QUnit.module('Domain Score Display', function(hooks) {

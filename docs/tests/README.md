@@ -23,7 +23,7 @@ Unit tests for DOM structure, accessibility, and component behavior.
 Test data files for import/export functionality testing.
 
 **Files:**
-- `sample-data-1month.json` - 30 days of realistic tracking data with varying scores across all domains
+- `sample-data-1month.json` - 45 days of realistic tracking data with varying scores across all domains (2025-09-01 to 2025-10-14)
 
 **Usage:**
 - Use in DOM tests for data import validation
@@ -36,17 +36,17 @@ Test data files for import/export functionality testing.
   "meta": {
     "_version": 2,
     "_schemaDate": "2024-05-01",
-    "lastEntryDate": "2024-10-06",
+    "lastEntryDate": "2025-10-14",
     "settings": {
       "skillOptions": ["Wrestling", "Mobility", "Yoga"],
       "visionTheme": "Build healthy habits..."
     }
   },
   "entries": {
-    "2024-09-07": {
-      "wake": "06:30",
-      "rest": "22:00",
-      "run": 5,
+    "2025-10-14": {
+      "wake": "06:35",
+      "rest": "22:20",
+      "run": 7,
       "strength": true,
       "strength_level": 1,
       "skill": ["Mobility"],
@@ -54,16 +54,16 @@ Test data files for import/export functionality testing.
       "write_level": 1,
       "quadrant": 2,
       "meditation": true,
-      "energy": 64,
-      "mood": 58,
+      "energy": 72,
+      "mood": 68,
       "scores": {
-        "sleep": 85,
-        "fitness": 75,
-        "mind": 80,
-        "spirit": 70
+        "sleep": 90,
+        "fitness": 70,
+        "mind": 55,
+        "spirit": 82
       }
     }
-    // ... 29 more entries
+    // ... 44 more entries (2025-09-01 to 2025-10-14)
   }
 }
 ```
