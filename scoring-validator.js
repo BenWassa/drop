@@ -94,19 +94,21 @@ const Scoring = {
   calcMind(state) {
     let rawScore = 0;
 
-    // Reading: up to 50 points from 3 tiers
-    const readLevel = state.read_level || 0;
-    if (readLevel === 1) rawScore += 25; // "Leisure"
-    else if (readLevel === 2) rawScore += 35; // "Perspicacity"
-    else if (readLevel === 3) rawScore += 50; // "Erudition"
+    const readLevel = Number(state.read_level) || 0;
+    const writeLevel = Number(state.write_level) || 0;
 
-    // Writing: up to 50 points from 3 tiers
-    const writeLevel = state.write_level || 0;
-    if (writeLevel === 1) rawScore += 25; // "Journal"
-    else if (writeLevel === 2) rawScore += 35; // "Editorial"
-    else if (writeLevel === 3) rawScore += 50; // "Treatise"
+    const readPointsMap = [0, 20, 35, 55];
+    const writePointsMap = [0, 20, 35, 55];
 
-    return Math.max(0, Math.min(99, rawScore));
+    rawScore += readPointsMap[Math.min(3, Math.max(0, readLevel))];
+    rawScore += writePointsMap[Math.min(3, Math.max(0, writeLevel))];
+
+    if (readLevel > 0 && writeLevel > 0) {
+      const synergy = Math.round(((readLevel + writeLevel) / 6) * 10);
+      rawScore += synergy;
+    }
+
+    return Math.max(0, Math.min(99, Math.round(rawScore)));
   },
 
   calcSpirit(state) {

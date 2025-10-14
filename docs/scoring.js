@@ -144,21 +144,33 @@ const Scoring = {
    * @returns {number|null} Score or null if insufficient data
    */
   calcMind(state, Store) {
+    // New approach: make Mind scoring more granular and provide synergy when both
+    // reading and writing are present. This avoids the bunching at low values.
     let rawScore = 0;
 
-    // Reading: up to 50 points from 3 tiers
-    const readLevel = state.read_level || 0; // Assumes state.read_level (0, 1, 2, 3)
-    if (readLevel === 1) rawScore += 25; // "Leisure"
-    else if (readLevel === 2) rawScore += 35; // "Perspicacity"
-    else if (readLevel === 3) rawScore += 50; // "Erudition"
+    const readLevel = Number(state.read_level) || 0; // 0..3
+    const writeLevel = Number(state.write_level) || 0; // 0..3
 
-    // Writing: up to 50 points from 3 tiers
-    const writeLevel = state.write_level || 0; // Assumes state.write_level (0, 1, 2, 3)
-    if (writeLevel === 1) rawScore += 25; // "Journal"
-    else if (writeLevel === 2) rawScore += 35; // "Editorial"
-    else if (writeLevel === 3) rawScore += 50; // "Treatise"
+    // Assign base points per tier but more granularly:
+    // Reading: 0 -> 0, 1 -> 20, 2 -> 35, 3 -> 55 (up to 55 to allow synergy)
+    const readPointsMap = [0, 20, 35, 55];
+    // Writing: 0 -> 0, 1 -> 20, 2 -> 35, 3 -> 55
+    const writePointsMap = [0, 20, 35, 55];
 
-    return this.calcTrendScore('mind', Math.min(100, rawScore), Store);
+    rawScore += readPointsMap[Math.min(3, Math.max(0, readLevel))];
+    rawScore += writePointsMap[Math.min(3, Math.max(0, writeLevel))];
+
+    // Synergy bonus: if both reading and writing are present at meaningful levels,
+    // grant up to +10 bonus points to reflect integrated intellectual work.
+    if (readLevel > 0 && writeLevel > 0) {
+      // The stronger the combination, the larger the bonus (scaled)
+      const synergy = Math.round(((readLevel + writeLevel) / 6) * 10); // 0..10
+      rawScore += synergy;
+    }
+
+    // Normalize to not exceed 99
+    const capped = Math.min(99, Math.round(rawScore));
+    return this.calcTrendScore('mind', capped, Store);
   },
 
   /**
