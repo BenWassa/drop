@@ -263,10 +263,28 @@ QUnit.module('Data Management', function(hooks) {
       throw new Error('DropApp test hooks are not available.');
     }
 
+    // Verify Store methods are available
+    if (typeof this.testHooks.validateImport !== 'function') {
+      throw new Error('Store.validateImport method not available');
+    }
+    if (typeof this.testHooks.merge !== 'function') {
+      throw new Error('Store.merge method not available');
+    }
+    if (typeof this.testHooks.clearAllData !== 'function') {
+      throw new Error('Store.clearAllData method not available');
+    }
+
+    // Clear any cached test data
+    localStorage.removeItem('lifeTrackerData');
+    localStorage.removeItem('lifeTrackerData_test');
+
     this.testHooks.initStore();
   });
 
   hooks.beforeEach(function() {
+    // Ensure clean state for each test
+    localStorage.removeItem('lifeTrackerData');
+    localStorage.removeItem('lifeTrackerData_test');
     this.testHooks.clearAllData();
   });
 

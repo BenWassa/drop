@@ -7,6 +7,17 @@ This directory contains automated tests for the drop PWA.
 ### 1. DOM Tests (QUnit)
 Unit tests for DOM structure, accessibility, and component behavior.
 
+## Running Tests
+
+**Important:** If tests fail unexpectedly, try these cache-clearing steps:
+
+1. **Hard Refresh:** Press `Ctrl+F5` (Windows/Linux) or `Cmd+Shift+R` (Mac) to hard refresh
+2. **Clear Browser Cache:** Or use DevTools → Network → Disable cache
+3. **Clear localStorage:** Tests automatically clear test data, but you can manually clear:
+   ```javascript
+   localStorage.clear()
+   ```
+
 **Run:**
 - Open `index.html` in a browser
 - Or visit: `http://localhost:3000/tests/` (if running `npm run serve`)
