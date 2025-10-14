@@ -55,10 +55,7 @@ class Scoring:
             raw_score += min(50, 15 * math.log(run_distance + 1))
         activity_count = self.calculate_activity_count_for_state(state)
         adjusted_raw = round(raw_score)
-        if activity_count > 3:
-            extra = max(0, activity_count - 3)
-            reduction = {1: 0.10, 2: 0.18}.get(extra, 0.25)
-            adjusted_raw = round(adjusted_raw * (1 - reduction))
+        # REMOVED: Dampening - now only UI warning
         return max(0, min(99, adjusted_raw))
 
     @staticmethod

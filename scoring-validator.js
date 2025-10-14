@@ -69,11 +69,7 @@ const Scoring = {
     // Apply soft dampening for unrealistic daily load
     const activityCount = this.calculateActivityCountForState(state);
     let adjustedRaw = Math.round(rawScore);
-    if (activityCount > 3) {
-      const extra = Math.max(0, activityCount - 3);
-      const reduction = extra === 1 ? 0.10 : extra === 2 ? 0.18 : 0.25;
-      adjustedRaw = Math.round(adjustedRaw * (1 - reduction));
-    }
+    // REMOVED: Scoring penalty - now only UI warning
 
     return Math.max(0, Math.min(99, adjustedRaw));
   },

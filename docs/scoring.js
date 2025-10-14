@@ -96,19 +96,10 @@ const Scoring = {
     }
 
     // Soft dampening for unrealistic daily load
-    // If the user logs an unusually high combination of activities in one day,
-    // apply a conservative scaling to the raw fitness score so that impossible
-    // combinations don't produce inflated scores. This preserves the guide's
-    // philosophy (realism over perfection) and keeps scoring transparent.
+    // REMOVED: Scoring penalty - now only UI warning for awareness
     const activityCount = this.calculateActivityCountForState(state);
     let adjustedRaw = Math.min(100, rawScore);
-    if (activityCount > 3) {
-      // Soft penalty: reduce raw fitness by 10-25% depending on how many extra activities
-      // 4 activities -> 10% reduction, 5 -> 18%, 6+ -> 25%
-      const extra = Math.max(0, activityCount - 3);
-      const reduction = extra === 1 ? 0.10 : extra === 2 ? 0.18 : 0.25;
-      adjustedRaw = Math.round(adjustedRaw * (1 - reduction));
-    }
+    // No reduction applied - warnings handled in UI
 
     return this.calcTrendScore('fitness', adjustedRaw, Store);
   },
