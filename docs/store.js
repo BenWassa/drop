@@ -1005,6 +1005,11 @@ const Store = {
       // Save to localStorage
       this.save();
 
+      // Trigger score recalculation and UI updates after import
+      if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
+        App.updateScores();
+      }
+
       console.log('✅ Store.merge: Data merged successfully');
       return true;
     } catch (error) {
