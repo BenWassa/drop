@@ -230,9 +230,12 @@ const Scoring = {
    * @returns {number|null} Adjusted score (60-95) or null
    */
   calcTrendScore(domain, rawScore, Store) {
-    const history = typeof Store.getHistory === 'function' ? Store.getHistory(7) : [];
+    // Sleep scoring needs at least 3 days to form a trend (1 point, 2 relationship, 3 trend)
+    const minHistory = domain === 'sleep' ? 3 : 7;
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(minHistory) : [];
 
-    if (history.length < 7) {
+    if (history.length < minHistory) {
+      // Not enough history to compute a trend-adjusted score
       return null;
     }
 

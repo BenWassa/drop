@@ -235,7 +235,14 @@ function calculateScores(entry) {
 
   // Mock historical averages for blending (simple fixed mock for validator)
   function calcTrend(domain, raw) {
-    // Mock a historical average and blend 50/50 to favor more daily variance
+    // Simulate required history lengths: sleep needs 3 days, others 7.
+    const minHistory = domain === 'sleep' ? 3 : 7;
+    const simulatedHistoryLength = getRandomChoice([0, 1, 2, 3, 4, 5, 6, 7]);
+    if (simulatedHistoryLength < minHistory) {
+      // Not enough history to produce a trend-adjusted score
+      return null;
+    }
+
     const historicalAverage = 65 + getRandomInt(-7, 12);
     const blended = (raw * 0.5) + (historicalAverage * 0.5);
     return adjustToRealisticRange(blended);
