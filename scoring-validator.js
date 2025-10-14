@@ -49,20 +49,20 @@ const Scoring = {
   calcFitness(state) {
     let rawScore = 0;
 
-    // Skill practice: up to 40 points
+    // Skill practice: up to 50 points
     const skillSelections = Array.isArray(state.skill) ? state.skill : [];
-    if (skillSelections.length > 0) rawScore += 40;
+    if (skillSelections.length > 0) rawScore += 50;
 
-    // Strength training: up to 30 points from 3 tiers
+    // Strength training: up to 35 points from 3 tiers
     const strengthLevel = state.strength_level || 0;
-    if (strengthLevel === 1) rawScore += 10; // "Movement"
-    else if (strengthLevel === 2) rawScore += 20; // "Session"
-    else if (strengthLevel === 3) rawScore += 30; // "Training"
+    if (strengthLevel === 1) rawScore += 15; // "Movement"
+    else if (strengthLevel === 2) rawScore += 25; // "Session"
+    else if (strengthLevel === 3) rawScore += 35; // "Training"
 
-    // Running: up to 30 points (logarithmic)
+    // Running: up to 40 points (logarithmic)
     const runDistance = state.run || 0;
     if (runDistance > 0) {
-      const runPoints = Math.min(30, 10 * Math.log(runDistance + 1));
+      const runPoints = Math.min(40, 12 * Math.log(runDistance + 1));
       rawScore += runPoints;
     }
 
@@ -98,8 +98,8 @@ const Scoring = {
     const writeLevel = Number(state.write_level) || 0;
 
     // Points maps that allow high-tier activities to be worth more, enabling a synergy bonus
-    const readPointsMap = [0, 20, 35, 55];
-    const writePointsMap = [0, 20, 35, 55];
+    const readPointsMap = [0, 25, 40, 60];
+    const writePointsMap = [0, 25, 40, 60];
 
     rawScore += readPointsMap[Math.min(3, Math.max(0, readLevel))];
     rawScore += writePointsMap[Math.min(3, Math.max(0, writeLevel))];
@@ -233,11 +233,11 @@ function generateRealisticEntry() {
 
 // Helper: adjust blended score to realistic range (mirrors app)
 function adjustToRealisticRange(blendedScore) {
-  const floor = 60;
+  const floor = 40;
   const ceiling = 99;
   if (blendedScore <= 0) return floor;
   const normalized = Math.max(0, Math.min(1, blendedScore / 100));
-  const mean = 0.55;
+  const mean = 0.72;
   const sigma = 0.14;
 
   function erf(x) {

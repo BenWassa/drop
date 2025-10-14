@@ -47,12 +47,12 @@ class Scoring:
 
     def calc_fitness(self, state):
         raw_score = 0
-        if state.get('skill'): raw_score += 40
+        if state.get('skill'): raw_score += 50
         strength_level = state.get('strength_level', 0)
-        raw_score += {0: 0, 1: 10, 2: 20, 3: 30}.get(strength_level, 0)
+        raw_score += {0: 0, 1: 15, 2: 25, 3: 35}.get(strength_level, 0)
         run_distance = state.get('run', 0)
         if run_distance > 0:
-            raw_score += min(30, 10 * math.log(run_distance + 1))
+            raw_score += min(40, 12 * math.log(run_distance + 1))
         activity_count = self.calculate_activity_count_for_state(state)
         adjusted_raw = round(raw_score)
         if activity_count > 3:
@@ -66,8 +66,8 @@ class Scoring:
         raw_score = 0
         read_level = int(state.get('read_level', 0))
         write_level = int(state.get('write_level', 0))
-        raw_score += {0: 0, 1: 20, 2: 35, 3: 55}.get(read_level, 0)
-        raw_score += {0: 0, 1: 20, 2: 35, 3: 55}.get(write_level, 0)
+        raw_score += {0: 0, 1: 25, 2: 40, 3: 60}.get(read_level, 0)
+        raw_score += {0: 0, 1: 25, 2: 40, 3: 60}.get(write_level, 0)
         if read_level > 0 and write_level > 0:
             raw_score += round(((read_level + write_level) / 6) * 10)
         return max(0, min(99, round(raw_score)))
@@ -87,10 +87,10 @@ class Scoring:
         return max(0, min(99, raw_score))
 
 ACTIVITY_PATTERNS = {
-  'restDay': {'run': [0, 3], 'strength': [False], 'skill': [[], ['Mobility'], ['Yoga']], 'read_level': [1, 2, 3], 'write_level': [0, 1, 2], 'meditation': [True, False], 'weight': 0.2, 'intensity': 1},
-  'lightDay': {'run': [3, 5, 8], 'strength': [False, True], 'strength_level': [1], 'skill': [[], ['Mobility'], ['Yoga'], ['Wrestling']], 'read_level': [1, 2], 'write_level': [0, 1], 'meditation': [True, False], 'weight': 0.4, 'intensity': 2},
-  'activeDay': {'run': [8, 10, 12, 15], 'strength': [True, False], 'strength_level': [1, 2], 'skill': [['Wrestling'], ['Volleyball'], ['Wrestling', 'Mobility']], 'read_level': [0, 1, 2], 'write_level': [0, 1], 'meditation': [True, False], 'weight': 0.3, 'intensity': 3},
-  'intenseDay': {'run': [15, 18, 20], 'strength': [False], 'strength_level': [0], 'skill': [[], ['Mobility']], 'read_level': [0, 1], 'write_level': [0], 'meditation': [True, False], 'weight': 0.1, 'intensity': 4}
+  'restDay': {'run': [0, 3], 'strength': [False], 'skill': [[], ['Mobility'], ['Yoga']], 'read_level': [1, 2, 3], 'write_level': [0, 1, 2], 'meditation': [True, False], 'weight': 0.1, 'intensity': 1},
+  'lightDay': {'run': [3, 5, 8], 'strength': [False, True], 'strength_level': [1], 'skill': [[], ['Mobility'], ['Yoga'], ['Wrestling']], 'read_level': [1, 2], 'write_level': [0, 1], 'meditation': [True, False], 'weight': 0.3, 'intensity': 2},
+  'activeDay': {'run': [8, 10, 12, 15], 'strength': [True, False], 'strength_level': [1, 2], 'skill': [['Wrestling'], ['Volleyball'], ['Wrestling', 'Mobility']], 'read_level': [0, 1, 2], 'write_level': [0, 1], 'meditation': [True, False], 'weight': 0.4, 'intensity': 3},
+  'intenseDay': {'run': [15, 18, 20], 'strength': [False], 'strength_level': [0], 'skill': [[], ['Mobility']], 'read_level': [0, 1], 'write_level': [0], 'meditation': [True, False], 'weight': 0.2, 'intensity': 4}
 }
 
 def select_weighted_pattern():
@@ -116,11 +116,11 @@ def generate_realistic_entry():
     return entry
 
 def adjust_to_realistic_range(score):
-    if score is None: return 60
-    floor, ceiling = 60, 99
+    if score is None: return 40
+    floor, ceiling = 40, 99
     if score <= 0: return floor
     normalized = max(0, min(1, score / 100))
-    mean, sigma = 0.55, 0.14
+    mean, sigma = 0.72, 0.14
     z = (normalized - mean) / (sigma * math.sqrt(2))
     phi = 0.5 * (1 + math.erf(z))
     return min(ceiling, round(floor + (ceiling - floor) * phi))

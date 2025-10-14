@@ -77,21 +77,21 @@ const Scoring = {
   calcFitness(state, Store) {
     let rawScore = 0;
 
-    // Skill practice: 40 points
+    // Skill practice: 50 points
     const skillSelections = Array.isArray(state.skill) ? state.skill : [];
-    if (skillSelections.length > 0) rawScore += 40;
+    if (skillSelections.length > 0) rawScore += 50;
 
-    // Strength training: up to 30 points from 3 tiers
+    // Strength training: up to 35 points from 3 tiers
     const strengthLevel = state.strength_level || 0; // Assumes state.strength_level (0, 1, 2, 3)
-    if (strengthLevel === 1) rawScore += 10; // "Movement"
-    else if (strengthLevel === 2) rawScore += 20; // "Session"
-    else if (strengthLevel === 3) rawScore += 30; // "Training"
+    if (strengthLevel === 1) rawScore += 15; // "Movement"
+    else if (strengthLevel === 2) rawScore += 25; // "Session"
+    else if (strengthLevel === 3) rawScore += 35; // "Training"
 
-    // Running: up to 30 points (logarithmic)
+    // Running: up to 40 points (logarithmic)
     const runDistance = state.run || 0;
     if (runDistance > 0) {
       // Logarithmic scaling: More points for starting, diminishing returns.
-      const runPoints = Math.min(30, 10 * Math.log(runDistance + 1));
+      const runPoints = Math.min(40, 12 * Math.log(runDistance + 1));
       rawScore += runPoints;
     }
 
@@ -152,10 +152,10 @@ const Scoring = {
     const writeLevel = Number(state.write_level) || 0; // 0..3
 
     // Assign base points per tier but more granularly:
-    // Reading: 0 -> 0, 1 -> 20, 2 -> 35, 3 -> 55 (up to 55 to allow synergy)
-    const readPointsMap = [0, 20, 35, 55];
-    // Writing: 0 -> 0, 1 -> 20, 2 -> 35, 3 -> 55
-    const writePointsMap = [0, 20, 35, 55];
+    // Reading: 0 -> 0, 1 -> 25, 2 -> 40, 3 -> 60 (up to 60 to allow synergy)
+    const readPointsMap = [0, 25, 40, 60];
+    // Writing: 0 -> 0, 1 -> 25, 2 -> 40, 3 -> 60
+    const writePointsMap = [0, 25, 40, 60];
 
     rawScore += readPointsMap[Math.min(3, Math.max(0, readLevel))];
     rawScore += writePointsMap[Math.min(3, Math.max(0, writeLevel))];
@@ -269,7 +269,7 @@ const Scoring = {
    * @returns {number} Adjusted score (60-95)
    */
   adjustToRealisticRange(blendedScore) {
-    const floor = 60;
+    const floor = 40;
     const ceiling = 99; // enforce hard cap at 99 as requested
 
     if (blendedScore <= 0) return floor;
@@ -280,7 +280,7 @@ const Scoring = {
     // Map with a normal-CDF-like curve to cluster values around a target mean.
     // This pushes the bulk of realistic days into the 75-85 band while still
     // allowing exceptional days to approach the ceiling.
-  const mean = 0.55;   // nudge center slightly lower to favor 75-85 band
+  const mean = 0.72;   // centers most scores around 80
   const sigma = 0.14;  // slightly wider spread to prevent excessive clustering near ceiling
 
     // Helper: error function approximation (Abramowitz-Stegun)
