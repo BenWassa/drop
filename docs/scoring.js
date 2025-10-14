@@ -87,11 +87,11 @@ const Scoring = {
     else if (strengthLevel === 2) rawScore += 25; // "Session"
     else if (strengthLevel === 3) rawScore += 35; // "Training"
 
-    // Running: up to 40 points (logarithmic)
+    // Running: up to 50 points (logarithmic)
     const runDistance = state.run || 0;
     if (runDistance > 0) {
       // Logarithmic scaling: More points for starting, diminishing returns.
-      const runPoints = Math.min(40, 12 * Math.log(runDistance + 1));
+      const runPoints = Math.min(50, 15 * Math.log(runDistance + 1));
       rawScore += runPoints;
     }
 
@@ -252,7 +252,7 @@ const Scoring = {
 
     const historicalAverage = weightSum > 0 ? weightedSum / weightSum : 0;
 
-    const blendedScore = (rawScore * 0.4) + (historicalAverage * 0.6);
+    const blendedScore = (rawScore * 0.5) + (historicalAverage * 0.5);
 
     // Ensure the adjusted score cannot exceed 99
     return Math.min(99, this.adjustToRealisticRange(blendedScore));

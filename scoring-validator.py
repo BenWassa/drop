@@ -52,7 +52,7 @@ class Scoring:
         raw_score += {0: 0, 1: 15, 2: 25, 3: 35}.get(strength_level, 0)
         run_distance = state.get('run', 0)
         if run_distance > 0:
-            raw_score += min(40, 12 * math.log(run_distance + 1))
+            raw_score += min(50, 15 * math.log(run_distance + 1))
         activity_count = self.calculate_activity_count_for_state(state)
         adjusted_raw = round(raw_score)
         if activity_count > 3:

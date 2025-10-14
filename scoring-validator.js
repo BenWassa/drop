@@ -59,10 +59,10 @@ const Scoring = {
     else if (strengthLevel === 2) rawScore += 25; // "Session"
     else if (strengthLevel === 3) rawScore += 35; // "Training"
 
-    // Running: up to 40 points (logarithmic)
+    // Running: up to 50 points (logarithmic)
     const runDistance = state.run || 0;
     if (runDistance > 0) {
-      const runPoints = Math.min(40, 12 * Math.log(runDistance + 1));
+      const runPoints = Math.min(50, 15 * Math.log(runDistance + 1));
       rawScore += runPoints;
     }
 
