@@ -930,28 +930,28 @@ const Store = {
   },
 
   validateImport(payload) {
-    if (!payload || typeof payload !== 'object') {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
       console.error('Store.validateImport: Invalid payload type');
       return false;
     }
 
-    // Check meta structure
+    // Check meta structure - must be object if present
     if (payload.meta !== undefined) {
       if (typeof payload.meta !== 'object' || Array.isArray(payload.meta)) {
-        console.error('Store.validateImport: Invalid meta structure');
+        console.error('Store.validateImport: Invalid meta structure - must be object');
         return false;
       }
     }
 
-    // Check entries structure
+    // Check entries structure - must be object if present
     if (payload.entries !== undefined) {
       if (typeof payload.entries !== 'object' || Array.isArray(payload.entries)) {
-        console.error('Store.validateImport: Invalid entries structure');
+        console.error('Store.validateImport: Invalid entries structure - must be object');
         return false;
       }
     }
 
-    // If both meta and entries are missing, it's invalid
+    // Must have at least meta or entries
     if (payload.meta === undefined && payload.entries === undefined) {
       console.error('Store.validateImport: Payload must contain meta or entries');
       return false;
@@ -974,21 +974,36 @@ const Store = {
           this.state.lastEntryDate = payload.meta.lastEntryDate;
         }
         if (payload.meta.settings && typeof payload.meta.settings === 'object') {
-          // Merge settings into state
-          Object.assign(this.state, payload.meta.settings);
+          // Merge allowed settings into state
+          Object.keys(payload.meta.settings).forEach(key => {
+            if (META_SETTINGS_KEYS.includes(key)) {
+              const value = payload.meta.settings[key];
+              if (Array.isArray(value)) {
+                this.state[key] = [...value];
+              } else {
+                this.state[key] = value;
+              }
+            }
+          });
         }
       }
 
       // Merge entries
       if (payload.entries && typeof payload.entries === 'object') {
         this.ensureEntries();
-        Object.assign(this.state.entries, payload.entries);
+        Object.keys(payload.entries).forEach(date => {
+          const entry = payload.entries[date];
+          if (entry && typeof entry === 'object') {
+            this.setEntry(date, entry);
+          }
+        });
       }
 
       // Update daily state from the last entry date if available
-      if (this.state.lastEntryDate && this.state.entries[this.state.lastEntryDate]) {
-        this.applyEntryToState(this.state.entries[this.state.lastEntryDate]);
-        this.state.actionTimestamps = { ...(this.state.entries[this.state.lastEntryDate].timestamps || {}) };
+      if (this.state.lastEntryDate && this.getEntry(this.state.lastEntryDate)) {
+        this.applyEntryToState(this.getEntry(this.state.lastEntryDate));
+        const entry = this.getEntry(this.state.lastEntryDate);
+        this.state.actionTimestamps = { ...(entry.timestamps || {}) };
       }
 
       // Save to localStorage
