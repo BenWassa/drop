@@ -925,6 +925,83 @@ const Store = {
     }
   },
 
+  cloneDefaults() {
+    return JSON.parse(JSON.stringify(this.defaults));
+  },
+
+  validateImport(payload) {
+    if (!payload || typeof payload !== 'object') {
+      console.error('Store.validateImport: Invalid payload type');
+      return false;
+    }
+
+    // Check meta structure
+    if (payload.meta !== undefined) {
+      if (typeof payload.meta !== 'object' || Array.isArray(payload.meta)) {
+        console.error('Store.validateImport: Invalid meta structure');
+        return false;
+      }
+    }
+
+    // Check entries structure
+    if (payload.entries !== undefined) {
+      if (typeof payload.entries !== 'object' || Array.isArray(payload.entries)) {
+        console.error('Store.validateImport: Invalid entries structure');
+        return false;
+      }
+    }
+
+    // If both meta and entries are missing, it's invalid
+    if (payload.meta === undefined && payload.entries === undefined) {
+      console.error('Store.validateImport: Payload must contain meta or entries');
+      return false;
+    }
+
+    console.log('✅ Store.validateImport: Payload is valid');
+    return true;
+  },
+
+  merge(payload) {
+    if (!payload || typeof payload !== 'object') {
+      console.error('Store.merge: Invalid payload');
+      return false;
+    }
+
+    try {
+      // Merge meta data
+      if (payload.meta && typeof payload.meta === 'object') {
+        if (payload.meta.lastEntryDate) {
+          this.state.lastEntryDate = payload.meta.lastEntryDate;
+        }
+        if (payload.meta.settings && typeof payload.meta.settings === 'object') {
+          // Merge settings into state
+          Object.assign(this.state, payload.meta.settings);
+        }
+      }
+
+      // Merge entries
+      if (payload.entries && typeof payload.entries === 'object') {
+        this.ensureEntries();
+        Object.assign(this.state.entries, payload.entries);
+      }
+
+      // Update daily state from the last entry date if available
+      if (this.state.lastEntryDate && this.state.entries[this.state.lastEntryDate]) {
+        this.applyEntryToState(this.state.entries[this.state.lastEntryDate]);
+        this.state.actionTimestamps = { ...(this.state.entries[this.state.lastEntryDate].timestamps || {}) };
+      }
+
+      // Save to localStorage
+      this.save();
+
+      console.log('✅ Store.merge: Data merged successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Store.merge: Failed to merge data', error);
+      return false;
+    }
+  },
+
   handleExport() {
     try {
       const exportData = this.getSanitizedExport();
@@ -1000,6 +1077,30 @@ const Store = {
         UI.notify(`Import error: ${error.message}`, 4000);
       }
     }
+  },
+
+  clearAllData() {
+    console.log('🧹 Store.clearAllData: Clearing all data');
+    
+    // Reset state to defaults
+    this.state = { ...this.cloneDefaults() };
+    
+    // Clear localStorage
+    try {
+      localStorage.removeItem(this.DB_KEY);
+      console.log('🗑️ Store.clearAllData: localStorage cleared');
+    } catch (error) {
+      console.error('❌ Store.clearAllData: Failed to clear localStorage', error);
+    }
+    
+    // Reinitialize
+    this.ensureMeta();
+    this.ensureEntries();
+    this.ensureSkillCollections();
+    this.state.meta.settings = this.collectSettings();
+    
+    console.log('✅ Store.clearAllData: All data cleared and reset to defaults');
+    return true;
   },
 
   handleDataClear() {
