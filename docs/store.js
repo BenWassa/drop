@@ -930,25 +930,21 @@ const Store = {
   },
 
   validateImport(payload) {
-    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    if (!payload || typeof payload !== 'object') {
       console.error('Store.validateImport: Invalid payload type');
       return false;
     }
 
-    // Check meta structure - must be object if present
-    if (payload.meta !== undefined) {
-      if (typeof payload.meta !== 'object' || Array.isArray(payload.meta)) {
-        console.error('Store.validateImport: Invalid meta structure - must be object');
-        return false;
-      }
+    // Reject if meta is an array
+    if (Array.isArray(payload.meta)) {
+      console.error('Store.validateImport: meta cannot be an array');
+      return false;
     }
 
-    // Check entries structure - must be object if present
-    if (payload.entries !== undefined) {
-      if (typeof payload.entries !== 'object' || Array.isArray(payload.entries)) {
-        console.error('Store.validateImport: Invalid entries structure - must be object');
-        return false;
-      }
+    // Reject if entries is an array
+    if (Array.isArray(payload.entries)) {
+      console.error('Store.validateImport: entries cannot be an array');
+      return false;
     }
 
     // Must have at least meta or entries
