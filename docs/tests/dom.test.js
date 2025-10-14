@@ -246,42 +246,72 @@ QUnit.module('Data Management', function(hooks) {
 
   QUnit.test('clearAllData resets state to defaults', function(assert) {
     const today = new Date().toISOString().slice(0, 10);
-    const payload = this.testHooks.getDefaults();
-    payload.wake = '06:15';
-    payload.run = 8;
-    payload.lastEntryDate = today;
-    payload.dailyTimestamps = { wake: today, run: today };
-    payload.history = [{ date: today, scores: { sleep: 90, fitness: 80, mind: 70, spirit: 60 } }];
+    const payload = {
+      meta: {
+        lastEntryDate: today,
+        settings: {
+          skillOptions: ['Climbing']
+        }
+      },
+      entries: {
+        [today]: {
+          wake: '06:15',
+          rest: '21:45',
+          run: 8,
+          strength: true,
+          skill: ['Mobility'],
+          timestamps: {
+            wake: `${today}T06:15:00.000Z`
+          },
+          scores: { sleep: 90, fitness: 80, mind: 70, spirit: 60 }
+        }
+      }
+    };
 
     this.testHooks.merge(payload);
 
     let state = this.testHooks.getState();
     assert.equal(state.wake, '06:15', 'Wake time imported');
     assert.equal(state.run, 8, 'Run distance imported');
-    assert.ok(Array.isArray(state.history) && state.history.length === 1, 'History imported');
+    assert.deepEqual(state.entries[today].scores, payload.entries[today].scores, 'Scores stored on entry');
+    assert.deepEqual(state.skillOptions, ['Climbing'], 'Skill options imported');
 
     this.testHooks.clearAllData();
     state = this.testHooks.getState();
 
     assert.equal(state.wake, '', 'Wake time reset');
     assert.equal(state.run, 0, 'Run distance reset');
-    assert.deepEqual(state.history, [], 'History cleared');
+    assert.deepEqual(state.entries, {}, 'Entries cleared');
+    assert.deepEqual(state.skillOptions, [], 'Skill options reset');
   });
 
   QUnit.test('validateImport rejects invalid payloads', function(assert) {
-    const payload = this.testHooks.getDefaults();
-    payload.run = 'five';
+    const invalidMeta = { meta: [], entries: {} };
+    assert.notOk(this.testHooks.validateImport(invalidMeta), 'Invalid meta rejected');
 
-    assert.notOk(this.testHooks.validateImport(payload), 'String values for numeric fields are rejected');
+    const invalidEntries = { meta: {}, entries: [] };
+    assert.notOk(this.testHooks.validateImport(invalidEntries), 'Invalid entries rejected');
   });
 
   QUnit.test('validateImport accepts valid payloads and merge applies data', function(assert) {
     const today = new Date().toISOString().slice(0, 10);
-    const payload = this.testHooks.getDefaults();
-    payload.wake = '05:45';
-    payload.strength = true;
-    payload.dailyTimestamps = { wake: today, strength: today };
-    payload.lastEntryDate = today;
+    const payload = {
+      meta: {
+        lastEntryDate: today,
+        settings: {
+          skillOptions: ['Yoga']
+        }
+      },
+      entries: {
+        [today]: {
+          wake: '05:45',
+          rest: '22:15',
+          run: 5,
+          strength: true,
+          skill: ['Yoga']
+        }
+      }
+    };
 
     assert.ok(this.testHooks.validateImport(payload), 'Valid payload passes validation');
 
@@ -289,7 +319,12 @@ QUnit.module('Data Management', function(hooks) {
     const state = this.testHooks.getState();
 
     assert.equal(state.wake, '05:45', 'Wake time updated from import');
+    assert.equal(state.rest, '22:15', 'Rest time imported correctly');
+    assert.equal(state.run, 5, 'Run distance imported correctly');
     assert.strictEqual(state.strength, true, 'Boolean fields import correctly');
+    assert.deepEqual(state.skill, ['Yoga'], 'Skill array imported correctly');
+    assert.deepEqual(state.skillOptions, ['Yoga'], 'Skill options imported correctly');
+    assert.equal(state.lastEntryDate, today, 'Last entry date imported correctly');
   });
 });
 

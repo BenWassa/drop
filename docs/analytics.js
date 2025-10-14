@@ -6,7 +6,7 @@ const Analytics = {
    * Calculates streaks for each domain based on recent history.
    */
   calculateStreaks() {
-    const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(7) : [];
     const recent = history.slice(-7);
     const domains = ['sleep', 'fitness', 'mind', 'spirit'];
     const streaks = {};
@@ -31,7 +31,11 @@ const Analytics = {
   getWeeklyData() {
     const domains = ['sleep', 'fitness', 'mind', 'spirit'];
     const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
-    const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(30, { includeArchived: true }) : [];
+    const historyMap = history.reduce((acc, entry) => {
+      acc[entry.date] = entry;
+      return acc;
+    }, {});
     const today = Store.getToday();
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const fullDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -50,7 +54,7 @@ const Analytics = {
       d.setDate(d.getDate() - daysSinceMonday + i);
       const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const dayIndex = d.getDay();
-      const entry = history.find(e => e.date === dateKey) || { date: dateKey, scores: {} };
+      const entry = historyMap[dateKey] || { date: dateKey, scores: {} };
 
       last7Days.push({
         dayLabel: dayNames[dayIndex],

@@ -126,7 +126,7 @@ const UI = {
 
   renderScores(scores, streaks = {}) {
     const announcements = [];
-    const history = Array.isArray(Store.state.history) ? Store.state.history : [];
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(30) : [];
 
     // Count days with valid baseline data (must have wake AND rest)
     const entries = Store.state.entries || {};
@@ -836,7 +836,7 @@ const UI = {
   },
 
   computeWeekOverWeekChanges(domainLabels) {
-    const history = Array.isArray(Store.state.history) ? [...Store.state.history] : [];
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(14, { includeArchived: true }) : [];
     if (history.length === 0) {
       return '';
     }
@@ -1580,34 +1580,6 @@ const UI = {
 
     Store.ensureEntries();
     
-    // Migrate: if entries is empty but we have history, populate entries from history
-    const entries = Store.state.entries || {};
-    const history = Store.state.history || [];
-    if (Object.keys(entries).length === 0 && history.length > 0) {
-      console.log('🔄 Migrating history to entries format...');
-      history.forEach(histEntry => {
-        if (histEntry.date) {
-          // Create a minimal entry from history scores
-          entries[histEntry.date] = {
-            wake: '', 
-            rest: '', 
-            run: 0, 
-            strength: false, 
-            skill: false,
-            read: false, 
-            write: false, 
-            quadrant: 0, 
-            meditation: false
-          };
-        }
-      });
-      Store.state.entries = entries;
-      Store.save();
-      console.log(`✅ Migrated ${history.length} history entries`);
-    }
-
-    console.log('📝 Store entries:', Store.state.entries);
-
     // Render history entries grouped by month and week
     const renderHistory = () => {
       const entries = Store.state.entries || {};
