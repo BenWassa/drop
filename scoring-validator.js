@@ -66,7 +66,29 @@ const Scoring = {
       rawScore += runPoints;
     }
 
-    return Math.round(Math.max(0, Math.min(100, rawScore)));
+    // Apply soft dampening for unrealistic daily load
+    const activityCount = this.calculateActivityCountForState(state);
+    let adjustedRaw = Math.round(Math.max(0, Math.min(100, rawScore)));
+    if (activityCount > 3) {
+      const extra = Math.max(0, activityCount - 3);
+      const reduction = extra === 1 ? 0.10 : extra === 2 ? 0.18 : 0.25;
+      adjustedRaw = Math.round(adjustedRaw * (1 - reduction));
+    }
+
+    return adjustedRaw;
+  },
+
+  calculateActivityCountForState(state) {
+    if (!state || typeof state !== 'object') return 0;
+
+    const runCount = (Number(state.run) || 0) > 0 ? 1 : 0;
+    const strengthCount = state.strength_level && state.strength_level > 0 ? 1 : 0;
+    const skillCount = Array.isArray(state.skill) ? (state.skill.length > 0 ? 1 : 0) : (state.skill ? 1 : 0);
+    const readCount = (state.read_level || 0) > 0 ? 1 : 0;
+    const writeCount = (state.write_level || 0) > 0 ? 1 : 0;
+    const meditationCount = state.meditation ? 1 : 0;
+
+    return runCount + strengthCount + skillCount + readCount + writeCount + meditationCount;
   },
 
   calcMind(state) {

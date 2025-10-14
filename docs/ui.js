@@ -171,11 +171,67 @@ const UI = {
     // Show/hide baseline message
     this.updateBaselineMessage(daysLogged, needsBaseline);
 
+    // Show a non-blocking warning if today's logged activities look unrealistic
+    try {
+      const todayState = Store.getTodayEntry ? Store.getTodayEntry() : Store.state;
+      const activityCount = (typeof Scoring !== 'undefined' && typeof Scoring.calculateActivityCountForState === 'function')
+        ? Scoring.calculateActivityCountForState(todayState)
+        : 0;
+
+      this.renderActivityWarning(activityCount);
+    } catch (e) {
+      // Don't let UI rendering fail if Store or Scoring is unavailable
+      console.warn('Activity warning check skipped:', e && e.message);
+    }
+
     if (announcements.length > 0 && this.elements.scoreAnnouncer) {
       this.elements.scoreAnnouncer.textContent = announcements.join('. ');
     }
 
     this.renderGratitude(scores);
+  },
+
+  /**
+   * Renders a small, dismissible warning when the day's activity count looks unrealistically high.
+   * This is intentionally non-blocking: it simply informs the user and links to guidance in the app.
+   */
+  renderActivityWarning(activityCount) {
+    const existing = document.getElementById('activity-warning-card');
+    if (activityCount <= 3) {
+      if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+      return;
+    }
+
+    // Create or update the warning card
+    let card = existing;
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'activity-warning-card';
+      card.className = 'app-warning-card';
+      card.innerHTML = `
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-content">
+          <strong>Multiple activities detected</strong>
+          <p>You've logged a large number of different practices today. This might reflect an unusual day — consider splitting heavy training and long endurance sessions across different days for recovery.</p>
+          <button id="activity-warning-dismiss" class="btn btn--small">Dismiss</button>
+        </div>
+      `;
+
+      // Insert near the top of the home page (after date display) if possible
+      const target = document.getElementById('home-top') || document.body;
+      if (target && target.parentNode) {
+        target.parentNode.insertBefore(card, target.nextSibling);
+      } else {
+        document.body.insertBefore(card, document.body.firstChild);
+      }
+
+      const dismissBtn = document.getElementById('activity-warning-dismiss');
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+          if (card && card.parentNode) card.parentNode.removeChild(card);
+        });
+      }
+    }
   },
 
   updateBaselineMessage(daysLogged, needsBaseline) {

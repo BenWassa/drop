@@ -91,13 +91,45 @@ const Scoring = {
     const runDistance = state.run || 0;
     if (runDistance > 0) {
       // Logarithmic scaling: More points for starting, diminishing returns.
-      // Math.log(1) = 0, Math.log(21) approx 3.
-      // This formula gives a nice curve: 1km=10pts, 5km=20pts, 15km=28pts, 20km=30pts
       const runPoints = Math.min(30, 10 * Math.log(runDistance + 1));
       rawScore += runPoints;
     }
 
-    return this.calcTrendScore('fitness', Math.min(100, rawScore), Store);
+    // Soft dampening for unrealistic daily load
+    // If the user logs an unusually high combination of activities in one day,
+    // apply a conservative scaling to the raw fitness score so that impossible
+    // combinations don't produce inflated scores. This preserves the guide's
+    // philosophy (realism over perfection) and keeps scoring transparent.
+    const activityCount = this.calculateActivityCountForState(state);
+    let adjustedRaw = Math.min(100, rawScore);
+    if (activityCount > 3) {
+      // Soft penalty: reduce raw fitness by 10-25% depending on how many extra activities
+      // 4 activities -> 10% reduction, 5 -> 18%, 6+ -> 25%
+      const extra = Math.max(0, activityCount - 3);
+      const reduction = extra === 1 ? 0.10 : extra === 2 ? 0.18 : 0.25;
+      adjustedRaw = Math.round(adjustedRaw * (1 - reduction));
+    }
+
+    return this.calcTrendScore('fitness', adjustedRaw, Store);
+  },
+
+  /**
+   * Count relevant activity fields in a state object.
+   * Used to detect potentially unrealistic daily combos (e.g., run + strength + multiple skills + reading).
+   * @param {Object} state
+   * @returns {number}
+   */
+  calculateActivityCountForState(state) {
+    if (!state || typeof state !== 'object') return 0;
+
+    const runCount = (Number(state.run) || 0) > 0 ? 1 : 0;
+    const strengthCount = state.strength_level && state.strength_level > 0 ? 1 : 0;
+    const skillCount = Array.isArray(state.skill) ? (state.skill.length > 0 ? 1 : 0) : (state.skill ? 1 : 0);
+    const readCount = (state.read_level || 0) > 0 ? 1 : 0;
+    const writeCount = (state.write_level || 0) > 0 ? 1 : 0;
+    const meditationCount = state.meditation ? 1 : 0;
+
+    return runCount + strengthCount + skillCount + readCount + writeCount + meditationCount;
   },
 
   /**
