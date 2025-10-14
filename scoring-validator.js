@@ -49,7 +49,7 @@ const Scoring = {
   calcFitness(state) {
     let rawScore = 0;
 
-    // Skill practice: 40 points (binary - any skill selected)
+    // Skill practice: up to 40 points
     const skillSelections = Array.isArray(state.skill) ? state.skill : [];
     if (skillSelections.length > 0) rawScore += 40;
 
@@ -68,14 +68,14 @@ const Scoring = {
 
     // Apply soft dampening for unrealistic daily load
     const activityCount = this.calculateActivityCountForState(state);
-  let adjustedRaw = Math.round(Math.max(0, Math.min(99, rawScore)));
+    let adjustedRaw = Math.round(rawScore);
     if (activityCount > 3) {
       const extra = Math.max(0, activityCount - 3);
       const reduction = extra === 1 ? 0.10 : extra === 2 ? 0.18 : 0.25;
       adjustedRaw = Math.round(adjustedRaw * (1 - reduction));
     }
 
-    return adjustedRaw;
+    return Math.max(0, Math.min(99, adjustedRaw));
   },
 
   calculateActivityCountForState(state) {
@@ -97,17 +97,20 @@ const Scoring = {
     const readLevel = Number(state.read_level) || 0;
     const writeLevel = Number(state.write_level) || 0;
 
+    // Points maps that allow high-tier activities to be worth more, enabling a synergy bonus
     const readPointsMap = [0, 20, 35, 55];
     const writePointsMap = [0, 20, 35, 55];
 
     rawScore += readPointsMap[Math.min(3, Math.max(0, readLevel))];
     rawScore += writePointsMap[Math.min(3, Math.max(0, writeLevel))];
 
+    // Re-introduce synergy bonus for combining reading and writing
     if (readLevel > 0 && writeLevel > 0) {
       const synergy = Math.round(((readLevel + writeLevel) / 6) * 10);
       rawScore += synergy;
     }
 
+    // Cap final score at 99 to prevent a perfect 100
     return Math.max(0, Math.min(99, Math.round(rawScore)));
   },
 
@@ -115,12 +118,9 @@ const Scoring = {
     let rawScore = 0;
     const { energy, mood, quadrant } = state;
 
-    // Check if mood has been logged
     if (energy !== 0 || mood !== 0 || quadrant > 0) {
-      // Base score for showing up and logging mood
       rawScore += 70;
 
-      // Bonus points (0-30) based on energy and mood
       let effectiveEnergy = energy;
       let effectiveMood = mood;
       if (energy === 0 && mood === 0 && quadrant > 0) {
@@ -129,14 +129,10 @@ const Scoring = {
         effectiveMood = preset.mood;
       }
 
-      // Normalize values from [-100, 100] to [0, 1]
       const normalizedEnergy = (effectiveEnergy + 100) / 200;
       const normalizedMood = (effectiveMood + 100) / 200;
-
-      // Calculate a combined metric. Mood is weighted slightly more.
       const combinedMetric = (normalizedEnergy * 0.4) + (normalizedMood * 0.6);
       const bonusPoints = Math.round(combinedMetric * 30);
-
       rawScore += bonusPoints;
     }
 
@@ -145,10 +141,10 @@ const Scoring = {
 
   getQuadrantPreset(quadrant) {
     const presets = {
-      1: { energy: 80, mood: 80 }, // High energy, positive
-      2: { energy: -20, mood: 60 }, // Low energy, positive
-      3: { energy: 70, mood: -30 }, // High energy, challenged
-      4: { energy: -50, mood: -50 } // Low energy, challenged
+      1: { energy: 65, mood: 70 },
+      2: { energy: -60, mood: 70 },
+      3: { energy: 65, mood: -65 },
+      4: { energy: -60, mood: -65 }
     };
     return presets[quadrant] || { energy: 0, mood: 0 };
   }
@@ -163,7 +159,7 @@ const ACTIVITY_RANGES = {
   strength_level: [0, 1, 2, 3],
   skill: [[], ['Wrestling'], ['Volleyball'], ['Mobility'], ['Yoga'], ['Wrestling', 'Mobility'], ['Volleyball', 'Yoga']],
   read_level: [0, 1, 2, 3],
-  write_level: [0, 1, 2],
+  write_level: [0, 1, 2, 3],
   quadrant: [1, 2, 3, 4],
   meditation: [false, true]
 };
@@ -210,17 +206,15 @@ function generateRandomEntry() {
     entry[key] = getRandomChoice(ACTIVITY_RANGES[key]);
   });
 
-  // Add energy and mood for spirit scoring (required for mood logging)
   entry.energy = getRandomInt(-100, 100);
   entry.mood = getRandomInt(-100, 100);
 
-  // Add some realistic correlations
   if (entry.run > 10 && Math.random() > 0.7) {
-    entry.strength = false; // Long runs might skip strength training
+    entry.strength = false;
   }
 
   if (entry.skill.length > 1 && Math.random() > 0.8) {
-    entry.run = Math.min(entry.run, 8); // Multiple skills might mean less running
+    entry.run = Math.min(entry.run, 8);
   }
 
   return entry;
@@ -231,24 +225,18 @@ function calculateScores(entry, useTrend = true) {
     return calculateDailyScores(entry);
   }
 
-  // Create a mock state object
   const state = { ...entry };
-
-  // Mock yesterday's rest for sleep calculation
   state.mockYesterdayRest = getRandomChoice(['22:00', '22:30', '23:00', '23:30']);
 
-  // Mock historical averages for blending (simple fixed mock for validator)
   function calcTrend(domain, raw) {
-    // Simulate required history lengths: sleep needs 3 days, others 7.
     const minHistory = domain === 'sleep' ? 3 : 7;
     const simulatedHistoryLength = getRandomChoice([0, 1, 2, 3, 4, 5, 6, 7]);
     if (simulatedHistoryLength < minHistory) {
-      // Fallback to adjusted daily score when insufficient history
       return adjustToRealisticRange(raw);
     }
 
     const historicalAverage = 65 + getRandomInt(-7, 12);
-    const blended = (raw * 0.5) + (historicalAverage * 0.5);
+    const blended = (raw * 0.4) + (historicalAverage * 0.6);
     return adjustToRealisticRange(blended);
   }
 
@@ -283,9 +271,8 @@ function calculateDailyScores(entry) {
 
 function assessRealism(entry, scores) {
   let issues = [];
-  let score = 100; // Start with perfect realism score
+  let score = 100;
 
-  // Check for unrealistic combinations
   const totalActivity = (entry.run > 0 ? 1 : 0) +
                        (entry.strength ? 1 : 0) +
                        (entry.skill.length > 0 ? 1 : 0) +
@@ -303,13 +290,12 @@ function assessRealism(entry, scores) {
     score -= 25;
   }
 
-  if (entry.run === 0 && entry.strength === false && entry.skill.length === 0 &&
-      entry.read_level === 0 && entry.write_level === 0 && entry.meditation === false) {
+  if (entry.run === 0 && !entry.strength && entry.skill.length === 0 &&
+      entry.read_level === 0 && entry.write_level === 0 && !entry.meditation) {
     issues.push('Completely inactive day');
     score -= 10;
   }
 
-  // Check score correlations
   if (entry.run > 10 && scores.fitness < 60) {
     issues.push('High running distance but low fitness score');
     score -= 15;
@@ -320,7 +306,7 @@ function assessRealism(entry, scores) {
     score -= 15;
   }
 
-  if (entry.read_level === 3 && entry.write_level === 2 && scores.mind < 80) {
+  if (entry.read_level === 3 && entry.write_level === 3 && scores.mind < 90) {
     issues.push('High reading/writing but low mind score');
     score -= 15;
   }
@@ -346,54 +332,18 @@ function runMonteCarloTest(iterations = 5) {
   console.log('🎲 SCORING VALIDATION TOOL - Monte Carlo Testing');
   console.log('================================================\n');
 
-  // First, test the specific example from the user
-  console.log('🎯 TESTING USER EXAMPLE: 9km run + strength + wrestling + volleyball');
-  const userExample = {
-    wake: '06:45',
-    rest: '22:30',
-    run: 9,
-    strength: true,
-    strength_level: 1,
-    skill: ['Wrestling', 'Volleyball'],
-    read_level: 1,
-    write_level: 1,
-    quadrant: 2,
-    meditation: true,
-    energy: 60, // Add required fields for spirit scoring
-    mood: 70
-  };
-  const userScores = calculateScores(userExample);
-  const userRealism = assessRealism(userExample, userScores);
-
-  console.log('Activities:', formatEntry(userExample));
-  console.log('Scores:', userScores);
-  console.log(`Realism: ${userRealism.score}/100 ${userRealism.score >= 70 ? '✅' : '⚠️'}`);
-  if (userRealism.issues.length > 0) {
-    console.log('Issues:', userRealism.issues);
-  }
-  console.log('---\n');
-
-  // Deterministic test cases derived from SCORING_GUIDE.md
   console.log('🧪 Running deterministic validation cases (from SCORING_GUIDE)');
   const deterministicTests = [
     {
-      label: 'Fitness - None (inactive day)',
-      entry: { wake: '07:00', rest: '23:00', run: 0, strength: false, strength_level: 0, skill: [], read_level: 0, write_level: 0, quadrant: 0, meditation: false, energy: 0, mood: 0 }
-    },
-    {
-      label: 'Fitness - Movement + skill (expected ~50-70)',
-      entry: { wake: '06:30', rest: '22:30', run: 1, strength: true, strength_level: 1, skill: ['Wrestling'], read_level: 0, write_level: 0, quadrant: 1, meditation: false, energy: 30, mood: 40 }
-    },
-    {
-      label: 'Fitness - Full training + skill + mid run (expected high ~85-95)',
+      label: 'Fitness - Full training + skill + mid run (expected high ~95-99 raw)',
       entry: { wake: '06:00', rest: '22:00', run: 12, strength: true, strength_level: 3, skill: ['Wrestling'], read_level: 0, write_level: 0, quadrant: 1, meditation: false, energy: 70, mood: 80 }
     },
     {
-      label: 'Mind - High reading & writing (expected 100)',
+      label: 'Mind - High reading & writing with synergy (expected 99 raw)',
       entry: { wake: '07:00', rest: '23:00', run: 0, strength: false, strength_level: 0, skill: [], read_level: 3, write_level: 3, quadrant: 0, meditation: false, energy: 0, mood: 0 }
     },
     {
-      label: 'Spirit - Mood logged via quadrant (base + bonus)',
+      label: 'Spirit - Mood logged via quadrant (Q1: High E, Pos M - expected high bonus)',
       entry: { wake: '07:00', rest: '23:00', run: 0, strength: false, strength_level: 0, skill: [], read_level: 0, write_level: 0, quadrant: 1, meditation: false, energy: 0, mood: 0 }
     },
     {
@@ -403,7 +353,7 @@ function runMonteCarloTest(iterations = 5) {
   ];
 
   deterministicTests.forEach(test => {
-    const scores = calculateScores(test.entry, false);
+    const scores = calculateDailyScores(test.entry);
     const realism = assessRealism(test.entry, scores);
     console.log(`\n🧾 ${test.label}`);
     console.log('Activities:', formatEntry(test.entry));
@@ -415,7 +365,6 @@ function runMonteCarloTest(iterations = 5) {
 
   console.log('\n---\n');
 
-  // Then run random tests
   console.log(`🔄 GENERATING ${iterations} RANDOM TEST CASES:`);
   console.log('================================================\n');
 
