@@ -177,7 +177,7 @@ const Scoring = {
    * @returns {number|null} Adjusted score (60-95) or null
    */
   calcTrendScore(domain, rawScore, Store) {
-    const history = Array.isArray(Store.state.history) ? Store.state.history.slice(-7) : [];
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(7) : [];
 
     if (history.length < 7) {
       return null;
@@ -387,7 +387,7 @@ const Scoring = {
    * @returns {number|null} Adjusted score (60-95) or null
    */
   calcTrendScore(domain, rawScore, Store) {
-    const history = Array.isArray(Store.state.history) ? Store.state.history.slice(-7) : [];
+    const history = typeof Store.getHistory === 'function' ? Store.getHistory(7) : [];
     
     // Require at least 7 days of data to establish baseline trend
     if (history.length < 7) {

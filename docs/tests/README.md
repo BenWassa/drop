@@ -33,20 +33,29 @@ Test data files for import/export functionality testing.
 **Data Structure:**
 ```json
 {
-  "wake": "06:30",
-  "rest": "22:00",
-  "run": 5,
-  "strength": true,
-  "skill": [],
-  "read": true,
-  "write": false,
-  "quadrant": 2,
-  "meditation": true,
-  "visionTheme": "Build healthy habits...",
-  "lastEntryDate": "2024-10-06",
-  "history": [
-    {
-      "date": "2024-09-07",
+  "meta": {
+    "_version": 2,
+    "_schemaDate": "2024-05-01",
+    "lastEntryDate": "2024-10-06",
+    "settings": {
+      "skillOptions": ["Wrestling", "Mobility", "Yoga"],
+      "visionTheme": "Build healthy habits..."
+    }
+  },
+  "entries": {
+    "2024-09-07": {
+      "wake": "06:30",
+      "rest": "22:00",
+      "run": 5,
+      "strength": true,
+      "strength_level": 1,
+      "skill": ["Mobility"],
+      "read_level": 2,
+      "write_level": 1,
+      "quadrant": 2,
+      "meditation": true,
+      "energy": 64,
+      "mood": 58,
       "scores": {
         "sleep": 85,
         "fitness": 75,
@@ -55,7 +64,7 @@ Test data files for import/export functionality testing.
       }
     }
     // ... 29 more entries
-  ]
+  }
 }
 ```
 
