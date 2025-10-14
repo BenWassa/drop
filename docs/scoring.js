@@ -269,18 +269,38 @@ const Scoring = {
     const floor = 60;
     const ceiling = 99; // enforce hard cap at 99 as requested
 
-  if (blendedScore <= 0) return floor;
+    if (blendedScore <= 0) return floor;
 
-    // Normalize score to a 0-1 range
-    const normalized = blendedScore / 100;
+    // Normalize to 0..1
+    const normalized = Math.max(0, Math.min(1, blendedScore / 100));
 
-    // Apply a power curve (e.g., ^0.8). This makes the score rise quickly at the
-    // start and then level off, making it easier to hit the 75-85 sweet spot
-    // but harder to reach the ceiling.
-    const curvedValue = Math.pow(normalized, 0.8);
+    // Map with a normal-CDF-like curve to cluster values around a target mean.
+    // This pushes the bulk of realistic days into the 75-85 band while still
+    // allowing exceptional days to approach the ceiling.
+  const mean = 0.55;   // nudge center slightly lower to favor 75-85 band
+  const sigma = 0.14;  // slightly wider spread to prevent excessive clustering near ceiling
 
-    const finalScore = floor + (ceiling - floor) * curvedValue;
+    // Helper: error function approximation (Abramowitz-Stegun)
+    function erf(x) {
+      // save the sign of x
+      const sign = x >= 0 ? 1 : -1;
+      const a1 =  0.254829592;
+      const a2 = -0.284496736;
+      const a3 =  1.421413741;
+      const a4 = -1.453152027;
+      const a5 =  1.061405429;
+      const p  =  0.3275911;
 
+      const t = 1 / (1 + p * Math.abs(x));
+      const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+      return sign * y;
+    }
+
+    // Standard normal CDF applied to (normalized - mean)/sigma
+    const z = (normalized - mean) / (sigma * Math.SQRT2);
+    const phi = 0.5 * (1 + erf(z)); // 0..1
+
+    const finalScore = floor + (ceiling - floor) * phi;
     return Math.min(ceiling, Math.round(finalScore));
   },
 

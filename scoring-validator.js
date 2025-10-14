@@ -168,6 +168,34 @@ const ACTIVITY_RANGES = {
   meditation: [false, true]
 };
 
+// Helper: adjust blended score to realistic range (mirrors app)
+function adjustToRealisticRange(blendedScore) {
+  const floor = 60;
+  const ceiling = 99;
+  if (blendedScore <= 0) return floor;
+  const normalized = Math.max(0, Math.min(1, blendedScore / 100));
+  const mean = 0.55;
+  const sigma = 0.14;
+
+  function erf(x) {
+    const sign = x >= 0 ? 1 : -1;
+    const a1 =  0.254829592;
+    const a2 = -0.284496736;
+    const a3 =  1.421413741;
+    const a4 = -1.453152027;
+    const a5 =  1.061405429;
+    const p  =  0.3275911;
+    const t = 1 / (1 + p * Math.abs(x));
+    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return sign * y;
+  }
+
+  const z = (normalized - mean) / (sigma * Math.SQRT2);
+  const phi = 0.5 * (1 + erf(z));
+  const finalScore = floor + (ceiling - floor) * phi;
+  return Math.min(ceiling, Math.round(finalScore));
+}
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -205,11 +233,26 @@ function calculateScores(entry) {
   // Mock yesterday's rest for sleep calculation
   state.mockYesterdayRest = getRandomChoice(['22:00', '22:30', '23:00', '23:30']);
 
-  const scores = {
+  // Mock historical averages for blending (simple fixed mock for validator)
+  function calcTrend(domain, raw) {
+    // Mock a historical average and blend 50/50 to favor more daily variance
+    const historicalAverage = 65 + getRandomInt(-7, 12);
+    const blended = (raw * 0.5) + (historicalAverage * 0.5);
+    return adjustToRealisticRange(blended);
+  }
+
+  const raw = {
     sleep: Scoring.calcSleep(state),
     fitness: Scoring.calcFitness(state),
     mind: Scoring.calcMind(state),
     spirit: Scoring.calcSpirit(state)
+  };
+
+  const scores = {
+    sleep: calcTrend('sleep', raw.sleep),
+    fitness: calcTrend('fitness', raw.fitness),
+    mind: calcTrend('mind', raw.mind),
+    spirit: calcTrend('spirit', raw.spirit)
   };
 
   return scores;
