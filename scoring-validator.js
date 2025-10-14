@@ -283,6 +283,47 @@ function runMonteCarloTest(iterations = 5) {
   }
   console.log('---\n');
 
+  // Deterministic test cases derived from SCORING_GUIDE.md
+  console.log('🧪 Running deterministic validation cases (from SCORING_GUIDE)');
+  const deterministicTests = [
+    {
+      label: 'Fitness - None (inactive day)',
+      entry: { wake: '07:00', rest: '23:00', run: 0, strength: false, strength_level: 0, skill: [], read_level: 0, write_level: 0, quadrant: 0, meditation: false, energy: 0, mood: 0 }
+    },
+    {
+      label: 'Fitness - Movement + skill (expected ~50-70)',
+      entry: { wake: '06:30', rest: '22:30', run: 1, strength: true, strength_level: 1, skill: ['Wrestling'], read_level: 0, write_level: 0, quadrant: 1, meditation: false, energy: 30, mood: 40 }
+    },
+    {
+      label: 'Fitness - Full training + skill + mid run (expected high ~85-95)',
+      entry: { wake: '06:00', rest: '22:00', run: 12, strength: true, strength_level: 3, skill: ['Wrestling'], read_level: 0, write_level: 0, quadrant: 1, meditation: false, energy: 70, mood: 80 }
+    },
+    {
+      label: 'Mind - High reading & writing (expected 100)',
+      entry: { wake: '07:00', rest: '23:00', run: 0, strength: false, strength_level: 0, skill: [], read_level: 3, write_level: 3, quadrant: 0, meditation: false, energy: 0, mood: 0 }
+    },
+    {
+      label: 'Spirit - Mood logged via quadrant (base + bonus)',
+      entry: { wake: '07:00', rest: '23:00', run: 0, strength: false, strength_level: 0, skill: [], read_level: 0, write_level: 0, quadrant: 1, meditation: false, energy: 0, mood: 0 }
+    },
+    {
+      label: 'Unrealistic combo - long run + strength + multiple skills (should flag)',
+      entry: { wake: '06:00', rest: '22:30', run: 20, strength: true, strength_level: 2, skill: ['Wrestling','Volleyball'], read_level: 1, write_level: 1, quadrant: 1, meditation: false, energy: 80, mood: 85 }
+    }
+  ];
+
+  deterministicTests.forEach(test => {
+    const scores = calculateScores(test.entry);
+    const realism = assessRealism(test.entry, scores);
+    console.log(`\n🧾 ${test.label}`);
+    console.log('Activities:', formatEntry(test.entry));
+    console.log('Scores:', scores);
+    console.log(`Realism: ${realism.score}/100 ${realism.score >= 70 ? '✅' : '⚠️'}`);
+    if (realism.issues.length > 0) console.log('Issues:', realism.issues);
+  });
+
+  console.log('\n---\n');
+
   // Then run random tests
   console.log(`🔄 GENERATING ${iterations} RANDOM TEST CASES:`);
   console.log('================================================\n');
