@@ -226,7 +226,11 @@ function generateRandomEntry() {
   return entry;
 }
 
-function calculateScores(entry) {
+function calculateScores(entry, useTrend = true) {
+  if (!useTrend) {
+    return calculateDailyScores(entry);
+  }
+
   // Create a mock state object
   const state = { ...entry };
 
@@ -239,8 +243,8 @@ function calculateScores(entry) {
     const minHistory = domain === 'sleep' ? 3 : 7;
     const simulatedHistoryLength = getRandomChoice([0, 1, 2, 3, 4, 5, 6, 7]);
     if (simulatedHistoryLength < minHistory) {
-      // Not enough history to produce a trend-adjusted score
-      return null;
+      // Fallback to adjusted daily score when insufficient history
+      return adjustToRealisticRange(raw);
     }
 
     const historicalAverage = 65 + getRandomInt(-7, 12);
@@ -263,6 +267,18 @@ function calculateScores(entry) {
   };
 
   return scores;
+}
+
+function calculateDailyScores(entry) {
+  const state = { ...entry };
+  state.mockYesterdayRest = getRandomChoice(['22:00', '22:30', '23:00', '23:30']);
+
+  const sleepScore = Scoring.calcSleep(state);
+  const fitnessScore = Scoring.calcFitness(state);
+  const mindScore = Scoring.calcMind(state);
+  const spiritScore = Scoring.calcSpirit(state);
+
+  return { sleep: sleepScore, fitness: fitnessScore, mind: mindScore, spirit: spiritScore };
 }
 
 function assessRealism(entry, scores) {
@@ -387,11 +403,12 @@ function runMonteCarloTest(iterations = 5) {
   ];
 
   deterministicTests.forEach(test => {
-    const scores = calculateScores(test.entry);
+    const scores = calculateScores(test.entry, false);
     const realism = assessRealism(test.entry, scores);
     console.log(`\n🧾 ${test.label}`);
     console.log('Activities:', formatEntry(test.entry));
     console.log('Scores:', scores);
+    console.log('(Daily scores shown - trend adjustment requires sufficient history)');
     console.log(`Realism: ${realism.score}/100 ${realism.score >= 70 ? '✅' : '⚠️'}`);
     if (realism.issues.length > 0) console.log('Issues:', realism.issues);
   });

@@ -277,6 +277,37 @@ All icons are in docs/icons/ as SVG files:
 - Check manifest and PWA installation
 - Clear site data when testing major changes
 
+##  Scoring Validation Tool
+
+The `scoring-validator.js` script provides Monte Carlo testing for the scoring algorithms, ensuring realism and adherence to the SCORING_GUIDE.md philosophy.
+
+### Usage
+
+```bash
+# Run with default 5 random test cases
+node scoring-validator.js
+
+# Run with custom number of test cases
+node scoring-validator.js 10
+
+# Run with 3 test cases
+node scoring-validator.js 3
+```
+
+### Output
+
+- **Deterministic Tests**: Validates key examples from SCORING_GUIDE.md with daily scores (trend requires history)
+- **Random Tests**: Generates realistic activity permutations and assesses scoring outcomes
+- **Realism Score**: 90-100 highly realistic, <50 likely unrealistic
+- **Issues**: Flags unrealistic combinations (e.g., too many activities)
+
+### Philosophy
+
+- Scores cluster around 75-85 via normal-CDF mapping
+- Hard 99 cap prevents unrealistic perfection
+- Trend-adjusted scores require minimum history (3 days sleep, 7 days others)
+- Soft dampening for overloaded days
+
 ##  Links
 
 - **Live App**: https://benwassa.github.io/drop/

@@ -1,0 +1,25 @@
+name: Validate Scoring
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  validate-scoring:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Run Scoring Validator
+      run: node scoring-validator.js 10
+
+    - name: Generate Sample Data
+      run: node generate-realistic-sample-data.js
