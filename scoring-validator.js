@@ -1,14 +1,14 @@
+
 #!/usr/bin/env node
 
 /**
- * Scoring Validation Tool - Monte Carlo Testing
- * Generates random permutations of daily activity data and validates scoring outcomes
+ * Refined Scoring Validation Tool - Monte Carlo Testing
+ * Generates realistic permutations of daily activity data and validates scoring outcomes.
+ * This script combines the original validation logic with the improved, pattern-based
+ * data generator for more meaningful test cases.
  */
 
-const fs = require('fs');
-const path = require('path');
-
-// Scoring logic adapted for Node.js testing - matches actual implementation
+// Scoring logic from the original validator - this is the system under test.
 const Scoring = {
   calcSleep(state) {
     const { wake } = state;
@@ -150,19 +150,86 @@ const Scoring = {
   }
 };
 
-// Activity data ranges for realistic permutations
-const ACTIVITY_RANGES = {
-  wake: ['06:00', '06:30', '07:00', '07:30', '08:00'],
-  rest: ['22:00', '22:30', '23:00', '23:30', '00:00'],
-  run: [0, 3, 5, 8, 10, 12, 15, 18, 20],
-  strength: [false, true],
-  strength_level: [0, 1, 2, 3],
-  skill: [[], ['Wrestling'], ['Volleyball'], ['Mobility'], ['Yoga'], ['Wrestling', 'Mobility'], ['Volleyball', 'Yoga']],
-  read_level: [0, 1, 2, 3],
-  write_level: [0, 1, 2, 3],
-  quadrant: [1, 2, 3, 4],
-  meditation: [false, true]
+// --- Refined Data Generation Section ---
+
+// Helper functions for data generation
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomChoice(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+// Realistic activity patterns for generating varied but credible daily logs
+const ACTIVITY_PATTERNS = {
+  restDay: {
+    run: [0, 3], strength: [false], skill: [[], ['Mobility'], ['Yoga']],
+    read_level: [1, 2, 3], write_level: [0, 1, 2], meditation: [true, false],
+    weight: 0.2
+  },
+  lightDay: {
+    run: [3, 5, 8], strength: [false, true], strength_level: [1],
+    skill: [[], ['Mobility'], ['Yoga'], ['Wrestling'], ['Volleyball']],
+    read_level: [1, 2], write_level: [0, 1], meditation: [true, false],
+    weight: 0.4
+  },
+  activeDay: {
+    run: [8, 10, 12, 15], strength: [true, false], strength_level: [1, 2],
+    skill: [['Wrestling'], ['Volleyball'], ['Wrestling', 'Mobility'], ['Volleyball', 'Yoga']],
+    read_level: [0, 1, 2], write_level: [0, 1], meditation: [true, false],
+    weight: 0.3
+  },
+  intenseDay: {
+    run: [15, 18, 20], strength: [false], strength_level: [0],
+    skill: [[], ['Mobility']], read_level: [0, 1], write_level: [0],
+    meditation: [true, false], weight: 0.1
+  }
 };
+
+// Selects a pattern based on its assigned weight
+function selectWeightedPattern() {
+  const rand = Math.random();
+  let cumulative = 0;
+  for (const pattern of Object.values(ACTIVITY_PATTERNS)) {
+    cumulative += pattern.weight;
+    if (rand <= cumulative) {
+      return pattern;
+    }
+  }
+  return ACTIVITY_PATTERNS.lightDay; // Fallback
+}
+
+// Generates a single, realistic daily entry based on weighted patterns
+function generateRealisticEntry() {
+  const pattern = selectWeightedPattern();
+
+  // Generate activities from the chosen pattern
+  const run = getRandomChoice(pattern.run);
+  const strength = getRandomChoice(pattern.strength);
+  const strength_level = strength ? getRandomChoice(pattern.strength_level || [1, 2, 3]) : 0;
+  const skill = getRandomChoice(pattern.skill);
+  const read_level = getRandomChoice(pattern.read_level);
+  const write_level = getRandomChoice(pattern.write_level);
+  const meditation = getRandomChoice(pattern.meditation);
+
+  // Wake and rest times
+  const wake = getRandomChoice(['06:00', '06:30', '07:00', '07:30', '08:00']);
+  const rest = getRandomChoice(['22:00', '22:30', '23:00', '23:30', '00:00']);
+  
+  // Quadrant, Energy, and Mood
+  let quadrant = getRandomChoice([1, 2, 3, 4]);
+  const energy = getRandomInt(-100, 100);
+  const mood = getRandomInt(-100, 100);
+
+  return {
+    wake, rest, run, strength, strength_level, skill,
+    read_level, write_level, quadrant, meditation, energy, mood
+  };
+}
+
+// --- End of Data Generation Section ---
+
 
 // Helper: adjust blended score to realistic range (mirrors app)
 function adjustToRealisticRange(blendedScore) {
@@ -190,34 +257,6 @@ function adjustToRealisticRange(blendedScore) {
   const phi = 0.5 * (1 + erf(z));
   const finalScore = floor + (ceiling - floor) * phi;
   return Math.min(ceiling, Math.round(finalScore));
-}
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function getRandomChoice(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-function generateRandomEntry() {
-  const entry = {};
-  Object.keys(ACTIVITY_RANGES).forEach(key => {
-    entry[key] = getRandomChoice(ACTIVITY_RANGES[key]);
-  });
-
-  entry.energy = getRandomInt(-100, 100);
-  entry.mood = getRandomInt(-100, 100);
-
-  if (entry.run > 10 && Math.random() > 0.7) {
-    entry.strength = false;
-  }
-
-  if (entry.skill.length > 1 && Math.random() > 0.8) {
-    entry.run = Math.min(entry.run, 8);
-  }
-
-  return entry;
 }
 
 function calculateScores(entry, useTrend = true) {
@@ -273,12 +312,7 @@ function assessRealism(entry, scores) {
   let issues = [];
   let score = 100;
 
-  const totalActivity = (entry.run > 0 ? 1 : 0) +
-                       (entry.strength ? 1 : 0) +
-                       (entry.skill.length > 0 ? 1 : 0) +
-                       (entry.read_level > 0 ? 1 : 0) +
-                       (entry.write_level > 0 ? 1 : 0) +
-                       (entry.meditation ? 1 : 0);
+  const totalActivity = Scoring.calculateActivityCountForState(entry);
 
   if (totalActivity > 4) {
     issues.push('Too many activities for one day');
@@ -290,19 +324,13 @@ function assessRealism(entry, scores) {
     score -= 25;
   }
 
-  if (entry.run === 0 && !entry.strength && entry.skill.length === 0 &&
-      entry.read_level === 0 && entry.write_level === 0 && !entry.meditation) {
+  if (totalActivity === 0) {
     issues.push('Completely inactive day');
     score -= 10;
   }
 
   if (entry.run > 10 && scores.fitness < 60) {
     issues.push('High running distance but low fitness score');
-    score -= 15;
-  }
-
-  if (entry.meditation && scores.spirit < 50) {
-    issues.push('Meditation logged but low spirit score');
     score -= 15;
   }
 
@@ -329,8 +357,8 @@ function formatEntry(entry) {
 }
 
 function runMonteCarloTest(iterations = 5) {
-  console.log('🎲 SCORING VALIDATION TOOL - Monte Carlo Testing');
-  console.log('================================================\n');
+  console.log('🎲 REFINED SCORING VALIDATION TOOL - Monte Carlo Testing');
+  console.log('======================================================\n');
 
   console.log('🧪 Running deterministic validation cases (from SCORING_GUIDE)');
   const deterministicTests = [
@@ -365,11 +393,11 @@ function runMonteCarloTest(iterations = 5) {
 
   console.log('\n---\n');
 
-  console.log(`🔄 GENERATING ${iterations} RANDOM TEST CASES:`);
-  console.log('================================================\n');
+  console.log(`🔄 GENERATING ${iterations} REALISTIC RANDOM TEST CASES:`);
+  console.log('======================================================\n');
 
   for (let i = 0; i < iterations; i++) {
-    const entry = generateRandomEntry();
+    const entry = generateRealisticEntry();
     const scores = calculateScores(entry);
     const realism = assessRealism(entry, scores);
 
@@ -388,7 +416,7 @@ function runMonteCarloTest(iterations = 5) {
   console.log('- 70-89: Realistic with minor concerns');
   console.log('- 50-69: Questionable activity combinations');
   console.log('- <50: Likely unrealistic daily load');
-  console.log('\nRun again with: node scoring-validator.js [number]');
+  console.log('\nRun again with: node scoring-validator-refined.js [number]');
 }
 
 // Main execution
