@@ -239,7 +239,8 @@ const Scoring = {
 
     const blendedScore = (rawScore * 0.4) + (historicalAverage * 0.6);
 
-    return this.adjustToRealisticRange(blendedScore);
+    // Ensure the adjusted score cannot exceed 99
+    return Math.min(99, this.adjustToRealisticRange(blendedScore));
   },
 
   /**
@@ -254,9 +255,9 @@ const Scoring = {
    */
   adjustToRealisticRange(blendedScore) {
     const floor = 60;
-    const ceiling = 95;
+    const ceiling = 99; // enforce hard cap at 99 as requested
 
-    if (blendedScore <= 0) return floor;
+  if (blendedScore <= 0) return floor;
 
     // Normalize score to a 0-1 range
     const normalized = blendedScore / 100;
@@ -357,10 +358,10 @@ const Scoring = {
     }
 
     return {
-      sleep: sleepScore,
-      fitness: fitnessScore,
-      mind: mindScore,
-      spirit: spiritScore
+      sleep: Math.min(99, sleepScore),
+      fitness: Math.min(99, fitnessScore),
+      mind: Math.min(99, mindScore),
+      spirit: Math.min(99, spiritScore)
     };
   },
 

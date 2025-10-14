@@ -43,7 +43,7 @@ const Scoring = {
     else if (hours > 11) rawScore = 50;
     else rawScore = 30;
 
-    return Math.max(0, Math.min(100, rawScore));
+    return Math.max(0, Math.min(99, rawScore));
   },
 
   calcFitness(state) {
@@ -68,7 +68,7 @@ const Scoring = {
 
     // Apply soft dampening for unrealistic daily load
     const activityCount = this.calculateActivityCountForState(state);
-    let adjustedRaw = Math.round(Math.max(0, Math.min(100, rawScore)));
+  let adjustedRaw = Math.round(Math.max(0, Math.min(99, rawScore)));
     if (activityCount > 3) {
       const extra = Math.max(0, activityCount - 3);
       const reduction = extra === 1 ? 0.10 : extra === 2 ? 0.18 : 0.25;
@@ -106,7 +106,7 @@ const Scoring = {
     else if (writeLevel === 2) rawScore += 35; // "Editorial"
     else if (writeLevel === 3) rawScore += 50; // "Treatise"
 
-    return Math.max(0, Math.min(100, rawScore));
+    return Math.max(0, Math.min(99, rawScore));
   },
 
   calcSpirit(state) {
@@ -138,7 +138,7 @@ const Scoring = {
       rawScore += bonusPoints;
     }
 
-    return Math.max(0, Math.min(100, rawScore));
+    return Math.max(0, Math.min(99, rawScore));
   },
 
   getQuadrantPreset(quadrant) {
