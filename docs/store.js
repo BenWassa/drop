@@ -382,7 +382,11 @@ const Store = {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    const dateKey = `${year}-${month}-${day}`;
+    if (typeof window !== 'undefined' && window.DEV_MODE) {
+      console.log('📅 getToday():', dateKey, 'from Date:', now, 'ISO:', now.toISOString());
+    }
+    return dateKey;
   },
 
   /**
@@ -616,6 +620,9 @@ const Store = {
     this.ensureEntries();
     // Use current calendar day for saving entries
     const today = this.getToday();
+    if (typeof window !== 'undefined' && window.DEV_MODE) {
+      console.log('💾 saveCurrentEntry: today =', today, 'existing entries:', Object.keys(this.state.entries));
+    }
     const existing = this.state.entries[today] || {};
     const entry = { ...existing };
 

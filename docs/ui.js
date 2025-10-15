@@ -123,6 +123,19 @@ const UI = {
   visionHints: {},
   toastTimer: null,
 
+  // Helper function to parse date keys correctly as local dates
+  parseDateKey(dateKey) {
+    if (window.DEV_MODE) {
+      console.log('🔍 parseDateKey input:', dateKey);
+    }
+    const [year, month, day] = dateKey.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    if (window.DEV_MODE) {
+      console.log('📅 parseDateKey result:', date, 'ISO:', date.toISOString(), 'Locale:', date.toLocaleDateString());
+    }
+    return date;
+  },
+
   renderScores(scores, streaks = {}) {
     const announcements = [];
     const history = typeof Store.getHistory === 'function' ? Store.getHistory(30) : [];
@@ -1632,12 +1645,12 @@ const UI = {
     // Render history entries grouped by month and week
     const renderHistory = () => {
       const entries = Store.state.entries || {};
-      const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
+      const allDates = Object.keys(entries).sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));
 
       // Group entries by month-year and then by week of year
       const groupedEntries = {};
       allDates.forEach(dateKey => {
-        const date = new Date(dateKey);
+        const date = UI.parseDateKey(dateKey);
         const monthYear = `${date.toLocaleDateString('en-US', { month: 'long' })} - ${date.getFullYear()}`;
         const weekOfYear = getWeekOfYear(date);
 
@@ -1678,9 +1691,9 @@ const UI = {
                 </button>
                 <div class="history-month__content">
                   ${weekKeys.map(weekNum => {
-                    const weekDates = monthWeeks[weekNum].sort((a, b) => new Date(b) - new Date(a));
-                    const weekStart = new Date(weekDates[weekDates.length - 1]);
-                    const weekEnd = new Date(weekDates[0]);
+                    const weekDates = monthWeeks[weekNum].sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));
+                    const weekStart = UI.parseDateKey(weekDates[weekDates.length - 1]);
+                    const weekEnd = UI.parseDateKey(weekDates[0]);
                     const weekRange = weekStart.toDateString() === weekEnd.toDateString()
                       ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                       : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
@@ -1694,7 +1707,7 @@ const UI = {
                             const scores = Scoring.calculateDomainScores(entry);
                             const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
 
-                            const date = new Date(dateKey);
+                            const date = UI.parseDateKey(dateKey);
                             const formattedDate = date.toLocaleDateString('en-US', {
                               weekday: 'short',
                               month: 'short',
@@ -1830,7 +1843,7 @@ const UI = {
         if (deleteBtn) {
           e.stopPropagation();
           const dateKey = deleteBtn.dataset.date;
-          if (confirm(`Are you sure you want to delete the entry for ${new Date(dateKey).toLocaleDateString()}?`)) {
+          if (confirm(`Are you sure you want to delete the entry for ${UI.parseDateKey(dateKey).toLocaleDateString()}?`)) {
             UI.deleteHistoryEntry(dateKey);
           }
         } else if (entryEl && !e.target.closest('.history-entry__delete')) {
@@ -1856,7 +1869,7 @@ const UI = {
 
     // Update title and date
     title.textContent = 'Edit Entry';
-    const date = new Date(dateKey);
+    const date = UI.parseDateKey(dateKey);
     editDate.textContent = date.toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -1976,12 +1989,15 @@ const UI = {
 
     const { list, dateRange } = UI.elements.historyOverlay;
     const entries = Store.state.entries || {};
-    const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
+    if (window.DEV_MODE) {
+      console.log('📊 Rendering history with entries:', Object.keys(entries));
+    }
+    const allDates = Object.keys(entries).sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));
 
     // Group entries by month-year and then by week of year
     const groupedEntries = {};
     allDates.forEach(dateKey => {
-      const date = new Date(dateKey);
+      const date = UI.parseDateKey(dateKey);
       const monthYear = `${date.toLocaleDateString('en-US', { month: 'long' })} - ${date.getFullYear()}`;
       const weekOfYear = getWeekOfYear(date);
 
@@ -2022,9 +2038,9 @@ const UI = {
               </button>
               <div class="history-month__content">
                 ${weekKeys.map(weekNum => {
-                  const weekDates = monthWeeks[weekNum].sort((a, b) => new Date(b) - new Date(a));
-                  const weekStart = new Date(weekDates[weekDates.length - 1]);
-                  const weekEnd = new Date(weekDates[0]);
+                  const weekDates = monthWeeks[weekNum].sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));
+                  const weekStart = UI.parseDateKey(weekDates[weekDates.length - 1]);
+                  const weekEnd = UI.parseDateKey(weekDates[0]);
                   const weekRange = weekStart.toDateString() === weekEnd.toDateString()
                     ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                     : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
@@ -2038,12 +2054,16 @@ const UI = {
                           const scores = Scoring.calculateDomainScores(entry);
                           const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
 
-                          const date = new Date(dateKey);
+                          const date = UI.parseDateKey(dateKey);
                           const formattedDate = date.toLocaleDateString('en-US', {
                             weekday: 'short',
                             month: 'short',
                             day: 'numeric'
                           });
+
+                          if (window.DEV_MODE) {
+                            console.log('📅 Entry', dateKey, 'formatted as:', formattedDate, 'Date object:', date);
+                          }
 
                           return `
                             <div class="history-entry" data-date="${dateKey}">
