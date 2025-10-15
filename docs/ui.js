@@ -650,9 +650,9 @@ const UI = {
   },
 
   /**
-   * Update date display to show current "sleep day"
+   * Update date display to show current calendar day
    * If viewing history (Store.state.currentDate is set), show that date
-   * Otherwise show current sleep day with note if in early morning hours
+   * Otherwise show current calendar day
    */
   updateDateDisplay() {
     try {
@@ -668,20 +668,13 @@ const UI = {
         return;
       }
 
-      // Otherwise show current sleep day
-      const now = new Date();
-      const hours = now.getHours();
-      const sleepDay = Store.getSleepDay();
-      const dateObj = new Date(sleepDay + 'T12:00:00');
+      // Otherwise show current calendar day
+      const today = Store.getToday();
+      const dateObj = new Date(today + 'T12:00:00');
 
       let dateText = dateObj.toLocaleDateString('en-US', {
         weekday: 'long', month: 'long', day: 'numeric'
       });
-
-      // Add note if we're in early morning hours (logging to "yesterday")
-      if (hours < 4) {
-        dateText += ` (early ${now.toLocaleDateString('en-US', { weekday: 'short' })}`;
-      }
 
       el.textContent = dateText;
     } catch (err) {
