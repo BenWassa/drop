@@ -764,17 +764,16 @@ const Store = {
   mergeSanitizedPayload(payload) {
     const defaults = this.cloneDefaults();
     const sanitizedEntries = this.sanitizeEntriesObject(payload.entries);
-    const settings = this.extractSettings(payload.meta?.settings || {});
     const archivedEntries = this.sanitizeEntriesObject(payload.meta?.archivedEntries || {});
 
+    // Preserve current meta and settings, only merge entries
     this.state = {
       ...defaults,
       entries: sanitizedEntries,
       archivedEntries,
       meta: {
         ...defaults.meta,
-        ...payload.meta,
-        settings
+        ...this.state.meta  // Preserve current meta and settings
       }
     };
 
