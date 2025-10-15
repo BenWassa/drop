@@ -650,9 +650,9 @@ const UI = {
   },
 
   /**
-   * Update date display to show current "sleep day"
+   * Update date display to show current calendar day
    * If viewing history (Store.state.currentDate is set), show that date
-   * Otherwise show current sleep day with note if in early morning hours
+   * Otherwise show current calendar day
    */
   updateDateDisplay() {
     try {
@@ -668,20 +668,13 @@ const UI = {
         return;
       }
 
-      // Otherwise show current sleep day
-      const now = new Date();
-      const hours = now.getHours();
-      const sleepDay = Store.getSleepDay();
-      const dateObj = new Date(sleepDay + 'T12:00:00');
+      // Otherwise show current calendar day
+      const today = Store.getToday();
+      const dateObj = new Date(today + 'T12:00:00');
 
       let dateText = dateObj.toLocaleDateString('en-US', {
         weekday: 'long', month: 'long', day: 'numeric'
       });
-
-      // Add note if we're in early morning hours (logging to "yesterday")
-      if (hours < 4) {
-        dateText += ` (early ${now.toLocaleDateString('en-US', { weekday: 'short' })}`;
-      }
 
       el.textContent = dateText;
     } catch (err) {
@@ -1851,7 +1844,7 @@ const UI = {
     console.log('✅ Adding active class to overlay');
     overlay.classList.add('active');
     console.log('🎨 Rendering history...');
-    renderHistory();
+    UI.renderHistory();
   },
 
   showHistoryEditForm(dateKey) {
@@ -1968,6 +1961,140 @@ const UI = {
       UI.renderHistory();
       if (typeof UI.showToast === 'function') {
         UI.showToast('Entry deleted successfully!');
+      }
+    }
+  },
+
+  renderHistory() {
+    const getWeekOfYear = (date) => {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    };
+
+    const { list, dateRange } = UI.elements.historyOverlay;
+    const entries = Store.state.entries || {};
+    const allDates = Object.keys(entries).sort((a, b) => new Date(b) - new Date(a));
+
+    // Group entries by month-year and then by week of year
+    const groupedEntries = {};
+    allDates.forEach(dateKey => {
+      const date = new Date(dateKey);
+      const monthYear = `${date.toLocaleDateString('en-US', { month: 'long' })} - ${date.getFullYear()}`;
+      const weekOfYear = getWeekOfYear(date);
+
+      if (!groupedEntries[monthYear]) {
+        groupedEntries[monthYear] = {};
+      }
+      if (!groupedEntries[monthYear][weekOfYear]) {
+        groupedEntries[monthYear][weekOfYear] = [];
+      }
+      groupedEntries[monthYear][weekOfYear].push(dateKey);
+    });
+
+    // Update date range text to show total entries
+    if (dateRange) {
+      const totalEntries = allDates.length;
+      dateRange.textContent = `${totalEntries} ${totalEntries === 1 ? 'entry' : 'entries'}`;
+    }
+
+    // Render grouped entries
+    if (list) {
+      if (allDates.length === 0) {
+        list.innerHTML = `
+          <div class="history-empty">
+            <div class="history-empty__icon">📅</div>
+            <p class="history-empty__text">No entries yet. Start tracking your daily progress!</p>
+          </div>
+        `;
+      } else {
+        list.innerHTML = Object.keys(groupedEntries).map(monthYear => {
+          const monthWeeks = groupedEntries[monthYear];
+          const weekKeys = Object.keys(monthWeeks).sort((a, b) => Number(b) - Number(a)); // Sort weeks descending
+
+          return `
+            <div class="history-month" data-month="${monthYear}">
+              <button class="history-month__header" aria-expanded="true">
+                <span class="history-month__title">${monthYear}</span>
+                <span class="history-month__toggle" aria-hidden="true">▼</span>
+              </button>
+              <div class="history-month__content">
+                ${weekKeys.map(weekNum => {
+                  const weekDates = monthWeeks[weekNum].sort((a, b) => new Date(b) - new Date(a));
+                  const weekStart = new Date(weekDates[weekDates.length - 1]);
+                  const weekEnd = new Date(weekDates[0]);
+                  const weekRange = weekStart.toDateString() === weekEnd.toDateString()
+                    ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                    : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+                  return `
+                    <div class="history-week">
+                      <div class="history-week__header">Week ${weekNum} • ${weekRange}</div>
+                      <div class="history-week__entries">
+                        ${weekDates.map(dateKey => {
+                          const entry = entries[dateKey];
+                          const scores = Scoring.calculateDomainScores(entry);
+                          const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+
+                          const date = new Date(dateKey);
+                          const formattedDate = date.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric'
+                          });
+
+                          return `
+                            <div class="history-entry" data-date="${dateKey}">
+                              <div class="history-entry__header">
+                                <div class="history-entry__date">${formattedDate}</div>
+                                <div class="history-entry__total">${totalScore}</div>
+                                <button class="history-entry__delete" data-date="${dateKey}" aria-label="Delete entry for ${formattedDate}">
+                                  <span aria-hidden="true">×</span>
+                                </button>
+                              </div>
+                              <div class="history-entry__domains">
+                                <div class="history-domain">
+                                  <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                                  <div class="history-domain__info">
+                                    <div class="history-domain__name">Sleep</div>
+                                    <div class="history-domain__score">${scores.sleep}</div>
+                                  </div>
+                                </div>
+                                <div class="history-domain">
+                                  <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                                  <div class="history-domain__info">
+                                    <div class="history-domain__name">Fitness</div>
+                                    <div class="history-domain__score">${scores.fitness}</div>
+                                  </div>
+                                </div>
+                                <div class="history-domain">
+                                  <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                                  <div class="history-domain__info">
+                                    <div class="history-domain__name">Mind</div>
+                                    <div class="history-domain__score">${scores.mind}</div>
+                                  </div>
+                                </div>
+                                <div class="history-domain">
+                                  <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                                  <div class="history-domain__info">
+                                    <div class="history-domain__name">Spirit</div>
+                                    <div class="history-domain__score">${scores.spirit}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          `;
+                        }).join('')}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
       }
     }
   },
