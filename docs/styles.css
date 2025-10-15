@@ -2875,6 +2875,52 @@ body {
   color: var(--color-primary);
 }
 
+.history-entry__delete {
+  width: 32px;
+  height: 32px;
+  background: var(--color-danger);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: rgba(248, 113, 113, 0.15);
+  touch-action: manipulation;
+  margin-left: 12px;
+}
+
+.history-entry__delete:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.history-add-btn {
+  background: var(--color-success);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-tap-highlight-color: rgba(74, 222, 128, 0.15);
+  touch-action: manipulation;
+}
+
+.history-add-btn:hover:not(:disabled) {
+  background: #16a34a;
+  transform: scale(1.02);
+}
+
 .history-entry__domains {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

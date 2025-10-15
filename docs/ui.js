@@ -51,6 +51,7 @@ const UI = {
       editDate: document.getElementById('history-edit-date'),
       editForm: document.getElementById('history-edit-form'),
       cancelBtn: document.getElementById('edit-cancel-btn'),
+      addBtn: document.getElementById('history-add-btn'),
       title: document.getElementById('history-title')
     },
     dataControls: {
@@ -1718,6 +1719,9 @@ const UI = {
                                 <div class="history-entry__header">
                                   <div class="history-entry__date">${formattedDate}</div>
                                   <div class="history-entry__total">${totalScore}</div>
+                                  <button class="history-entry__delete" data-date="${dateKey}" aria-label="Delete entry for ${formattedDate}">
+                                    <span aria-hidden="true">×</span>
+                                  </button>
                                 </div>
                                 <div class="history-entry__domains">
                                   <div class="history-domain">
@@ -1823,6 +1827,33 @@ const UI = {
       });
     }
 
+    // Add entry button
+    const { addBtn } = UI.elements.historyOverlay;
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        UI.showAddEntryForm();
+      });
+    }
+
+    // Event delegation for delete buttons and entry clicks
+    if (list) {
+      list.addEventListener('click', (e) => {
+        const deleteBtn = e.target.closest('.history-entry__delete');
+        const entryEl = e.target.closest('.history-entry');
+
+        if (deleteBtn) {
+          e.stopPropagation();
+          const dateKey = deleteBtn.dataset.date;
+          if (confirm(`Are you sure you want to delete the entry for ${new Date(dateKey).toLocaleDateString()}?`)) {
+            UI.deleteHistoryEntry(dateKey);
+          }
+        } else if (entryEl && !e.target.closest('.history-entry__delete')) {
+          const dateKey = entryEl.dataset.date;
+          UI.showHistoryEditForm(dateKey);
+        }
+      });
+    }
+
     // Open overlay and render
     console.log('✅ Adding active class to overlay');
     overlay.classList.add('active');
@@ -1882,8 +1913,20 @@ const UI = {
   },
 
   saveHistoryEdit() {
-    const { editForm } = UI.elements.historyOverlay;
-    const dateKey = editForm.dataset.dateKey;
+    const { editForm, editDate } = UI.elements.historyOverlay;
+    let dateKey = editForm.dataset.dateKey;
+
+    // If no dateKey, this is a new entry - get date from the date picker
+    if (!dateKey) {
+      const datePicker = editDate.querySelector('#add-entry-date');
+      if (datePicker && datePicker.value) {
+        dateKey = datePicker.value;
+      } else {
+        UI.notify('Please select a date for the new entry.');
+        return;
+      }
+    }
+
     const formData = new FormData(editForm);
 
     // Build updated entry
@@ -1921,7 +1964,60 @@ const UI = {
 
     // Show success feedback
     if (typeof UI.showToast === 'function') {
-      UI.showToast('Entry updated successfully!');
+      UI.showToast(dateKey === editForm.dataset.dateKey ? 'Entry updated successfully!' : 'Entry added successfully!');
     }
+  },
+
+  deleteHistoryEntry(dateKey) {
+    if (Store.state.entries && Store.state.entries[dateKey]) {
+      delete Store.state.entries[dateKey];
+      Store.save();
+      UI.renderHistory();
+      if (typeof UI.showToast === 'function') {
+        UI.showToast('Entry deleted successfully!');
+      }
+    }
+  },
+
+  showAddEntryForm() {
+    const { listView, editView, editDate, editForm, title } = UI.elements.historyOverlay;
+
+    // Update title
+    title.textContent = 'Add New Entry';
+
+    // Show date picker for selecting the date
+    const datePicker = document.createElement('input');
+    datePicker.type = 'date';
+    datePicker.id = 'add-entry-date';
+    datePicker.max = new Date().toISOString().split('T')[0]; // Can't add future dates
+
+    // Clear the form
+    editForm.reset();
+
+    // Update the date display
+    editDate.innerHTML = '';
+    editDate.appendChild(datePicker);
+
+    // Switch to edit view
+    listView.style.display = 'none';
+    editView.style.display = 'block';
+
+    // Focus on date picker
+    datePicker.focus();
+
+    // Handle date selection
+    datePicker.addEventListener('change', () => {
+      const selectedDate = datePicker.value;
+      if (selectedDate) {
+        const date = new Date(selectedDate);
+        editDate.textContent = date.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        datePicker.remove();
+      }
+    });
   },
 };
