@@ -37,6 +37,29 @@ drop/
 └── README.md                 # This file
 ```
 
+##  Version Management
+
+### Version Update Checklist
+When releasing a new version, update these files in order:
+
+1. **`package.json`** - `"version": "X.Y.Z"`
+2. **`manifest.json`** - `"version": "X.Y.Z"`
+3. **`sw.js`** - `APP_VERSION = 'X.Y.Z'`
+4. **`index.html`** - `<span id="app-version">X.Y.Z</span>`
+
+### Version Locations
+- **Package**: `package.json` (npm/package version)
+- **PWA Manifest**: `manifest.json` (app store/install version)
+- **Service Worker**: `sw.js` (cache versioning for updates)
+- **UI Display**: `index.html` (user-visible version in settings)
+
+### Release Process
+1. Update all version references above
+2. Test the app thoroughly
+3. Commit with message: `"Release vX.Y.Z - description"`
+4. Push to main branch
+5. GitHub Pages will auto-deploy
+
 ##  Architecture
 
 ### Single Page App (SPA)
