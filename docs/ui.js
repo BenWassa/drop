@@ -356,6 +356,7 @@ const UI = {
       backupNowBtn.disabled = disabled;
       backupNowBtn.setAttribute('aria-disabled', String(disabled));
       backupNowBtn.classList.toggle('is-busy', Boolean(busy));
+      backupNowBtn.style.display = resolvedReady ? '' : 'none';
     }
 
     if (backupSetupBtn) {
