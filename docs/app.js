@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
+      this.loadAppVersion();
       Install.initInstallPrompt();
       UI.showPage('home');
 
@@ -368,9 +369,82 @@ document.addEventListener('DOMContentLoaded', () => {
     registerServiceWorker() {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
-          .then(registration => console.log('Service Worker registered successfully:', registration))
+          .then(registration => {
+            console.log('Service Worker registered successfully:', registration);
+            
+            // Check for updates every 5 minutes when the app is visible
+            setInterval(() => {
+              if (document.visibilityState === 'visible') {
+                registration.update();
+              }
+            }, 5 * 60 * 1000); // 5 minutes
+            
+            // Listen for service worker updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New version available, show update notification
+                    this.showUpdateNotification();
+                  }
+                });
+              }
+            });
+          })
           .catch(error => console.log('Service Worker registration failed:', error));
       }
+    },
+
+    showUpdateNotification() {
+      // Create a persistent update notification
+      const updateBanner = document.createElement('div');
+      updateBanner.id = 'update-banner';
+      updateBanner.innerHTML = `
+        <div class="update-banner__content">
+          <span class="update-banner__text">App updated! Refresh to get the latest version.</span>
+          <button class="update-banner__button" id="update-refresh-btn">Refresh</button>
+        </div>
+      `;
+      updateBanner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: var(--color-success);
+        color: white;
+        padding: 12px;
+        text-align: center;
+        z-index: 10000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        font-size: 14px;
+      `;
+      
+      document.body.appendChild(updateBanner);
+      
+      // Handle refresh button click
+      document.getElementById('update-refresh-btn').addEventListener('click', () => {
+        window.location.reload();
+      });
+      
+      // Auto-refresh after 30 seconds if user doesn't click
+      setTimeout(() => {
+        if (document.body.contains(updateBanner)) {
+          window.location.reload();
+        }
+      }, 30000);
+    },
+
+    loadAppVersion() {
+      fetch('manifest.json')
+        .then(response => response.json())
+        .then(manifest => {
+          const versionElement = document.getElementById('app-version');
+          if (versionElement && manifest.version) {
+            versionElement.textContent = manifest.version;
+          }
+        })
+        .catch(error => console.warn('Could not load app version:', error));
     },
 
     setupDevPill() {

@@ -3272,3 +3272,35 @@ body {
   background: var(--color-accent-hover);
   transform: translateY(-1px);
 }
+
+/* === UPDATE BANNER === */
+.update-banner__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.update-banner__text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.update-banner__button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.update-banner__button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
