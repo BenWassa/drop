@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
-  const DEV_MODE = false;
+  const DEV_MODE = true;
   window.DEV_MODE = DEV_MODE; // Make accessible to other modules
 
   const App = {
@@ -541,6 +541,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset app state to defaults (after storage is cleared)
             if (window.DropApp && DropApp.Store && typeof DropApp.Store.clearAllData === 'function') {
               DropApp.Store.clearAllData();
+            }
+
+            // Clear backup connection data (but keep the actual backup folder)
+            if (window.Backup && typeof Backup.clearBackupData === 'function') {
+              try {
+                await Backup.clearBackupData();
+                console.log('Backup: Cleared backup connection data');
+              } catch (backupError) {
+                console.warn('Failed to clear backup data:', backupError);
+              }
             }
 
             UI.toast('Cleared app data. Reloading...', 1400);
