@@ -4,9 +4,24 @@
  * ===========================
  *
  * Handles automatic backups of the drop app state to a user-selected folder
- * on the local device using the File System Access API.
- *
- * Responsibilities:
+ * on the local device using the File System Access  },
+
+  async persistHandle(handle) {
+    const db = await this.openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.STORE_NAME, 'readwrite');
+      const store = tx.objectStore(this.STORE_NAME);
+      const req = store.put(handle, this.HANDLE_KEY);
+      req.onsuccess = () => {
+        resolve();
+        db.close();
+      };
+      req.onerror = () => {
+        reject(req.error);
+        db.close();
+      };
+    });
+  },onsibilities:
  * - Persist the user's chosen directory handle using IndexedDB
  * - Throttle automatic backups after Store.save() calls
  * - Provide manual "Backup Now" support from the settings menu
@@ -61,6 +76,15 @@ const Backup = {
 
     if (!this.dirHandle) {
       this.updateUI({ statusText: 'Choose a folder to store automatic backups.' });
+      return;
+    }
+
+    // Try to validate existing backup data
+    const backupValid = await this.validateExistingBackup();
+    if (!backupValid) {
+      console.log('Backup: Existing backup data is invalid or outdated, prompting for new backup folder');
+      this.dirHandle = null;
+      this.updateUI({ statusText: 'Backup data needs updating. Please choose a new backup folder.' });
       return;
     }
 
@@ -123,6 +147,56 @@ const Backup = {
     });
   },
 
+  async validateExistingBackup() {
+    if (!this.dirHandle) {
+      return false;
+    }
+
+    try {
+      // Check if we can access the directory
+      const permission = await this.dirHandle.requestPermission({ mode: 'readwrite' });
+      if (permission !== 'granted') {
+        console.log('Backup: Permission not granted for existing backup folder');
+        return false;
+      }
+
+      // Check if the backup folder has the expected structure
+      // Look for recent backup files
+      const recentBackups = [];
+      try {
+        for await (const [name, handle] of this.dirHandle.entries()) {
+          if (name.endsWith('.json') && name.includes('drop-state')) {
+            // Check if it's a recent file (within last 30 days)
+            const file = await handle.getFile();
+            const fileDate = new Date(file.lastModified);
+            const daysSinceModified = (Date.now() - fileDate.getTime()) / (1000 * 60 * 60 * 24);
+            
+            if (daysSinceModified <= 30) {
+              recentBackups.push({ name, date: fileDate, size: file.size });
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Backup: Error checking existing backup files', error);
+        return false;
+      }
+
+      // If we have recent backup files, consider the backup valid
+      if (recentBackups.length > 0) {
+        console.log(`Backup: Found ${recentBackups.length} recent backup files, validating existing setup`);
+        return true;
+      }
+
+      // If no recent backups but folder exists, we might need to create new backups
+      console.log('Backup: Folder exists but no recent backups found, will create new backups');
+      return true;
+
+    } catch (error) {
+      console.error('Backup: Error validating existing backup', error);
+      return false;
+    }
+  },
+
   async loadHandle() {
     const db = await this.openDb();
     return new Promise((resolve, reject) => {
@@ -130,25 +204,29 @@ const Backup = {
       const store = tx.objectStore(this.STORE_NAME);
       const req = store.get(this.HANDLE_KEY);
       req.onsuccess = () => {
-        resolve(req.result || null);
+        const handle = req.result || null;
         db.close();
-      };
-      req.onerror = () => {
-        reject(req.error);
-        db.close();
-      };
-    });
-  },
-
-  async persistHandle(handle) {
-    const db = await this.openDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      const store = tx.objectStore(this.STORE_NAME);
-      const req = store.put(handle, this.HANDLE_KEY);
-      req.onsuccess = () => {
-        resolve();
-        db.close();
+        
+        // If we have a handle, validate it before returning
+        if (handle) {
+          this.dirHandle = handle;
+          this.validateExistingBackup().then(isValid => {
+            if (isValid) {
+              console.log('Backup: Loaded and validated existing backup folder');
+              resolve(handle);
+            } else {
+              console.log('Backup: Existing backup folder is invalid, will prompt for new folder');
+              this.dirHandle = null;
+              resolve(null);
+            }
+          }).catch(error => {
+            console.warn('Backup: Error validating loaded handle, will prompt for new folder', error);
+            this.dirHandle = null;
+            resolve(null);
+          });
+        } else {
+          resolve(null);
+        }
       };
       req.onerror = () => {
         reject(req.error);
