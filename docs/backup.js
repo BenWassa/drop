@@ -4,24 +4,9 @@
  * ===========================
  *
  * Handles automatic backups of the drop app state to a user-selected folder
- * on the local device using the File System Access  },
-
-  async persistHandle(handle) {
-    const db = await this.openDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(this.STORE_NAME, 'readwrite');
-      const store = tx.objectStore(this.STORE_NAME);
-      const req = store.put(handle, this.HANDLE_KEY);
-      req.onsuccess = () => {
-        resolve();
-        db.close();
-      };
-      req.onerror = () => {
-        reject(req.error);
-        db.close();
-      };
-    });
-  },onsibilities:
+ * on the local device using the File System Access API.
+ *
+ * Responsibilities:
  * - Persist the user's chosen directory handle using IndexedDB
  * - Throttle automatic backups after Store.save() calls
  * - Provide manual "Backup Now" support from the settings menu
@@ -47,6 +32,23 @@ const Backup = {
     lastBackupISO: '',
     lastDailyISO: '',
     lastHash: ''
+  },
+
+  async persistHandle(handle) {
+    const db = await this.openDb();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(this.STORE_NAME, 'readwrite');
+      const store = tx.objectStore(this.STORE_NAME);
+      const req = store.put(handle, this.HANDLE_KEY);
+      req.onsuccess = () => {
+        resolve();
+        db.close();
+      };
+      req.onerror = () => {
+        reject(req.error);
+        db.close();
+      };
+    });
   },
   getState: null,
 
