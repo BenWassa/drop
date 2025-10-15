@@ -548,6 +548,56 @@ const Backup = {
     return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
   },
 
+  async clearBackupData() {
+    try {
+      // Clear the stored directory handle from IndexedDB
+      const db = await this.openDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(this.STORE_NAME, 'readwrite');
+        const store = tx.objectStore(this.STORE_NAME);
+        
+        // Delete both the handle and metadata
+        const deleteHandle = store.delete(this.HANDLE_KEY);
+        const deleteMetadata = store.delete(this.METADATA_KEY);
+        
+        let completed = 0;
+        const checkComplete = () => {
+          completed++;
+          if (completed === 2) {
+            // Reset in-memory state
+            this.dirHandle = null;
+            this.ready = false;
+            this.metadata = {
+              lastBackupISO: '',
+              lastDailyISO: '',
+              lastHash: ''
+            };
+            this.saveMetadata(); // This will save empty metadata
+            this.updateUI({ statusText: 'Choose a folder to store automatic backups.' });
+            console.log('Backup: Cleared backup data and reset state');
+            db.close();
+            resolve();
+          }
+        };
+        
+        deleteHandle.onsuccess = checkComplete;
+        deleteMetadata.onsuccess = checkComplete;
+        
+        deleteHandle.onerror = () => {
+          console.warn('Backup: Failed to delete handle from IndexedDB');
+          checkComplete();
+        };
+        deleteMetadata.onerror = () => {
+          console.warn('Backup: Failed to delete metadata from IndexedDB');
+          checkComplete();
+        };
+      });
+    } catch (error) {
+      console.error('Backup: Error clearing backup data', error);
+      throw error;
+    }
+  },
+
   formatTimestamp(isoString) {
     if (!isoString) return '';
     const date = new Date(isoString);
