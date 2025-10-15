@@ -43,8 +43,6 @@ const UI = {
       closeBtn: document.querySelector('#history-overlay .close-btn'),
       list: document.getElementById('history-list'),
       dateRange: document.getElementById('history-date-range'),
-      prevBtn: document.getElementById('history-prev-btn'),
-      nextBtn: document.getElementById('history-next-btn'),
       listView: document.getElementById('history-list-view'),
       editView: document.getElementById('history-edit-view'),
       backBtn: document.getElementById('history-back-btn'),
@@ -1627,9 +1625,9 @@ const UI = {
 
   openHistoryView() {
     console.log('🔓 Opening history view...');
-    const { overlay, closeBtn, list, dateRange, prevBtn, nextBtn } = UI.elements.historyOverlay;
+    const { overlay, closeBtn, list, dateRange, addBtn } = UI.elements.historyOverlay;
 
-    console.log('📊 History overlay elements:', { overlay, closeBtn, list, dateRange, prevBtn, nextBtn });
+    console.log('📊 History overlay elements:', { overlay, closeBtn, list, dateRange, addBtn });
 
     if (!overlay) {
       console.log('❌ History overlay element not found!');
@@ -1664,10 +1662,6 @@ const UI = {
         const totalEntries = allDates.length;
         dateRange.textContent = `${totalEntries} ${totalEntries === 1 ? 'entry' : 'entries'}`;
       }
-
-      // Disable navigation buttons since we show all entries
-      if (prevBtn) prevBtn.disabled = true;
-      if (nextBtn) nextBtn.disabled = true;
 
       // Render grouped entries
       if (list) {
@@ -1828,7 +1822,6 @@ const UI = {
     }
 
     // Add entry button
-    const { addBtn } = UI.elements.historyOverlay;
     if (addBtn) {
       addBtn.addEventListener('click', () => {
         UI.showAddEntryForm();
