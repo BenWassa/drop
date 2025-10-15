@@ -110,7 +110,7 @@ const Store = {
   },
 
   hydrateDailyState() {
-    const today = this.getSleepDay();
+    const today = this.getToday();
     const entry = this.getEntry(today);
 
     if (entry) {
@@ -426,7 +426,7 @@ const Store = {
   },
 
   checkForNewDay() {
-    const today = this.getSleepDay();
+    const today = this.getToday();
 
     if (this.state.lastEntryDate === today) {
       return false;
@@ -585,9 +585,10 @@ const Store = {
       console.log('✅ State updated:', key, '=', this.state[key]);
 
       if (this.dailyKeys.includes(key)) {
-        // Use sleep day for daily tracking (00:00-03:59 counts as previous day)
-        this.state.lastEntryDate = this.getSleepDay();
-        console.log('📅 Daily key logged for:', this.state.lastEntryDate);
+        // Use current calendar day for all entries
+        const entryDate = this.getToday();
+        this.state.lastEntryDate = entryDate;
+        console.log('📅 Daily key logged for:', entryDate);
         // Add timestamp when data is logged
         if (!this.state.actionTimestamps) {
           this.state.actionTimestamps = {};
@@ -613,8 +614,8 @@ const Store = {
 
   saveCurrentEntry() {
     this.ensureEntries();
-    // Use sleep day for saving entries (00:00-03:59 counts as previous day)
-    const today = this.getSleepDay();
+    // Use current calendar day for saving entries
+    const today = this.getToday();
     const existing = this.state.entries[today] || {};
     const entry = { ...existing };
 
@@ -847,7 +848,7 @@ const Store = {
   recordHistory(scores) {
     if (!scores || typeof scores !== 'object') return;
 
-    const today = this.getSleepDay();
+    const today = this.getToday();
     const safeScores = ['sleep', 'fitness', 'mind', 'spirit'].reduce((acc, domain) => {
       const value = Number(scores[domain]);
       const safeValue = Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
