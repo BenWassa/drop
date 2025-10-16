@@ -156,8 +156,8 @@ const Backup = {
 
     try {
       // Check if we can access the directory
-      const permission = await this.dirHandle.requestPermission({ mode: 'readwrite' });
-      if (permission !== 'granted') {
+      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', false);
+      if (!hasPermission) {
         console.log('Backup: Permission not granted for existing backup folder');
         return false;
       }
