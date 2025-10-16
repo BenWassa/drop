@@ -2,21 +2,24 @@
 
 ## Issues Fixed
 
-### 1. ✅ Backup Folder Permission Persistence
-**Problem:** Users had to re-select backup folder and grant permissions every time they reopened the app after closing the browser.
+### 1. ✅ Backup Permission Persistence & User Activation
+**Problem:** File System Access API permissions require "user activation" (user gesture) to request. Automatic permission requests on app startup were failing with "User activation is required" error.
 
-**Root Cause:** File System Access API permissions don't persist across browser sessions by design. When the app restarted, `queryPermission()` returned "prompt" instead of "granted", causing validation to fail and the stored handle to be discarded.
+**Root Cause:** The app was trying to automatically request permissions on startup without user interaction, which violates browser security policies.
 
 **Fix:**
-- Modified `ensurePermission()` to automatically request permission when status is "prompt" and `request=true`
-- Updated `validateExistingBackup()` to pass `request=true` so permissions are re-requested automatically on app startup
-- This provides seamless backup restoration without manual reconfiguration
+- Modified `init()` to only check if backup folder is configured, not validate permissions automatically
+- Updated `performBackup()` to handle permission requests properly:
+  - Manual backups: Request permissions when user clicks
+  - Auto backups: Skip silently if no permission (don't spam user)
+  - Permission denied: Clear stored handle for manual backups, show error
+- Added `clearStoredHandle()` method for proper cleanup
 
 **Result:** 
-- Backup folder and permissions are automatically restored on app restart
-- Users get a permission prompt only when needed (not every time)
-- If permission is denied, the handle is properly discarded and user must reconfigure
-- Clean user experience with persistent backup functionality
+- Backup folder location persists across sessions
+- Permissions only requested when user actively uses backup features
+- No more automatic permission prompts on app startup
+- Graceful handling when permissions are denied
 
 ---
 
@@ -103,17 +106,17 @@
 ## Code Changes
 
 ### Files Modified:
-1. **backup.js** - Fixed permission handling for cross-session persistence
-2. **package.json** - Version bump to 3.1.3
-3. **manifest.json** - Version bump to 3.1.3  
-4. **sw.js** - Version bump to 3.1.3
-5. **index.html** - Version bump to 3.1.3
+1. **backup.js** - Fixed permission handling and user activation requirements
+2. **package.json** - Version bump to 3.1.4
+3. **manifest.json** - Version bump to 3.1.4  
+4. **sw.js** - Version bump to 3.1.4
+5. **index.html** - Version bump to 3.1.4
 6. **index.html** - Uncommented progress bar HTML
 7. **styles.css** - Added visibility hidden to mantra text
 8. **ui.js** - Added debug logging to updateQuarterProgress()
 
 ### Lines Changed:
-- `backup.js`: Lines 157-162 (permission validation), Lines 247-275 (ensurePermission logic)
+- `backup.js`: Lines 65-95 (init method), Lines 380-410 (performBackup method), Lines 545-565 (clearStoredHandle method)
 - `package.json`: Line 3 (version)
 - `manifest.json`: Line 5 (version)
 - `sw.js`: Line 3 (version)
