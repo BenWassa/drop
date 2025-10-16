@@ -4,26 +4,38 @@
 
 ### 🎉 NEW: Reliable Automatic Backup System (v3.2.0)
 
-**Problem Solved:** Chrome's File System Access API handles expire when tabs close, causing persistent backup failures.
+**Problem Solved:** Chrome's File System Access API handles expire when tabs close, causing persistent backup failures. Additionally, auto-downloading files creates clutter with dated filenames.
 
-**New Solution:** Automatic download-based backups
-- **No permission prompts** - Uses browser download API (always works)
-- **Automatic hourly backups** - Creates timestamped JSON files in Downloads folder after changes
-- **Smart strategy:** 
-  - Keeps `drop-backup-latest.json` (updated same day)
-  - Creates `drop-backup-YYYY-MM-DD.json` (new daily backup)
-  - User manages old backups as needed
-- **User control:** Toggle automatic backups on/off in settings
-- **Manual backup:** "Download Backup Now" button for immediate backup
+**New Solution:** localStorage-based rolling backups
+- **No permission prompts** - Uses browser localStorage (always available)
+- **Automatic backups** - Saves after every change (5 second throttle)
+- **Rolling backup strategy:** 
+  - Maintains 3 versions: Current, Previous, Oldest
+  - Automatically rotates as changes are made
+  - All stored in browser localStorage (no file downloads)
+- **Auto-restore:** Detects corrupted main state and auto-restores from backup
+- **User control:** 
+  - Toggle automatic backups on/off in settings
+  - "Download Backup File" creates timestamped JSON for external storage
+  - "Restore from Backup" lets you choose which backup version to restore
 
 **Benefits:**
 - ✅ Works reliably across all sessions
-- ✅ No handle expiration issues
-- ✅ User has full control over backup files
-- ✅ Simple, predictable behavior
-- ✅ Can manually organize/delete old backups
+- ✅ No file clutter or handle expiration issues
+- ✅ Instant automatic backups after changes
+- ✅ 3 versions of history for safety
+- ✅ Auto-recovery from corruption
+- ✅ Manual download when you want external backup
+- ✅ No file system permissions needed
 
-**Migration:** Old File System Access API backup system removed. Files are now downloaded to your Downloads folder.
+**Technical Details:**
+- Uses separate localStorage keys for 3 backup versions
+- SHA-256 hashing prevents redundant backups
+- Throttles to 5 seconds after last change
+- Backup metadata tracks dates and hash
+- Auto-restore runs on initialization
+
+**Migration:** Old File System Access API backup system removed. Backups now stored in browser localStorage with manual download option.
 
 ---
 

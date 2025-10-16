@@ -31,6 +31,7 @@ const UI = {
       autoBackupToggle: document.getElementById('auto-backup-toggle'),
       autoBackupStatus: document.getElementById('auto-backup-status'),
       backupDownloadBtn: document.getElementById('settings-backup-download-btn'),
+      backupRestoreBtn: document.getElementById('settings-backup-restore-btn'),
       exportBtn: document.getElementById('settings-export-btn'),
       importBtn: document.getElementById('settings-import-btn'),
       importInput: document.getElementById('settings-import-input'),
@@ -1488,7 +1489,8 @@ const UI = {
       clearBtn,
       autoBackupToggle,
       autoBackupStatus,
-      backupDownloadBtn
+      backupDownloadBtn,
+      backupRestoreBtn
     } = UI.elements.settingsMenu;
     
     if (!menu || !openBtn) return;
@@ -1576,6 +1578,44 @@ const UI = {
         } catch (error) {
           console.error('Backup download failed:', error);
           UI.notify('Failed to download backup');
+        }
+      });
+    }
+
+    // Restore from backup
+    if (backupRestoreBtn) {
+      backupRestoreBtn.addEventListener('click', () => {
+        if (typeof AutoBackup === 'undefined') {
+          UI.notify('Backup system not available');
+          return;
+        }
+
+        const backups = AutoBackup.getBackupInfo();
+        if (backups.length === 0) {
+          UI.notify('No backups available to restore');
+          return;
+        }
+
+        // Show backup selection dialog
+        const message = backups.map((b, i) => 
+          `${i + 1}. ${b.label}: ${b.date.toLocaleString()}`
+        ).join('\n');
+
+        const choice = prompt(
+          `Select backup to restore:\n\n${message}\n\nEnter 1, 2, or 3 (WARNING: This will reload the page)`,
+          '1'
+        );
+
+        if (choice && ['1', '2', '3'].includes(choice)) {
+          const index = parseInt(choice) - 1;
+          if (backups[index]) {
+            const confirmed = confirm(
+              `Restore from ${backups[index].label} backup (${backups[index].date.toLocaleString()})?\n\nThis will reload the page.`
+            );
+            if (confirmed) {
+              AutoBackup.restoreFromBackup(backups[index].key);
+            }
+          }
         }
       });
     }
