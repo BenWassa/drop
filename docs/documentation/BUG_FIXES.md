@@ -1,8 +1,24 @@
-# Bug Fixes - October 8, 2025
+# Bug Fixes - October 16, 2025
 
 ## Issues Fixed
 
-### 1. ✅ Quarter and Week Display (Q1 Wk 0)
+### 1. ✅ Backup Folder Permission Persistence
+**Problem:** Users had to re-select backup folder and grant permissions every time they reopened the app after some time or updates.
+
+**Root Cause:** The `validateExistingBackup()` method was incorrectly calling `requestPermission()` every time the app started, which prompts the user for permission even if it was previously granted. This bypassed the proper permission checking flow.
+
+**Fix:**
+- Changed `validateExistingBackup()` to use `this.ensurePermission(handle, 'readwrite', false)` instead of directly calling `requestPermission()`
+- This properly checks if permission is already granted using `queryPermission()` without prompting the user
+
+**Result:** 
+- Backup folder and permissions now persist correctly across app sessions
+- Users only need to re-select folder if permission was actually lost (due to browser updates, clearing data, etc.)
+- App startup no longer triggers unnecessary permission prompts
+
+---
+
+### 2. ✅ Quarter and Week Display (Q1 Wk 0)
 **Problem:** Quarter and week labels were stuck at "Q1 Wk 0" and not updating to today's date.
 
 **Root Cause:** The progress bar HTML element (`#quarter-progress-fill`) was commented out in `index.html` (lines 62-67). The update function was silently failing because the element didn't exist in the DOM.
@@ -62,6 +78,12 @@
 
 ## Testing Performed
 
+### Backup Permission Persistence
+- ✅ App startup no longer prompts for backup folder permission unnecessarily
+- ✅ Existing backup folder is properly validated without prompting
+- ✅ Permission persistence works across browser sessions
+- ✅ Only prompts when permission is actually not granted
+
 ### Quarter/Week Display
 - ✅ Labels now show correct quarter based on current date
 - ✅ Week number calculates correctly (day of year / 7)
@@ -79,14 +101,23 @@
 ## Code Changes
 
 ### Files Modified:
-1. **index.html** - Uncommented progress bar HTML
-2. **styles.css** - Added visibility hidden to mantra text
-3. **ui.js** - Added debug logging to updateQuarterProgress()
+1. **backup.js** - Fixed permission validation logic
+2. **package.json** - Version bump to 3.1.3
+3. **manifest.json** - Version bump to 3.1.3  
+4. **sw.js** - Version bump to 3.1.3
+5. **index.html** - Version bump to 3.1.3
+6. **index.html** - Uncommented progress bar HTML
+7. **styles.css** - Added visibility hidden to mantra text
+8. **ui.js** - Added debug logging to updateQuarterProgress()
 
 ### Lines Changed:
-- `index.html`: Lines 62-67 (uncommented)
-- `styles.css`: Lines 1482-1500 (enhanced hiding)
-- `ui.js`: Lines 566-607 (added logging)
+- `backup.js`: Lines 157-162 (permission validation fix)
+- `package.json`: Line 3 (version)
+- `manifest.json`: Line 5 (version)
+- `sw.js`: Line 3 (version)
+- `index.html`: Line 950 (version), Lines 62-67 (progress bar)
+- `styles.css`: Lines 1482-1500 (mantra visibility)
+- `ui.js`: Lines 566-607 (logging)
 
 ---
 
@@ -101,15 +132,25 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 
 ## Verification Steps
 
-1. Open the app in browser
-2. Check header - should show current quarter (Q4) and week (Wk 41 for Oct 8, 2025)
-3. Open Spirit overlay
-4. Verify only "Start Session" is visible initially
-5. Press and hold timer button - mantra should fade in smoothly
-6. Check browser console for quarter/week calculation logs
+1. **Backup Persistence:**
+   - Set up backup folder and grant permissions
+   - Close browser tab and reopen app
+   - Verify backup folder is remembered without prompting
+   - Check backup status shows "Last backup: [timestamp]" instead of "Choose a folder"
+
+2. **Quarter/Week Display:**
+   - Open the app in browser
+   - Check header - should show current quarter and week
+   - Check browser console for quarter/week calculation logs
+
+3. **Spirit Timer:**
+   - Open Spirit overlay
+   - Verify only "Start Session" is visible initially
+   - Press and hold timer button - mantra should fade in smoothly
 
 ---
 
-**Status:** Both issues resolved ✅  
+**Status:** All issues resolved ✅  
+**Version:** 3.1.3  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes
