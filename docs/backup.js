@@ -72,7 +72,6 @@ const Backup = {
     console.log('Backup: Initializing backup system...');
     try {
       this.dirHandle = await this.loadHandle();
-      console.log('Backup: loadHandle returned:', this.dirHandle ? 'handle found' : 'no handle');
     } catch (error) {
       console.error('Backup: Failed to load stored directory handle', error);
       this.dirHandle = null;
@@ -158,10 +157,8 @@ const Backup = {
     }
 
     try {
-      console.log('Backup: Validating existing backup - checking permissions...');
       // Check if we can access the directory
-      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', true); // Changed to true to request if needed
-      console.log('Backup: Permission check result:', hasPermission ? 'granted' : 'denied');
+      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', true);
       if (!hasPermission) {
         console.log('Backup: Permission not granted for existing backup folder');
         return false;
@@ -211,9 +208,6 @@ const Backup = {
       const store = tx.objectStore(this.STORE_NAME);
       const req = store.get(this.HANDLE_KEY);
       req.onsuccess = () => {
-        const handle = req.result || null;
-        db.close();
-        
         console.log('Backup: Retrieved handle from IndexedDB:', handle ? 'handle exists' : 'no handle stored');
         
         // If we have a handle, validate it before returning
@@ -253,26 +247,19 @@ const Backup = {
 
     const options = { mode };
     try {
-      console.log('Backup: ensurePermission - querying permission...');
       const status = await handle.queryPermission(options);
-      console.log('Backup: ensurePermission - queryPermission returned:', status);
       if (status === 'granted') {
         return true;
       }
       if (status === 'prompt' && request) {
-        console.log('Backup: ensurePermission - requesting permission...');
         const result = await handle.requestPermission(options);
-        console.log('Backup: ensurePermission - requestPermission returned:', result);
         return result === 'granted';
       }
       if (!request) {
-        console.log('Backup: ensurePermission - permission not granted and not requesting');
         return false;
       }
       if (typeof handle.requestPermission === 'function') {
-        console.log('Backup: ensurePermission - requesting permission...');
         const result = await handle.requestPermission(options);
-        console.log('Backup: ensurePermission - requestPermission returned:', result);
         return result === 'granted';
       }
     } catch (error) {
