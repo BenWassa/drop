@@ -28,9 +28,7 @@ const UI = {
       openBtn: document.getElementById('settings-icon-btn'),
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
-      backupSetupBtn: document.getElementById('settings-backup-setup-btn'),
-      backupNowBtn: document.getElementById('settings-backup-now-btn'),
-      backupStatus: document.getElementById('settings-backup-status'),
+      backupDownloadBtn: document.getElementById('settings-backup-download-btn'),
       exportBtn: document.getElementById('settings-export-btn'),
       importBtn: document.getElementById('settings-import-btn'),
       importInput: document.getElementById('settings-import-input'),
@@ -344,35 +342,8 @@ const UI = {
   },
 
   setBackupState({ statusText = '', ready, needsPermission = false, unsupported = false, busy = false } = {}) {
-    const { backupStatus, backupNowBtn, backupSetupBtn } = this.elements.settingsMenu;
-    const resolvedReady = typeof ready === 'boolean' ? ready : Boolean(!unsupported && !needsPermission);
-
-    if (backupStatus) {
-      backupStatus.textContent = statusText;
-      if (unsupported) {
-        backupStatus.dataset.state = 'unsupported';
-      } else if (needsPermission) {
-        backupStatus.dataset.state = 'permission';
-      } else if (resolvedReady) {
-        backupStatus.dataset.state = 'ready';
-      } else {
-        backupStatus.dataset.state = 'idle';
-      }
-    }
-
-    if (backupNowBtn) {
-      const disabled = !resolvedReady || busy;
-      backupNowBtn.disabled = disabled;
-      backupNowBtn.setAttribute('aria-disabled', String(disabled));
-      backupNowBtn.classList.toggle('is-busy', Boolean(busy));
-      backupNowBtn.style.display = resolvedReady ? '' : 'none';
-    }
-
-    if (backupSetupBtn) {
-      const disabled = Boolean(busy);
-      backupSetupBtn.disabled = disabled;
-      backupSetupBtn.setAttribute('aria-disabled', String(disabled));
-    }
+    // Backup UI removed - using simple download button instead
+    // This method kept for compatibility with backup.js if it's still referenced
   },
 
   renderSkillChips() {
@@ -1513,8 +1484,7 @@ const UI = {
       importBtn,
       importInput,
       clearBtn,
-      backupSetupBtn,
-      backupNowBtn
+      backupDownloadBtn
     } = UI.elements.settingsMenu;
     
     if (!menu || !openBtn) return;
@@ -1546,39 +1516,34 @@ const UI = {
       }
     });
 
+    // Download backup file
+    if (backupDownloadBtn) {
+      backupDownloadBtn.addEventListener('click', () => {
+        try {
+          const state = Store.state;
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+          const filename = `drop-backup-${timestamp}.json`;
+          const dataStr = JSON.stringify(state, null, 2);
+          const dataBlob = new Blob([dataStr], { type: 'application/json' });
+          const url = URL.createObjectURL(dataBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          link.click();
+          URL.revokeObjectURL(url);
+          UI.notify('Backup file downloaded');
+        } catch (error) {
+          console.error('Backup download failed:', error);
+          UI.notify('Failed to download backup');
+        }
+      });
+    }
+
     // Export data from settings
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {
         Store.handleExport();
         closeSettings();
-      });
-    }
-
-    if (backupSetupBtn) {
-      backupSetupBtn.addEventListener('click', async () => {
-        if (typeof Backup === 'undefined' || typeof Backup.chooseDirectory !== 'function') {
-          UI.notify('Local folder backups are not supported on this device.');
-          return;
-        }
-        try {
-          await Backup.chooseDirectory();
-        } catch (error) {
-          console.error('Backup setup failed:', error);
-        }
-      });
-    }
-
-    if (backupNowBtn) {
-      backupNowBtn.addEventListener('click', async () => {
-        if (typeof Backup === 'undefined' || typeof Backup.manualBackup !== 'function') {
-          UI.notify('Local folder backups are not supported on this device.');
-          return;
-        }
-        try {
-          await Backup.manualBackup();
-        } catch (error) {
-          console.error('Manual backup failed:', error);
-        }
       });
     }
 
