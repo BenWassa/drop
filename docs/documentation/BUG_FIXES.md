@@ -107,10 +107,10 @@
 
 ### Files Modified:
 1. **backup.js** - Fixed permission handling and user activation requirements
-2. **package.json** - Version bump to 3.1.4
-3. **manifest.json** - Version bump to 3.1.4  
-4. **sw.js** - Version bump to 3.1.4
-5. **index.html** - Version bump to 3.1.4
+2. **package.json** - Version bump to 3.1.5
+3. **manifest.json** - Version bump to 3.1.5  
+4. **sw.js** - Version bump to 3.1.5
+5. **index.html** - Version bump to 3.1.5
 6. **index.html** - Uncommented progress bar HTML
 7. **styles.css** - Added visibility hidden to mantra text
 8. **ui.js** - Added debug logging to updateQuarterProgress()
@@ -157,6 +157,6 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.1.3  
+**Version:** 3.1.5  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes
