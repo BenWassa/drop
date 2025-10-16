@@ -2,7 +2,29 @@
 
 ## Issues Fixed
 
-### 1. ✅ Backup Handle Staleness & Robust Permission Handling
+### 1. ✅ Immediate Version Update Check on Startup
+**Enhancement:** App now checks for latest version immediately on startup, not just every 5 minutes.
+
+**Implementation:**
+- Added `registration.update()` call right after service worker registration
+- Maintains existing 5-minute interval checks for ongoing updates
+- Ensures users get latest version as early as possible
+
+**Result:** Faster version updates and better user experience with immediate update detection.
+
+---
+
+### 2. ✅ Loading Screen PNG Protection
+**Enhancement:** Loading screen logo is now unclickable and non-downloadable.
+
+**Implementation:**
+- Added `pointer-events: none` to prevent clicks and interactions
+- Added `user-select: none` to prevent text selection
+- Maintains visual appearance while preventing user downloads/saves
+
+**Result:** Loading screen image cannot be downloaded or saved by users.
+
+---
 **Problem:** Even after fixing user activation issues, backup was still failing with "User activation is required" error when FileSystemDirectoryHandle became stale after browser sessions.
 
 **Root Cause:** File System Access API handles can become invalid/stale after browser restarts or permission expiration. Calling `requestPermission()` on stale handles fails even with user gestures.
@@ -177,6 +199,6 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.1.6  
+**Version:** 3.1.7  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes
