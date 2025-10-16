@@ -69,7 +69,6 @@ const Backup = {
       return;
     }
 
-    console.log('Backup: Initializing backup system...');
     try {
       this.dirHandle = await this.loadHandle();
     } catch (error) {
@@ -187,12 +186,10 @@ const Backup = {
 
       // If we have recent backup files, consider the backup valid
       if (recentBackups.length > 0) {
-        console.log(`Backup: Found ${recentBackups.length} recent backup files, validating existing setup`);
         return true;
       }
 
       // If no recent backups but folder exists, we might need to create new backups
-      console.log('Backup: Folder exists but no recent backups found, will create new backups');
       return true;
 
     } catch (error) {
@@ -208,18 +205,16 @@ const Backup = {
       const store = tx.objectStore(this.STORE_NAME);
       const req = store.get(this.HANDLE_KEY);
       req.onsuccess = () => {
-        console.log('Backup: Retrieved handle from IndexedDB:', handle ? 'handle exists' : 'no handle stored');
+        const handle = req.result || null;
+        db.close();
         
         // If we have a handle, validate it before returning
         if (handle) {
           this.dirHandle = handle;
           this.validateExistingBackup().then(isValid => {
-            console.log('Backup: Validation result:', isValid ? 'valid' : 'invalid');
             if (isValid) {
-              console.log('Backup: Loaded and validated existing backup folder');
               resolve(handle);
             } else {
-              console.log('Backup: Existing backup folder is invalid, will prompt for new folder');
               this.dirHandle = null;
               resolve(null);
             }
@@ -241,7 +236,6 @@ const Backup = {
 
   async ensurePermission(handle, mode = 'readwrite', request = false) {
     if (!handle || typeof handle.queryPermission !== 'function') {
-      console.log('Backup: ensurePermission - no handle or no queryPermission function');
       return true;
     }
 
