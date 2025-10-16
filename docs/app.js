@@ -371,6 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(registration => {
             console.log('Service Worker registered successfully:', registration);
             
+            // Check for updates immediately on startup
+            registration.update();
+            
             // Check for updates every 5 minutes when the app is visible
             setInterval(() => {
               if (document.visibilityState === 'visible') {

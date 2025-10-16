@@ -2163,6 +2163,8 @@ body {
   will-change: transform;
   animation: breath 8000ms ease-in-out 1 forwards;
   flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Layout wrapper for logo + word to control spacing during 'breath' */
