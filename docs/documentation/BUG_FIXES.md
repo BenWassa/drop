@@ -3,18 +3,20 @@
 ## Issues Fixed
 
 ### 1. ✅ Backup Folder Permission Persistence
-**Problem:** Users had to re-select backup folder and grant permissions every time they reopened the app after some time or updates.
+**Problem:** Users had to re-select backup folder and grant permissions every time they reopened the app after closing the browser.
 
-**Root Cause:** The `validateExistingBackup()` method was incorrectly calling `requestPermission()` every time the app started, which prompts the user for permission even if it was previously granted. This bypassed the proper permission checking flow.
+**Root Cause:** File System Access API permissions don't persist across browser sessions by design. When the app restarted, `queryPermission()` returned "prompt" instead of "granted", causing validation to fail and the stored handle to be discarded.
 
 **Fix:**
-- Changed `validateExistingBackup()` to use `this.ensurePermission(handle, 'readwrite', false)` instead of directly calling `requestPermission()`
-- This properly checks if permission is already granted using `queryPermission()` without prompting the user
+- Modified `ensurePermission()` to automatically request permission when status is "prompt" and `request=true`
+- Updated `validateExistingBackup()` to pass `request=true` so permissions are re-requested automatically on app startup
+- This provides seamless backup restoration without manual reconfiguration
 
 **Result:** 
-- Backup folder and permissions now persist correctly across app sessions
-- Users only need to re-select folder if permission was actually lost (due to browser updates, clearing data, etc.)
-- App startup no longer triggers unnecessary permission prompts
+- Backup folder and permissions are automatically restored on app restart
+- Users get a permission prompt only when needed (not every time)
+- If permission is denied, the handle is properly discarded and user must reconfigure
+- Clean user experience with persistent backup functionality
 
 ---
 
@@ -101,7 +103,7 @@
 ## Code Changes
 
 ### Files Modified:
-1. **backup.js** - Fixed permission validation logic
+1. **backup.js** - Fixed permission handling for cross-session persistence
 2. **package.json** - Version bump to 3.1.3
 3. **manifest.json** - Version bump to 3.1.3  
 4. **sw.js** - Version bump to 3.1.3
@@ -111,7 +113,7 @@
 8. **ui.js** - Added debug logging to updateQuarterProgress()
 
 ### Lines Changed:
-- `backup.js`: Lines 157-162 (permission validation fix)
+- `backup.js`: Lines 157-162 (permission validation), Lines 247-275 (ensurePermission logic)
 - `package.json`: Line 3 (version)
 - `manifest.json`: Line 5 (version)
 - `sw.js`: Line 3 (version)
@@ -134,9 +136,10 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 
 1. **Backup Persistence:**
    - Set up backup folder and grant permissions
-   - Close browser tab and reopen app
-   - Verify backup folder is remembered without prompting
+   - Close browser completely and reopen app
+   - Verify backup automatically requests permission and continues working
    - Check backup status shows "Last backup: [timestamp]" instead of "Choose a folder"
+   - If permission is denied when prompted, backup should require reconfiguration
 
 2. **Quarter/Week Display:**
    - Open the app in browser
