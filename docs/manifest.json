@@ -2,7 +2,7 @@
   "id": "./",
   "name": "drop",
   "short_name": "drop",
-  "version": "3.1.4",
+  "version": "3.1.6",
   "lang": "en",
   "description": "Track your sleep, fitness, mind, and spirit daily.",
   "start_url": "./?source=pwa",

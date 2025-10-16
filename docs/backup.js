@@ -69,7 +69,6 @@ const Backup = {
       return;
     }
 
-    console.log('Backup: Initializing backup system...');
     try {
       this.dirHandle = await this.loadHandle();
     } catch (error) {
@@ -77,37 +76,19 @@ const Backup = {
       this.dirHandle = null;
     }
 
-    if (!this.dirHandle) {
-      this.updateUI({ statusText: 'Choose a folder to store automatic backups.' });
-      return;
-    }
-
-    // Try to validate existing backup data
-    const backupValid = await this.validateExistingBackup();
-    if (!backupValid) {
-      console.log('Backup: Existing backup data is invalid or outdated, prompting for new backup folder');
-      this.dirHandle = null;
-      this.updateUI({ statusText: 'Backup data needs updating. Please choose a new backup folder.' });
-      return;
-    }
-
-    const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', false);
-
-    if (!hasPermission) {
+    // Check if backup is configured (handle exists)
+    const isConfigured = !!this.dirHandle;
+    
+    if (isConfigured) {
+      // Don't validate permissions automatically - just show as configured
+      // Permissions will be requested when user tries to backup
       this.updateUI({
-        statusText: 'Allow folder access to resume automatic backups.',
-        ready: false,
-        needsPermission: true
+        statusText: 'Backup folder configured. Ready to backup.',
+        ready: true
       });
-      return;
+    } else {
+      this.updateUI({ statusText: 'Choose a folder to store automatic backups.' });
     }
-
-    this.ready = true;
-    this.updateUI({
-      statusText: this.describeCurrentStatus(),
-      ready: true
-    });
-    this.scheduleBackup('startup');
   },
 
   checkSupport() {
@@ -157,10 +138,22 @@ const Backup = {
     }
 
     try {
-      // Check if we can access the directory
-      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', true);
-      if (!hasPermission) {
-        console.log('Backup: Permission not granted for existing backup folder');
+      // Check if we can access the directory without requesting permissions
+      // Just try to list entries to see if the handle is still valid
+      let hasAccess = false;
+      try {
+        for await (const [name, handle] of this.dirHandle.entries()) {
+          hasAccess = true;
+          break; // Just need to know we can access it
+        }
+      } catch (error) {
+        // If we can't access entries, the handle might be stale
+        console.log('Backup: Cannot access directory entries, handle may be stale');
+        return false;
+      }
+
+      if (!hasAccess) {
+        console.log('Backup: Directory appears empty or inaccessible');
         return false;
       }
 
@@ -187,12 +180,10 @@ const Backup = {
 
       // If we have recent backup files, consider the backup valid
       if (recentBackups.length > 0) {
-        console.log(`Backup: Found ${recentBackups.length} recent backup files, validating existing setup`);
         return true;
       }
 
       // If no recent backups but folder exists, we might need to create new backups
-      console.log('Backup: Folder exists but no recent backups found, will create new backups');
       return true;
 
     } catch (error) {
@@ -208,18 +199,16 @@ const Backup = {
       const store = tx.objectStore(this.STORE_NAME);
       const req = store.get(this.HANDLE_KEY);
       req.onsuccess = () => {
-        console.log('Backup: Retrieved handle from IndexedDB:', handle ? 'handle exists' : 'no handle stored');
+        const handle = req.result || null;
+        db.close();
         
         // If we have a handle, validate it before returning
         if (handle) {
           this.dirHandle = handle;
           this.validateExistingBackup().then(isValid => {
-            console.log('Backup: Validation result:', isValid ? 'valid' : 'invalid');
             if (isValid) {
-              console.log('Backup: Loaded and validated existing backup folder');
               resolve(handle);
             } else {
-              console.log('Backup: Existing backup folder is invalid, will prompt for new folder');
               this.dirHandle = null;
               resolve(null);
             }
@@ -241,7 +230,6 @@ const Backup = {
 
   async ensurePermission(handle, mode = 'readwrite', request = false) {
     if (!handle || typeof handle.queryPermission !== 'function') {
-      console.log('Backup: ensurePermission - no handle or no queryPermission function');
       return true;
     }
 
@@ -252,15 +240,33 @@ const Backup = {
         return true;
       }
       if (status === 'prompt' && request) {
-        const result = await handle.requestPermission(options);
-        return result === 'granted';
+        try {
+          const result = await handle.requestPermission(options);
+          return result === 'granted';
+        } catch (error) {
+          // Handle stale handles that fail even with user activation
+          if (error.name === 'SecurityError' && error.message.includes('User activation is required')) {
+            console.warn('Backup: Handle appears stale, user activation required but not available');
+            return false;
+          }
+          throw error;
+        }
       }
       if (!request) {
         return false;
       }
       if (typeof handle.requestPermission === 'function') {
-        const result = await handle.requestPermission(options);
-        return result === 'granted';
+        try {
+          const result = await handle.requestPermission(options);
+          return result === 'granted';
+        } catch (error) {
+          // Handle stale handles that fail even with user activation
+          if (error.name === 'SecurityError' && error.message.includes('User activation is required')) {
+            console.warn('Backup: Handle appears stale, user activation required but not available');
+            return false;
+          }
+          throw error;
+        }
       }
     } catch (error) {
       console.warn('Backup: Permission request failed', error);
@@ -411,11 +417,23 @@ const Backup = {
 
     const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', reason !== 'auto');
     if (!hasPermission) {
-      this.updateUI({
-        statusText: 'Allow folder access to resume automatic backups.',
-        ready: false,
-        needsPermission: true
-      });
+      if (reason === 'manual') {
+        // For manual backups, show error and don't proceed
+        this.updateUI({
+          statusText: 'Permission denied. Choose backup folder again.',
+          ready: false,
+          needsPermission: true
+        });
+        // Clear the handle so user can reconfigure
+        this.dirHandle = null;
+        await this.clearStoredHandle();
+      } else {
+        // For auto backups, just skip silently
+        this.updateUI({
+          statusText: 'Backup folder configured. Ready to backup.',
+          ready: true
+        });
+      }
       return false;
     }
 
@@ -557,7 +575,6 @@ const Backup = {
 
   async clearBackupData() {
     try {
-      // Clear the stored directory handle from IndexedDB
       const db = await this.openDb();
       return new Promise((resolve, reject) => {
         const tx = db.transaction(this.STORE_NAME, 'readwrite');
@@ -602,6 +619,27 @@ const Backup = {
     } catch (error) {
       console.error('Backup: Error clearing backup data', error);
       throw error;
+    }
+  },
+
+  async clearStoredHandle() {
+    try {
+      const db = await this.openDb();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(this.STORE_NAME, 'readwrite');
+        const store = tx.objectStore(this.STORE_NAME);
+        const req = store.delete(this.HANDLE_KEY);
+        req.onsuccess = () => {
+          db.close();
+          resolve();
+        };
+        req.onerror = () => {
+          reject(req.error);
+          db.close();
+        };
+      });
+    } catch (error) {
+      console.warn('Backup: Failed to clear stored handle', error);
     }
   },
 
