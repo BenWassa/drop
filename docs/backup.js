@@ -209,12 +209,20 @@ const Backup = {
             if (isValid) {
               resolve(handle);
             } else {
+              // Handle is stale or invalid, clear it from storage
+              console.log('Backup: Stored handle is stale, clearing from storage');
               this.dirHandle = null;
+              this.clearStoredHandle().catch(error => {
+                console.warn('Backup: Failed to clear stale handle from storage', error);
+              });
               resolve(null);
             }
           }).catch(error => {
-            console.warn('Backup: Error validating loaded handle, will prompt for new folder', error);
+            console.warn('Backup: Error validating loaded handle, clearing stale handle', error);
             this.dirHandle = null;
+            this.clearStoredHandle().catch(clearError => {
+              console.warn('Backup: Failed to clear stale handle from storage', clearError);
+            });
             resolve(null);
           });
         } else {
@@ -269,7 +277,9 @@ const Backup = {
         }
       }
     } catch (error) {
-      console.warn('Backup: Permission request failed', error);
+      // Handle case where queryPermission itself fails on stale handle
+      console.warn('Backup: Permission query failed, handle may be stale', error);
+      return false;
     }
     return false;
   },
@@ -481,6 +491,9 @@ const Backup = {
         ready: false,
         needsPermission: true
       };
+      // Clear the potentially stale handle so user can reconfigure
+      this.dirHandle = null;
+      await this.clearStoredHandle();
       if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
         UI.notify('Backup failed. Check folder access and try again.');
       }
