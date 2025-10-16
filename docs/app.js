@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
       this.bindEvents();
       this.registerServiceWorker();
       this.loadAppVersion();
-      Install.initInstallPrompt();
       UI.showPage('home');
 
       // Skip loading animation logic if disabled
@@ -618,8 +617,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const isTestEnvironment = document.body && document.body.dataset && document.body.dataset.dropTest === 'true';
-
-  Install.setupInstallPromptEvents();
 
   if (isTestEnvironment) {
     return;

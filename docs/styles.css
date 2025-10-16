@@ -2760,17 +2760,6 @@ body {
   filter: invert(15%) sepia(89%) saturate(7451%) hue-rotate(0deg) brightness(105%) contrast(105%);
 }
 
-.icon-install-app {
-  background-image: url('icons/install_app.svg');
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  background-position: center;
-  width: 20px;
-  height: 20px;
-  display: inline-block;
-  filter: brightness(0) invert(1);
-}
-
 .icon-folder-sync {
   background-image: url('icons/folder_sync.svg');
   background-size: 20px 20px;
