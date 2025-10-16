@@ -28,6 +28,8 @@ const UI = {
       openBtn: document.getElementById('settings-icon-btn'),
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
+      autoBackupToggle: document.getElementById('auto-backup-toggle'),
+      autoBackupStatus: document.getElementById('auto-backup-status'),
       backupDownloadBtn: document.getElementById('settings-backup-download-btn'),
       exportBtn: document.getElementById('settings-export-btn'),
       importBtn: document.getElementById('settings-import-btn'),
@@ -1484,6 +1486,8 @@ const UI = {
       importBtn,
       importInput,
       clearBtn,
+      autoBackupToggle,
+      autoBackupStatus,
       backupDownloadBtn
     } = UI.elements.settingsMenu;
     
@@ -1516,22 +1520,59 @@ const UI = {
       }
     });
 
+    // Auto-backup toggle
+    if (autoBackupToggle) {
+      // Load saved preference
+      const savedEnabled = localStorage.getItem('auto-backup-enabled');
+      if (savedEnabled !== null) {
+        autoBackupToggle.checked = savedEnabled === 'true';
+      }
+      
+      // Update AutoBackup based on saved state
+      if (typeof AutoBackup !== 'undefined') {
+        AutoBackup.setEnabled(autoBackupToggle.checked);
+        if (autoBackupStatus) {
+          autoBackupStatus.textContent = AutoBackup.getStatus();
+        }
+      }
+
+      autoBackupToggle.addEventListener('change', () => {
+        const enabled = autoBackupToggle.checked;
+        localStorage.setItem('auto-backup-enabled', enabled.toString());
+        
+        if (typeof AutoBackup !== 'undefined') {
+          AutoBackup.setEnabled(enabled);
+        }
+        
+        UI.notify(enabled ? 'Automatic backups enabled' : 'Automatic backups disabled');
+      });
+    }
+
     // Download backup file
     if (backupDownloadBtn) {
-      backupDownloadBtn.addEventListener('click', () => {
+      backupDownloadBtn.addEventListener('click', async () => {
         try {
-          const state = Store.state;
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-          const filename = `drop-backup-${timestamp}.json`;
-          const dataStr = JSON.stringify(state, null, 2);
-          const dataBlob = new Blob([dataStr], { type: 'application/json' });
-          const url = URL.createObjectURL(dataBlob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = filename;
-          link.click();
-          URL.revokeObjectURL(url);
-          UI.notify('Backup file downloaded');
+          if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.manualBackup === 'function') {
+            await AutoBackup.manualBackup();
+            // Update status display
+            if (autoBackupStatus) {
+              autoBackupStatus.textContent = AutoBackup.getStatus();
+            }
+          } else {
+            // Fallback to simple download
+            const state = Store.state;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `drop-backup-${timestamp}.json`;
+            const dataStr = JSON.stringify(state, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+            UI.notify('Backup file downloaded');
+          }
         } catch (error) {
           console.error('Backup download failed:', error);
           UI.notify('Failed to download backup');

@@ -487,7 +487,11 @@ const Store = {
 
     try {
       localStorage.setItem(this.DB_KEY, JSON.stringify(payload));
-      // Automatic backup disabled - using manual download backup instead
+      
+      // Trigger automatic backup after state changes
+      if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.handleStoreSave === 'function') {
+        AutoBackup.handleStoreSave();
+      }
     } catch (error) {
       if (this.isQuotaError(error)) {
         const recovered = this.handleQuotaExceeded();

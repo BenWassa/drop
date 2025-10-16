@@ -634,8 +634,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     Store.init();
-    // Backup.init() disabled - using simple download backup instead of File System Access API
-    // The File System Access API handles expire when Chrome tabs close, causing persistent issues
+    
+    // Initialize AutoBackup system
+    if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.init === 'function') {
+      try {
+        AutoBackup.init();
+        console.log('AutoBackup initialized successfully');
+      } catch (error) {
+        console.error('AutoBackup initialization failed:', error);
+      }
+    }
+    
     App.init();
     App.setupDevPill();
   })();

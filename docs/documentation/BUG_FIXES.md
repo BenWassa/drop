@@ -1,8 +1,35 @@
-# Bug Fixes - October 16, 2025
+# Bug Fixes & Updates - October 16, 2025
 
-## Issues Fixed
+## Major Updates
 
-### 1. ✅ Automatic Stale Handle Detection & Cleanup
+### 🎉 NEW: Reliable Automatic Backup System (v3.2.0)
+
+**Problem Solved:** Chrome's File System Access API handles expire when tabs close, causing persistent backup failures.
+
+**New Solution:** Automatic download-based backups
+- **No permission prompts** - Uses browser download API (always works)
+- **Automatic hourly backups** - Creates timestamped JSON files in Downloads folder after changes
+- **Smart strategy:** 
+  - Keeps `drop-backup-latest.json` (updated same day)
+  - Creates `drop-backup-YYYY-MM-DD.json` (new daily backup)
+  - User manages old backups as needed
+- **User control:** Toggle automatic backups on/off in settings
+- **Manual backup:** "Download Backup Now" button for immediate backup
+
+**Benefits:**
+- ✅ Works reliably across all sessions
+- ✅ No handle expiration issues
+- ✅ User has full control over backup files
+- ✅ Simple, predictable behavior
+- ✅ Can manually organize/delete old backups
+
+**Migration:** Old File System Access API backup system removed. Files are now downloaded to your Downloads folder.
+
+---
+
+## Previous Issues Fixed
+
+### 1. ✅ Automatic Stale Handle Detection & Cleanup (v3.1.8 - DEPRECATED)
 **Problem:** File System Access API handles become stale between sessions or during use, causing persistent backup failures.
 
 **Root Cause:** Stale handles were detected but not automatically cleaned up from storage, causing the same stale handle to be loaded repeatedly.
@@ -216,6 +243,7 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.1.8  
+**Version:** 3.2.0  
 **Ready for testing:** Yes  
-**Requires page refresh:** Yes
+**Requires page refresh:** Yes  
+**Breaking Change:** Old backup system removed, new automatic download system implemented

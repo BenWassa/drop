@@ -915,11 +915,17 @@
         </section>
         <section class="settings-section">
           <h3 class="settings-section__title">Data Management</h3>
+          <div class="settings-field">
+            <label class="settings-label">
+              <input type="checkbox" id="auto-backup-toggle" checked>
+              <span>Enable Automatic Backups</span>
+            </label>
+          </div>
+          <p class="settings-helper-text" id="auto-backup-status">Automatic backups save to Downloads folder hourly when changes are made.</p>
           <button class="settings-btn" id="settings-backup-download-btn" type="button">
             <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
-            <span>Download Backup File</span>
+            <span>Download Backup Now</span>
           </button>
-          <p class="settings-helper-text">Downloads a timestamped backup file to your device's Downloads folder.</p>
           <button class="settings-btn" id="settings-export-btn" type="button">
             <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
             <span>Export Data (Copy JSON)</span>
@@ -939,7 +945,7 @@
           <div class="settings-info">
             <p><strong>drop</strong> - Daily Domain Tracker PWA</p>
             <p>Track your daily life domains: Sleep, Fitness, Mind, and Spirit.</p>
-            <p><strong>Version:</strong> <span id="app-version">3.1.8</span></p>
+            <p><strong>Version:</strong> <span id="app-version">3.2.0</span></p>
             <p><strong>License:</strong> MIT License</p>
             <p><strong>Author:</strong> Benjamin Haddon</p>
             <p><strong>Repository:</strong> <a href="https://github.com/BenWassa/drop" target="_blank" rel="noopener">github.com/BenWassa/drop</a></p>
@@ -952,7 +958,7 @@
 
   <script src="store.js"></script>
   <script src="scoring.js"></script>
-  <script src="backup.js"></script>
+  <script src="auto-backup.js"></script>
   <script src="ui.js"></script>
   <script src="analytics.js"></script>
   <script src="app.js"></script>
