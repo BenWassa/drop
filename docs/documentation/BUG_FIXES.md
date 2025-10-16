@@ -2,7 +2,27 @@
 
 ## Issues Fixed
 
-### 1. ✅ Backup Permission Persistence & User Activation
+### 1. ✅ Backup Handle Staleness & Robust Permission Handling
+**Problem:** Even after fixing user activation issues, backup was still failing with "User activation is required" error when FileSystemDirectoryHandle became stale after browser sessions.
+
+**Root Cause:** File System Access API handles can become invalid/stale after browser restarts or permission expiration. Calling `requestPermission()` on stale handles fails even with user gestures.
+
+**Fix:**
+- Modified `validateExistingBackup()` to check directory accessibility without requesting permissions during initialization
+- Enhanced `ensurePermission()` with specific error handling for stale handles:
+  - Catch `SecurityError` with "User activation is required" message
+  - Return `false` for stale handles instead of throwing
+- Improved error flow: When permissions fail due to stale handles, clear the stored handle and prompt user to reconfigure
+
+**Result:**
+- Robust handling of stale backup folder handles
+- Automatic detection and recovery from permission/handle expiration
+- User gets clear feedback to reconfigure backup when needed
+- No more crashes from stale handle operations
+
+---
+
+### 2. ✅ Backup Permission Persistence & User Activation
 **Problem:** File System Access API permissions require "user activation" (user gesture) to request. Automatic permission requests on app startup were failing with "User activation is required" error.
 
 **Root Cause:** The app was trying to automatically request permissions on startup without user interaction, which violates browser security policies.
@@ -157,6 +177,6 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.1.5  
+**Version:** 3.1.6  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes
