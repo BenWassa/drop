@@ -69,6 +69,7 @@ const Backup = {
       return;
     }
 
+    console.log('Backup: Initializing backup system...');
     try {
       this.dirHandle = await this.loadHandle();
     } catch (error) {
@@ -151,12 +152,13 @@ const Backup = {
 
   async validateExistingBackup() {
     if (!this.dirHandle) {
+      console.log('Backup: validateExistingBackup called but no dirHandle');
       return false;
     }
 
     try {
       // Check if we can access the directory
-      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', false);
+      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', true);
       if (!hasPermission) {
         console.log('Backup: Permission not granted for existing backup folder');
         return false;
@@ -206,13 +208,13 @@ const Backup = {
       const store = tx.objectStore(this.STORE_NAME);
       const req = store.get(this.HANDLE_KEY);
       req.onsuccess = () => {
-        const handle = req.result || null;
-        db.close();
+        console.log('Backup: Retrieved handle from IndexedDB:', handle ? 'handle exists' : 'no handle stored');
         
         // If we have a handle, validate it before returning
         if (handle) {
           this.dirHandle = handle;
           this.validateExistingBackup().then(isValid => {
+            console.log('Backup: Validation result:', isValid ? 'valid' : 'invalid');
             if (isValid) {
               console.log('Backup: Loaded and validated existing backup folder');
               resolve(handle);
@@ -239,6 +241,7 @@ const Backup = {
 
   async ensurePermission(handle, mode = 'readwrite', request = false) {
     if (!handle || typeof handle.queryPermission !== 'function') {
+      console.log('Backup: ensurePermission - no handle or no queryPermission function');
       return true;
     }
 
@@ -247,6 +250,10 @@ const Backup = {
       const status = await handle.queryPermission(options);
       if (status === 'granted') {
         return true;
+      }
+      if (status === 'prompt' && request) {
+        const result = await handle.requestPermission(options);
+        return result === 'granted';
       }
       if (!request) {
         return false;

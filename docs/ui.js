@@ -28,7 +28,6 @@ const UI = {
       openBtn: document.getElementById('settings-icon-btn'),
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
-      installBtn: document.getElementById('settings-install-btn'),
       backupSetupBtn: document.getElementById('settings-backup-setup-btn'),
       backupNowBtn: document.getElementById('settings-backup-now-btn'),
       backupStatus: document.getElementById('settings-backup-status'),
