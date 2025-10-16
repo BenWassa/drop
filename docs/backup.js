@@ -138,10 +138,22 @@ const Backup = {
     }
 
     try {
-      // Check if we can access the directory
-      const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', true);
-      if (!hasPermission) {
-        console.log('Backup: Permission not granted for existing backup folder');
+      // Check if we can access the directory without requesting permissions
+      // Just try to list entries to see if the handle is still valid
+      let hasAccess = false;
+      try {
+        for await (const [name, handle] of this.dirHandle.entries()) {
+          hasAccess = true;
+          break; // Just need to know we can access it
+        }
+      } catch (error) {
+        // If we can't access entries, the handle might be stale
+        console.log('Backup: Cannot access directory entries, handle may be stale');
+        return false;
+      }
+
+      if (!hasAccess) {
+        console.log('Backup: Directory appears empty or inaccessible');
         return false;
       }
 
@@ -228,15 +240,33 @@ const Backup = {
         return true;
       }
       if (status === 'prompt' && request) {
-        const result = await handle.requestPermission(options);
-        return result === 'granted';
+        try {
+          const result = await handle.requestPermission(options);
+          return result === 'granted';
+        } catch (error) {
+          // Handle stale handles that fail even with user activation
+          if (error.name === 'SecurityError' && error.message.includes('User activation is required')) {
+            console.warn('Backup: Handle appears stale, user activation required but not available');
+            return false;
+          }
+          throw error;
+        }
       }
       if (!request) {
         return false;
       }
       if (typeof handle.requestPermission === 'function') {
-        const result = await handle.requestPermission(options);
-        return result === 'granted';
+        try {
+          const result = await handle.requestPermission(options);
+          return result === 'granted';
+        } catch (error) {
+          // Handle stale handles that fail even with user activation
+          if (error.name === 'SecurityError' && error.message.includes('User activation is required')) {
+            console.warn('Backup: Handle appears stale, user activation required but not available');
+            return false;
+          }
+          throw error;
+        }
       }
     } catch (error) {
       console.warn('Backup: Permission request failed', error);
