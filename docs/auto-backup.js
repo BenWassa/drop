@@ -3,27 +3,32 @@
  * AUTO-BACKUP MODULE
  * ===========================
  *
- * Provides reliable automatic backups using localStorage for redundancy.
- * This avoids Chrome's File System Access API handle expiration issues.
+ * Provides reliable automatic backups using IndexedDB for persistence.
+ * IndexedDB survives app updates, cache clears, and service worker updates.
  *
  * Strategy:
- * - Maintains rolling backups in localStorage (current + 2 previous versions)
+ * - Maintains rolling backups in IndexedDB (current + 2 previous versions)
  * - Automatically saves after changes with throttling
+ * - Survives localStorage clears and app updates
  * - Manual download creates timestamped files
  * - No file system permissions needed
- * - Works reliably across all sessions
+ * - Works reliably across all sessions and updates
  */
 
 const AutoBackup = {
-  BACKUP_CURRENT_KEY: 'drop-backup-current',
-  BACKUP_PREVIOUS_KEY: 'drop-backup-previous',
-  BACKUP_OLDEST_KEY: 'drop-backup-oldest',
-  METADATA_KEY: 'drop-auto-backup-metadata',
+  DB_NAME: 'drop-auto-backup-db',
+  DB_VERSION: 1,
+  STORE_NAME: 'backups',
+  BACKUP_CURRENT_KEY: 'current',
+  BACKUP_PREVIOUS_KEY: 'previous',
+  BACKUP_OLDEST_KEY: 'oldest',
+  METADATA_KEY: 'metadata',
   AUTO_DELAY_MS: 5000, // 5 seconds after last change
   
   pendingTimer: null,
   lastHash: '',
   enabled: true,
+  db: null,
 
   metadata: {
     lastBackupISO: '',
@@ -33,18 +38,41 @@ const AutoBackup = {
     backupCount: 0
   },
 
-  init() {
-    this.loadMetadata();
-    this.restoreBackupIfNeeded();
-    console.log('AutoBackup: Initialized with metadata:', this.metadata);
+  async init() {
+    try {
+      await this.openDB();
+      await this.loadMetadata();
+      await this.restoreBackupIfNeeded();
+      console.log('AutoBackup: Initialized with metadata:', this.metadata);
+    } catch (error) {
+      console.error('AutoBackup: Initialization failed', error);
+    }
   },
 
-  loadMetadata() {
+  async openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+      
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve(this.db);
+      };
+      
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+          db.createObjectStore(this.STORE_NAME);
+        }
+      };
+    });
+  },
+
+  async loadMetadata() {
     try {
-      const raw = localStorage.getItem(this.METADATA_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        this.metadata = { ...this.metadata, ...parsed };
+      const metadata = await this.getFromDB(this.METADATA_KEY);
+      if (metadata) {
+        this.metadata = { ...this.metadata, ...metadata };
         this.lastHash = this.metadata.lastHash || '';
       }
     } catch (error) {
@@ -52,15 +80,17 @@ const AutoBackup = {
     }
   },
 
-  restoreBackupIfNeeded() {
+  async restoreBackupIfNeeded() {
     // Check if main state is corrupted or empty, restore from backup if needed
     try {
       const mainState = localStorage.getItem('drop-state-v2');
       if (!mainState || mainState === 'null' || mainState === '{}') {
-        const backup = localStorage.getItem(this.BACKUP_CURRENT_KEY);
+        const backup = await this.getFromDB(this.BACKUP_CURRENT_KEY);
         if (backup) {
           console.warn('AutoBackup: Main state appears empty, restoring from backup');
-          localStorage.setItem('drop-state-v2', backup);
+          localStorage.setItem('drop-state-v2', JSON.stringify(backup));
+          // Trigger a page reload to apply restored state
+          setTimeout(() => window.location.reload(), 100);
         }
       }
     } catch (error) {
@@ -68,9 +98,33 @@ const AutoBackup = {
     }
   },
 
-  saveMetadata() {
+  async getFromDB(key) {
+    if (!this.db) await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction([this.STORE_NAME], 'readonly');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.get(key);
+      
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  },
+
+  async saveToDB(key, value) {
+    if (!this.db) await this.openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(this.STORE_NAME);
+      const request = store.put(value, key);
+      
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  },
+
+  async saveMetadata() {
     try {
-      localStorage.setItem(this.METADATA_KEY, JSON.stringify(this.metadata));
+      await this.saveToDB(this.METADATA_KEY, this.metadata);
     } catch (error) {
       console.warn('AutoBackup: Failed to save metadata', error);
     }
@@ -103,7 +157,7 @@ const AutoBackup = {
   },
 
   /**
-   * Perform an automatic backup to localStorage
+   * Perform an automatic backup to IndexedDB
    */
   async performBackup() {
     try {
@@ -120,26 +174,26 @@ const AutoBackup = {
 
       // Rotate backups: oldest <- previous <- current <- new
       try {
-        const current = localStorage.getItem(this.BACKUP_CURRENT_KEY);
-        const previous = localStorage.getItem(this.BACKUP_PREVIOUS_KEY);
+        const current = await this.getFromDB(this.BACKUP_CURRENT_KEY);
+        const previous = await this.getFromDB(this.BACKUP_PREVIOUS_KEY);
         
         // Move current to previous, previous to oldest
         if (current) {
           if (previous) {
-            localStorage.setItem(this.BACKUP_OLDEST_KEY, previous);
+            await this.saveToDB(this.BACKUP_OLDEST_KEY, previous);
             this.metadata.oldestBackupDate = this.metadata.previousBackupDate;
           }
-          localStorage.setItem(this.BACKUP_PREVIOUS_KEY, current);
+          await this.saveToDB(this.BACKUP_PREVIOUS_KEY, current);
           this.metadata.previousBackupDate = this.metadata.currentBackupDate;
         }
         
         // Save new current backup
-        localStorage.setItem(this.BACKUP_CURRENT_KEY, dataStr);
+        await this.saveToDB(this.BACKUP_CURRENT_KEY, state);
         
       } catch (error) {
         console.warn('AutoBackup: Failed to rotate backups', error);
         // Still try to save current backup
-        localStorage.setItem(this.BACKUP_CURRENT_KEY, dataStr);
+        await this.saveToDB(this.BACKUP_CURRENT_KEY, state);
       }
 
       // Update metadata
@@ -149,9 +203,9 @@ const AutoBackup = {
       this.metadata.currentBackupDate = timestamp;
       this.metadata.lastHash = hash;
       this.metadata.backupCount = (this.metadata.backupCount || 0) + 1;
-      this.saveMetadata();
+      await this.saveMetadata();
 
-      console.log('AutoBackup: Backup saved to localStorage (3 versions maintained)');
+      console.log('AutoBackup: Backup saved to IndexedDB (3 versions maintained, survives updates)');
 
     } catch (error) {
       console.error('AutoBackup: Failed to create backup', error);
@@ -268,16 +322,18 @@ const AutoBackup = {
    */
   async restoreFromBackup(backupKey) {
     try {
-      const backupData = localStorage.getItem(backupKey);
+      const backupData = await this.getFromDB(backupKey);
       if (!backupData) {
         throw new Error('Backup not found');
       }
 
-      // Validate it's valid JSON
-      const parsed = JSON.parse(backupData);
+      // Validate it's a valid object
+      if (typeof backupData !== 'object') {
+        throw new Error('Invalid backup data');
+      }
       
       // Save to main state
-      localStorage.setItem('drop-state-v2', backupData);
+      localStorage.setItem('drop-state-v2', JSON.stringify(backupData));
       
       // Reload the page to apply restored state
       window.location.reload();

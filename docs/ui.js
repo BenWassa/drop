@@ -32,7 +32,6 @@ const UI = {
       autoBackupStatus: document.getElementById('auto-backup-status'),
       backupDownloadBtn: document.getElementById('settings-backup-download-btn'),
       backupRestoreBtn: document.getElementById('settings-backup-restore-btn'),
-      exportBtn: document.getElementById('settings-export-btn'),
       importBtn: document.getElementById('settings-import-btn'),
       importInput: document.getElementById('settings-import-input'),
       historyBtn: document.getElementById('settings-history-btn'),
@@ -1483,7 +1482,6 @@ const UI = {
       openBtn,
       closeBtn,
       backdrop,
-      exportBtn,
       importBtn,
       importInput,
       clearBtn,
@@ -1617,14 +1615,6 @@ const UI = {
             }
           }
         }
-      });
-    }
-
-    // Export data from settings
-    if (exportBtn) {
-      exportBtn.addEventListener('click', () => {
-        Store.handleExport();
-        closeSettings();
       });
     }
 

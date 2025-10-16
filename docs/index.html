@@ -918,25 +918,21 @@
           <div class="settings-field">
             <label class="settings-label">
               <input type="checkbox" id="auto-backup-toggle" checked>
-              <span>Enable Automatic Backups</span>
+              <span>Automatic Backups (survives updates)</span>
             </label>
           </div>
-          <p class="settings-helper-text" id="auto-backup-status">Automatic backups save 3 versions in browser storage after changes.</p>
-          <button class="settings-btn" id="settings-backup-download-btn" type="button">
-            <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
-            <span>Download Backup File</span>
-          </button>
+          <p class="settings-helper-text" id="auto-backup-status">Maintains 3 backup versions in IndexedDB. Protected from cache clears and app updates.</p>
           <button class="settings-btn" id="settings-backup-restore-btn" type="button">
             <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
             <span>Restore from Backup</span>
           </button>
-          <button class="settings-btn" id="settings-export-btn" type="button">
+          <button class="settings-btn" id="settings-backup-download-btn" type="button">
             <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
-            <span>Export Data (Copy JSON)</span>
+            <span>Download Backup File</span>
           </button>
           <button class="settings-btn" id="settings-import-btn" type="button">
             <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
-            <span>Import Data</span>
+            <span>Import Data from File</span>
           </button>
           <button class="settings-btn" id="settings-clear-btn" type="button">
             <span class="settings-btn__icon icon-database-delete" aria-hidden="true"></span>

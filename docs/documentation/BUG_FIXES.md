@@ -4,22 +4,28 @@
 
 ### 🎉 NEW: Reliable Automatic Backup System (v3.2.0)
 
-**Problem Solved:** Chrome's File System Access API handles expire when tabs close, causing persistent backup failures. Additionally, auto-downloading files creates clutter with dated filenames.
+**Problem Solved:** 
+1. Chrome's File System Access API handles expire when tabs close, causing persistent backup failures
+2. Auto-downloading files creates clutter with dated filenames
+3. **CRITICAL**: localStorage gets cleared on app updates and service worker changes, losing all backup data
 
-**New Solution:** localStorage-based rolling backups
-- **No permission prompts** - Uses browser localStorage (always available)
+**New Solution:** IndexedDB-based rolling backups (survives updates!)
+- **No permission prompts** - Uses browser IndexedDB (always available)
+- **Survives app updates** - IndexedDB persists through cache clears and service worker updates
 - **Automatic backups** - Saves after every change (5 second throttle)
 - **Rolling backup strategy:** 
   - Maintains 3 versions: Current, Previous, Oldest
   - Automatically rotates as changes are made
-  - All stored in browser localStorage (no file downloads)
-- **Auto-restore:** Detects corrupted main state and auto-restores from backup
+  - All stored in IndexedDB (separate from app cache)
+- **Auto-restore:** Detects corrupted main state and auto-restores from backup on startup
 - **User control:** 
   - Toggle automatic backups on/off in settings
   - "Download Backup File" creates timestamped JSON for external storage
   - "Restore from Backup" lets you choose which backup version to restore
+- **Simplified UI:** Removed redundant Export button (use Download instead)
 
 **Benefits:**
+- ✅ **Survives app updates and cache clears** (critical!)
 - ✅ Works reliably across all sessions
 - ✅ No file clutter or handle expiration issues
 - ✅ Instant automatic backups after changes
@@ -29,13 +35,15 @@
 - ✅ No file system permissions needed
 
 **Technical Details:**
-- Uses separate localStorage keys for 3 backup versions
+- Uses IndexedDB database 'drop-auto-backup-db' with objectStore 'backups'
+- Stores 3 backup versions with keys: 'current', 'previous', 'oldest'
 - SHA-256 hashing prevents redundant backups
 - Throttles to 5 seconds after last change
-- Backup metadata tracks dates and hash
-- Auto-restore runs on initialization
+- Backup metadata tracks dates and hash in IndexedDB
+- Auto-restore checks on initialization
+- IndexedDB survives service worker updates and cache clears
 
-**Migration:** Old File System Access API backup system removed. Backups now stored in browser localStorage with manual download option.
+**Migration:** Old File System Access API and localStorage backup systems removed. Backups now stored in IndexedDB for persistence across updates.
 
 ---
 
