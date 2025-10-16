@@ -2,7 +2,24 @@
 
 ## Issues Fixed
 
-### 1. ✅ Immediate Version Update Check on Startup
+### 1. ✅ Automatic Stale Handle Detection & Cleanup
+**Problem:** File System Access API handles become stale between sessions or during use, causing persistent backup failures.
+
+**Root Cause:** Stale handles were detected but not automatically cleaned up from storage, causing the same stale handle to be loaded repeatedly.
+
+**Fix:**
+- Modified `loadHandle()` to clear stale handles from IndexedDB when validation fails
+- Enhanced `performBackup()` error handling to clear handles when write operations fail
+- Improved `ensurePermission()` to handle `queryPermission` failures on stale handles
+- Automatic cleanup prevents users from getting stuck with unusable backup configurations
+
+**Result:**
+- Stale handles are automatically detected and removed
+- Users are prompted to re-select backup folders when handles become invalid
+- No more persistent backup failures due to stale handles
+- Seamless recovery from handle expiration
+
+---
 **Enhancement:** App now checks for latest version immediately on startup, not just every 5 minutes.
 
 **Implementation:**
@@ -199,6 +216,6 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.1.7  
+**Version:** 3.1.8  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes
