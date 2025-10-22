@@ -1711,7 +1711,7 @@ const UI = {
         console.log('Clear button clicked');
         const cleared = Store.handleDataClear();
         if (cleared) {
-          closeSettings();
+          location.reload();
         }
       });
     } else {

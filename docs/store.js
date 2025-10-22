@@ -1130,7 +1130,7 @@ const Store = {
 
   handleDataClear() {
     console.log('handleDataClear called');
-    const confirmationMessage = 'This will remove all saved data, including history. Do you want to continue?';
+    const confirmationMessage = 'This will remove all saved data, including history. This will reload the page. Do you want to continue?';
     const confirmed = window.confirm(confirmationMessage);
     console.log('User confirmed:', confirmed);
 
