@@ -91,6 +91,7 @@
   window.exportConfig = exportConfig;
   window.loadPreset = loadPreset;
   window.updateParams = updateParams;
+  window.showDomainTab = showDomainTab;
 
   document.addEventListener('DOMContentLoaded', init);
 
@@ -123,6 +124,7 @@
     }
 
     updateParams();
+    showDomainTab('sleep'); // Initialize first tab
     loadSampleData().then((loaded) => {
       if (!loaded) {
         generateMockData();
@@ -237,6 +239,16 @@
     URL.revokeObjectURL(url);
   }
 
+  function showDomainTab(domain) {
+    // Hide all tabs
+    document.querySelectorAll('.domain-details').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    // Show selected tab
+    document.getElementById(domain + '-tab').classList.add('active');
+    document.querySelector(`[onclick="showDomainTab('${domain}')"]`).classList.add('active');
+  }
+
   function loadSampleData(file = 'sample-data-30days.json') {
     if (typeof fetch !== 'function') {
       generateMockData();
@@ -284,6 +296,7 @@
       updateScoreCards([]);
       updateLatestSummary([]);
       drawChart([]);
+      updateDetailsTables([]);
       return;
     }
 
@@ -291,6 +304,7 @@
     updateScoreCards(scores);
     updateLatestSummary(scores);
     drawChart(scores);
+    updateDetailsTables(scores);
   }
 
   function computeScores(entries, params) {
@@ -431,6 +445,92 @@
     return adjust(blended);
   }
 
+  function computeSleepRaw(entry, previous) {
+    const wake = entry.wake;
+    const rest = previous && previous.rest ? previous.rest : entry.rest;
+
+    if (!wake || !rest) {
+      return 0;
+    }
+
+    const minutes = computeSleepDuration(wake, rest);
+    const hours = minutes / 60;
+
+    if (hours >= 7 && hours <= 9) return 100;
+    else if (hours >= 6 && hours < 7) return 85;
+    else if (hours > 9 && hours <= 10) return 85;
+    else if (hours >= 5 && hours < 6) return 65;
+    else if (hours > 10 && hours <= 11) return 65;
+    else if (hours >= 4 && hours < 5) return 45;
+    else if (hours > 11) return 50;
+    else return 30;
+  }
+
+  function computeFitnessRaw(entry, params) {
+    const skillPoints = Array.isArray(entry.skill) && entry.skill.length ? params.skill : 0;
+    const strengthLevel = Number(entry.strength_level) || 0;
+    const strengthPoints = params.strength * (STRENGTH_RATIOS[strengthLevel] || 0);
+    const runDistance = Number(entry.run) || 0;
+    let runPoints = 0;
+
+    if (runDistance > 0) {
+      runPoints = Math.min(params.runMax, params.runScale * Math.log(runDistance + 1));
+    }
+
+    return Math.min(100, skillPoints + strengthPoints + runPoints);
+  }
+
+  function computeMindRaw(entry, params) {
+    const readLevel = Number(entry.read_level) || 0;
+    const writeLevel = Number(entry.write_level) || 0;
+
+    const readPoints = params.read3 * READ_RATIOS[readLevel];
+    const writePoints = params.write3 * WRITE_RATIOS[writeLevel];
+
+    let total = readPoints + writePoints;
+
+    if (readLevel > 0 && writeLevel > 0) {
+      const synergy = Math.round(((readLevel + writeLevel) / 6) * params.synergy);
+      total += synergy;
+    }
+
+    return Math.min(99, Math.round(total));
+  }
+
+  function computeSpiritRaw(entry, params) {
+    const energy = Number(entry.energy);
+    const mood = Number(entry.mood);
+
+    const hasData = Number.isFinite(energy) || Number.isFinite(mood);
+    if (!hasData) {
+      return 0;
+    }
+
+    const normalizedEnergy = (clamp(Number.isFinite(energy) ? energy : 0, -100, 100) + 100) / 200;
+    const normalizedMood = (clamp(Number.isFinite(mood) ? mood : 0, -100, 100) + 100) / 200;
+    const blended = (normalizedEnergy * 0.4) + (normalizedMood * 0.6);
+    const bonus = Math.round(blended * params.bonus);
+
+    return Math.min(100, Math.max(0, params.base + bonus));
+  }
+
+  function resolveQuadrant(energy, mood) {
+    const e = Number(energy) || 0;
+    const m = Number(mood) || 0;
+    const threshold = 10;
+
+    if (Math.abs(e) < threshold && Math.abs(m) < threshold) {
+      return 0;
+    }
+
+    if (e >= 0 && m >= 0) return 1;
+    if (e < 0 && m >= 0) return 2;
+    if (e >= 0 && m < 0) return 3;
+    if (e < 0 && m < 0) return 4;
+
+    return 0;
+  }
+
   function runMonteCarlo(runs) {
     if (!simulationSummaryEl) {
       return;
@@ -524,6 +624,92 @@
     });
   }
 
+  function updateDetailsTables(series) {
+    // Update sleep details
+    const sleepTable = document.getElementById('sleep-details');
+    sleepTable.innerHTML = '';
+    series.forEach((score, index) => {
+      const entry = historyEntries[index];
+      const previous = index > 0 ? historyEntries[index - 1] : null;
+      const rest = previous && previous.rest ? previous.rest : entry.rest;
+      const minutes = entry.wake && rest ? computeSleepDuration(entry.wake, rest) : 0;
+      const hours = minutes / 60;
+      const rawScore = computeSleepRaw(entry, previous);
+      
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${formatLabel(score.date)}</td>
+        <td>${entry.wake || '--'}</td>
+        <td>${rest || '--'}</td>
+        <td>${hours.toFixed(1)}</td>
+        <td>${rawScore}</td>
+        <td>${score.sleep}</td>
+      `;
+      sleepTable.appendChild(row);
+    });
+
+    // Update fitness details
+    const fitnessTable = document.getElementById('fitness-details');
+    fitnessTable.innerHTML = '';
+    series.forEach((score, index) => {
+      const entry = historyEntries[index];
+      const rawScore = computeFitnessRaw(entry, currentParams.fitness);
+      
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${formatLabel(score.date)}</td>
+        <td>${Array.isArray(entry.skill) ? entry.skill.join(', ') : '--'}</td>
+        <td>${entry.strength_level || 0}</td>
+        <td>${entry.run || 0} km</td>
+        <td>${rawScore}</td>
+        <td>${score.fitness}</td>
+      `;
+      fitnessTable.appendChild(row);
+    });
+
+    // Update mind details
+    const mindTable = document.getElementById('mind-details');
+    mindTable.innerHTML = '';
+    series.forEach((score, index) => {
+      const entry = historyEntries[index];
+      const rawScore = computeMindRaw(entry, currentParams.mind);
+      const synergy = entry.read_level > 0 && entry.write_level > 0 ? 
+        Math.round(((entry.read_level + entry.write_level) / 6) * currentParams.mind.synergy) : 0;
+      
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${formatLabel(score.date)}</td>
+        <td>${entry.read_level || 0}</td>
+        <td>${entry.write_level || 0}</td>
+        <td>${synergy}</td>
+        <td>${rawScore}</td>
+        <td>${score.mind}</td>
+      `;
+      mindTable.appendChild(row);
+    });
+
+    // Update spirit details
+    const spiritTable = document.getElementById('spirit-details');
+    spiritTable.innerHTML = '';
+    series.forEach((score, index) => {
+      const entry = historyEntries[index];
+      const rawScore = computeSpiritRaw(entry, currentParams.spirit);
+      const quadrant = entry.energy !== 0 || entry.mood !== 0 || entry.quadrant ? 
+        (entry.quadrant || resolveQuadrant(entry.energy, entry.mood)) : '--';
+      
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${formatLabel(score.date)}</td>
+        <td>${entry.energy}</td>
+        <td>${entry.mood}</td>
+        <td>${quadrant}</td>
+        <td>${rawScore}</td>
+        <td>${score.spirit}</td>
+      `;
+      spiritTable.appendChild(row);
+    });
+  }
+
   function updateDatasetMeta(source, entries) {
     if (!datasetMetaEl) {
       return;
@@ -536,7 +722,7 @@
     const start = formatLabel(entries[0].date);
     const end = formatLabel(entries[entries.length - 1].date);
     const dayCount = entries.length;
-    datasetMetaEl.textContent = `${source} • ${start} – ${end} • ${dayCount} day${dayCount === 1 ? '' : 's'}`;
+    datasetMetaEl.textContent = `${source} ï¿½ ${start} ï¿½ ${end} ï¿½ ${dayCount} day${dayCount === 1 ? '' : 's'}`;
   }
 
   function drawChart(series) {
