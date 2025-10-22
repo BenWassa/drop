@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scoring Tuning Lab - drop</title>
   <script src="../scoring.js"></script>
-  <script src="../store.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
   <style>
     :root {
       --color-bg: #0B0B0F;
@@ -167,6 +165,129 @@
       margin-bottom: 20px;
     }
 
+    #scoreChart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .dataset-meta {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .summary-section {
+      margin-top: 20px;
+    }
+
+    .summary-section:first-of-type {
+      margin-top: 16px;
+    }
+
+    .summary-grid,
+    .simulation-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-item,
+    .simulation-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .summary-item h4,
+    .simulation-card h4 {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .score-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .score-chip--high {
+      background: rgba(22, 163, 74, 0.18);
+      color: #4ade80;
+    }
+
+    .score-chip--mid {
+      background: rgba(234, 179, 8, 0.18);
+      color: #facc15;
+    }
+
+    .score-chip--low {
+      background: rgba(248, 113, 113, 0.18);
+      color: #f87171;
+    }
+
+    .summary-placeholder {
+      grid-column: 1 / -1;
+      background: var(--color-surface-2);
+      border: 1px dashed var(--color-border);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+    }
+
+    .simulation-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .simulation-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .simulation-controls label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    .simulation-controls select {
+      background: var(--color-surface-2);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+
+    .simulation-card dl {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 6px 12px;
+      font-size: 12px;
+    }
+
+    .simulation-card dt {
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .simulation-card dd {
+      color: var(--color-text-primary);
+      text-align: right;
+    }
+
     .controls {
       display: flex;
       gap: 12px;
@@ -275,9 +396,10 @@
     </header>
 
     <div class="controls">
-      <button onclick="generateMockData()">🔄 Generate New Data</button>
-      <button class="secondary" onclick="resetToDefaults()">↺ Reset to Defaults</button>
-      <button class="secondary" onclick="exportConfig()">💾 Export Config</button>
+      <button onclick="generateMockData()">Generate New Data</button>
+      <button class="secondary" onclick="loadSampleData()">Load 30-Day Sample</button>
+      <button class="secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+      <button class="secondary" onclick="exportConfig()">Export Config</button>
     </div>
 
     <div class="scores-grid">
@@ -315,7 +437,7 @@
             Sleep
           </div>
           <div class="info-text">
-            Sleep scoring uses fixed ranges: 7-9 hours = 100pts, 6-7/9-10 = 85pts, etc. (Not tunable in this lab)
+            Sleep scoring uses fixed duration ranges (7-9 hours = 100). Adjust the other domains below; results already include the production trend and realistic-range adjustments.
           </div>
         </div>
 
@@ -397,345 +519,60 @@
         </div>
 
         <div class="info-text">
-          💡 Adjust parameters and see real-time impact on 7-day rolling averages. All scores are trend-adjusted with historical data.<br>
-          ⚠️ <strong>Major issues to address:</strong> This lab uses approximate scoring logic. To be accurate, it should integrate with the actual Scoring module and include realistic range adjustments. Chart.js should be bundled locally instead of using CDN. Mock data should use real sample data structure.
+          Adjust the weights and refresh the dataset to see how the production trend curve responds. Use the analysis panel to load real samples or run Monte Carlo sweeps against freshly generated histories.
+        </div>
         </div>
       </div>
 
       <div class="panel">
-        <h2>📊 7-Day Rolling Average</h2>
+        <h2>7-Day Rolling Average</h2>
+        <div class="dataset-meta" id="dataset-meta"></div>
         <div class="chart-container">
           <canvas id="scoreChart"></canvas>
+        </div>
+        <div class="summary-section">
+          <h3>Latest Day Snapshot</h3>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <h4>Sleep</h4>
+              <div class="score-chip" id="summary-sleep">--</div>
+            </div>
+            <div class="summary-item">
+              <h4>Fitness</h4>
+              <div class="score-chip" id="summary-fitness">--</div>
+            </div>
+            <div class="summary-item">
+              <h4>Mind</h4>
+              <div class="score-chip" id="summary-mind">--</div>
+            </div>
+            <div class="summary-item">
+              <h4>Spirit</h4>
+              <div class="score-chip" id="summary-spirit">--</div>
+            </div>
+          </div>
+        </div>
+        <div class="summary-section">
+          <div class="simulation-header">
+            <h3>Monte Carlo Simulation</h3>
+            <div class="simulation-controls">
+              <label for="simulation-runs">Runs</label>
+              <select id="simulation-runs">
+                <option value="1">1</option>
+                <option value="10">10</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+              </select>
+              <button class="secondary" id="run-simulations-btn">Run</button>
+            </div>
+          </div>
+          <div class="simulation-summary" id="simulation-summary">
+            <p class="summary-placeholder">Run a simulation to see aggregated domain results.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    // Mock data store
-    let mockHistory = [];
-    let currentParams = {
-      sleep: { optimal: 8, tolerance: 1 },
-      fitness: { skill: 50, strength: 35, run: 15 },
-      mind: { read3: 60, write3: 60, synergy: 10 },
-      spirit: { base: 70, bonus: 30 }
-    };
-
-    // Mock Store for Scoring module
-    const MockStore = {
-      state: {
-        entries: {}
-      },
-      getToday() {
-        const today = new Date();
-        return today.toISOString().split('T')[0];
-      },
-      getHistory(days) {
-        // Return last 'days' entries from mockHistory
-        return mockHistory.slice(-days).map(entry => ({
-          ...entry,
-          scores: {
-            sleep: calculateSleepScore(entry),
-            fitness: calculateFitnessScore(entry),
-            mind: calculateMindScore(entry),
-            spirit: calculateSpiritScore(entry)
-          }
-        }));
-      }
-    };
-
-    function calculateTrendScore(domain, rawScore) {
-      // Simple trend: average of last 7 days
-      const history = mockHistory.slice(-7);
-      if (history.length < 7) return rawScore;
-      
-      const historicalScores = history.map(entry => {
-        switch(domain) {
-          case 'sleep': return calculateSleepScore(entry);
-          case 'fitness': return calculateFitnessScore(entry);
-          case 'mind': return calculateMindScore(entry);
-          case 'spirit': return calculateSpiritScore(entry);
-          default: return 0;
-        }
-      });
-      
-      const avgHistorical = historicalScores.reduce((a, b) => a + b, 0) / historicalScores.length;
-      return Math.min(99, Math.round((rawScore * 0.5) + (avgHistorical * 0.5)));
-    }
-
-    // Initialize
-    function init() {
-      generateMockData();
-      setupChart();
-      updateParams();
-    }
-
-    function setupChart() {
-      const ctx = document.getElementById('scoreChart').getContext('2d');
-      scoreChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: 'Sleep',
-              data: [],
-              borderColor: '#1e90ff',
-              backgroundColor: 'rgba(30, 144, 255, 0.1)',
-              tension: 0.4
-            },
-            {
-              label: 'Fitness',
-              data: [],
-              borderColor: '#ff3b30',
-              backgroundColor: 'rgba(255, 59, 48, 0.1)',
-              tension: 0.4
-            },
-            {
-              label: 'Mind',
-              data: [],
-              borderColor: '#7c3aed',
-              backgroundColor: 'rgba(124, 58, 237, 0.1)',
-              tension: 0.4
-            },
-            {
-              label: 'Spirit',
-              data: [],
-              borderColor: '#16a34a',
-              backgroundColor: 'rgba(22, 163, 74, 0.1)',
-              tension: 0.4
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              labels: { color: '#F0F2F5' }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              ticks: { color: '#A0AEC0' },
-              grid: { color: 'rgba(255, 255, 255, 0.1)' }
-            },
-            x: {
-              ticks: { color: '#A0AEC0' },
-              grid: { color: 'rgba(255, 255, 255, 0.1)' }
-            }
-          }
-        }
-      });
-    }
-
-    function generateMockData() {
-      mockHistory = [];
-      const today = new Date();
-      
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        
-        mockHistory.push({
-          date: date.toISOString().split('T')[0],
-          wake: `0${6 + Math.floor(Math.random() * 3)}:${Math.floor(Math.random() * 60)}`,
-          rest: `2${2 + Math.floor(Math.random() * 2)}:${Math.floor(Math.random() * 60)}`,
-          run: Math.random() > 0.5 ? Math.floor(Math.random() * 15) + 3 : 0,
-          strength_level: Math.floor(Math.random() * 4),
-          skill: Math.random() > 0.5 ? ['Mobility'] : [],
-          read_level: Math.floor(Math.random() * 4),
-          write_level: Math.floor(Math.random() * 4),
-          energy: Math.floor(Math.random() * 200) - 100,
-          mood: Math.floor(Math.random() * 200) - 100,
-          meditation: Math.random() > 0.6
-        });
-      }
-      
-      calculateAndUpdate();
-    }
-
-    function calculateSleepScore(entry) {
-      if (!entry.wake || !entry.rest) return 0;
-      
-      // Simplified: assume rest is previous day, wake is today
-      const [wh, wm] = entry.wake.split(':').map(Number);
-      const [rh, rm] = entry.rest.split(':').map(Number);
-      const wakeMins = wh * 60 + wm;
-      const restMins = rh * 60 + rm;
-      const duration = wakeMins + (1440 - restMins);
-      const hours = duration / 60;
-      
-      // Real scoring ranges (approximated)
-      let rawScore;
-      if (hours >= 7 && hours <= 9) rawScore = 100;
-      else if (hours >= 6 && hours < 7) rawScore = 85;
-      else if (hours > 9 && hours <= 10) rawScore = 85;
-      else if (hours >= 5 && hours < 6) rawScore = 65;
-      else if (hours > 10 && hours <= 11) rawScore = 65;
-      else if (hours >= 4 && hours < 5) rawScore = 45;
-      else if (hours > 11) rawScore = 50;
-      else rawScore = 30;
-      
-      return calculateTrendScore('sleep', rawScore);
-    }
-
-    function calculateFitnessScore(entry) {
-      let score = 0;
-      
-      if (Array.isArray(entry.skill) && entry.skill.length > 0) {
-        score += currentParams.fitness.skill;
-      }
-      
-      if (entry.strength_level === 3) score += currentParams.fitness.strength;
-      else if (entry.strength_level === 2) score += currentParams.fitness.strength * (25/35);
-      else if (entry.strength_level === 1) score += currentParams.fitness.strength * (15/35);
-      
-      if (entry.run > 0) {
-        score += Math.min(50, currentParams.fitness.run * Math.log(entry.run + 1));
-      }
-      
-      return calculateTrendScore('fitness', Math.min(100, score));
-    }
-
-    function calculateMindScore(entry) {
-      const readPointsMap = [0, 25, 40, currentParams.mind.read3];
-      const writePointsMap = [0, 25, 40, currentParams.mind.write3];
-      
-      let score = readPointsMap[Math.min(3, entry.read_level || 0)];
-      score += writePointsMap[Math.min(3, entry.write_level || 0)];
-      
-      if (entry.read_level > 0 && entry.write_level > 0) {
-        const synergy = Math.round(((entry.read_level + entry.write_level) / 6) * currentParams.mind.synergy);
-        score += synergy;
-      }
-      
-      return calculateTrendScore('mind', Math.min(99, Math.round(score)));
-    }
-
-    function calculateSpiritScore(entry) {
-      let score = 0;
-      
-      if (entry.energy !== 0 || entry.mood !== 0) {
-        score += currentParams.spirit.base;
-        
-        const normalizedEnergy = (entry.energy + 100) / 200;
-        const normalizedMood = (entry.mood + 100) / 200;
-        const combined = (normalizedEnergy * 0.4) + (normalizedMood * 0.6);
-        score += Math.round(combined * currentParams.spirit.bonus);
-      }
-      
-      return calculateTrendScore('spirit', Math.min(100, score));
-    }
-
-    function calculateAndUpdate() {
-      const scores = mockHistory.map(entry => ({
-        date: entry.date,
-        sleep: calculateSleepScore(entry),
-        fitness: calculateFitnessScore(entry),
-        mind: calculateMindScore(entry),
-        spirit: calculateSpiritScore(entry)
-      }));
-      
-      // Update current scores (latest day)
-      const latest = scores[scores.length - 1];
-      document.getElementById('sleep-score').textContent = latest.sleep;
-      document.getElementById('fitness-score').textContent = latest.fitness;
-      document.getElementById('mind-score').textContent = latest.mind;
-      document.getElementById('spirit-score').textContent = latest.spirit;
-      
-      // Update chart
-      const labels = scores.map(s => {
-        const d = new Date(s.date);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      });
-      
-      scoreChart.data.labels = labels;
-      scoreChart.data.datasets[0].data = scores.map(s => s.sleep);
-      scoreChart.data.datasets[1].data = scores.map(s => s.fitness);
-      scoreChart.data.datasets[2].data = scores.map(s => s.mind);
-      scoreChart.data.datasets[3].data = scores.map(s => s.spirit);
-      scoreChart.update();
-    }
-
-    function updateParams() {
-      // Fitness
-      const fitnessSkill = parseInt(document.getElementById('fitness-skill').value);
-      const fitnessStrength = parseInt(document.getElementById('fitness-strength').value);
-      const fitnessRun = parseInt(document.getElementById('fitness-run').value);
-      document.getElementById('fitness-skill-val').textContent = fitnessSkill;
-      document.getElementById('fitness-strength-val').textContent = fitnessStrength;
-      document.getElementById('fitness-run-val').textContent = fitnessRun;
-      currentParams.fitness = { skill: fitnessSkill, strength: fitnessStrength, run: fitnessRun };
-      
-      // Mind
-      const mindRead3 = parseInt(document.getElementById('mind-read3').value);
-      const mindWrite3 = parseInt(document.getElementById('mind-write3').value);
-      const mindSynergy = parseInt(document.getElementById('mind-synergy').value);
-      document.getElementById('mind-read3-val').textContent = mindRead3;
-      document.getElementById('mind-write3-val').textContent = mindWrite3;
-      document.getElementById('mind-synergy-val').textContent = mindSynergy;
-      currentParams.mind = { read3: mindRead3, write3: mindWrite3, synergy: mindSynergy };
-      
-      // Spirit
-      const spiritBase = parseInt(document.getElementById('spirit-base').value);
-      const spiritBonus = parseInt(document.getElementById('spirit-bonus').value);
-      document.getElementById('spirit-base-val').textContent = spiritBase;
-      document.getElementById('spirit-bonus-val').textContent = spiritBonus;
-      currentParams.spirit = { base: spiritBase, bonus: spiritBonus };
-      
-      calculateAndUpdate();
-    }
-
-    function resetToDefaults() {
-      document.getElementById('fitness-skill').value = 50;
-      document.getElementById('fitness-strength').value = 35;
-      document.getElementById('fitness-run').value = 15;
-      document.getElementById('mind-read3').value = 60;
-      document.getElementById('mind-write3').value = 60;
-      document.getElementById('mind-synergy').value = 10;
-      document.getElementById('spirit-base').value = 70;
-      document.getElementById('spirit-bonus').value = 30;
-      updateParams();
-    }
-
-    function loadPreset(preset) {
-      switch(preset) {
-        case 'baseline':
-          document.getElementById('fitness-skill').value = 50;
-          document.getElementById('mind-read3').value = 60;
-          break;
-        case 'burnout':
-          document.getElementById('fitness-skill').value = 30;
-          document.getElementById('spirit-base').value = 80;
-          break;
-        case 'recovery':
-          document.getElementById('fitness-strength').value = 20;
-          break;
-      }
-      updateParams();
-    }
-
-    function exportConfig() {
-      const config = {
-        version: '1.0',
-        timestamp: new Date().toISOString(),
-        parameters: currentParams
-      };
-      
-      const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `scoring-config-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // Initialize on load
-    init();
-  </script>
+  <script src="score_tuning_lab.js"></script>
 </body>
 </html>
