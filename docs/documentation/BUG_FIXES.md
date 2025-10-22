@@ -2,6 +2,36 @@
 
 ## Major Updates
 
+### 🎯 NEW: Baseline-Gated Metrics & Guidance (v3.3.0)
+
+**Problem Solved:**
+1. New users were shown domain scores before enough data existed, creating noise.
+2. Gratitude insights referenced metrics that had not been earned yet, reducing trust.
+3. Baseline requirements were unclear and not surfaced in the UI.
+
+**New Solution:** Delay all score displays until seven wake/rest days are captured.
+- Home score rings stay hidden until the baseline is complete.
+- Gratitude page swaps scorecards for guidance copy and progress reminders.
+- Baseline banner tracks remaining days with a progress meter.
+- Weekly trajectory heatmap continues to render so users still see logging feedback.
+
+**Benefits:**
+- 🔒 Prevents misleading averages before enough data exists.
+- 🧭 Offers clear direction on what to log next.
+- 🚀 Preserves positive momentum via the heatmap while still onboarding.
+- 🙌 Restores full insights automatically on day seven with no extra steps.
+
+**Technical Details:**
+- `UI.renderScores()` now counts baseline-ready days and toggles score visibility.
+- New gating state passed into `renderGratitude()` to swap copy and hide progress bars.
+- Added cached references to score section and gratitude cards for quick DOM updates.
+- Screen reader announcements suppressed until the baseline unlocks.
+
+**Verification:**
+- Clear storage, log fewer than seven days, confirm score UI stays hidden.
+- Add entries to reach seven days, ensure scores, insights, and announcer resume.
+- Confirm weekly heatmap renders continuously in both states.
+
 ### 🎉 NEW: Reliable Automatic Backup System (v3.2.0)
 
 **Problem Solved:** 
@@ -263,7 +293,7 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.2.0  
+**Version:** 3.3.0  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes  
-**Breaking Change:** Old backup system removed, new automatic download system implemented
+**Breaking Change:** Domain metrics stay hidden until a seven-day baseline is logged

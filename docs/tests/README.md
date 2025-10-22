@@ -34,14 +34,25 @@ Unit tests for DOM structure, accessibility, and component behavior.
 Test data files for import/export functionality testing.
 
 **Files:**
-- `sample-data-1month.json` - 45 days of realistic tracking data with varying scores across all domains (2025-09-01 to 2025-10-14)
+- `sample-data-5days.json` - Most recent five days ending today (baseline ramp testing)
+- `sample-data-30days.json` - Rolling 30-day history ending today (baseline satisfied)
+- `sample-data-1month.json` - Legacy 45-day data set (2025-09-01 to 2025-10-14) for regression checks
+
+**Generate on demand:**
+```bash
+# 5-day dataset saved to docs/tests/sample-data-5days.json
+node docs/tests/generate-sample-data.js --days 5
+
+# 30-day dataset (same API; pass --out to customise path)
+node docs/tests/generate-sample-data.js --days 30
+```
 
 **Usage:**
 - Use in DOM tests for data import validation
 - Manual testing of import/export features
 - Development/demo data
 
-**Data Structure:**
+**Data Structure:** (dates shown are illustrative; generated files use the current date)
 ```json
 {
   "meta": {

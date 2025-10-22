@@ -19,6 +19,7 @@ const UI = {
     overlays: document.querySelectorAll('.overlay'),
     navButtons: document.querySelectorAll('.nav-btn'),
     pages: document.querySelectorAll('[data-page]'),
+    scoresSection: document.querySelector('.scores-section'),
     loadingOverlay: document.getElementById('loading-overlay'),
     devPill: document.getElementById('dev-pill'),
     devToast: document.getElementById('dev-toast'),
@@ -76,6 +77,13 @@ const UI = {
       runSummary: document.getElementById('gratitude-run-summary'),
       meditationSummary: document.getElementById('gratitude-meditation-summary'),
       progressBars: document.querySelectorAll('[data-progress-domain]')
+    },
+    gratitudeCards: {
+      highlight: document.querySelector('.insight-card--highlight'),
+      focus: document.querySelector('.insight-card--focus'),
+      momentum: document.querySelector('.insight-card--momentum'),
+      scoreboard: document.querySelector('.insight-card--scoreboard'),
+      reflections: document.querySelector('.insight-card--reflections')
     },
     scoreDisplays: {
       sleep: {
@@ -136,6 +144,7 @@ const UI = {
     },  renderScores(scores, streaks = {}) {
     const announcements = [];
     const history = typeof Store.getHistory === 'function' ? Store.getHistory(30) : [];
+    const placeholderScore = '--';
 
     // Count days with valid baseline data (must have wake AND rest)
     const entries = Store.state.entries || {};
@@ -145,22 +154,32 @@ const UI = {
 
     const needsBaseline = daysLogged < 7;
 
+    if (this.elements.scoresSection) {
+      this.elements.scoresSection.style.display = needsBaseline ? 'none' : '';
+    }
+
     for (const domain in scores) {
       const display = this.elements.scoreDisplays[domain];
       if (!display) continue;
 
+      if (needsBaseline) {
+        if (display.score) {
+          display.score.textContent = '';
+        }
+        if (display.meter) {
+          display.meter.setAttribute('aria-valuenow', '0');
+        }
+        continue;
+      }
+
       const score = scores[domain];
       const previousValue = display.score ? display.score.textContent : null;
 
-      // Show dash if score is null (insufficient data)
       let scoreText;
-      let clampedScore;
-
       if (score === null || score === undefined || !Number.isFinite(score)) {
-        scoreText = '—'; // Em dash
-        clampedScore = 0;
+        scoreText = placeholderScore;
       } else {
-        clampedScore = Math.max(0, Math.min(100, Math.round(score)));
+        const clampedScore = Math.max(0, Math.min(100, Math.round(score)));
         scoreText = String(clampedScore);
       }
 
@@ -168,11 +187,11 @@ const UI = {
         display.score.textContent = scoreText;
       }
       if (display.meter) {
-        display.meter.setAttribute('aria-valuenow', scoreText === '—' ? '0' : scoreText);
+        display.meter.setAttribute('aria-valuenow', scoreText === placeholderScore ? '0' : scoreText);
         // Score rings are now static CSS - no JavaScript manipulation needed
       }
 
-      if (previousValue !== null && previousValue !== scoreText && scoreText !== '—') {
+      if (previousValue !== null && previousValue !== scoreText && scoreText !== placeholderScore) {
         announcements.push(`${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${scoreText}`);
       }
     }
@@ -193,11 +212,15 @@ const UI = {
       console.warn('Activity warning check skipped:', e && e.message);
     }
 
-    if (announcements.length > 0 && this.elements.scoreAnnouncer) {
+    if (needsBaseline) {
+      if (this.elements.scoreAnnouncer) {
+        this.elements.scoreAnnouncer.textContent = '';
+      }
+    } else if (announcements.length > 0 && this.elements.scoreAnnouncer) {
       this.elements.scoreAnnouncer.textContent = announcements.join('. ');
     }
 
-    this.renderGratitude(scores);
+    this.renderGratitude(scores, needsBaseline, daysLogged);
   },
 
   /**
@@ -757,7 +780,7 @@ const UI = {
     }
   },
 
-  renderGratitude(scores) {
+  renderGratitude(scores, needsBaseline = false, daysLogged = 0) {
     const {
       topDomain, topScore, topDetail,
       focusDomain, focusScore, focusDetail,
@@ -765,9 +788,50 @@ const UI = {
       meditationSummary, progressBars
     } = this.elements.gratitude;
 
+    const gratitudeCards = this.elements.gratitudeCards || {};
+    const placeholderScore = '--';
+
     if (!topDomain) return;
 
+    if (needsBaseline) {
+      if (gratitudeCards.scoreboard) {
+        gratitudeCards.scoreboard.style.display = 'none';
+      }
+
+      progressBars.forEach(bar => {
+        bar.style.display = 'none';
+        bar.setAttribute('aria-valuenow', '0');
+        const fill = bar.querySelector('.progress-fill');
+        const scoreEl = bar.querySelector('.progress-score');
+        if (fill) fill.style.width = '0%';
+        if (scoreEl) scoreEl.textContent = '';
+      });
+
+      const safeDays = typeof daysLogged === 'number' && daysLogged > 0 ? daysLogged : 0;
+      const remaining = Math.max(0, 7 - safeDays);
+      const dayWord = remaining === 1 ? 'day' : 'days';
+
+      topDomain.textContent = 'Baseline building';
+      topScore.textContent = '';
+      topDetail.textContent = `Log ${remaining} more ${dayWord} to surface your standout domain.`;
+
+      focusDomain.textContent = 'Keep logging';
+      focusScore.textContent = '';
+      focusDetail.textContent = 'Once your baseline is ready, we will highlight the next focus area.';
+
+      momentumDetail.textContent = 'Weekly momentum unlocks after your first 7 days of entries.';
+      sleepSummary.textContent = 'Track wake and rest times each day to unlock recovery insights.';
+      runSummary.textContent = 'Record movement to seed your fitness narrative.';
+      meditationSummary.textContent = 'Capture reflective practices to reveal spirit trends.';
+      return;
+    }
+
+    if (gratitudeCards.scoreboard) {
+      gratitudeCards.scoreboard.style.display = '';
+    }
+
     progressBars.forEach(bar => {
+      bar.style.display = '';
       const domain = bar.dataset.progressDomain;
       if (domain in scores) {
         bar.style.setProperty('--progress', `${scores[domain]}%`);
@@ -776,6 +840,12 @@ const UI = {
         const scoreEl = bar.querySelector('.progress-score');
         if (fill) fill.style.width = `${scores[domain]}%`;
         if (scoreEl) scoreEl.textContent = scores[domain];
+      } else {
+        bar.setAttribute('aria-valuenow', '0');
+        const fill = bar.querySelector('.progress-fill');
+        const scoreEl = bar.querySelector('.progress-score');
+        if (fill) fill.style.width = '0%';
+        if (scoreEl) scoreEl.textContent = '';
       }
     });
 
@@ -783,11 +853,11 @@ const UI = {
 
     if (allScoresZero) {
       topDomain.textContent = 'Log a win';
-      topScore.textContent = '—';
+      topScore.textContent = placeholderScore;
       topDetail.textContent = 'Add your first entries to reveal highlights tailored to you.';
 
       focusDomain.textContent = 'Where to start';
-      focusScore.textContent = '—';
+      focusScore.textContent = placeholderScore;
       focusDetail.textContent = 'Log sleep, movement or a reflection to surface your next focus.';
 
       momentumDetail.textContent = 'Track a full day to unlock momentum stories and week-over-week comparisons.';
