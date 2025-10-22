@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scoring Tuning Lab - drop</title>
+  <script src="../scoring.js"></script>
+  <script src="../store.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
   <style>
     :root {
@@ -312,19 +314,8 @@
             <span class="domain-badge sleep"></span>
             Sleep
           </div>
-          <div class="param-control">
-            <div class="param-label">
-              <span>Optimal Hours Center</span>
-              <span class="param-value" id="sleep-optimal-val">8.0</span>
-            </div>
-            <input type="range" id="sleep-optimal" min="6" max="10" step="0.5" value="8" oninput="updateParams()">
-          </div>
-          <div class="param-control">
-            <div class="param-label">
-              <span>Tolerance (±hours)</span>
-              <span class="param-value" id="sleep-tolerance-val">1.0</span>
-            </div>
-            <input type="range" id="sleep-tolerance" min="0.5" max="2" step="0.1" value="1" oninput="updateParams()">
+          <div class="info-text">
+            Sleep scoring uses fixed ranges: 7-9 hours = 100pts, 6-7/9-10 = 85pts, etc. (Not tunable in this lab)
           </div>
         </div>
 
@@ -335,21 +326,21 @@
           </div>
           <div class="param-control">
             <div class="param-label">
-              <span>Skill Practice Weight</span>
+              <span>Skill Practice Points</span>
               <span class="param-value" id="fitness-skill-val">50</span>
             </div>
             <input type="range" id="fitness-skill" min="20" max="60" step="5" value="50" oninput="updateParams()">
           </div>
           <div class="param-control">
             <div class="param-label">
-              <span>Strength Weight</span>
+              <span>Strength Tier 3 Points</span>
               <span class="param-value" id="fitness-strength-val">35</span>
             </div>
             <input type="range" id="fitness-strength" min="15" max="45" step="5" value="35" oninput="updateParams()">
           </div>
           <div class="param-control">
             <div class="param-label">
-              <span>Run Log Scale</span>
+              <span>Run Log Scale Factor</span>
               <span class="param-value" id="fitness-run-val">15</span>
             </div>
             <input type="range" id="fitness-run" min="10" max="25" step="1" value="15" oninput="updateParams()">
@@ -377,7 +368,7 @@
           </div>
           <div class="param-control">
             <div class="param-label">
-              <span>Synergy Bonus</span>
+              <span>Synergy Bonus Max</span>
               <span class="param-value" id="mind-synergy-val">10</span>
             </div>
             <input type="range" id="mind-synergy" min="0" max="20" step="2" value="10" oninput="updateParams()">
@@ -391,14 +382,14 @@
           </div>
           <div class="param-control">
             <div class="param-label">
-              <span>Mood Log Base</span>
+              <span>Base Points for Logging</span>
               <span class="param-value" id="spirit-base-val">70</span>
             </div>
             <input type="range" id="spirit-base" min="50" max="80" step="5" value="70" oninput="updateParams()">
           </div>
           <div class="param-control">
             <div class="param-label">
-              <span>Energy/Mood Bonus</span>
+              <span>Bonus Points Max</span>
               <span class="param-value" id="spirit-bonus-val">30</span>
             </div>
             <input type="range" id="spirit-bonus" min="20" max="40" step="5" value="30" oninput="updateParams()">
@@ -406,7 +397,8 @@
         </div>
 
         <div class="info-text">
-          💡 Adjust parameters and see real-time impact on 7-day rolling averages. All scores are trend-adjusted with historical data.
+          💡 Adjust parameters and see real-time impact on 7-day rolling averages. All scores are trend-adjusted with historical data.<br>
+          ⚠️ <strong>Major issues to address:</strong> This lab uses approximate scoring logic. To be accurate, it should integrate with the actual Scoring module and include realistic range adjustments. Chart.js should be bundled locally instead of using CDN. Mock data should use real sample data structure.
         </div>
       </div>
 
@@ -429,8 +421,47 @@
       spirit: { base: 70, bonus: 30 }
     };
 
-    // Chart instance
-    let scoreChart = null;
+    // Mock Store for Scoring module
+    const MockStore = {
+      state: {
+        entries: {}
+      },
+      getToday() {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+      },
+      getHistory(days) {
+        // Return last 'days' entries from mockHistory
+        return mockHistory.slice(-days).map(entry => ({
+          ...entry,
+          scores: {
+            sleep: calculateSleepScore(entry),
+            fitness: calculateFitnessScore(entry),
+            mind: calculateMindScore(entry),
+            spirit: calculateSpiritScore(entry)
+          }
+        }));
+      }
+    };
+
+    function calculateTrendScore(domain, rawScore) {
+      // Simple trend: average of last 7 days
+      const history = mockHistory.slice(-7);
+      if (history.length < 7) return rawScore;
+      
+      const historicalScores = history.map(entry => {
+        switch(domain) {
+          case 'sleep': return calculateSleepScore(entry);
+          case 'fitness': return calculateFitnessScore(entry);
+          case 'mind': return calculateMindScore(entry);
+          case 'spirit': return calculateSpiritScore(entry);
+          default: return 0;
+        }
+      });
+      
+      const avgHistorical = historicalScores.reduce((a, b) => a + b, 0) / historicalScores.length;
+      return Math.min(99, Math.round((rawScore * 0.5) + (avgHistorical * 0.5)));
+    }
 
     // Initialize
     function init() {
@@ -529,6 +560,7 @@
     function calculateSleepScore(entry) {
       if (!entry.wake || !entry.rest) return 0;
       
+      // Simplified: assume rest is previous day, wake is today
       const [wh, wm] = entry.wake.split(':').map(Number);
       const [rh, rm] = entry.rest.split(':').map(Number);
       const wakeMins = wh * 60 + wm;
@@ -536,15 +568,18 @@
       const duration = wakeMins + (1440 - restMins);
       const hours = duration / 60;
       
-      const optimal = currentParams.sleep.optimal;
-      const tolerance = currentParams.sleep.tolerance;
+      // Real scoring ranges (approximated)
+      let rawScore;
+      if (hours >= 7 && hours <= 9) rawScore = 100;
+      else if (hours >= 6 && hours < 7) rawScore = 85;
+      else if (hours > 9 && hours <= 10) rawScore = 85;
+      else if (hours >= 5 && hours < 6) rawScore = 65;
+      else if (hours > 10 && hours <= 11) rawScore = 65;
+      else if (hours >= 4 && hours < 5) rawScore = 45;
+      else if (hours > 11) rawScore = 50;
+      else rawScore = 30;
       
-      if (Math.abs(hours - optimal) <= tolerance) return 100;
-      if (hours >= optimal - tolerance * 2 && hours < optimal - tolerance) return 85;
-      if (hours > optimal + tolerance && hours <= optimal + tolerance * 2) return 85;
-      if (hours >= optimal - tolerance * 3 && hours < optimal - tolerance * 2) return 65;
-      if (hours > optimal + tolerance * 2 && hours <= optimal + tolerance * 3) return 65;
-      return 45;
+      return calculateTrendScore('sleep', rawScore);
     }
 
     function calculateFitnessScore(entry) {
@@ -555,29 +590,29 @@
       }
       
       if (entry.strength_level === 3) score += currentParams.fitness.strength;
-      else if (entry.strength_level === 2) score += currentParams.fitness.strength * 0.71;
-      else if (entry.strength_level === 1) score += currentParams.fitness.strength * 0.43;
+      else if (entry.strength_level === 2) score += currentParams.fitness.strength * (25/35);
+      else if (entry.strength_level === 1) score += currentParams.fitness.strength * (15/35);
       
       if (entry.run > 0) {
         score += Math.min(50, currentParams.fitness.run * Math.log(entry.run + 1));
       }
       
-      return Math.min(100, score);
+      return calculateTrendScore('fitness', Math.min(100, score));
     }
 
     function calculateMindScore(entry) {
-      const readMap = [0, 25, 40, currentParams.mind.read3];
-      const writeMap = [0, 25, 40, currentParams.mind.write3];
+      const readPointsMap = [0, 25, 40, currentParams.mind.read3];
+      const writePointsMap = [0, 25, 40, currentParams.mind.write3];
       
-      let score = readMap[Math.min(3, entry.read_level || 0)];
-      score += writeMap[Math.min(3, entry.write_level || 0)];
+      let score = readPointsMap[Math.min(3, entry.read_level || 0)];
+      score += writePointsMap[Math.min(3, entry.write_level || 0)];
       
       if (entry.read_level > 0 && entry.write_level > 0) {
         const synergy = Math.round(((entry.read_level + entry.write_level) / 6) * currentParams.mind.synergy);
         score += synergy;
       }
       
-      return Math.min(99, Math.round(score));
+      return calculateTrendScore('mind', Math.min(99, Math.round(score)));
     }
 
     function calculateSpiritScore(entry) {
@@ -592,7 +627,7 @@
         score += Math.round(combined * currentParams.spirit.bonus);
       }
       
-      return Math.min(100, score);
+      return calculateTrendScore('spirit', Math.min(100, score));
     }
 
     function calculateAndUpdate() {
@@ -626,13 +661,6 @@
     }
 
     function updateParams() {
-      // Sleep
-      const sleepOptimal = parseFloat(document.getElementById('sleep-optimal').value);
-      const sleepTolerance = parseFloat(document.getElementById('sleep-tolerance').value);
-      document.getElementById('sleep-optimal-val').textContent = sleepOptimal.toFixed(1);
-      document.getElementById('sleep-tolerance-val').textContent = sleepTolerance.toFixed(1);
-      currentParams.sleep = { optimal: sleepOptimal, tolerance: sleepTolerance };
-      
       // Fitness
       const fitnessSkill = parseInt(document.getElementById('fitness-skill').value);
       const fitnessStrength = parseInt(document.getElementById('fitness-strength').value);
@@ -662,8 +690,6 @@
     }
 
     function resetToDefaults() {
-      document.getElementById('sleep-optimal').value = 8;
-      document.getElementById('sleep-tolerance').value = 1;
       document.getElementById('fitness-skill').value = 50;
       document.getElementById('fitness-strength').value = 35;
       document.getElementById('fitness-run').value = 15;
@@ -678,18 +704,14 @@
     function loadPreset(preset) {
       switch(preset) {
         case 'baseline':
-          document.getElementById('sleep-optimal').value = 8;
           document.getElementById('fitness-skill').value = 50;
           document.getElementById('mind-read3').value = 60;
           break;
         case 'burnout':
-          document.getElementById('sleep-optimal').value = 9;
           document.getElementById('fitness-skill').value = 30;
           document.getElementById('spirit-base').value = 80;
           break;
         case 'recovery':
-          document.getElementById('sleep-optimal').value = 9;
-          document.getElementById('sleep-tolerance').value = 1.5;
           document.getElementById('fitness-strength').value = 20;
           break;
       }
