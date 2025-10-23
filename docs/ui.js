@@ -1999,8 +1999,8 @@ const UI = {
 
     // Spirit fields
     form.meditation.value = entry.meditation ? 'true' : 'false';
-    form.mood.value = entry.mood || '';
-    form.energy.value = entry.energy || '';
+    form.mood.value = Number.isFinite(entry.mood) ? entry.mood : '';
+    form.energy.value = Number.isFinite(entry.energy) ? entry.energy : '';
 
     // Show edit view
     listView.style.display = 'none';
@@ -2032,17 +2032,23 @@ const UI = {
     const formData = new FormData(editForm);
 
     // Build updated entry
+    const parseNumber = (value) => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    const clampSigned = (value) => Math.max(-100, Math.min(100, value));
+
     const updatedEntry = {
       wake: formData.get('wake') || '',
       rest: formData.get('rest') || '',
-      run: parseFloat(formData.get('run')) || 0,
+      run: parseNumber(formData.get('run')),
       strength_level: parseInt(formData.get('strength_level')) || 0,
       skill: formData.get('skill') ? formData.get('skill').split(',').map(s => s.trim()).filter(s => s) : [],
       read_level: parseInt(formData.get('read_level')) || 0,
       write_level: parseInt(formData.get('write_level')) || 0,
       meditation: formData.get('meditation') === 'true',
-      mood: parseInt(formData.get('mood')) || 0,
-      energy: parseInt(formData.get('energy')) || 0,
+      mood: clampSigned(parseNumber(formData.get('mood'))),
+      energy: clampSigned(parseNumber(formData.get('energy'))),
       quadrant: 0 // Will be recalculated
     };
 
@@ -2052,11 +2058,21 @@ const UI = {
 
     // Recalculate quadrant
     const { mood, energy } = updatedEntry;
-    if (mood > 0 && energy > 0) {
-      if (mood > 50 && energy > 50) updatedEntry.quadrant = 1; // High mood, high energy
-      else if (mood > 50 && energy <= 50) updatedEntry.quadrant = 2; // High mood, low energy
-      else if (mood <= 50 && energy > 50) updatedEntry.quadrant = 3; // Low mood, high energy
-      else updatedEntry.quadrant = 4; // Low mood, low energy
+    if (typeof Scoring !== 'undefined' && typeof Scoring.resolveQuadrant === 'function') {
+      updatedEntry.quadrant = Scoring.resolveQuadrant(energy, mood);
+    } else {
+      const threshold = 10;
+      if (Math.abs(energy) < threshold && Math.abs(mood) < threshold) {
+        updatedEntry.quadrant = 0;
+      } else if (energy >= 0 && mood >= 0) {
+        updatedEntry.quadrant = 1;
+      } else if (energy < 0 && mood >= 0) {
+        updatedEntry.quadrant = 2;
+      } else if (energy >= 0 && mood < 0) {
+        updatedEntry.quadrant = 3;
+      } else {
+        updatedEntry.quadrant = 4;
+      }
     }
 
     // Save and update

@@ -1,22 +1,23 @@
 # Bug Fixes & Updates - October 16, 2025
 
 ## Major Updates
-### dY~ FIX: Spirit History Preserves Signed Mood (v3.3.1)
+### dY~ FIX: History Editor Respects Signed Mood & Energy (v3.3.2)
 
 **Problem Solved:**
-- History dashboards and Monte Carlo summaries only surfaced positive energy/mood values, hiding the negative quadrants and skewing spirit trends.
+- Editing past entries in the history overlay forced mood/energy back to positive values, which broke quadrant alignment and erased negative reflections.
 
 **New Solution:**
-- Shared quadrant baselines now drive signed energy/mood generation in `docs/tests/score_tuning_lab.js`, `docs/tests/generate-sample-data.js`, and `generate-realistic-sample-data.js`.
-- Regenerated bundled 5-day, 30-day, and 1-month sample datasets so demo data spans all four quadrants.
+- History form inputs now accept the full -100 to 100 range and clamp values before saving.
+- Quadrant recalculation reuses `Scoring.resolveQuadrant`, so saved entries land in the correct circumplex quadrant.
+- Retained the updated tuning lab/sample dataset baselines introduced in 3.3.1 so reference data still covers all four quadrants.
 
 **Benefits:**
-- Spirit history tables stay aligned with the quadrant view, showing both positive and negative states.
-- Monte Carlo runs now cover adverse scenarios, improving tuning confidence.
+- Negative or low-energy days survive history edits, keeping the quadrant view and spirit summaries accurate.
+- Demo datasets and Monte Carlo runs continue to surface both positive and negative scenarios for tuning.
 
 **Verification:**
-- Reloaded the scoring lab with refreshed sample datasets and confirmed the spirit history tab shows mixed-sign energy/mood values with correct quadrants.
-- Spot-checked regenerated JSON fixtures to ensure signed values persist across datasets.
+- Edited multiple history entries with negative mood/energy values and confirmed they persist alongside the correct quadrant label.
+- Reloaded the scoring lab to confirm regenerated sample datasets still include signed values.
 
 
 ### 🎯 NEW: Baseline-Gated Metrics & Guidance (v3.3.0)
@@ -310,7 +311,7 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.3.1  
+**Version:** 3.3.2  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes  
 **Breaking Change:** Domain metrics stay hidden until a seven-day baseline is logged
