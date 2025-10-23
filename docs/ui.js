@@ -2014,6 +2014,54 @@ const UI = {
     }
   },
 
+  refreshAfterEntryChange(dateKey) {
+    if (!Store || typeof Store !== 'object') {
+      return;
+    }
+
+    const today = typeof Store.getToday === 'function' ? Store.getToday() : null;
+    const entries = Store.state.entries || {};
+    const entryForDate = entries[dateKey];
+
+    if (today && dateKey === today) {
+      if (entryForDate && typeof Store.applyEntryToState === 'function') {
+        Store.applyEntryToState(entryForDate);
+        if (entryForDate.timestamps) {
+          Store.state.actionTimestamps = { ...entryForDate.timestamps };
+        }
+      } else if (!entryForDate && typeof Store.resetDailyData === 'function') {
+        Store.resetDailyData();
+      }
+
+      if (typeof UI.syncDailyUI === 'function') {
+        UI.syncDailyUI();
+      }
+    }
+
+    if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
+      App.updateScores();
+      return;
+    }
+
+    if (typeof Scoring !== 'undefined'
+      && typeof Scoring.calcSleep === 'function'
+      && typeof UI.renderScores === 'function') {
+      const scores = {
+        sleep: Scoring.calcSleep(Store.state, Store),
+        fitness: Scoring.calcFitness(Store.state, Store),
+        mind: Scoring.calcMind(Store.state, Store),
+        spirit: Scoring.calcSpirit(Store.state, Store)
+      };
+      const streaks = (typeof Analytics !== 'undefined' && typeof Analytics.calculateStreaks === 'function')
+        ? Analytics.calculateStreaks()
+        : {};
+      UI.renderScores(scores, streaks);
+      if (typeof Analytics !== 'undefined' && typeof Analytics.renderWeeklyHeatmap === 'function') {
+        Analytics.renderWeeklyHeatmap();
+      }
+    }
+  },
+
   saveHistoryEdit() {
     const { editForm, editDate } = UI.elements.historyOverlay;
     const existingDateKey = editForm.dataset.dateKey;
@@ -2086,6 +2134,7 @@ const UI = {
 
     // Save and update
     Store.save();
+    UI.refreshAfterEntryChange(dateKey);
     UI.hideHistoryEditForm();
     UI.renderHistory(); // Re-render the list
 
@@ -2100,6 +2149,7 @@ const UI = {
       delete Store.state.entries[dateKey];
       Store.save();
       UI.renderHistory();
+      UI.refreshAfterEntryChange(dateKey);
       if (typeof UI.showToast === 'function') {
         UI.showToast('Entry deleted successfully!');
       }
