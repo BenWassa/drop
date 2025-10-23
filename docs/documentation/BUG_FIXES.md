@@ -1,6 +1,22 @@
 # Bug Fixes & Updates - October 16, 2025
 
 ## Major Updates
+### dY" FIX: History Date Picker Keeps Local Day (v3.3.4)
+
+**Problem Solved:**
+- Adding a new history entry shifted the chosen date back one day and blocked saving because the picker value vanished.
+
+**New Solution:**
+- Persist the selected date in form state instead of relying on the removed picker element.
+- Parse date keys with the existing local-time helper so labels stay aligned with the user’s day boundary.
+
+**Benefits:**
+- Users can confidently backfill entries without the UI jumping to the previous day.
+- Saves go through on the first try because the selected date is retained.
+
+**Verification:**
+- Selected several future and past dates in the history overlay, confirmed the label matched the chosen day, and saved successfully without prompts.
+
 ### dY' FIX: Sleep Duration Handles Cross-Midnight Rest (v3.3.3)
 
 **Problem Solved:**
@@ -328,7 +344,7 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.3.3  
+**Version:** 3.3.4  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes  
 **Breaking Change:** Domain metrics stay hidden until a seven-day baseline is logged

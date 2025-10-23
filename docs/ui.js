@@ -2000,22 +2000,37 @@ const UI = {
   },
 
   hideHistoryEditForm() {
-    const { listView, editView, title } = UI.elements.historyOverlay;
+    const { listView, editView, title, editForm, editDate } = UI.elements.historyOverlay;
     title.textContent = 'History';
     listView.style.display = 'block';
     editView.style.display = 'none';
+    if (editForm) {
+      editForm.reset();
+      delete editForm.dataset.dateKey;
+      delete editForm.dataset.newEntryDate;
+    }
+    if (editDate && !editDate.querySelector('#add-entry-date')) {
+      editDate.textContent = '';
+    }
   },
 
   saveHistoryEdit() {
     const { editForm, editDate } = UI.elements.historyOverlay;
-    let dateKey = editForm.dataset.dateKey;
+    const existingDateKey = editForm.dataset.dateKey;
+    let dateKey = existingDateKey;
 
     // If no dateKey, this is a new entry - get date from the date picker
     if (!dateKey) {
-      const datePicker = editDate.querySelector('#add-entry-date');
-      if (datePicker && datePicker.value) {
-        dateKey = datePicker.value;
+      const selected = editForm.dataset.newEntryDate;
+      if (selected) {
+        dateKey = selected;
       } else {
+        const datePicker = editDate.querySelector('#add-entry-date');
+        if (datePicker && datePicker.value) {
+          dateKey = datePicker.value;
+        }
+      }
+      if (!dateKey) {
         UI.notify('Please select a date for the new entry.');
         return;
       }
@@ -2067,6 +2082,8 @@ const UI = {
       }
     }
 
+    const isExistingEntry = Boolean(existingDateKey);
+
     // Save and update
     Store.save();
     UI.hideHistoryEditForm();
@@ -2074,7 +2091,7 @@ const UI = {
 
     // Show success feedback
     if (typeof UI.showToast === 'function') {
-      UI.showToast(dateKey === editForm.dataset.dateKey ? 'Entry updated successfully!' : 'Entry added successfully!');
+      UI.showToast(isExistingEntry ? 'Entry updated successfully!' : 'Entry added successfully!');
     }
   },
 
@@ -2242,6 +2259,8 @@ const UI = {
 
     // Clear the form
     editForm.reset();
+    delete editForm.dataset.dateKey;
+    delete editForm.dataset.newEntryDate;
 
     // Update the date display
     editDate.innerHTML = '';
@@ -2258,7 +2277,8 @@ const UI = {
     datePicker.addEventListener('change', () => {
       const selectedDate = datePicker.value;
       if (selectedDate) {
-        const date = new Date(selectedDate);
+        const date = UI.parseDateKey(selectedDate);
+        editForm.dataset.newEntryDate = selectedDate;
         editDate.textContent = date.toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
