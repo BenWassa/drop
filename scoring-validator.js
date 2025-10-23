@@ -27,10 +27,16 @@ const Scoring = {
 
     const [wh, wm] = wake.split(':').map(Number);
     const [rh, rm] = yesterdayRest.split(':').map(Number);
+    if ([wh, wm, rh, rm].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+
     const wakeMins = wh * 60 + wm;
     const restMins = rh * 60 + rm;
-
-    const duration = wakeMins + (1440 - restMins);
+    let duration = wakeMins - restMins;
+    if (duration < 0) {
+      duration += 1440;
+    }
     const hours = duration / 60;
 
     let rawScore;

@@ -915,16 +915,8 @@ const UI = {
     
     if (!rest) return null;
     
-    const [wh, wm] = wake.split(':').map(Number);
-    const [rh, rm] = rest.split(':').map(Number);
-    if ([wh, wm, rh, rm].some(v => isNaN(v))) return null;
-    
-    const wakeMins = wh * 60 + wm;
-    const restMins = rh * 60 + rm;
-    
-    // Calculate duration: from yesterday's rest time to today's wake time
-    // This spans midnight, so add wake time to time from rest to midnight
-    const duration = wakeMins + (1440 - restMins);
+    const duration = Scoring.getSleepDurationMinutes(rest, wake);
+    if (duration === null) return null;
     return Math.round((duration / 60) * 10) / 10;
   },
 

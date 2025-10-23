@@ -1,6 +1,23 @@
 # Bug Fixes & Updates - October 16, 2025
 
 ## Major Updates
+### dY' FIX: Sleep Duration Handles Cross-Midnight Rest (v3.3.3)
+
+**Problem Solved:**
+- Sleep scores and history summaries treated bedtimes logged after midnight as 18+ hour stretches, making cross-midnight entries unusable.
+
+**New Solution:**
+- Centralised a helper that calculates rest-to-wake duration with 24-hour wrap-around and wired it into live scoring, history tables, and tooling.
+- Updated the history overlay summary so edited entries immediately reflect accurate sleep hours.
+
+**Benefits:**
+- Bedtimes entered after midnight no longer inflate sleep to impossible numbers.
+- Sleep insights and history cards now align with the 'wake to rest' definition of a day.
+
+**Verification:**
+- Logged rest times such as 00:45 with a 06:30 wake and confirmed sleep summaries report about six hours.
+- Edited past entries with after-midnight bedtimes and verified history cards and scores remain consistent.
+
 ### dY~ FIX: History Editor Respects Signed Mood & Energy (v3.3.2)
 
 **Problem Solved:**
@@ -311,7 +328,7 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.3.2  
+**Version:** 3.3.3  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes  
 **Breaking Change:** Domain metrics stay hidden until a seven-day baseline is logged

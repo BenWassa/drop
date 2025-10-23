@@ -862,10 +862,15 @@
     const wakeMinutes = wh * 60 + wm;
     const restMinutes = rh * 60 + rm;
 
-    if (restMinutes <= wakeMinutes) {
-      return wakeMinutes - restMinutes;
+    if (!Number.isFinite(wakeMinutes) || !Number.isFinite(restMinutes)) {
+      return 0;
     }
-    return wakeMinutes + (1440 - restMinutes);
+
+    let duration = wakeMinutes - restMinutes;
+    if (duration < 0) {
+      duration += 1440;
+    }
+    return duration;
   }
 
   function setScoreValue(id, score) {

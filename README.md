@@ -40,7 +40,7 @@ drop/
 │   ├── backup.js             # Manual backup utilities
 │   ├── install.js            # PWA install prompt handling
 │   ├── styles.css            # Styling & design tokens
-│   ├── manifest.json         # PWA manifest (v3.3.2)
+│   ├── manifest.json         # PWA manifest (v3.3.3)
 │   ├── sw.js                 # Service worker for offline support
 │   ├── package.json          # NPM configuration & test scripts
 │   ├── playwright.config.js  # E2E test configuration
@@ -573,10 +573,11 @@ Older versions are preserved in `archive/` for reference:
   - `Gemini_AILab/` - Alternative Gemini variant
 - **V3.1/** - Pre-docs iteration before current architecture
 
-**Current live version** is in the `docs/` folder (v3.3.2).
+**Current live version** is in the `docs/` folder (v3.3.3).
 
 ### Version History
-- **v3.3.2** (Current) - History editor now supports signed mood/energy values for quadrant accuracy
+- **v3.3.3** (Current) - Sleep duration now respects cross-midnight rest times in scoring and history
+- **v3.3.2** - History editor now supports signed mood/energy values for quadrant accuracy
 - **v3.3.1** - Scoring lab datasets now include signed mood/energy samples
 - **v3.3.0** - Baseline gating for metrics, UI guidance updates
 - **v3.1.x** - Modular architecture, comprehensive testing

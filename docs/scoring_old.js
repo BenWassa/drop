@@ -41,12 +41,10 @@ const Scoring = {
       return this.calcTrendScore('sleep', 0, Store);
     }
 
-    const [wh, wm] = wake.split(':').map(Number);
-    const [rh, rm] = yesterdayRest.split(':').map(Number);
-    const wakeMins = wh * 60 + wm;
-    const restMins = rh * 60 + rm;
-
-    const duration = wakeMins + (1440 - restMins);
+    const duration = this.getSleepDurationMinutes(yesterdayRest, wake);
+    if (duration === null) {
+      return this.calcTrendScore('sleep', 0, Store);
+    }
     const hours = duration / 60;
 
     let rawScore;
@@ -248,7 +246,7 @@ const Scoring = {
     
     // Calculate duration: from yesterday's rest time to today's wake time
     // This will typically span midnight, so we need to handle the day boundary
-    const duration = wakeMins + (1440 - restMins); // Add wake time to time from rest to midnight
+    const duration = (function(){ let duration = wakeMins - restMins; if (duration < 0) { duration += 1440; } return duration; })(); // Add wake time to time from rest to midnight
     const hours = duration / 60;
     
     console.log('😴 Sleep calculated:', { hours, wakeMins, restMins, duration });
@@ -473,12 +471,8 @@ const Scoring = {
     // Calculate sleep score
     let sleepScore = 0;
     if (entry.wake && entry.rest) {
-      const [wh, wm] = entry.wake.split(':').map(Number);
-      const [rh, rm] = entry.rest.split(':').map(Number);
-      if (!isNaN(wh) && !isNaN(wm) && !isNaN(rh) && !isNaN(rm)) {
-        const wakeMins = wh * 60 + wm;
-        const restMins = rh * 60 + rm;
-        const duration = restMins < wakeMins ? (1440 - wakeMins + restMins) : (restMins - wakeMins);
+      const duration = this.getSleepDurationMinutes(entry.rest, entry.wake);
+      if (duration !== null) {
         const hours = duration / 60;
         
         if (hours >= 7 && hours <= 9) sleepScore = 100;
@@ -583,5 +577,28 @@ const Scoring = {
     if (e < 0 && m < 0) return 4;   // Low energy, negative mood
     
     return 0; // Fallback to neutral
+  },
+
+  getSleepDurationMinutes(restTime, wakeTime) {
+    if (!restTime || !wakeTime) {
+      return null;
+    }
+
+    const [rh, rm] = restTime.split(':').map(Number);
+    const [wh, wm] = wakeTime.split(':').map(Number);
+
+    if ([rh, rm, wh, wm].some((value) => Number.isNaN(value))) {
+      return null;
+    }
+
+    const restMins = rh * 60 + rm;
+    const wakeMins = wh * 60 + wm;
+    let duration = wakeMins - restMins;
+
+    if (duration < 0) {
+      duration += 1440;
+    }
+
+    return duration;
   }
 };
