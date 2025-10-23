@@ -60,9 +60,43 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 400px 1fr;
+      /* Use minmax(0,1fr) for the flexible column so it can shrink below its content
+         and avoid forcing the grid to overflow which causes stacking in some browsers */
+      grid-template-columns: 350px minmax(0, 1fr);
+      grid-template-rows: auto;
       gap: 24px;
       margin-bottom: 24px;
+      width: 100%;
+      align-items: start;
+      justify-items: stretch;
+    }
+
+    .grid > .panel {
+      min-width: 0;
+    }
+
+    /* Responsive: below 1000px switch to single column grid */
+    @media (max-width: 1000px) {
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      .grid > .panel {
+        width: 100%;
+      }
+    }
+
+    /* Debug outline to visually spot unexpected stacking during development - remove if not needed */
+    .grid.debug-outline > .panel {
+      outline: 1px dashed rgba(255,255,255,0.04);
+    }
+
+    /* Place the details panel in the right-hand column under the chart */
+    .details-panel {
+      grid-column: 2;
+      min-width: 0;
+      max-width: 100%;
     }
 
     .panel {
@@ -70,6 +104,10 @@
       border: 1px solid var(--color-border);
       border-radius: 12px;
       padding: 20px;
+      box-sizing: border-box;
+      min-width: 0; /* Allow shrinking */
+      max-width: 100%; /* Prevent overflow */
+      overflow: hidden;
     }
 
     .panel h2 {
@@ -138,6 +176,7 @@
       border-radius: 3px;
       outline: none;
       -webkit-appearance: none;
+      appearance: none;
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -163,6 +202,8 @@
       position: relative;
       height: 400px;
       margin-bottom: 20px;
+      width: 100%;
+      overflow: hidden;
     }
 
     #scoreChart {
@@ -611,80 +652,79 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="panel">
-      <h2>📋 Daily Activity Details</h2>
-      <div class="domain-tabs">
-        <button class="tab-btn active" onclick="showDomainTab('sleep')">Sleep</button>
-        <button class="tab-btn" onclick="showDomainTab('fitness')">Fitness</button>
-        <button class="tab-btn" onclick="showDomainTab('mind')">Mind</button>
-        <button class="tab-btn" onclick="showDomainTab('spirit')">Spirit</button>
-      </div>
-      <div class="tab-content">
-        <div id="sleep-tab" class="domain-details active">
-          <table class="details-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Wake Time</th>
-                <th>Rest Time</th>
-                <th>Hours</th>
-                <th>Raw Score</th>
-                <th>Trend Score</th>
-              </tr>
-            </thead>
-            <tbody id="sleep-details"></tbody>
-          </table>
+      <div class="panel details-panel">
+        <h2>📋 Daily Activity Details</h2>
+        <div class="domain-tabs">
+          <button class="tab-btn active" onclick="showDomainTab('sleep')">Sleep</button>
+          <button class="tab-btn" onclick="showDomainTab('fitness')">Fitness</button>
+          <button class="tab-btn" onclick="showDomainTab('mind')">Mind</button>
+          <button class="tab-btn" onclick="showDomainTab('spirit')">Spirit</button>
         </div>
-        <div id="fitness-tab" class="domain-details">
-          <table class="details-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Skill Practices</th>
-                <th>Strength Level</th>
-                <th>Run Distance</th>
-                <th>Raw Score</th>
-                <th>Trend Score</th>
-              </tr>
-            </thead>
-            <tbody id="fitness-details"></tbody>
-          </table>
-        </div>
-        <div id="mind-tab" class="domain-details">
-          <table class="details-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Read Level</th>
-                <th>Write Level</th>
-                <th>Synergy</th>
-                <th>Raw Score</th>
-                <th>Trend Score</th>
-              </tr>
-            </thead>
-            <tbody id="mind-details"></tbody>
-          </table>
-        </div>
-        <div id="spirit-tab" class="domain-details">
-          <table class="details-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Energy</th>
-                <th>Mood</th>
-                <th>Quadrant</th>
-                <th>Raw Score</th>
-                <th>Trend Score</th>
-              </tr>
-            </thead>
-            <tbody id="spirit-details"></tbody>
-          </table>
+        <div class="tab-content">
+          <div id="sleep-tab" class="domain-details active">
+            <table class="details-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Wake Time</th>
+                  <th>Rest Time</th>
+                  <th>Hours</th>
+                  <th>Raw Score</th>
+                  <th>Trend Score</th>
+                </tr>
+              </thead>
+              <tbody id="sleep-details"></tbody>
+            </table>
+          </div>
+          <div id="fitness-tab" class="domain-details">
+            <table class="details-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Skill Practices</th>
+                  <th>Strength Level</th>
+                  <th>Run Distance</th>
+                  <th>Raw Score</th>
+                  <th>Trend Score</th>
+                </tr>
+              </thead>
+              <tbody id="fitness-details"></tbody>
+            </table>
+          </div>
+          <div id="mind-tab" class="domain-details">
+            <table class="details-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Read Level</th>
+                  <th>Write Level</th>
+                  <th>Synergy</th>
+                  <th>Raw Score</th>
+                  <th>Trend Score</th>
+                </tr>
+              </thead>
+              <tbody id="mind-details"></tbody>
+            </table>
+          </div>
+          <div id="spirit-tab" class="domain-details">
+            <table class="details-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Energy</th>
+                  <th>Mood</th>
+                  <th>Quadrant</th>
+                  <th>Raw Score</th>
+                  <th>Trend Score</th>
+                </tr>
+              </thead>
+              <tbody id="spirit-details"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
   <script src="score_tuning_lab.js"></script>
 </body>
