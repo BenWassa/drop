@@ -60,6 +60,14 @@ const ACTIVITY_PATTERNS = {
   }
 };
 
+const QUADRANT_BASELINES = {
+  0: { energy: 0, mood: 0 },
+  1: { energy: 60, mood: 65 },
+  2: { energy: -55, mood: 55 },
+  3: { energy: 55, mood: -55 },
+  4: { energy: -60, mood: -60 }
+};
+
 // Helper functions
 function formatDate(date) {
   const year = date.getFullYear();
@@ -88,6 +96,10 @@ function selectWeightedPattern() {
   }
 
   return ACTIVITY_PATTERNS.lightDay; // fallback
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 // Generate realistic activity data
@@ -131,10 +143,30 @@ function generateEntry(date) {
     quadrant = getRandomChoice([1, 2, 3, 4]); // Mixed
   }
 
-  // Energy and mood (50-95, correlated with activity)
-  const activityScore = (run > 0 ? 20 : 0) + (strength ? 15 : 0) + (skill.length * 10) + (read_level * 8) + (meditation ? 10 : 0);
-  const energy = Math.min(95, Math.max(30, 40 + activityScore + getRandomInt(-10, 10)));
-  const mood = Math.min(95, Math.max(25, energy - 5 + getRandomInt(-15, 15)));
+  // Energy and mood aligned to quadrant baselines (-100 to 100)
+  const effortScore = (run > 0 ? 22 + run * 1.3 : -15)
+    + (strength ? 14 + strength_level * 4 : -10)
+    + (skill.length * 9)
+    + (read_level * 7)
+    + (write_level * 5)
+    + (meditation ? 10 : -6);
+
+  const baseline = QUADRANT_BASELINES[quadrant] || QUADRANT_BASELINES[0];
+  const activationShift = clamp(Math.round((effortScore - 40) * 0.5 + getRandomInt(-20, 18)), -45, 45);
+  let energy = clamp(baseline.energy + activationShift, -95, 95);
+  if (baseline.energy < 0) {
+    energy = Math.min(-5, energy);
+  } else if (baseline.energy > 0) {
+    energy = Math.max(5, energy);
+  }
+
+  const moodShift = clamp(Math.round((effortScore - 35) * 0.35 + getRandomInt(-25, 25) + (meditation ? 10 : 0)), -45, 45);
+  let mood = clamp(baseline.mood + moodShift, -95, 95);
+  if (baseline.mood < 0) {
+    mood = Math.min(-5, mood);
+  } else if (baseline.mood > 0) {
+    mood = Math.max(5, mood);
+  }
 
   // Generate timestamps for some activities
   const timestamps = {};

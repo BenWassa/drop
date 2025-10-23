@@ -69,6 +69,14 @@
     }
   ];
 
+  const QUADRANT_BASELINES = {
+    0: { energy: 0, mood: 0 },
+    1: { energy: 60, mood: 65 },
+    2: { energy: -55, mood: 55 },
+    3: { energy: 55, mood: -55 },
+    4: { energy: -60, mood: -60 }
+  };
+
   let currentParams = clone(DEFAULT_PARAMS);
   let historyEntries = [];
   let datasetSource = 'Sample';
@@ -1004,8 +1012,25 @@
       + (read_level * 8)
       + (meditation ? 10 : 0);
 
-    const energy = clamp(Math.round(45 + activityScore + randomInt(rand, -12, 8)), 30, 98);
-    const mood = clamp(Math.round(energy - 8 + randomInt(rand, -18, 12)), 25, 98);
+    const baseline = QUADRANT_BASELINES[quadrant] || QUADRANT_BASELINES[0];
+    const activationShift = clamp(Math.round((activityScore - 50) * 0.6 + randomInt(rand, -20, 18)), -40, 40);
+    const skillBoost = skill.length >= 2 ? 5 : (skill.length === 1 ? 3 : 0);
+
+    let energy = clamp(baseline.energy + activationShift + skillBoost, -95, 95);
+    if (baseline.energy < 0) {
+      energy = Math.min(-5, energy);
+    } else if (baseline.energy > 0) {
+      energy = Math.max(5, energy);
+    }
+
+    const recoveryBoost = meditation ? 8 : 0;
+    const moodShift = clamp(Math.round((activityScore - 45) * 0.35 + randomInt(rand, -25, 25) + recoveryBoost), -40, 40);
+    let mood = clamp(baseline.mood + moodShift, -95, 95);
+    if (baseline.mood < 0) {
+      mood = Math.min(-5, mood);
+    } else if (baseline.mood > 0) {
+      mood = Math.max(5, mood);
+    }
 
     return {
       date: formatDate(date),

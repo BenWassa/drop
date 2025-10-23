@@ -1,6 +1,23 @@
 # Bug Fixes & Updates - October 16, 2025
 
 ## Major Updates
+### dY~ FIX: Spirit History Preserves Signed Mood (v3.3.1)
+
+**Problem Solved:**
+- History dashboards and Monte Carlo summaries only surfaced positive energy/mood values, hiding the negative quadrants and skewing spirit trends.
+
+**New Solution:**
+- Shared quadrant baselines now drive signed energy/mood generation in `docs/tests/score_tuning_lab.js`, `docs/tests/generate-sample-data.js`, and `generate-realistic-sample-data.js`.
+- Regenerated bundled 5-day, 30-day, and 1-month sample datasets so demo data spans all four quadrants.
+
+**Benefits:**
+- Spirit history tables stay aligned with the quadrant view, showing both positive and negative states.
+- Monte Carlo runs now cover adverse scenarios, improving tuning confidence.
+
+**Verification:**
+- Reloaded the scoring lab with refreshed sample datasets and confirmed the spirit history tab shows mixed-sign energy/mood values with correct quadrants.
+- Spot-checked regenerated JSON fixtures to ensure signed values persist across datasets.
+
 
 ### 🎯 NEW: Baseline-Gated Metrics & Guidance (v3.3.0)
 
@@ -293,7 +310,7 @@ The meditation timer is still implemented as an inline `<script>` tag in `index.
 ---
 
 **Status:** All issues resolved ✅  
-**Version:** 3.3.0  
+**Version:** 3.3.1  
 **Ready for testing:** Yes  
 **Requires page refresh:** Yes  
 **Breaking Change:** Domain metrics stay hidden until a seven-day baseline is logged

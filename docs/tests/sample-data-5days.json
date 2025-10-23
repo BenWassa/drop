@@ -2,7 +2,7 @@
   "meta": {
     "_version": 2,
     "_schemaDate": "2024-05-01",
-    "lastEntryDate": "2025-10-22",
+    "lastEntryDate": "2025-10-23",
     "settings": {
       "skillOptions": [
         "Wrestling",
@@ -19,135 +19,133 @@
     }
   },
   "entries": {
-    "2025-10-22": {
-      "wake": "06:53",
-      "rest": "22:24",
+    "2025-10-23": {
+      "wake": "06:32",
+      "rest": "22:01",
       "run": 0,
-      "strength": false,
+      "strength": true,
       "strength_level": 1,
       "skill": [],
-      "read_level": 1,
+      "read_level": 0,
       "write_level": 0,
-      "quadrant": 2,
-      "meditation": false,
-      "energy": 61,
-      "mood": 91,
+      "quadrant": 1,
+      "meditation": true,
+      "energy": 68,
+      "mood": 62,
       "timestamps": {
-        "wake": "2025-10-22T06:53:00.000Z",
-        "rest": "2025-10-22T22:24:00.000Z"
+        "wake": "2025-10-23T06:32:00.000Z",
+        "rest": "2025-10-23T22:01:00.000Z"
       },
       "scores": {
-        "sleep": 78,
-        "fitness": 62,
-        "mind": 66,
-        "spirit": 69
+        "sleep": 85,
+        "fitness": 51,
+        "mind": 64,
+        "spirit": 76
       }
     },
-    "2025-10-21": {
-      "wake": "06:38",
-      "rest": "22:05",
-      "run": 5,
+    "2025-10-22": {
+      "wake": "06:14",
+      "rest": "22:37",
+      "run": 0,
       "strength": false,
       "strength_level": 0,
       "skill": [
-        "Plyometrics"
+        "Wrestling"
       ],
-      "read_level": 2,
+      "read_level": 3,
       "write_level": 2,
       "quadrant": 2,
       "meditation": true,
-      "energy": 92,
-      "mood": 91,
+      "energy": -41,
+      "mood": 57,
       "timestamps": {
-        "wake": "2025-10-21T06:38:00.000Z",
-        "rest": "2025-10-21T22:05:00.000Z"
+        "wake": "2025-10-22T06:14:00.000Z",
+        "rest": "2025-10-22T22:37:00.000Z"
       },
       "scores": {
-        "sleep": 70,
-        "fitness": 66,
-        "mind": 80,
-        "spirit": 80
+        "sleep": 74,
+        "fitness": 57,
+        "mind": 90,
+        "spirit": 78
+      }
+    },
+    "2025-10-21": {
+      "wake": "06:20",
+      "rest": "22:26",
+      "run": 12,
+      "strength": false,
+      "strength_level": 0,
+      "skill": [
+        "Wrestling",
+        "Plyometrics"
+      ],
+      "read_level": 2,
+      "write_level": 0,
+      "quadrant": 3,
+      "meditation": true,
+      "energy": 58,
+      "mood": -29,
+      "timestamps": {
+        "wake": "2025-10-21T06:20:00.000Z",
+        "rest": "2025-10-21T22:26:00.000Z"
+      },
+      "scores": {
+        "sleep": 94,
+        "fitness": 88,
+        "mind": 82,
+        "spirit": 90
       }
     },
     "2025-10-20": {
-      "wake": "06:27",
-      "rest": "22:11",
-      "run": 9,
+      "wake": "07:00",
+      "rest": "22:21",
+      "run": 6,
       "strength": true,
-      "strength_level": 3,
+      "strength_level": 2,
       "skill": [
-        "Yoga",
         "Wrestling"
+      ],
+      "read_level": 0,
+      "write_level": 1,
+      "quadrant": 3,
+      "meditation": true,
+      "energy": 65,
+      "mood": -43,
+      "timestamps": {
+        "wake": "2025-10-20T07:00:00.000Z",
+        "rest": "2025-10-20T22:21:00.000Z"
+      },
+      "scores": {
+        "sleep": 76,
+        "fitness": 71,
+        "mind": 60,
+        "spirit": 79
+      }
+    },
+    "2025-10-19": {
+      "wake": "06:22",
+      "rest": "22:49",
+      "run": 6,
+      "strength": true,
+      "strength_level": 2,
+      "skill": [
+        "Yoga"
       ],
       "read_level": 3,
       "write_level": 1,
       "quadrant": 3,
       "meditation": true,
-      "energy": 62,
-      "mood": 57,
+      "energy": 95,
+      "mood": -10,
       "timestamps": {
-        "wake": "2025-10-20T06:27:00.000Z",
-        "rest": "2025-10-20T22:11:00.000Z"
+        "wake": "2025-10-19T06:22:00.000Z",
+        "rest": "2025-10-19T22:49:00.000Z"
       },
       "scores": {
-        "sleep": 71,
-        "fitness": 93,
-        "mind": 97,
-        "spirit": 82
-      }
-    },
-    "2025-10-19": {
-      "wake": "06:32",
-      "rest": "22:54",
-      "run": 12,
-      "strength": false,
-      "strength_level": 1,
-      "skill": [
-        "Volleyball",
-        "Wrestling"
-      ],
-      "read_level": 2,
-      "write_level": 0,
-      "quadrant": 1,
-      "meditation": false,
-      "energy": 71,
-      "mood": 63,
-      "timestamps": {
-        "wake": "2025-10-19T06:32:00.000Z",
-        "rest": "2025-10-19T22:54:00.000Z"
-      },
-      "scores": {
-        "sleep": 70,
-        "fitness": 69,
-        "mind": 80,
-        "spirit": 65
-      }
-    },
-    "2025-10-18": {
-      "wake": "06:28",
-      "rest": "22:13",
-      "run": 8,
-      "strength": true,
-      "strength_level": 1,
-      "skill": [
-        "Mobility",
-        "Yoga"
-      ],
-      "read_level": 2,
-      "write_level": 2,
-      "quadrant": 4,
-      "meditation": false,
-      "energy": 67,
-      "mood": 88,
-      "timestamps": {
-        "wake": "2025-10-18T06:28:00.000Z",
-        "rest": "2025-10-18T22:13:00.000Z"
-      },
-      "scores": {
-        "sleep": 87,
-        "fitness": 82,
+        "sleep": 86,
+        "fitness": 92,
         "mind": 89,
-        "spirit": 64
+        "spirit": 88
       }
     }
   }

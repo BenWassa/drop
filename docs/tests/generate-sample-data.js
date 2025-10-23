@@ -38,6 +38,14 @@ const DAILY_KEYS = [
   'mood'
 ];
 
+const QUADRANT_BASELINES = {
+  0: { energy: 0, mood: 0 },
+  1: { energy: 60, mood: 65 },
+  2: { energy: -55, mood: 55 },
+  3: { energy: 55, mood: -55 },
+  4: { energy: -60, mood: -60 }
+};
+
 const DATE_FORMAT_OPTIONS = { timeZone: 'UTC', hour12: false };
 
 function formatDateKey(date) {
@@ -57,6 +65,10 @@ function seededRandom(seed) {
   return x - Math.floor(x);
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function buildEntry(dateKey, dayIndex) {
   const numericSeed = parseInt(dateKey.replace(/-/g, ''), 10) + dayIndex * 17;
   const r = (offset) => seededRandom(numericSeed + offset);
@@ -71,12 +83,9 @@ function buildEntry(dateKey, dayIndex) {
   const restTotalMinutes = Math.min(23 * 60 + 30, restBaseMinutes + restMinuteOffset);
 
   const runDistance = r(3) > 0.35 ? Math.round(2 + r(4) * 10) : 0;
-  const strengthLevel = runDistance > 0 ? Math.round(r(5) * 3) : Math.round(r(5) * 2);
+  const baseStrengthLevel = runDistance > 0 ? Math.round(r(5) * 3) : Math.round(r(5) * 2);
   const readLevel = Math.round(r(6) * 3);
   const writeLevel = Math.round(r(7) * 2);
-  const energy = Math.min(100, Math.max(40, Math.round(55 + r(8) * 40)));
-  const mood = Math.min(100, Math.max(40, Math.round(50 + r(9) * 45)));
-  const quadrant = Math.max(1, Math.min(4, Math.ceil(r(10) * 4)));
   const meditation = r(11) > 0.4;
 
   const skillPool = DEFAULT_SETTINGS.skillOptions;
@@ -85,6 +94,43 @@ function buildEntry(dateKey, dayIndex) {
   for (let i = 0; i < skillCount; i++) {
     const pickIndex = Math.floor(r(13 + i) * skillPool.length);
     skillSet.add(skillPool[pickIndex]);
+  }
+
+  const strength = r(18) > 0.5;
+  const strengthLevel = strength ? baseStrengthLevel : 0;
+
+  const activityLoad = (runDistance > 0 ? 1 : 0) + (strength ? 1 : 0) + skillSet.size;
+  const quadrantRoll = r(10);
+  let quadrant;
+  if (activityLoad >= 3) {
+    quadrant = quadrantRoll > 0.5 ? 1 : 3;
+  } else if (activityLoad === 0) {
+    quadrant = quadrantRoll > 0.5 ? 2 : 4;
+  } else {
+    quadrant = Math.max(1, Math.min(4, Math.ceil(quadrantRoll * 4)));
+  }
+
+  const runContribution = runDistance > 0 ? 18 + runDistance * 1.2 : -12;
+  const strengthContribution = strength ? 12 + strengthLevel * 4 : -8;
+  const skillContribution = skillSet.size * 9;
+  const cognitiveContribution = readLevel * 6 + writeLevel * 5;
+  const effortScore = runContribution + strengthContribution + skillContribution + cognitiveContribution + (meditation ? 8 : -6);
+
+  const baseline = QUADRANT_BASELINES[quadrant] || QUADRANT_BASELINES[0];
+  const activationShift = clamp(Math.round((effortScore - 30) * 0.5 + (r(8) * 40 - 20)), -45, 45);
+  let energy = clamp(baseline.energy + activationShift, -95, 95);
+  if (baseline.energy < 0) {
+    energy = Math.min(-5, energy);
+  } else if (baseline.energy > 0) {
+    energy = Math.max(5, energy);
+  }
+
+  const moodShift = clamp(Math.round((effortScore - 25) * 0.35 + (r(9) * 50 - 25) + (meditation ? 10 : 0)), -45, 45);
+  let mood = clamp(baseline.mood + moodShift, -95, 95);
+  if (baseline.mood < 0) {
+    mood = Math.min(-5, mood);
+  } else if (baseline.mood > 0) {
+    mood = Math.max(5, mood);
   }
 
   const sleepScore = Math.min(100, Math.max(50, Math.round(70 + r(14) * 25)));
@@ -96,7 +142,7 @@ function buildEntry(dateKey, dayIndex) {
     wake: formatTime(Math.floor(wakeTotalMinutes / 60), wakeTotalMinutes % 60),
     rest: formatTime(Math.floor(restTotalMinutes / 60), restTotalMinutes % 60),
     run: runDistance,
-    strength: r(18) > 0.5,
+    strength,
     strength_level: strengthLevel,
     skill: Array.from(skillSet),
     read_level: readLevel,
