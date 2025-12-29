@@ -1,11 +1,9 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// Firebase helpers for auth + Firestore persistence
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// NOTE: For production, move these config values to environment variables or a secure runtime.
 const firebaseConfig = {
   apiKey: "AIzaSyChB4LIztDi0EcvSodWlNw8664-YDjZsrM",
   authDomain: "drop-d8ad2.firebaseapp.com",
@@ -16,6 +14,37 @@ const firebaseConfig = {
   measurementId: "G-BYSBF51J6D"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+export async function firebaseSignInAnonymous() {
+  const res = await signInAnonymously(auth);
+  return res.user.uid;
+}
+
+export function subscribeToAuthState(cb) {
+  return onAuthStateChanged(auth, cb);
+}
+
+export function userStateDocRef(uid) {
+  // Document shape: { schemaVersion, lastUpdated, state }
+  return doc(db, 'users', uid, 'state', 'main');
+}
+
+export async function firestoreLoadState(uid) {
+  const ref = userStateDocRef(uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  return data?.state ?? null;
+}
+
+export async function firestoreSaveState(uid, state) {
+  const ref = userStateDocRef(uid);
+  await setDoc(ref, {
+    schemaVersion: state?.meta?._version ?? null,
+    lastUpdated: new Date().toISOString(),
+    state
+  }, { merge: true });
+}
