@@ -1,6 +1,7 @@
 {
   "name": "drop",
   "version": "4.0.0",
+  "type": "module",
   "description": "Daily domain tracker PWA - Sleep, Fitness, Mind, Spirit",
   "private": true,
   "scripts": {
@@ -10,7 +11,8 @@
     "test:visual:update": "playwright test --config docs/testing/playwright.config.js --update-snapshots",
     "test:visual:ui": "playwright test --config docs/testing/playwright.config.js --ui",
     "serve": "npx serve . -p 3000",
-    "dev": "npx serve . -p 3000 -s"
+    "dev": "npx serve . -p 3000 -s",
+    "version:sync": "node update-version.js"
   },
   "keywords": [
     "pwa",
