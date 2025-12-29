@@ -136,8 +136,6 @@ const Store = {
       }
     }, 800);
   },
-    this.flushSave();
-  },
 
   applyMigrations(savedData) {
     if (!this.state.meta || typeof this.state.meta !== 'object') {
@@ -1222,3 +1220,5 @@ const Store = {
 if (typeof window !== 'undefined') {
   window.Store = Store;
 }
+
+export { Store };
