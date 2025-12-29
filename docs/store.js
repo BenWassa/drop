@@ -85,11 +85,11 @@ const Store = {
 
   loadFromLocalStorage() {
     const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
-    console.log('💾 Loaded from localStorage:', Object.keys(savedData).length, 'keys');
+    // console.log('💾 Loaded from localStorage:', Object.keys(savedData).length, 'keys');
 
     this.state = { ...this.cloneDefaults(), ...savedData };
-    console.log('📋 Initial state created with', Object.keys(this.state).length, 'keys');
-    console.log('📊 Daily values:', {
+    // console.log('📋 Initial state created with', Object.keys(this.state).length, 'keys');
+    // console.log('📊 Daily values:', {
       wake: this.state.wake,
       rest: this.state.rest,
       run: this.state.run,
@@ -106,7 +106,7 @@ const Store = {
     const payload = this.getPersistedState();
     try {
       localStorage.setItem(this.DB_KEY, JSON.stringify(payload));
-      console.log('💾 Saved to localStorage');
+      // console.log('💾 Saved to localStorage');
     } catch (error) {
       if (this.isQuotaError(error)) {
         const recovered = this.handleQuotaExceeded();
@@ -659,7 +659,7 @@ const Store = {
         this.saveCurrentEntry();
       }
       this.save();
-      console.log('💾 State saved to localStorage');
+      // console.log('💾 State saved to localStorage');
 
       if (!key.startsWith('vision')) {
         console.log('🔄 Triggering score update for key:', key);
@@ -678,7 +678,7 @@ const Store = {
     // Use current calendar day for saving entries
     const today = this.getToday();
     if (typeof window !== 'undefined' && window.DEV_MODE) {
-      console.log('💾 saveCurrentEntry: today =', today, 'existing entries:', Object.keys(this.state.entries));
+      // console.log('💾 saveCurrentEntry: today =', today, 'existing entries:', Object.keys(this.state.entries));
     }
     const existing = this.state.entries[today] || {};
     const entry = { ...existing };
