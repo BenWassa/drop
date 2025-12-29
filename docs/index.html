@@ -914,33 +914,6 @@
           </button>
         </section>
         <section class="settings-section">
-          <h3 class="settings-section__title">Data Management</h3>
-          <div class="settings-field">
-            <label class="settings-label">
-              <input type="checkbox" id="auto-backup-toggle" checked>
-              <span>Automatic Backups (survives updates)</span>
-            </label>
-          </div>
-          <p class="settings-helper-text" id="auto-backup-status">Maintains 3 backup versions in IndexedDB. Protected from cache clears and app updates.</p>
-          <button class="settings-btn" id="settings-backup-restore-btn" type="button">
-            <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
-            <span>Restore from Backup</span>
-          </button>
-          <button class="settings-btn" id="settings-backup-download-btn" type="button">
-            <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
-            <span>Download Backup File</span>
-          </button>
-          <button class="settings-btn" id="settings-import-btn" type="button">
-            <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
-            <span>Import Data from File</span>
-          </button>
-          <button class="settings-btn" id="settings-clear-btn" type="button">
-            <span class="settings-btn__icon icon-database-delete" aria-hidden="true"></span>
-            <span>Clear All Data</span>
-          </button>
-          <input type="file" id="settings-import-input" accept="application/json" hidden>
-        </section>
-        <section class="settings-section">
           <h3 class="settings-section__title">About</h3>
           <div class="settings-info">
             <p><strong>drop</strong> - Daily Domain Tracker PWA</p>
@@ -960,7 +933,6 @@
   <script type="module" src="firebase.js"></script>
   <script type="module" src="store.js"></script>
   <script src="scoring.js"></script>
-  <script src="auto-backup.js"></script>
   <script src="ui.js"></script>
   <script src="analytics.js"></script>
   <script type="module" src="app.js"></script>

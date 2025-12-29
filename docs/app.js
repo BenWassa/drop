@@ -279,28 +279,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
 
-      const { exportBtn, importBtn, importInput } = UI.elements.dataControls;
-      if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-          Store.handleExport();
-        });
-      }
-
-      if (importBtn && importInput) {
-        importBtn.addEventListener('click', () => {
-          importInput.value = '';
-          importInput.click();
-        });
-
-        importInput.addEventListener('change', () => {
-          const [file] = importInput.files || [];
-          if (file) {
-            Store.handleImport(file);
-          }
-          importInput.value = '';
-        });
-      }
-
       // Settings menu bindings
       UI.bindSettingsMenu();
     },
@@ -372,7 +350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
+        navigator.serviceWorker.register('sw.js', { type: 'module' })
           .then(registration => {
             console.log('Service Worker registered successfully:', registration);
             
@@ -639,16 +617,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     Store.init();
-    
-    // Initialize AutoBackup system
-    if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.init === 'function') {
-      try {
-        AutoBackup.init();
-        console.log('AutoBackup initialized successfully');
-      } catch (error) {
-        console.error('AutoBackup initialization failed:', error);
-      }
-    }
     
     App.init();
     App.setupDevPill();

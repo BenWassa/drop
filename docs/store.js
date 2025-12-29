@@ -116,7 +116,7 @@ const Store = {
         }
         console.error('Quota exceeded and automatic recovery failed:', error);
         if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-          UI.notify('Storage is full. Please export and clear old data.', 5000);
+          UI.notify('Storage is full. Please clear old data.', 5000);
         }
       } else {
         console.error('LocalStorage save failed:', error);
@@ -557,11 +557,6 @@ const Store = {
   persistState() {
     this.saveLocalOnly();
     this.scheduleRemoteSave();
-
-    // Trigger automatic backup after state changes
-    if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.handleStoreSave === 'function') {
-      AutoBackup.handleStoreSave();
-    }
   },
 
   isQuotaError(error) {

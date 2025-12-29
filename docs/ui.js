@@ -29,14 +29,7 @@ const UI = {
       openBtn: document.getElementById('settings-icon-btn'),
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
-      autoBackupToggle: document.getElementById('auto-backup-toggle'),
-      autoBackupStatus: document.getElementById('auto-backup-status'),
-      backupDownloadBtn: document.getElementById('settings-backup-download-btn'),
-      backupRestoreBtn: document.getElementById('settings-backup-restore-btn'),
-      importBtn: document.getElementById('settings-import-btn'),
-      importInput: document.getElementById('settings-import-input'),
-      historyBtn: document.getElementById('settings-history-btn'),
-      clearBtn: document.getElementById('settings-clear-btn')
+      historyBtn: document.getElementById('settings-history-btn')
     },
     historyOverlay: {
       overlay: document.getElementById('history-overlay'),
@@ -51,11 +44,6 @@ const UI = {
       cancelBtn: document.getElementById('edit-cancel-btn'),
       addBtn: document.getElementById('history-add-btn'),
       title: document.getElementById('history-title')
-    },
-    dataControls: {
-      exportBtn: document.getElementById('export-data-btn'),
-      importBtn: document.getElementById('import-data-btn'),
-      importInput: document.getElementById('import-data-input')
     },
     visionInputs: {
       theme: document.getElementById('vision-theme'),
@@ -1543,14 +1531,7 @@ const UI = {
       menu,
       openBtn,
       closeBtn,
-      backdrop,
-      importBtn,
-      importInput,
-      clearBtn,
-      autoBackupToggle,
-      autoBackupStatus,
-      backupDownloadBtn,
-      backupRestoreBtn
+      backdrop
     } = UI.elements.settingsMenu;
     
     if (!menu || !openBtn) return;
@@ -1582,145 +1563,13 @@ const UI = {
       }
     });
 
-    // Auto-backup toggle
-    if (autoBackupToggle) {
-      // Load saved preference
-      const savedEnabled = localStorage.getItem('auto-backup-enabled');
-      if (savedEnabled !== null) {
-        autoBackupToggle.checked = savedEnabled === 'true';
-      }
-      
-      // Update AutoBackup based on saved state
-      if (typeof AutoBackup !== 'undefined') {
-        AutoBackup.setEnabled(autoBackupToggle.checked);
-        if (autoBackupStatus) {
-          autoBackupStatus.textContent = AutoBackup.getStatus();
-        }
-      }
-
-      autoBackupToggle.addEventListener('change', () => {
-        const enabled = autoBackupToggle.checked;
-        localStorage.setItem('auto-backup-enabled', enabled.toString());
-        
-        if (typeof AutoBackup !== 'undefined') {
-          AutoBackup.setEnabled(enabled);
-        }
-        
-        UI.notify(enabled ? 'Automatic backups enabled' : 'Automatic backups disabled');
-      });
-    }
-
-    // Download backup file
-    if (backupDownloadBtn) {
-      backupDownloadBtn.addEventListener('click', async () => {
-        try {
-          if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.manualBackup === 'function') {
-            await AutoBackup.manualBackup();
-            // Update status display
-            if (autoBackupStatus) {
-              autoBackupStatus.textContent = AutoBackup.getStatus();
-            }
-          } else {
-            // Fallback to simple download
-            const state = Store.state;
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            const filename = `drop-backup-${timestamp}.json`;
-            const dataStr = JSON.stringify(state, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = filename;
-            link.click();
-            URL.revokeObjectURL(url);
-            UI.notify('Backup file downloaded');
-          }
-        } catch (error) {
-          console.error('Backup download failed:', error);
-          UI.notify('Failed to download backup');
-        }
-      });
-    }
-
-    // Restore from backup
-    if (backupRestoreBtn) {
-      backupRestoreBtn.addEventListener('click', () => {
-        if (typeof AutoBackup === 'undefined') {
-          UI.notify('Backup system not available');
-          return;
-        }
-
-        const backups = AutoBackup.getBackupInfo();
-        if (backups.length === 0) {
-          UI.notify('No backups available to restore');
-          return;
-        }
-
-        // Show backup selection dialog
-        const message = backups.map((b, i) => 
-          `${i + 1}. ${b.label}: ${b.date.toLocaleString()}`
-        ).join('\n');
-
-        const choice = prompt(
-          `Select backup to restore:\n\n${message}\n\nEnter 1, 2, or 3 (WARNING: This will reload the page)`,
-          '1'
-        );
-
-        if (choice && ['1', '2', '3'].includes(choice)) {
-          const index = parseInt(choice) - 1;
-          if (backups[index]) {
-            const confirmed = confirm(
-              `Restore from ${backups[index].label} backup (${backups[index].date.toLocaleString()})?\n\nThis will reload the page.`
-            );
-            if (confirmed) {
-              AutoBackup.restoreFromBackup(backups[index].key);
-            }
-          }
-        }
-      });
-    }
-
-    // Import data from settings
-    if (importBtn && importInput) {
-      importBtn.addEventListener('click', () => {
-        importInput.value = '';
-        importInput.click();
-      });
-
-      importInput.addEventListener('change', () => {
-        const [file] = importInput.files || [];
-        if (file) {
-          Store.handleImport(file);
-        }
-        importInput.value = '';
-        closeSettings();
-      });
-    }
-
-    if (clearBtn) {
-      console.log('Clear button found, binding event');
-      clearBtn.addEventListener('click', () => {
-        console.log('Clear button clicked');
-        const cleared = Store.handleDataClear();
-        if (cleared) {
-          location.reload();
-        }
-      });
-    } else {
-      console.log('Clear button not found');
-    }
-
     // History view from settings
     const { historyBtn } = UI.elements.settingsMenu;
-    console.log('🔍 History button found:', historyBtn);
     if (historyBtn) {
       historyBtn.addEventListener('click', () => {
-        console.log('📅 History button clicked');
         closeSettings();
         UI.openHistoryView();
       });
-    } else {
-      console.log('❌ History button NOT found');
     }
   },
 
