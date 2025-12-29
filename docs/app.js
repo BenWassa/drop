@@ -1,4 +1,6 @@
 // === TEST HOOKS (exposed immediately for test environment) ===
+import { Store } from './store.js';
+
 if (typeof window !== 'undefined') {
   window.DropApp = window.DropApp || {};
   
