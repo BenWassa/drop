@@ -1,6 +1,6 @@
 {
   "name": "drop",
-  "version": "3.3.5",
+  "version": "4.0.0",
   "description": "Daily domain tracker PWA - Sleep, Fitness, Mind, Spirit",
   "private": true,
   "scripts": {
