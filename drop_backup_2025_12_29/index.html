@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1C1C21">
+  <meta name="application-name" content="drop">
+  <meta name="apple-mobile-web-app-title" content="drop">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Wix+Madefor+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="icons/drop_rounded_app_icon.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/drop_rounded_app_icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Preload critical images -->
+  <link rel="preload" as="image" href="icons/drop_rounded.png">
+  <link rel="preload" as="image" href="icons/fitness.svg">
+  <link rel="preload" as="image" href="icons/sleep.svg">
+  <link rel="preload" as="image" href="icons/mind.svg">
+  <link rel="preload" as="image" href="icons/spirit.svg">
+  <title>drop</title>
+</head>
+<body>
+  <!-- Loading overlay shown on app startup (short minimum duration) -->
+  <div class="loading-overlay" id="loading-overlay" aria-hidden="true">
+    <div class="loading-frame">
+      <img src="icons/drop_rounded.png" alt="" class="loading-logo" aria-hidden="true">
+    </div>
+  </div>
+
+  <!-- Developer pill (clickable) and small toast for dev messages -->
+  <div class="dev-pill" id="dev-pill" title="Toggle developer mode">DEV</div>
+  <div class="dev-loader-toggle" id="dev-loader-toggle" title="Toggle loading screen" hidden>
+    <span id="dev-loader-icon">🔄</span>
+  </div>
+  <!-- Dev-only: Clear all app data (localStorage, caches, SW, cookies) -->
+  <button id="dev-clear-data" class="dev-clear-btn" title="Clear all app data (localStorage, caches, service workers, cookies)" hidden>
+    Clear App Data
+  </button>
+  <div class="dev-toast" id="dev-toast" aria-live="polite"></div>
+  <div class="app-toast" id="app-toast" aria-live="polite" role="status"></div>
+
+  <header class="app-header">
+    <!-- Row 1: Menu Icon (Left) + App Title (Center) + Progress Labels (Right) -->
+    <div class="header-row header-row--identity">
+      <button class="menu-icon-btn" id="settings-icon-btn" aria-label="Open settings menu">
+        <svg class="menu-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <h1 class="app-title">drop</h1>
+      <div class="quarter-progress__labels">
+        <span class="quarter-label" id="quarter-label">Q1</span>
+        <span class="label-divider">·</span>
+        <span class="week-label" id="week-label">Wk 0</span>
+      </div>
+    </div>
+
+    <!-- Row 2: Quarterly Progress Bar -->
+    <!-- COMMENTED OUT: Quarterly progress bar inactive for now, keeping asset -->
+    <!-- <div class="header-row header-row--progress">
+      <div class="quarter-progress">
+        <div class="quarter-progress__bar" role="progressbar" aria-valuemin="0" aria-valuemax="52" aria-valuenow="0" aria-label="Weekly progress">
+          <div class="quarter-progress__fill" id="quarter-progress-fill"></div>
+        </div>
+      </div>
+    </div> -->
+  </header> 
+
+  <main class="app-main">
+    <!-- Domain Score Rings - Moved from header -->
+    <section class="scores-section">
+      <!-- Screen reader announcements for score updates -->
+      <div class="sr-announce" id="score-announcer" aria-live="polite" aria-atomic="true"></div>
+      <div class="scores-grid">
+        <article class="score-item" data-domain="sleep">
+          <div class="score-meter" data-domain-meter="sleep" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Sleep score">
+            <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+              <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="score-meter__center">
+              <span class="score-value" id="sleep-score">0</span>
+            </div>
+            <div class="score-meter__icon" aria-hidden="true">
+              <img src="icons/sleep.svg" alt="">
+            </div>
+          </div>
+          <div class="score-name">Sleep</div>
+        </article>
+        <article class="score-item" data-domain="fitness">
+          <div class="score-meter" data-domain-meter="fitness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Fitness score">
+            <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+              <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="score-meter__center">
+              <span class="score-value" id="fitness-score">0</span>
+            </div>
+            <div class="score-meter__icon" aria-hidden="true">
+              <img src="icons/fitness.svg" alt="">
+            </div>
+          </div>
+          <div class="score-name">Fitness</div>
+        </article>
+        <article class="score-item" data-domain="mind">
+          <div class="score-meter" data-domain-meter="mind" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Mind score">
+            <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+              <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="score-meter__center">
+              <span class="score-value" id="mind-score">0</span>
+            </div>
+            <div class="score-meter__icon" aria-hidden="true">
+              <img src="icons/mind.svg" alt="">
+            </div>
+          </div>
+          <div class="score-name">Mind</div>
+        </article>
+        <article class="score-item" data-domain="spirit">
+          <div class="score-meter" data-domain-meter="spirit" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Spirit score">
+            <svg class="score-ring" viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="score-ring__track" cx="60" cy="60" r="52"></circle>
+              <circle class="score-ring__arc" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="score-meter__center">
+              <span class="score-value" id="spirit-score">0</span>
+            </div>
+            <div class="score-meter__icon" aria-hidden="true">
+              <img src="icons/spirit.svg" alt="">
+            </div>
+          </div>
+          <div class="score-name">Spirit</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page page--home active" data-page="home" aria-labelledby="home-heading">
+      <h1 id="home-heading" class="visually-hidden">Daily Domain Tracker</h1>
+      
+      <!-- ** NEW COMPONENT: Weekly Trajectory Heatmap ** -->
+      <section class="weekly-heatmap" id="weekly-heatmap">
+        <h2 class="heatmap-title">Weekly Trajectory</h2>
+        <div class="heatmap-container" id="heatmap-container">
+          <!-- Content dynamically generated by App.renderWeeklyHeatmap() -->
+        </div>
+        <p class="heatmap-summary" id="heatmap-summary">Loading weekly data...</p>
+      </section>
+      <!-- ** END NEW COMPONENT ** -->
+      
+      <section class="home-actions" aria-label="Daily actions">
+        <div class="action-list-wrapper" id="home-action-grid">
+          <article class="action-card sleep-card" data-card="sleep">
+            <header class="action-card__header">
+              <img src="icons/sleep.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Sleep</h2>
+                <p class="action-card__subtitle">Recovery &amp; Rhythm</p>
+              </div>
+            </header>
+            <!-- Sleep with tiered labels -->
+            <div class="sleep-widget-body">
+              <div class="tiered-selection-group">
+                
+                <!-- Wake with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-sleep-section="wake" data-practice="wake">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Wake</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="wake-controls">
+                      <div class="time-input-control">
+                        <input type="time" id="wake-time" autocomplete="off">
+                        <button class="log-current-btn" type="button" data-target="wake-time">Now</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Rest with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-sleep-section="rest" data-practice="rest">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Rest</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="rest-controls">
+                      <div class="time-input-control">
+                        <input type="time" id="rest-time" autocomplete="off">
+                        <button class="log-current-btn" type="button" data-target="rest-time">Now</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            <p class="text-status" id="sleep-status">No sleep window logged yet.</p>
+          </article>
+
+          <article class="action-card fitness-card" data-card="fitness">
+            <header class="action-card__header">
+              <img src="icons/fitness.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Fitness</h2>
+                <p class="action-card__subtitle">Discipline &amp; Consistency</p>
+              </div>
+            </header>
+            
+            <!-- NEW: Fitness with tiered labels -->
+            <div class="fitness-widget-body">
+              <div class="tiered-selection-group">
+                
+                <!-- Run with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-fitness-section="run" data-practice="run">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Run</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="run-controls">
+                      <div class="run-presets" role="group" aria-label="Quick distance presets">
+                        <button class="run-preset" type="button" data-run-value="5">5 km</button>
+                        <button class="run-preset" type="button" data-run-value="10">10 km</button>
+                        <button class="run-preset" type="button" data-run-value="20">20 km</button>
+                      </div>
+                      <div class="run-adjust" role="group" aria-label="Adjust distance">
+                        <button class="run-step" type="button" data-run-step="-1" aria-label="Decrease distance">−</button>
+                        <div class="run-display"><span id="run-value">0</span><span class="run-unit">km</span></div>
+                        <button class="run-step" type="button" data-run-step="1" aria-label="Increase distance">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Strength tiered selection -->
+                <div class="tiered-selection collapsible-practice" data-fitness-tier="strength" data-practice="strength">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Strength</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="tier-buttons" role="group" aria-label="Strength training tiers">
+                      <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Movement</button>
+                      <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Session</button>
+                      <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Training</button>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Skill with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-fitness-section="skill" data-practice="skill">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Skill</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="skill-controls">
+                      <div class="skill-chip-row" id="skill-chip-row" role="group" aria-label="Skill practice options">
+                        <!-- Skill chips injected by UI.renderSkillChips() -->
+                        <button class="skill-chip skill-chip--add" type="button" id="skill-add-btn">+ Add</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+            
+            <p class="text-status" id="fitness-summary">No training logged yet.</p>
+          </article>
+
+          <article class="action-card mind-card" data-card="mind">
+            <header class="action-card__header">
+              <img src="icons/mind.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Mind</h2>
+                <p class="action-card__subtitle">Perception &amp; Articulation</p>
+              </div>
+            </header>
+            
+            <!-- Tiered selections for Reading and Writing -->
+            <div class="mind-widget-body">
+              <div class="tiered-selection-group">
+                <div class="tiered-selection collapsible-practice" data-mind-tier="reading" data-practice="reading">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Reading</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="tier-buttons" role="group" aria-label="Reading quality tiers">
+                      <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Leisure</button>
+                      <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Perspicacity</button>
+                      <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Erudition</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="tiered-selection collapsible-practice" data-mind-tier="writing" data-practice="writing">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Writing</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="tier-buttons" role="group" aria-label="Writing depth tiers">
+                      <button class="tier-btn" type="button" data-tier-value="1" aria-pressed="false">Journal</button>
+                      <button class="tier-btn" type="button" data-tier-value="2" aria-pressed="false">Editorial</button>
+                      <button class="tier-btn" type="button" data-tier-value="3" aria-pressed="false">Treatise</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <p class="text-status" id="mind-status">Nothing logged yet.</p>
+          </article>
+
+          <article class="action-card spirit-card" data-card="spirit">
+            <header class="action-card__header">
+              <img src="icons/spirit.svg" alt="" class="action-card__icon" aria-hidden="true">
+              <div>
+                <h2 class="action-card__title">Spirit</h2>
+                <p class="action-card__subtitle">Root your presence.</p>
+              </div>
+            </header>
+
+            <!-- Spirit with tiered labels -->
+            <div class="spirit-widget-body">
+              <div class="tiered-selection-group">
+                
+                <!-- Mindfulness with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-spirit-section="mindfulness" data-practice="mindfulness">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Mindfulness</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="mindfulness-controls">
+                      <div class="timer-button-wrapper">
+                        <button class="timer-action-btn" id="spirit-timer-btn" data-state="stopped" aria-pressed="false">
+                          <span id="spirit-timer-text">Start Session</span>
+                          <span id="spirit-mantra-text" class="mantra-text">ॐ मणि पद्मे हूँ</span>
+                          <div class="timer-fill" id="spirit-timer-fill"></div>
+                        </button>
+                      </div>
+                      <p class="text-status" id="spirit-timer-instruction">Press and hold to begin a session.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Mood & Energy with tiered label -->
+                <div class="tiered-selection collapsible-practice" data-spirit-section="mood-energy" data-practice="mood">
+                  <button class="tiered-label practice-header" type="button">
+                    <span class="practice-name">Mood & Energy</span>
+                    <span class="practice-value"></span>
+                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="practice-content">
+                    <div class="mood-energy-controls">
+                      <div class="mood-grid-container" id="spirit-mood-grid" role="img" aria-label="Mood quadrant">
+                        <div class="mood-dot" id="spirit-mood-dot" style="--mood-x:50%; --mood-y:50%;"></div>
+                        <span class="mood-axis-label label-e-high">High Energy</span>
+                        <span class="mood-axis-label label-e-low">Low Energy</span>
+                        <span class="mood-axis-label label-m-neg">Negative</span>
+                        <span class="mood-axis-label label-m-pos">Positive</span>
+                      </div>
+                      <p class="mood-description" id="spirit-mood-label">Neutral · Medium Energy</p>
+                      <p class="mood-instruction">Click anywhere to reflect on mood for the day</p>
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+
+            <p class="text-status" id="spirit-status">Status: Meditation pending</p>
+          </article>
+        </div>
+        <script>
+        (function(){
+          // Self-contained spirit widget wiring
+          const btn = document.getElementById('spirit-timer-btn');
+          const text = document.getElementById('spirit-timer-text');
+          const mantra = document.getElementById('spirit-mantra-text');
+          const fill = document.getElementById('spirit-timer-fill');
+          const instruction = document.getElementById('spirit-timer-instruction');
+          const moodDot = document.getElementById('spirit-mood-dot');
+          const moodGrid = document.getElementById('spirit-mood-grid');
+          const moodLabel = document.getElementById('spirit-mood-label');
+          
+          if (!btn || !text || !mantra || !fill || !instruction || !moodDot || !moodGrid || !moodLabel) {
+            console.error('Spirit timer elements not found');
+            return;
+          }
+
+          const MIN_PRESS = 500; // Minimum 0.5s before animation starts
+          const FILL_DURATION = 2000; // Fill animation duration (matches CSS)
+          const TOTAL_DURATION = MIN_PRESS + FILL_DURATION; // Total: 2500ms
+          let timer = null, running = false, seconds = 0, wasLong = false, pressStartTime = 0;
+          let minPressTimer = null, longPressTimer = null;
+
+          const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+
+          function startTimer(){ 
+            running=true; 
+            btn.dataset.state='running'; 
+            instruction.textContent='Session running. Tap to pause.'; 
+            // Reset text display for running state
+            text.classList.remove('fade-out');
+            mantra.classList.remove('fade-in');
+            timer = setInterval(()=>{ 
+              seconds++; 
+              text.textContent = fmt(seconds); 
+            },1000); 
+          }
+          
+          function pauseTimer(){ clearInterval(timer); running=false; btn.dataset.state='paused'; instruction.textContent = `Paused at ${fmt(seconds)}. Tap to resume. Hold to log.`; }
+          function stopAndLog(){ 
+            clearInterval(timer); 
+            running=false; 
+            const logged = fmt(seconds); 
+            const loggedSeconds = seconds;
+            
+            btn.classList.add('logged-success'); 
+            text.textContent = `✓ Logged ${logged}`; 
+            // Reset text visibility
+            text.classList.remove('fade-out');
+            mantra.classList.remove('fade-in');
+            instruction.textContent='Session complete.'; 
+            
+            // Store the meditation session after UI feedback starts
+            // Store.update() will automatically call App.updateScores() and save to daily entry
+            if (typeof Store !== 'undefined' && typeof UI !== 'undefined') {
+              Store.update('meditation', true);
+              // Update the Spirit summary status text
+              UI.updateSpiritSummary(Store.state.quadrant, true, Store.state.energy || 0, Store.state.mood || 0);
+            }
+            
+            setTimeout(()=>{ 
+              btn.classList.remove('logged-success'); 
+              text.textContent='Start Session'; 
+              seconds=0; 
+              btn.dataset.state='stopped'; 
+              instruction.textContent='Press and hold to begin a new session.'; 
+            },2500); 
+          }
+
+          // Long-press handling with minimum press duration
+          function pressStart(){ 
+            if(minPressTimer || longPressTimer) return; 
+            wasLong=false; 
+            pressStartTime=Date.now(); 
+            
+            // Wait MIN_PRESS before starting animation
+            minPressTimer = setTimeout(()=>{ 
+              minPressTimer = null;
+              // Start the animation and mantra after minimum press duration
+              btn.classList.add('long-pressing'); 
+              text.classList.add('fade-out');
+              mantra.classList.add('fade-in');
+              
+              // Wait for full fill animation to complete (2000ms)
+              longPressTimer = setTimeout(()=>{ 
+                wasLong=true; 
+                btn.classList.remove('long-pressing'); 
+                // Action happens here - timer/log starts AFTER fill completes
+                const state = btn.dataset.state;
+                if(state === 'stopped') {
+                  startTimer(); 
+                } else if(state === 'running' || state === 'paused') {
+                  stopAndLog(); 
+                }
+                longPressTimer=null; 
+                setTimeout(()=>{ wasLong=false; },50); 
+              }, FILL_DURATION); // Full 2000ms for fill animation
+            }, MIN_PRESS);
+          }
+          
+          function pressEnd(){ 
+            if(minPressTimer){ 
+              clearTimeout(minPressTimer); 
+              minPressTimer=null; 
+            }
+            if(longPressTimer){ 
+              clearTimeout(longPressTimer); 
+              longPressTimer=null; 
+              btn.classList.remove('long-pressing'); 
+              text.classList.remove('fade-out');
+              mantra.classList.remove('fade-in');
+            } 
+          }
+
+          btn.addEventListener('mousedown', ()=>{ if(!running) pressStart(); else pressStart(); });
+          btn.addEventListener('touchstart', ()=>{ if(!running) pressStart(); else pressStart(); },{passive:true});
+          btn.addEventListener('mouseup', pressEnd); btn.addEventListener('touchend', pressEnd); window.addEventListener('blur', pressEnd);
+          btn.addEventListener('click', (e)=>{ if(wasLong) return; if(running) pauseTimer(); else if(btn.dataset.state==='paused') startTimer(); });
+
+          // Mood controls: update the dot position and label from state
+          function updateMood(){
+            if (typeof Store === 'undefined') return;
+            const m = Store.state.mood || 50;
+            const e = Store.state.energy || 50;
+            const x = m + '%';
+            const y = e + '%';
+            moodDot.style.setProperty('--mood-x', x);
+            moodDot.style.setProperty('--mood-y', y);
+            let moodText = (m>66?'Positive':m>33?'Neutral':'Negative') + ' · ' + (e>66?'High Energy':e>33?'Medium Energy':'Low Energy');
+            moodLabel.textContent = moodText;
+          }
+          // Clicking on mood grid to set mood
+          moodGrid.addEventListener('click', (ev) => {
+            if (typeof Store === 'undefined') return;
+            const rect = moodGrid.getBoundingClientRect();
+            let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width);
+            let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height);
+            const mx = Math.round((px/rect.width)*100);
+            const my = Math.round((py/rect.height)*100);
+            Store.update('mood', mx);
+            Store.update('energy', my);
+            updateMood();
+          });
+
+          // Dragging the mood dot (pointer friendly)
+          let dragging=false;
+          moodDot.addEventListener('pointerdown', (ev)=>{ dragging=true; moodDot.setPointerCapture(ev.pointerId); });
+          window.addEventListener('pointerup', (ev)=>{ if(dragging){ dragging=false; moodDot.releasePointerCapture(ev.pointerId); } });
+          window.addEventListener('pointermove', (ev)=>{
+            if(!dragging || typeof Store === 'undefined') return;
+            const rect = moodGrid.getBoundingClientRect();
+            let px = Math.min(Math.max(ev.clientX-rect.left,0),rect.width);
+            let py = Math.min(Math.max(rect.bottom-ev.clientY,0),rect.height);
+            const mx = Math.round((px/rect.width)*100);
+            const my = Math.round((py/rect.height)*100);
+            // Update store state
+            Store.update('mood', mx);
+            Store.update('energy', my);
+            updateMood();
+          });
+
+          // init
+          updateMood();
+        })();
+        </script>
+      </section>
+    </section>
+
+    <section class="page page--vision" data-page="vision" aria-labelledby="vision-heading">
+      <div class="page-header">
+        <p class="page-eyebrow">Vision</p>
+        <h2 id="vision-heading">Set the tone for the week</h2>
+        <p class="page-subtitle">Define where your attention goes in each domain so execution feels intentional.</p>
+      </div>
+      <div class="vision-grid">
+        <article class="vision-intent">
+          <h3>Weekly North Star</h3>
+          <p>Anchor the week with a single theme or feeling to cultivate.</p>
+          <label class="input-label" for="vision-theme">Theme</label>
+          <textarea id="vision-theme" class="vision-textarea" rows="3" placeholder="Example: Protect deep sleep and prime creative energy." maxlength="200" data-empty-hint="Set a weekly mantra you can return to when decisions stack up."></textarea>
+          <p class="vision-tip">Keep it short and memorable—something to revisit on the fly.</p>
+        </article>
+        
+        <article class="vision-card" data-domain="sleep">
+          <header class="vision-card__header">
+            <img src="icons/sleep.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Sleep</h3>
+              <p>Protect recovery so mornings start steady.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-sleep-focus">Focus statement</label>
+          <textarea id="vision-sleep-focus" class="vision-textarea" rows="3" placeholder="Lights out by 10:30pm with devices off." maxlength="160" data-empty-hint="Try setting a bedtime goal to anchor your recovery."></textarea>
+          <ul class="vision-prompts">
+            <li>What habit ensures you wake sharp?</li>
+            <li>Where can you remove friction from the wind-down?</li>
+          </ul>
+        </article>
+
+        <article class="vision-card" data-domain="fitness">
+          <header class="vision-card__header">
+            <img src="icons/fitness.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Fitness</h3>
+              <p>Set a clear training rhythm and win the reps.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-fitness-focus">Focus statement</label>
+          <textarea id="vision-fitness-focus" class="vision-textarea" rows="3" placeholder="Two strength blocks + one tempo run." maxlength="160" data-empty-hint="Drop in the training block that will move the needle this week."></textarea>
+          <ul class="vision-prompts">
+            <li>Which session creates the biggest return?</li>
+            <li>How will you celebrate consistency?</li>
+          </ul>
+        </article>
+
+        <article class="vision-card" data-domain="mind">
+          <header class="vision-card__header">
+            <img src="icons/mind.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Mind</h3>
+              <p>Curate inputs that sharpen thinking.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-mind-focus">Focus statement</label>
+          <textarea id="vision-mind-focus" class="vision-textarea" rows="3" placeholder="Read 20 pages before checking messages." maxlength="160" data-empty-hint="Pick one input that will sharpen your thinking each day."></textarea>
+          <ul class="vision-prompts">
+            <li>Which questions are you exploring?</li>
+            <li>Where can you trade scrolling for study?</li>
+          </ul>
+        </article>
+
+        <article class="vision-card" data-domain="spirit">
+          <header class="vision-card__header">
+            <img src="icons/spirit.svg" alt="" aria-hidden="true">
+            <div>
+              <h3>Spirit</h3>
+              <p>Stay rooted in purpose and connection.</p>
+            </div>
+          </header>
+          <label class="input-label" for="vision-spirit-focus">Focus statement</label>
+          <textarea id="vision-spirit-focus" class="vision-textarea" rows="3" placeholder="Daily gratitude note before shutting down work." maxlength="160" data-empty-hint="Name the relationship or ritual you want to pour into this week."></textarea>
+          <ul class="vision-prompts">
+            <li>What practice keeps you centred?</li>
+            <li>Who can you intentionally pour into?</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="page page--gratitude" data-page="gratitude" aria-labelledby="gratitude-heading">
+      <div class="page-header">
+        <p class="page-eyebrow">Gratitude</p>
+        <h2 id="gratitude-heading">Review the results with clarity</h2>
+        <p class="page-subtitle">Surface meaningful progress and the next nudge—no generic dashboards.</p>
+      </div>
+
+      <div class="insights-grid">
+        <article class="insight-card insight-card--highlight">
+          <div class="card-eyebrow">Highlights</div>
+          <h3>Standout Domain</h3>
+          <div class="insight-metric">
+            <span id="gratitude-top-domain" class="insight-metric__label">Sleep</span>
+            <span id="gratitude-top-score" class="insight-metric__value">0</span>
+          </div>
+          <p id="gratitude-top-detail" class="insight-detail">Momentum copy.</p>
+        </article>
+
+        <article class="insight-card insight-card--focus">
+          <div class="card-eyebrow">Next Focus</div>
+          <h3>Sharpen This Area</h3>
+          <div class="insight-metric">
+            <span id="gratitude-focus-domain" class="insight-metric__label">Fitness</span>
+            <span id="gratitude-focus-score" class="insight-metric__value">0</span>
+          </div>
+          <p id="gratitude-focus-detail" class="insight-detail">Opportunity copy.</p>
+        </article>
+
+        <article class="insight-card insight-card--momentum">
+          <div class="card-eyebrow">Momentum</div>
+          <h3>Weekly Pulse</h3>
+          <p id="gratitude-momentum-detail" class="insight-detail">Momentum narrative.</p>
+        </article>
+
+        <article class="insight-card insight-card--scoreboard">
+          <div class="card-eyebrow">Scoreboard</div>
+          <h3>Domain Scores</h3>
+          <div class="progress-list">
+            <div class="progress-row" data-progress-domain="sleep" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Sleep</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+            <div class="progress-row" data-progress-domain="fitness" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Fitness</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+            <div class="progress-row" data-progress-domain="mind" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Mind</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+            <div class="progress-row" data-progress-domain="spirit" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="progress-label">Spirit</span>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+              <span class="progress-score">0</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="insight-card insight-card--reflections">
+          <div class="card-eyebrow">Micro Reflections</div>
+          <h3>Signals Worth Noting</h3>
+          <ul class="insight-list">
+            <li id="gratitude-sleep-summary">Sleep insight.</li>
+            <li id="gratitude-run-summary">Run insight.</li>
+            <li id="gratitude-meditation-summary">Meditation insight.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <nav class="bottom-nav">
+      <button class="nav-btn" data-page="vision" aria-label="Vision">
+        <img src="icons/vision.svg" class="nav-icon" alt="">
+        <!-- <span class="nav-label">Vision</span> -->
+      </button>
+      <button class="nav-btn active" data-page="home" aria-label="Home">
+        <img src="icons/drop_icon.svg" class="nav-icon" alt="">
+        <!-- <span class="nav-label">Home</span> -->
+      </button>
+      <button class="nav-btn" data-page="gratitude" aria-label="Gratitude">
+        <img src="icons/data_analysis.svg" class="nav-icon" alt="">
+        <!-- <span class="nav-label">Gratitude</span> -->
+      </button>
+    </nav>
+  </footer>
+  
+  <!-- Overlays -->
+  <!-- History overlay -->
+  <div class="overlay" id="history-overlay">
+    <div class="overlay-content-wrapper">
+      <header class="overlay-header">
+        <h2 class="overlay-title" id="history-title">History</h2>
+        <button class="close-btn" aria-label="Close history overlay">&times;</button>
+      </header>
+      <div class="overlay-content">
+        <!-- History List View -->
+        <div id="history-list-view">
+          <div class="history-controls">
+            <div class="history-info">
+              <div class="history-date-range" id="history-date-range">0 entries</div>
+              <div class="history-subtitle">All your tracked days</div>
+            </div>
+            <button class="history-add-btn" id="history-add-btn" aria-label="Add new entry">
+              <span aria-hidden="true">+</span> Add Entry
+            </button>
+          </div>
+          <div class="history-list" id="history-list">
+            <!-- History entries will be populated here -->
+          </div>
+        </div>
+
+        <!-- History Edit View -->
+        <div id="history-edit-view" style="display: none;">
+          <div class="history-edit-header">
+            <button class="history-back-btn" id="history-back-btn" aria-label="Back to history list">← Back</button>
+            <div class="history-edit-date" id="history-edit-date"></div>
+          </div>
+          <form class="history-edit-form" id="history-edit-form">
+            <!-- Sleep Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/sleep.svg" alt="" class="edit-section-icon">
+                Sleep
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-wake">Wake Time</label>
+                  <input type="time" id="edit-wake" name="wake">
+                </div>
+                <div class="edit-field">
+                  <label for="edit-rest">Rest Time</label>
+                  <input type="time" id="edit-rest" name="rest">
+                </div>
+              </div>
+            </div>
+
+            <!-- Fitness Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/fitness.svg" alt="" class="edit-section-icon">
+                Fitness
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-run">Run Distance (km)</label>
+                  <input type="number" id="edit-run" name="run" min="0" step="0.1">
+                </div>
+                <div class="edit-field">
+                  <label for="edit-strength">Strength Level</label>
+                  <select id="edit-strength" name="strength_level">
+                    <option value="0">None</option>
+                    <option value="1">Movement</option>
+                    <option value="2">Session</option>
+                    <option value="3">Training</option>
+                  </select>
+                </div>
+                <div class="edit-field">
+                  <label for="edit-skill">Skills</label>
+                  <input type="text" id="edit-skill" name="skill" placeholder="e.g., Wrestling, Yoga">
+                </div>
+              </div>
+            </div>
+
+            <!-- Mind Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/mind.svg" alt="" class="edit-section-icon">
+                Mind
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-reading">Reading Level</label>
+                  <select id="edit-reading" name="read_level">
+                    <option value="0">None</option>
+                    <option value="1">Leisure</option>
+                    <option value="2">Perspicacity</option>
+                    <option value="3">Erudition</option>
+                  </select>
+                </div>
+                <div class="edit-field">
+                  <label for="edit-writing">Writing Level</label>
+                  <select id="edit-writing" name="write_level">
+                    <option value="0">None</option>
+                    <option value="1">Journal</option>
+                    <option value="2">Editorial</option>
+                    <option value="3">Treatise</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Spirit Section -->
+            <div class="edit-section">
+              <h3 class="edit-section-title">
+                <img src="icons/spirit.svg" alt="" class="edit-section-icon">
+                Spirit
+              </h3>
+              <div class="edit-controls">
+                <div class="edit-field">
+                  <label for="edit-meditation">Meditation</label>
+                  <select id="edit-meditation" name="meditation">
+                    <option value="false">Not logged</option>
+                    <option value="true">Completed</option>
+                  </select>
+                </div>
+                <div class="edit-field">
+                  <label for="edit-mood">Mood</label>
+                  <input type="number" id="edit-mood" name="mood" min="-100" max="100" placeholder="-100 to 100">
+                </div>
+                <div class="edit-field">
+                  <label for="edit-energy">Energy</label>
+                  <input type="number" id="edit-energy" name="energy" min="-100" max="100" placeholder="-100 to 100">
+                </div>
+              </div>
+            </div>
+
+            <div class="edit-actions">
+              <button type="button" class="edit-cancel-btn" id="edit-cancel-btn">Cancel</button>
+              <button type="submit" class="edit-save-btn">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings side menu -->
+  <div class="settings-menu" id="settings-menu">
+    <div class="settings-menu__backdrop" id="settings-backdrop"></div>
+    <nav class="settings-menu__panel" role="dialog" aria-labelledby="settings-title">
+      <div class="settings-menu__header">
+        <h2 id="settings-title">Settings</h2>
+        <button class="close-btn" id="settings-close-btn" aria-label="Close settings">✕</button>
+      </div>
+      <div class="settings-menu__content">
+        <section class="settings-section">
+          <h3 class="settings-section__title">App</h3>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">History</h3>
+          <button class="settings-btn" id="settings-history-btn" type="button">
+            <span class="settings-btn__icon icon-calendar-search" aria-hidden="true"></span>
+            <span>View & Edit Past Entries</span>
+          </button>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">Data Management</h3>
+          <div class="settings-field">
+            <label class="settings-label">
+              <input type="checkbox" id="auto-backup-toggle" checked>
+              <span>Automatic Backups (survives updates)</span>
+            </label>
+          </div>
+          <p class="settings-helper-text" id="auto-backup-status">Maintains 3 backup versions in IndexedDB. Protected from cache clears and app updates.</p>
+          <button class="settings-btn" id="settings-backup-restore-btn" type="button">
+            <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
+            <span>Restore from Backup</span>
+          </button>
+          <button class="settings-btn" id="settings-backup-download-btn" type="button">
+            <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
+            <span>Download Backup File</span>
+          </button>
+          <button class="settings-btn" id="settings-import-btn" type="button">
+            <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
+            <span>Import Data from File</span>
+          </button>
+          <button class="settings-btn" id="settings-clear-btn" type="button">
+            <span class="settings-btn__icon icon-database-delete" aria-hidden="true"></span>
+            <span>Clear All Data</span>
+          </button>
+          <input type="file" id="settings-import-input" accept="application/json" hidden>
+        </section>
+        <section class="settings-section">
+          <h3 class="settings-section__title">About</h3>
+          <div class="settings-info">
+            <p><strong>drop</strong> - Daily Domain Tracker PWA</p>
+            <p>Track your daily life domains: Sleep, Fitness, Mind, and Spirit.</p>
+            <p><strong>Version:</strong> <span id="app-version">3.3.5</span></p>
+            <p><strong>License:</strong> MIT License</p>
+            <p><strong>Author:</strong> Benjamin Haddon</p>
+            <p><strong>Repository:</strong> <a href="https://github.com/BenWassa/drop" target="_blank" rel="noopener">github.com/BenWassa/drop</a></p>
+            <p><strong>Live App:</strong> <a href="https://benwassa.github.io/drop/" target="_blank" rel="noopener">benwassa.github.io/drop</a></p>
+          </div>
+        </section>
+      </div>
+    </nav>
+  </div>
+
+  <script src="store.js"></script>
+  <script src="scoring.js"></script>
+  <script src="auto-backup.js"></script>
+  <script src="ui.js"></script>
+  <script src="analytics.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

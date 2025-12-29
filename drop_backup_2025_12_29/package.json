@@ -1,0 +1,33 @@
+{
+  "name": "drop",
+  "version": "3.3.5",
+  "description": "Daily domain tracker PWA - Sleep, Fitness, Mind, Spirit",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:dom",
+    "test:dom": "echo 'Open docs/tests/index.html in a browser to run DOM tests'",
+    "test:visual": "playwright test tests/visual.test.js",
+    "test:visual:update": "playwright test tests/visual.test.js --update-snapshots",
+    "test:visual:ui": "playwright test tests/visual.test.js --ui",
+    "serve": "npx serve docs -p 3000",
+    "dev": "npx serve docs -p 3000"
+  },
+  "keywords": [
+    "pwa",
+    "wellness",
+    "tracker",
+    "productivity"
+  ],
+  "author": "Benjamin Haddon",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BenWassa/drop.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
