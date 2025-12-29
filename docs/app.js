@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Click handler to open test suite
       devPill.addEventListener('click', () => {
         // Open test suite in new window
-        const testUrl = 'tests/index.html';
+        const testUrl = 'testing/pages/index.html';
         const testWindow = window.open(testUrl, 'drop-tests', 'width=1200,height=800');
         
         if (testWindow) {

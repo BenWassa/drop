@@ -14,7 +14,7 @@ const { test, expect } = require('@playwright/test');
 const path = require('path');
 
 // Configuration
-const BASE_URL = process.env.BASE_URL || `file://${path.resolve(__dirname, '../index.html')}`;
+const BASE_URL = process.env.BASE_URL || `file://${path.resolve(__dirname, '../../index.html')}`;
 const VIEWPORT_WIDTH = 360;
 const VIEWPORT_HEIGHT = 800;
 

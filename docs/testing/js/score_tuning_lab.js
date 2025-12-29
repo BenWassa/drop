@@ -257,7 +257,7 @@
     document.querySelector(`[onclick="showDomainTab('${domain}')"]`).classList.add('active');
   }
 
-  function loadSampleData(file = 'sample-data-30days.json') {
+  function loadSampleData(file = '../data/sample-data-30days.json') {
     if (typeof fetch !== 'function') {
       generateMockData();
       return Promise.resolve(false);

@@ -5,10 +5,10 @@
   "private": true,
   "scripts": {
     "test": "npm run test:dom",
-    "test:dom": "echo 'Open docs/tests/index.html in a browser to run DOM tests'",
-    "test:visual": "playwright test tests/visual.test.js",
-    "test:visual:update": "playwright test tests/visual.test.js --update-snapshots",
-    "test:visual:ui": "playwright test tests/visual.test.js --ui",
+    "test:dom": "echo 'Open docs/testing/pages/index.html in a browser to run DOM tests'",
+    "test:visual": "playwright test --config docs/testing/playwright.config.js",
+    "test:visual:update": "playwright test --config docs/testing/playwright.config.js --update-snapshots",
+    "test:visual:ui": "playwright test --config docs/testing/playwright.config.js --ui",
     "serve": "npx serve docs -p 3000",
     "dev": "npx serve docs -p 3000"
   },

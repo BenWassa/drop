@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: './js',
   testMatch: 'visual.test.js',
   
   /* Maximum time one test can run */
@@ -67,7 +67,7 @@ export default defineConfig({
   ],
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  outputDir: 'tests/test-results/',
+  outputDir: 'test-results/',
   
   /* Snapshot path template */
   snapshotPathTemplate: '{testDir}/screenshots/{testFilePath}/{arg}{ext}',

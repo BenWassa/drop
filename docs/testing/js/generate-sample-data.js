@@ -4,8 +4,8 @@
  * Sample data generator for the drop PWA.
  *
  * Usage:
- *   node docs/tests/generate-sample-data.js --days 5
- *   node docs/tests/generate-sample-data.js --days 30 --out docs/tests/custom.json
+ *   node docs/testing/js/generate-sample-data.js --days 5
+ *   node docs/testing/js/generate-sample-data.js --days 30 --out docs/testing/data/custom.json
  *
  * The generator is deterministic: the same number of days
  * always produces the same dataset for repeatable demos/tests.
@@ -225,7 +225,7 @@ function printHelp() {
 
 Options:
   --days <n>        Number of days to generate (default: 5)
-  --out <path>      Output file (defaults to docs/tests/sample-data-<n>days.json)
+  --out <path>      Output file (defaults to docs/testing/data/sample-data-<n>days.json)
   -h, --help        Show this message
 `);
 }
@@ -234,7 +234,7 @@ function writeSample(days, outPath) {
   const dataset = generateSample(days);
   const targetPath =
     outPath ||
-    path.join(__dirname, `sample-data-${String(days)}days.json`);
+    path.join(__dirname, '../data', `sample-data-${String(days)}days.json`);
 
   fs.writeFileSync(targetPath, JSON.stringify(dataset, null, 2) + '\n', 'utf8');
   return targetPath;

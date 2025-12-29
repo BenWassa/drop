@@ -19,8 +19,8 @@ Unit tests for DOM structure, accessibility, and component behavior.
    ```
 
 **Run:**
-- Open `index.html` in a browser
-- Or visit: `http://localhost:3000/tests/` (if running `npm run serve`)
+- Open `pages/index.html` in a browser
+- Or visit: `http://localhost:3000/testing/pages/` (if running `npm run serve`)
 
 **Coverage:**
 - Domain score display elements
@@ -40,11 +40,11 @@ Test data files for import/export functionality testing.
 
 **Generate on demand:**
 ```bash
-# 5-day dataset saved to docs/tests/sample-data-5days.json
-node docs/tests/generate-sample-data.js --days 5
+# 5-day dataset saved to docs/testing/data/sample-data-5days.json
+node docs/testing/js/generate-sample-data.js --days 5
 
 # 30-day dataset (same API; pass --out to customise path)
-node docs/tests/generate-sample-data.js --days 30
+node docs/testing/js/generate-sample-data.js --days 30
 ```
 
 **Usage:**
@@ -173,7 +173,7 @@ When you make intentional UI changes:
 
 **Pop-up blocked:**
 - Allow pop-ups for localhost
-- Or manually navigate to `tests/index.html`
+- Or manually navigate to `testing/pages/index.html`
 
 ## Adding New Tests
 
