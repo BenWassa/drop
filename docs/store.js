@@ -1,6 +1,25 @@
 // === STORE MODULE ===
 // Data persistence and state management for the drop life tracker app
 
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+
+// Firebase config (move to env vars in production)
+const firebaseConfig = {
+  apiKey: "AIzaSyChB4LIztDi0EcvSodWlNw8664-YDjZsrM",
+  authDomain: "drop-d8ad2.firebaseapp.com",
+  projectId: "drop-d8ad2",
+  storageBucket: "drop-d8ad2.firebasestorage.app",
+  messagingSenderId: "632897597373",
+  appId: "1:632897597373:web:bd855b412cd4f075a2ecd4",
+  measurementId: "G-BYSBF51J6D"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 const SAVE_DEBOUNCE_MS = 400;
 const SCHEMA_VERSION = 2;
@@ -18,6 +37,8 @@ const Store = {
   DB_KEY: 'lifeTrackerData',
   state: {},
   saveTimer: null,
+  userId: null,
+  firebaseReady: false,
   dailyKeys: ['wake', 'rest', 'run', 'strength', 'strength_level', 'skill', 'read_level', 'write_level', 'quadrant', 'meditation', 'energy', 'mood'],
   defaults: {
     wake: '', rest: '', run: 0, strength: false, strength_level: 0, skill: [],
@@ -38,6 +59,10 @@ const Store = {
 
   init() {
     console.log('🔧 Store.init called');
+
+    // Initialize Firebase auth
+    this.initFirebaseAuth();
+
     const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
     console.log('💾 Loaded from localStorage:', Object.keys(savedData).length, 'keys');
 
@@ -121,6 +146,65 @@ const Store = {
     }
 
     this.state.lastEntryDate = today;
+  },
+
+  initFirebaseAuth() {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        this.userId = user.uid;
+        this.firebaseReady = true;
+        console.log('🔥 Firebase auth ready, user ID:', this.userId);
+        this.syncWithFirestore();
+      } else {
+        console.log('🔥 No user signed in, signing in anonymously...');
+        signInAnonymously(auth).catch((error) => {
+          console.error('❌ Firebase anonymous sign-in failed:', error);
+        });
+      }
+    });
+  },
+
+  async syncWithFirestore() {
+    if (!this.userId) return;
+
+    try {
+      const docRef = doc(db, 'users', this.userId, 'data', 'state');
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const firestoreData = docSnap.data();
+        console.log('☁️ Loaded from Firestore:', Object.keys(firestoreData).length, 'keys');
+        // Merge Firestore data with local, preferring Firestore for conflicts
+        this.state = { ...this.cloneDefaults(), ...firestoreData };
+        // Re-run hydration after loading from Firestore
+        this.applyMigrations(this.state);
+        this.ensureMeta();
+        this.ensureEntries();
+        this.ensureSkillCollections();
+        this.state.meta.settings = this.collectSettings();
+        this.migrateOldMindFields();
+        this.hydrateDailyState();
+        console.log('📋 State updated from Firestore');
+      } else {
+        console.log('☁️ No Firestore data, will save local state');
+        this.saveToFirestore();
+      }
+    } catch (error) {
+      console.error('❌ Firestore sync failed:', error);
+      // Continue with localStorage
+    }
+  },
+
+  async saveToFirestore() {
+    if (!this.userId || !this.firebaseReady) return;
+
+    try {
+      const docRef = doc(db, 'users', this.userId, 'data', 'state');
+      await setDoc(docRef, this.state);
+      console.log('☁️ Saved to Firestore');
+    } catch (error) {
+      console.error('❌ Firestore save failed:', error);
+    }
   },
 
   applyEntryToState(entry) {
@@ -487,6 +571,9 @@ const Store = {
 
     try {
       localStorage.setItem(this.DB_KEY, JSON.stringify(payload));
+      
+      // Save to Firestore if ready
+      this.saveToFirestore();
       
       // Trigger automatic backup after state changes
       if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.handleStoreSave === 'function') {
