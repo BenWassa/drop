@@ -13,7 +13,6 @@
  */
 
 const Scoring = {
-
   /**
    * Calculate Sleep score
    * Based on sleep duration. Remains a quantitative measure.
@@ -81,8 +80,10 @@ const Scoring = {
 
     // Strength training: up to 35 points from 3 tiers
     const strengthLevel = state.strength_level || 0; // Assumes state.strength_level (0, 1, 2, 3)
-    if (strengthLevel === 1) rawScore += 15; // "Movement"
-    else if (strengthLevel === 2) rawScore += 25; // "Session"
+    if (strengthLevel === 1)
+      rawScore += 15; // "Movement"
+    else if (strengthLevel === 2)
+      rawScore += 25; // "Session"
     else if (strengthLevel === 3) rawScore += 35; // "Training"
 
     // Running: up to 50 points (logarithmic)
@@ -96,7 +97,7 @@ const Scoring = {
     // Soft dampening for unrealistic daily load
     // REMOVED: Scoring penalty - now only UI warning for awareness
     const activityCount = this.calculateActivityCountForState(state);
-    let adjustedRaw = Math.min(100, rawScore);
+    const adjustedRaw = Math.min(100, rawScore);
     // No reduction applied - warnings handled in UI
 
     return this.calcTrendScore('fitness', adjustedRaw, Store);
@@ -113,7 +114,13 @@ const Scoring = {
 
     const runCount = (Number(state.run) || 0) > 0 ? 1 : 0;
     const strengthCount = state.strength_level && state.strength_level > 0 ? 1 : 0;
-    const skillCount = Array.isArray(state.skill) ? (state.skill.length > 0 ? 1 : 0) : (state.skill ? 1 : 0);
+    const skillCount = Array.isArray(state.skill)
+      ? state.skill.length > 0
+        ? 1
+        : 0
+      : state.skill
+        ? 1
+        : 0;
     const readCount = (state.read_level || 0) > 0 ? 1 : 0;
     const writeCount = (state.write_level || 0) > 0 ? 1 : 0;
     const meditationCount = state.meditation ? 1 : 0;
@@ -197,7 +204,7 @@ const Scoring = {
       const normalizedMood = (effectiveMood + 100) / 200;
 
       // Calculate a combined metric. Mood is weighted slightly more.
-      const combinedMetric = (normalizedEnergy * 0.4) + (normalizedMood * 0.6);
+      const combinedMetric = normalizedEnergy * 0.4 + normalizedMood * 0.6;
       const bonusPoints = Math.round(combinedMetric * 30);
 
       rawScore += bonusPoints;
@@ -241,7 +248,7 @@ const Scoring = {
 
     const historicalAverage = weightSum > 0 ? weightedSum / weightSum : 0;
 
-    const blendedScore = (rawScore * 0.5) + (historicalAverage * 0.5);
+    const blendedScore = rawScore * 0.5 + historicalAverage * 0.5;
 
     // Ensure the adjusted score cannot exceed 99
     return Math.min(99, this.adjustToRealisticRange(blendedScore));
@@ -269,22 +276,22 @@ const Scoring = {
     // Map with a normal-CDF-like curve to cluster values around a target mean.
     // This pushes the bulk of realistic days into the 75-85 band while still
     // allowing exceptional days to approach the ceiling.
-  const mean = 0.72;   // centers most scores around 80
-  const sigma = 0.14;  // slightly wider spread to prevent excessive clustering near ceiling
+    const mean = 0.72; // centers most scores around 80
+    const sigma = 0.14; // slightly wider spread to prevent excessive clustering near ceiling
 
     // Helper: error function approximation (Abramowitz-Stegun)
     function erf(x) {
       // save the sign of x
       const sign = x >= 0 ? 1 : -1;
-      const a1 =  0.254829592;
+      const a1 = 0.254829592;
       const a2 = -0.284496736;
-      const a3 =  1.421413741;
+      const a3 = 1.421413741;
       const a4 = -1.453152027;
-      const a5 =  1.061405429;
-      const p  =  0.3275911;
+      const a5 = 1.061405429;
+      const p = 0.3275911;
 
       const t = 1 / (1 + p * Math.abs(x));
-      const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+      const y = 1 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
       return sign * y;
     }
 
@@ -347,13 +354,17 @@ const Scoring = {
     // Calculate mind score - NEEDS UPDATE for tiered system
     let mindScore = 0;
     const readLevel = entry.read_level || 0;
-    if (readLevel === 1) mindScore += 25; // "Leisure"
-    else if (readLevel === 2) mindScore += 35; // "Perspicacity"
+    if (readLevel === 1)
+      mindScore += 25; // "Leisure"
+    else if (readLevel === 2)
+      mindScore += 35; // "Perspicacity"
     else if (readLevel === 3) mindScore += 50; // "Erudition"
 
     const writeLevel = entry.write_level || 0;
-    if (writeLevel === 1) mindScore += 25; // "Journal"
-    else if (writeLevel === 2) mindScore += 35; // "Editorial"
+    if (writeLevel === 1)
+      mindScore += 25; // "Journal"
+    else if (writeLevel === 2)
+      mindScore += 35; // "Editorial"
     else if (writeLevel === 3) mindScore += 50; // "Treatise"
 
     // Calculate spirit score - NEEDS UPDATE for new system
@@ -371,7 +382,7 @@ const Scoring = {
       const normalizedMood = (mood + 100) / 200;
 
       // Calculate a combined metric. Mood is weighted slightly more.
-      const combinedMetric = (normalizedEnergy * 0.4) + (normalizedMood * 0.6);
+      const combinedMetric = normalizedEnergy * 0.4 + normalizedMood * 0.6;
       const bonusPoints = Math.round(combinedMetric * 30);
 
       spiritScore += bonusPoints;
@@ -381,7 +392,7 @@ const Scoring = {
       sleep: Math.min(99, sleepScore),
       fitness: Math.min(99, fitnessScore),
       mind: Math.min(99, mindScore),
-      spirit: Math.min(99, spiritScore)
+      spirit: Math.min(99, spiritScore),
     };
   },
 
@@ -435,9 +446,9 @@ const Scoring = {
 
     // Determine quadrant based on signs
     if (e >= 0 && m >= 0) return 1; // High energy, positive mood
-    if (e < 0 && m >= 0) return 2;  // Low energy, positive mood
-    if (e >= 0 && m < 0) return 3;  // High energy, negative mood
-    if (e < 0 && m < 0) return 4;   // Low energy, negative mood
+    if (e < 0 && m >= 0) return 2; // Low energy, positive mood
+    if (e >= 0 && m < 0) return 3; // High energy, negative mood
+    if (e < 0 && m < 0) return 4; // Low energy, negative mood
 
     return 0; // Fallback to neutral
   },
@@ -463,5 +474,5 @@ const Scoring = {
     }
 
     return duration;
-  }
+  },
 };

@@ -3,7 +3,7 @@ import { Store } from './store.js';
 
 if (typeof window !== 'undefined') {
   window.DropApp = window.DropApp || {};
-  
+
   // Expose test hooks immediately so tests can access them
   // These will be available before DOMContentLoaded fires
   window.DropApp.testHooks = {
@@ -13,12 +13,11 @@ if (typeof window !== 'undefined') {
     getDefaults: () => Store.cloneDefaults(),
     validateImport: (payload) => Store.validateImport(payload),
     merge: (payload) => Store.merge(payload),
-    update: (key, value) => Store.update(key, value)
+    update: (key, value) => Store.update(key, value),
   };
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
   const DEV_MODE = false;
@@ -37,17 +36,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       UI.removeDevElements();
       UI.setVisionFields(Store.state);
       this.moodAxes = Scoring.getQuadrantPreset(Store.state.quadrant);
-      
+
       // Expose App globally BEFORE syncDailyUI() so ui.js can access it
       if (typeof window !== 'undefined') {
         window.App = App;
       }
-      
+
       UI.syncDailyUI();
 
       // Check if loading overlay should be skipped (dev mode toggle)
       const skipLoader = DEV_MODE && localStorage.getItem('dev_disable_loader') === 'true';
-      
+
       if (skipLoader) {
         // Skip loading overlay entirely
         UI.showLoading(false);
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const animDurationMs = 5000; // matches the CSS breath animation duration
         UI.showLoading(true);
       }
-      
+
       this.updateScores();
       this.bindEvents();
       this.registerServiceWorker();
@@ -97,11 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const testElement = document.createElement('div');
             testElement.style.display = 'none';
             document.body.appendChild(testElement);
-            
+
             // Check if CSS custom properties are available (indicates our stylesheet loaded)
             const hasCSS = getComputedStyle(testElement).getPropertyValue('--color-bg') !== '';
             document.body.removeChild(testElement);
-            
+
             return hasCSS;
           };
 
@@ -161,30 +160,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         read: Store.state.read,
         write: Store.state.write,
         meditation: Store.state.meditation,
-        quadrant: Store.state.quadrant
+        quadrant: Store.state.quadrant,
       });
-      
+
       const scores = {
         sleep: Scoring.calcSleep(Store.state, Store),
         fitness: Scoring.calcFitness(Store.state, Store),
         mind: Scoring.calcMind(Store.state, Store),
-        spirit: Scoring.calcSpirit(Store.state, Store)
+        spirit: Scoring.calcSpirit(Store.state, Store),
       };
-      
+
       console.log('📈 Calculated scores:', scores);
-      
+
       Store.recordHistory(scores);
       const streaks = Analytics.calculateStreaks();
       UI.renderScores(scores, streaks);
       Analytics.renderWeeklyHeatmap();
-      
+
       console.log('✅ Scores updated and rendered');
     },
 
     bindEvents() {
       UI.bindHomeActions();
       // Open overlays
-      UI.elements.cards.forEach(card => {
+      UI.elements.cards.forEach((card) => {
         card.addEventListener('click', () => {
           const domain = card.dataset.domain;
           UI.loadOverlayData(domain);
@@ -193,8 +192,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       // Close overlays and handle inputs via event delegation
-      UI.elements.overlays.forEach(overlay => {
-        overlay.addEventListener('click', e => {
+      UI.elements.overlays.forEach((overlay) => {
+        overlay.addEventListener('click', (e) => {
           if (e.target.classList.contains('close-btn')) {
             UI.toggleOverlay(overlay.dataset.domain, false);
           }
@@ -209,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               }
 
               if (isToggleGroup) {
-                const newValue = !Boolean(Store.state[type]);
+                const newValue = !Store.state[type];
                 Store.update(type, newValue);
                 UI.updateToggleButton(type, newValue);
                 return;
@@ -232,9 +231,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             UI.elements.inputs.runValue.textContent = newRunValue;
           }
         });
-        
+
         // Time inputs
-        overlay.addEventListener('change', e => {
+        overlay.addEventListener('change', (e) => {
           if (e.target.matches('#wake-time')) {
             Store.update('wake', e.target.value);
           }
@@ -245,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       // Nav buttons
-      UI.elements.navButtons.forEach(btn => {
+      UI.elements.navButtons.forEach((btn) => {
         btn.addEventListener('click', () => {
           const page = btn.dataset.page;
           if (!page) return;
@@ -283,19 +282,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       UI.bindSettingsMenu();
     },
 
-
-
     // --- SCORE CALCULATION LOGIC (Trend-based with 7-day weighted average) ---
-    
+
     /**
      * Calculates a trend-based score that considers:
      * 1. Today's raw activity score (40% weight)
      * 2. 7-day weighted average (60% weight) - recent days weighted more heavily
      * 3. Baseline adjustment to center around 80 for typical performance
      * 4. Floor and ceiling to prevent extreme values (never 0 or 100)
-     * 
+     *
      * Returns null if insufficient data (< 7 days) to establish baseline
-     * 
+     *
      * NOTE: This functionality has been moved to scoring.js module
      * All scoring logic is now in the Scoring object for better modularity
      */
@@ -310,60 +307,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       return UI.calculateSleepHours();
     },
 
-
-
     /**
      * Analyzes the last 7 days of historical data and determines the heatmap mode.
      */
-
 
     /**
      * Renders the Weekly Trajectory Heatmap component based on the weekly data.
      */
 
-
     /**
      * Maps raw activity score (0-100) to heatmap intensity level.
      */
 
-
-
-
-
-
-
-
-
-          high: 'You’re staying grounded and connected to what matters most.',
-
-
-
-
-
-
-
-
-
-
-
-
+    high: 'You’re staying grounded and connected to what matters most.',
 
     registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js', { type: 'module' })
-          .then(registration => {
+        navigator.serviceWorker
+          .register('sw.js', { type: 'module' })
+          .then((registration) => {
             console.log('Service Worker registered successfully:', registration);
-            
+
             // Check for updates immediately on startup
             registration.update();
-            
+
             // Check for updates every 5 minutes when the app is visible
-            setInterval(() => {
-              if (document.visibilityState === 'visible') {
-                registration.update();
-              }
-            }, 5 * 60 * 1000); // 5 minutes
-            
+            setInterval(
+              () => {
+                if (document.visibilityState === 'visible') {
+                  registration.update();
+                }
+              },
+              5 * 60 * 1000
+            ); // 5 minutes
+
             // Listen for service worker updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
@@ -377,7 +354,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               }
             });
           })
-          .catch(error => console.log('Service Worker registration failed:', error));
+          .catch((error) => console.log('Service Worker registration failed:', error));
       }
     },
 
@@ -404,14 +381,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         font-size: 14px;
       `;
-      
+
       document.body.appendChild(updateBanner);
-      
+
       // Handle refresh button click
       document.getElementById('update-refresh-btn').addEventListener('click', () => {
         window.location.reload();
       });
-      
+
       // Auto-refresh after 30 seconds if user doesn't click
       setTimeout(() => {
         if (document.body.contains(updateBanner)) {
@@ -422,14 +399,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     loadAppVersion() {
       fetch('manifest.json')
-        .then(response => response.json())
-        .then(manifest => {
+        .then((response) => response.json())
+        .then((manifest) => {
           const versionElement = document.getElementById('app-version');
           if (versionElement && manifest.version) {
             versionElement.textContent = manifest.version;
           }
         })
-        .catch(error => console.warn('Could not load app version:', error));
+        .catch((error) => console.warn('Could not load app version:', error));
     },
 
     setupDevPill() {
@@ -447,7 +424,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Open test suite in new window
         const testUrl = 'testing/pages/index.html';
         const testWindow = window.open(testUrl, 'drop-tests', 'width=1200,height=800');
-        
+
         if (testWindow) {
           UI.toast('Opening test suite...', 2000);
         } else {
@@ -472,7 +449,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         loaderToggle.addEventListener('click', () => {
           const isCurrentlyDisabled = loaderToggle.classList.contains('disabled');
-          
+
           if (isCurrentlyDisabled) {
             // Enable loader
             localStorage.removeItem('dev_disable_loader');
@@ -494,7 +471,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (clearDataBtn) {
         clearDataBtn.hidden = false;
         clearDataBtn.addEventListener('click', async () => {
-          const confirmClear = confirm('Clear all app data, caches, service workers, and cookies? This will reload the page.');
+          const confirmClear = confirm(
+            'Clear all app data, caches, service workers, and cookies? This will reload the page.'
+          );
           if (!confirmClear) return;
 
           try {
@@ -505,26 +484,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Clear caches
             if (window.caches && caches.keys) {
               const keys = await caches.keys();
-              await Promise.all(keys.map(k => caches.delete(k)));
+              await Promise.all(keys.map((k) => caches.delete(k)));
             }
 
             // Unregister service workers
             if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
               const regs = await navigator.serviceWorker.getRegistrations();
-              await Promise.all(regs.map(r => r.unregister()));
+              await Promise.all(regs.map((r) => r.unregister()));
             }
 
             // Attempt to clear cookies (best-effort)
             try {
-              document.cookie.split(';').forEach(function(c) {
-                document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
+              document.cookie.split(';').forEach(function (c) {
+                document.cookie = c
+                  .replace(/^ +/, '')
+                  .replace(/=.*/, '=;expires=' + new Date(0).toUTCString() + ';path=/');
               });
             } catch (e) {
               console.warn('Failed to clear cookies programmatically:', e);
             }
 
             // Reset app state to defaults (after storage is cleared)
-            if (window.DropApp && DropApp.Store && typeof DropApp.Store.clearAllData === 'function') {
+            if (
+              window.DropApp &&
+              DropApp.Store &&
+              typeof DropApp.Store.clearAllData === 'function'
+            ) {
               DropApp.Store.clearAllData();
             }
 
@@ -554,7 +539,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         'icons/fitness.svg',
         'icons/sleep.svg',
         'icons/mind.svg',
-        'icons/spirit.svg'
+        'icons/spirit.svg',
       ];
 
       const checkImage = (src) => {
@@ -567,10 +552,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
 
       const results = await Promise.all(criticalImages.map(checkImage));
-      const failed = results.filter(r => !r.loaded);
+      const failed = results.filter((r) => !r.loaded);
 
       if (failed.length > 0) {
-        console.warn('Failed to load critical resources:', failed.map(f => f.src));
+        console.warn(
+          'Failed to load critical resources:',
+          failed.map((f) => f.src)
+        );
       }
 
       // Check if styles.css is loaded by checking for a known CSS variable
@@ -589,9 +577,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       return {
         imagesOk: failed.length === 0,
         cssOk: cssLoaded,
-        allOk: failed.length === 0 && cssLoaded
+        allOk: failed.length === 0 && cssLoaded,
       };
-    }
+    },
   };
 
   // Expose App, UI, and Analytics to window (testHooks already exposed at top of file)
@@ -602,7 +590,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.DropApp.Analytics = Analytics;
   }
 
-  const isTestEnvironment = document.body && document.body.dataset && document.body.dataset.dropTest === 'true';
+  const isTestEnvironment =
+    document.body && document.body.dataset && document.body.dataset.dropTest === 'true';
 
   if (isTestEnvironment) {
     return;
@@ -617,9 +606,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     Store.init();
-    
+
     App.init();
     App.setupDevPill();
   })();
-
 });

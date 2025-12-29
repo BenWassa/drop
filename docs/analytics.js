@@ -12,13 +12,14 @@ const Analytics = {
     const streaks = {};
     const denominator = recent.length === 0 ? 7 : recent.length;
 
-    domains.forEach(domain => {
+    domains.forEach((domain) => {
       const activeDays = recent.reduce((count, entry) => {
         const value = Number(entry?.scores?.[domain]);
         return count + (Number.isFinite(value) && value > 0 ? 1 : 0);
       }, 0);
       const labelDenominator = denominator === 1 ? 'day' : 'days';
-      const totalLabel = recent.length === 0 ? `7 ${labelDenominator}` : `${denominator} ${labelDenominator}`;
+      const totalLabel =
+        recent.length === 0 ? `7 ${labelDenominator}` : `${denominator} ${labelDenominator}`;
       streaks[domain] = `${activeDays} of ${totalLabel}`;
     });
 
@@ -31,7 +32,8 @@ const Analytics = {
   getWeeklyData() {
     const domains = ['sleep', 'fitness', 'mind', 'spirit'];
     const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
-    const history = typeof Store.getHistory === 'function' ? Store.getHistory(30, { includeArchived: true }) : [];
+    const history =
+      typeof Store.getHistory === 'function' ? Store.getHistory(30, { includeArchived: true }) : [];
     const historyMap = history.reduce((acc, entry) => {
       acc[entry.date] = entry;
       return acc;
@@ -61,13 +63,13 @@ const Analytics = {
         fullDayName: fullDayNames[dayIndex],
         dateKey,
         scores: entry.scores || { sleep: 0, fitness: 0, mind: 0, spirit: 0 },
-        isToday: dateKey === today
+        isToday: dateKey === today,
       });
     }
 
     const totalDays = last7Days.length || 1;
     const activeDaySet = new Set();
-    const domainConsistencies = domains.map(domain => {
+    const domainConsistencies = domains.map((domain) => {
       const activeDays = last7Days.reduce((count, day) => {
         const score = Number(day.scores[domain]) || 0;
         if (score >= 50) {
@@ -79,7 +81,7 @@ const Analytics = {
       return {
         domain,
         count: activeDays,
-        consistency: activeDays / totalDays
+        consistency: activeDays / totalDays,
       };
     });
 
@@ -107,15 +109,17 @@ const Analytics = {
       summary = 'Ready to start? Log an entry now to begin your weekly momentum.';
     } else if (mode === 'V2') {
       const neededDays = Math.max(0, requiredDays - weakestDomain.count);
-      const deficitStatement = weakestDomain.count === 0
-        ? 'not logged this week'
-        : `only tracked ${weakestDomain.count} of ${totalDays} days`;
-      const actionStatement = neededDays > 0
-        ? `Hit it ${neededDays === 1 ? 'once' : `${neededDays} more times`} this week to rebound.`
-        : 'Focus on the missing action today to boost alignment.';
+      const deficitStatement =
+        weakestDomain.count === 0
+          ? 'not logged this week'
+          : `only tracked ${weakestDomain.count} of ${totalDays} days`;
+      const actionStatement =
+        neededDays > 0
+          ? `Hit it ${neededDays === 1 ? 'once' : `${neededDays} more times`} this week to rebound.`
+          : 'Focus on the missing action today to boost alignment.';
       summary = `${formatDomain(weakestDomain.domain)} shows a clear deficit—${deficitStatement}. ${actionStatement}`;
     } else {
-      const allEven = domainConsistencies.every(d => d.count === strongestDomain.count);
+      const allEven = domainConsistencies.every((d) => d.count === strongestDomain.count);
       if (allEven) {
         summary = `Exceptional consistency! All domains tracked on ${strongestDomain.count} of ${totalDays} days.`;
       } else {
@@ -139,22 +143,28 @@ const Analytics = {
     const formatDomain = (domain) => domain.charAt(0).toUpperCase() + domain.slice(1);
 
     // Build day labels as individual elements
-    const dayLabelsHTML = last7Days.map(day => {
-      const tooltip = day.isToday ? 'Today' : day.fullDayName;
-      return `<div class="day-label" title="${tooltip}">${day.dayLabel}</div>`;
-    }).join('');
+    const dayLabelsHTML = last7Days
+      .map((day) => {
+        const tooltip = day.isToday ? 'Today' : day.fullDayName;
+        return `<div class="day-label" title="${tooltip}">${day.dayLabel}</div>`;
+      })
+      .join('');
 
     // Build rows for each domain
-    const rowsHTML = domains.map(domain => {
-      const cellsHTML = last7Days.map(day => {
-        const score = Number(day.scores[domain]) || 0;
-        const intensity = this.getHeatmapIntensity(score);
-        const tooltip = `${formatDomain(domain)} on ${day.fullDayName}${day.isToday ? ' (Today)' : ''}: ${score} pts`;
-        return `<div class="heatmap-cell" data-intensity="${intensity}" title="${tooltip}"></div>`;
-      }).join('');
+    const rowsHTML = domains
+      .map((domain) => {
+        const cellsHTML = last7Days
+          .map((day) => {
+            const score = Number(day.scores[domain]) || 0;
+            const intensity = this.getHeatmapIntensity(score);
+            const tooltip = `${formatDomain(domain)} on ${day.fullDayName}${day.isToday ? ' (Today)' : ''}: ${score} pts`;
+            return `<div class="heatmap-cell" data-intensity="${intensity}" title="${tooltip}"></div>`;
+          })
+          .join('');
 
-      return `<div class="domain-label">${formatDomain(domain)}</div>${cellsHTML}`;
-    }).join('');
+        return `<div class="domain-label">${formatDomain(domain)}</div>${cellsHTML}`;
+      })
+      .join('');
 
     container.innerHTML = `
       <div class="heatmap-grid">
@@ -177,7 +187,7 @@ const Analytics = {
     if (rawScore < 50) return 'low';
     if (rawScore < 80) return 'med';
     return 'high';
-  }
+  },
 };
 
 // Make Analytics available globally

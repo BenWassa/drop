@@ -31,7 +31,7 @@ const Backup = {
   metadata: {
     lastBackupISO: '',
     lastDailyISO: '',
-    lastHash: ''
+    lastHash: '',
   },
 
   async persistHandle(handle) {
@@ -53,9 +53,10 @@ const Backup = {
   getState: null,
 
   async init({ getState } = {}) {
-    this.getState = typeof getState === 'function'
-      ? getState
-      : () => (typeof Store !== 'undefined' ? Store.state : {});
+    this.getState =
+      typeof getState === 'function'
+        ? getState
+        : () => (typeof Store !== 'undefined' ? Store.state : {});
 
     this.supported = this.checkSupport();
     this.loadMetadata();
@@ -64,7 +65,7 @@ const Backup = {
       this.updateUI({
         statusText: 'Local folder backups are not available on this device.',
         unsupported: true,
-        ready: false
+        ready: false,
       });
       return;
     }
@@ -78,13 +79,13 @@ const Backup = {
 
     // Check if backup is configured (handle exists)
     const isConfigured = !!this.dirHandle;
-    
+
     if (isConfigured) {
       // Don't validate permissions automatically - just show as configured
       // Permissions will be requested when user tries to backup
       this.updateUI({
         statusText: 'Backup folder configured. Ready to backup.',
-        ready: true
+        ready: true,
       });
     } else {
       this.updateUI({ statusText: 'Choose a folder to store automatic backups.' });
@@ -92,9 +93,11 @@ const Backup = {
   },
 
   checkSupport() {
-    return typeof window !== 'undefined'
-      && 'showDirectoryPicker' in window
-      && typeof indexedDB !== 'undefined';
+    return (
+      typeof window !== 'undefined' &&
+      'showDirectoryPicker' in window &&
+      typeof indexedDB !== 'undefined'
+    );
   },
 
   loadMetadata() {
@@ -167,7 +170,7 @@ const Backup = {
             const file = await handle.getFile();
             const fileDate = new Date(file.lastModified);
             const daysSinceModified = (Date.now() - fileDate.getTime()) / (1000 * 60 * 60 * 24);
-            
+
             if (daysSinceModified <= 30) {
               recentBackups.push({ name, date: fileDate, size: file.size });
             }
@@ -185,7 +188,6 @@ const Backup = {
 
       // If no recent backups but folder exists, we might need to create new backups
       return true;
-
     } catch (error) {
       console.error('Backup: Error validating existing backup', error);
       return false;
@@ -201,30 +203,32 @@ const Backup = {
       req.onsuccess = () => {
         const handle = req.result || null;
         db.close();
-        
+
         // If we have a handle, validate it before returning
         if (handle) {
           this.dirHandle = handle;
-          this.validateExistingBackup().then(isValid => {
-            if (isValid) {
-              resolve(handle);
-            } else {
-              // Handle is stale or invalid, clear it from storage
-              console.log('Backup: Stored handle is stale, clearing from storage');
+          this.validateExistingBackup()
+            .then((isValid) => {
+              if (isValid) {
+                resolve(handle);
+              } else {
+                // Handle is stale or invalid, clear it from storage
+                console.log('Backup: Stored handle is stale, clearing from storage');
+                this.dirHandle = null;
+                this.clearStoredHandle().catch((error) => {
+                  console.warn('Backup: Failed to clear stale handle from storage', error);
+                });
+                resolve(null);
+              }
+            })
+            .catch((error) => {
+              console.warn('Backup: Error validating loaded handle, clearing stale handle', error);
               this.dirHandle = null;
-              this.clearStoredHandle().catch(error => {
-                console.warn('Backup: Failed to clear stale handle from storage', error);
+              this.clearStoredHandle().catch((clearError) => {
+                console.warn('Backup: Failed to clear stale handle from storage', clearError);
               });
               resolve(null);
-            }
-          }).catch(error => {
-            console.warn('Backup: Error validating loaded handle, clearing stale handle', error);
-            this.dirHandle = null;
-            this.clearStoredHandle().catch(clearError => {
-              console.warn('Backup: Failed to clear stale handle from storage', clearError);
             });
-            resolve(null);
-          });
         } else {
           resolve(null);
         }
@@ -253,8 +257,13 @@ const Backup = {
           return result === 'granted';
         } catch (error) {
           // Handle stale handles that fail even with user activation
-          if (error.name === 'SecurityError' && error.message.includes('User activation is required')) {
-            console.warn('Backup: Handle appears stale, user activation required but not available');
+          if (
+            error.name === 'SecurityError' &&
+            error.message.includes('User activation is required')
+          ) {
+            console.warn(
+              'Backup: Handle appears stale, user activation required but not available'
+            );
             return false;
           }
           throw error;
@@ -269,8 +278,13 @@ const Backup = {
           return result === 'granted';
         } catch (error) {
           // Handle stale handles that fail even with user activation
-          if (error.name === 'SecurityError' && error.message.includes('User activation is required')) {
-            console.warn('Backup: Handle appears stale, user activation required but not available');
+          if (
+            error.name === 'SecurityError' &&
+            error.message.includes('User activation is required')
+          ) {
+            console.warn(
+              'Backup: Handle appears stale, user activation required but not available'
+            );
             return false;
           }
           throw error;
@@ -294,14 +308,21 @@ const Backup = {
     return 'Backup folder linked. Backups run automatically after changes.';
   },
 
-  updateUI({ statusText = '', ready, needsPermission = false, unsupported = false, busy = this.busy } = {}) {
+  updateUI({
+    statusText = '',
+    ready,
+    needsPermission = false,
+    unsupported = false,
+    busy = this.busy,
+  } = {}) {
     if (typeof UI === 'undefined' || typeof UI.setBackupState !== 'function') {
       return;
     }
 
-    const resolvedReady = typeof ready === 'boolean'
-      ? ready
-      : Boolean(this.dirHandle && !needsPermission && !unsupported);
+    const resolvedReady =
+      typeof ready === 'boolean'
+        ? ready
+        : Boolean(this.dirHandle && !needsPermission && !unsupported);
 
     this.ready = resolvedReady;
     UI.setBackupState({
@@ -309,7 +330,7 @@ const Backup = {
       ready: resolvedReady,
       needsPermission,
       unsupported,
-      busy
+      busy,
     });
   },
 
@@ -321,13 +342,16 @@ const Backup = {
       this.updateUI({
         statusText: 'Local folder backups are not available on this device.',
         unsupported: true,
-        ready: false
+        ready: false,
       });
       return;
     }
 
     try {
-      const rootHandle = await window.showDirectoryPicker({ id: 'drop-backups', mode: 'readwrite' });
+      const rootHandle = await window.showDirectoryPicker({
+        id: 'drop-backups',
+        mode: 'readwrite',
+      });
       const dirHandle = await rootHandle.getDirectoryHandle('drop-backups', { create: true });
       const granted = await this.ensurePermission(dirHandle, 'readwrite', true);
 
@@ -342,7 +366,11 @@ const Backup = {
       this.metadata.lastHash = '';
       this.saveMetadata();
       this.ready = true;
-      this.updateUI({ statusText: 'Backup folder connected. Creating first backup…', ready: true, busy: true });
+      this.updateUI({
+        statusText: 'Backup folder connected. Creating first backup…',
+        ready: true,
+        busy: true,
+      });
       await this.performBackup('setup');
       if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
         UI.notify('Backup folder connected');
@@ -360,7 +388,7 @@ const Backup = {
         this.updateUI({
           statusText: 'Permission required. Choose the folder again and allow access.',
           ready: false,
-          needsPermission: true
+          needsPermission: true,
         });
       } else {
         if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
@@ -369,7 +397,7 @@ const Backup = {
         this.updateUI({
           statusText: 'Unable to access folder. Choose a different location.',
           ready: false,
-          needsPermission: true
+          needsPermission: true,
         });
       }
     }
@@ -425,14 +453,18 @@ const Backup = {
       return false;
     }
 
-    const hasPermission = await this.ensurePermission(this.dirHandle, 'readwrite', reason !== 'auto');
+    const hasPermission = await this.ensurePermission(
+      this.dirHandle,
+      'readwrite',
+      reason !== 'auto'
+    );
     if (!hasPermission) {
       if (reason === 'manual') {
         // For manual backups, show error and don't proceed
         this.updateUI({
           statusText: 'Permission denied. Choose backup folder again.',
           ready: false,
-          needsPermission: true
+          needsPermission: true,
         });
         // Clear the handle so user can reconfigure
         this.dirHandle = null;
@@ -441,7 +473,7 @@ const Backup = {
         // For auto backups, just skip silently
         this.updateUI({
           statusText: 'Backup folder configured. Ready to backup.',
-          ready: true
+          ready: true,
         });
       }
       return false;
@@ -453,7 +485,7 @@ const Backup = {
     let uiState = {
       statusText: this.describeCurrentStatus(),
       ready: true,
-      needsPermission: false
+      needsPermission: false,
     };
 
     try {
@@ -489,7 +521,7 @@ const Backup = {
       uiState = {
         statusText: 'Backup failed. Reconnect the folder to continue.',
         ready: false,
-        needsPermission: true
+        needsPermission: true,
       };
       // Clear the potentially stale handle so user can reconfigure
       this.dirHandle = null;
@@ -508,19 +540,24 @@ const Backup = {
     const rawState = this.getState ? this.getState() : {};
     const safeState = JSON.parse(JSON.stringify(rawState || {}));
 
-    if (safeState && typeof safeState === 'object' && safeState.entries && typeof safeState.entries === 'object') {
+    if (
+      safeState &&
+      typeof safeState === 'object' &&
+      safeState.entries &&
+      typeof safeState.entries === 'object'
+    ) {
       const dates = Object.keys(safeState.entries).sort();
       if (dates.length > this.MAX_ENTRY_SNAPSHOTS) {
         const trimmed = dates.length - this.MAX_ENTRY_SNAPSHOTS;
         const keepDates = dates.slice(-this.MAX_ENTRY_SNAPSHOTS);
         const pruned = {};
-        keepDates.forEach(date => {
+        keepDates.forEach((date) => {
           pruned[date] = safeState.entries[date];
         });
         safeState.entries = pruned;
         safeState._backupMeta = {
           ...(safeState._backupMeta || {}),
-          trimmedEntries: trimmed
+          trimmedEntries: trimmed,
         };
       }
     }
@@ -531,9 +568,9 @@ const Backup = {
       exportedAt: new Date().toISOString(),
       metadata: {
         entriesRetained: safeState.entries ? Object.keys(safeState.entries).length : 0,
-        lastEntryDate: safeState.lastEntryDate || null
+        lastEntryDate: safeState.lastEntryDate || null,
       },
-      state: safeState
+      state: safeState,
     };
 
     return JSON.stringify(payload, null, 2);
@@ -583,7 +620,9 @@ const Backup = {
     const encoder = new TextEncoder();
     const data = encoder.encode(input);
     const digest = await window.crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
   },
 
   async clearBackupData() {
@@ -592,11 +631,11 @@ const Backup = {
       return new Promise((resolve, reject) => {
         const tx = db.transaction(this.STORE_NAME, 'readwrite');
         const store = tx.objectStore(this.STORE_NAME);
-        
+
         // Delete both the handle and metadata
         const deleteHandle = store.delete(this.HANDLE_KEY);
         const deleteMetadata = store.delete(this.METADATA_KEY);
-        
+
         let completed = 0;
         const checkComplete = () => {
           completed++;
@@ -607,7 +646,7 @@ const Backup = {
             this.metadata = {
               lastBackupISO: '',
               lastDailyISO: '',
-              lastHash: ''
+              lastHash: '',
             };
             this.saveMetadata(); // This will save empty metadata
             this.updateUI({ statusText: 'Choose a folder to store automatic backups.' });
@@ -616,10 +655,10 @@ const Backup = {
             resolve();
           }
         };
-        
+
         deleteHandle.onsuccess = checkComplete;
         deleteMetadata.onsuccess = checkComplete;
-        
+
         deleteHandle.onerror = () => {
           console.warn('Backup: Failed to delete handle from IndexedDB');
           checkComplete();
@@ -674,9 +713,12 @@ const Backup = {
     if (date.toDateString() === yesterday.toDateString()) {
       return `Yesterday at ${timeFormatter.format(date)}`;
     }
-    const formatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
     return formatter.format(date);
-  }
+  },
 };
 
 if (typeof window !== 'undefined') {

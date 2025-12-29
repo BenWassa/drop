@@ -12,7 +12,13 @@
     "test:visual:ui": "playwright test --config docs/testing/playwright.config.js --ui",
     "serve": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000 -s",
-    "version:sync": "node update-version.js"
+    "version:sync": "node update-version.js",
+    "lint": "eslint . --ext .js,.mjs",
+    "lint:fix": "eslint . --ext .js,.mjs --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "build": "npm run lint && npm run format:check && npm run test",
+    "precommit": "npm run lint && npm run format:check"
   },
   "keywords": [
     "pwa",
@@ -23,7 +29,9 @@
   "author": "Benjamin Haddon",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.40.0"
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
   },
   "repository": {
     "type": "git",

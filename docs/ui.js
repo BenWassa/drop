@@ -29,7 +29,7 @@ const UI = {
       openBtn: document.getElementById('settings-icon-btn'),
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
-      historyBtn: document.getElementById('settings-history-btn')
+      historyBtn: document.getElementById('settings-history-btn'),
     },
     historyOverlay: {
       overlay: document.getElementById('history-overlay'),
@@ -43,14 +43,14 @@ const UI = {
       editForm: document.getElementById('history-edit-form'),
       cancelBtn: document.getElementById('edit-cancel-btn'),
       addBtn: document.getElementById('history-add-btn'),
-      title: document.getElementById('history-title')
+      title: document.getElementById('history-title'),
     },
     visionInputs: {
       theme: document.getElementById('vision-theme'),
       sleep: document.getElementById('vision-sleep-focus'),
       fitness: document.getElementById('vision-fitness-focus'),
       mind: document.getElementById('vision-mind-focus'),
-      spirit: document.getElementById('vision-spirit-focus')
+      spirit: document.getElementById('vision-spirit-focus'),
     },
     scoreAnnouncer: document.getElementById('score-announcer'),
     gratitude: {
@@ -64,37 +64,37 @@ const UI = {
       sleepSummary: document.getElementById('gratitude-sleep-summary'),
       runSummary: document.getElementById('gratitude-run-summary'),
       meditationSummary: document.getElementById('gratitude-meditation-summary'),
-      progressBars: document.querySelectorAll('[data-progress-domain]')
+      progressBars: document.querySelectorAll('[data-progress-domain]'),
     },
     gratitudeCards: {
       highlight: document.querySelector('.insight-card--highlight'),
       focus: document.querySelector('.insight-card--focus'),
       momentum: document.querySelector('.insight-card--momentum'),
       scoreboard: document.querySelector('.insight-card--scoreboard'),
-      reflections: document.querySelector('.insight-card--reflections')
+      reflections: document.querySelector('.insight-card--reflections'),
     },
     scoreDisplays: {
       sleep: {
         score: document.getElementById('sleep-score'),
-        meter: document.querySelector('[data-domain-meter="sleep"]')
+        meter: document.querySelector('[data-domain-meter="sleep"]'),
       },
       fitness: {
         score: document.getElementById('fitness-score'),
-        meter: document.querySelector('[data-domain-meter="fitness"]')
+        meter: document.querySelector('[data-domain-meter="fitness"]'),
       },
       mind: {
         score: document.getElementById('mind-score'),
-        meter: document.querySelector('[data-domain-meter="mind"]')
+        meter: document.querySelector('[data-domain-meter="mind"]'),
       },
       spirit: {
         score: document.getElementById('spirit-score'),
-        meter: document.querySelector('[data-domain-meter="spirit"]')
-      }
+        meter: document.querySelector('[data-domain-meter="spirit"]'),
+      },
     },
     quarterProgress: {
       fill: document.getElementById('quarter-progress-fill'),
       quarterLabel: document.getElementById('quarter-label'),
-      weekLabel: document.getElementById('week-label')
+      weekLabel: document.getElementById('week-label'),
     },
     inputs: {
       wakeTime: document.getElementById('wake-time'),
@@ -113,30 +113,38 @@ const UI = {
       moodDot: document.getElementById('spirit-mood-dot'),
     },
     heatmapContainer: document.getElementById('heatmap-container'),
-    heatmapSummary: document.getElementById('heatmap-summary')
+    heatmapSummary: document.getElementById('heatmap-summary'),
   },
   visionHints: {},
   toastTimer: null,
 
-    // Helper function to parse date keys correctly as local dates
-    parseDateKey(dateKey) {
+  // Helper function to parse date keys correctly as local dates
+  parseDateKey(dateKey) {
     if (window.DEV_MODE) {
       console.log('🔍 parseDateKey input:', dateKey);
     }
     const [year, month, day] = dateKey.split('-').map(Number);
     const date = new Date(year, month - 1, day);
     if (window.DEV_MODE) {
-      console.log('📅 parseDateKey result:', date, 'ISO:', date.toISOString(), 'Locale:', date.toLocaleDateString());
+      console.log(
+        '📅 parseDateKey result:',
+        date,
+        'ISO:',
+        date.toISOString(),
+        'Locale:',
+        date.toLocaleDateString()
+      );
     }
     return date;
-    },  renderScores(scores, streaks = {}) {
+  },
+  renderScores(scores, streaks = {}) {
     const announcements = [];
     const history = typeof Store.getHistory === 'function' ? Store.getHistory(30) : [];
     const placeholderScore = '--';
 
     // Count days with valid baseline data (must have wake AND rest)
     const entries = Store.state.entries || {};
-    const daysLogged = Object.values(entries).filter(entry => {
+    const daysLogged = Object.values(entries).filter((entry) => {
       return entry && entry.wake && entry.rest;
     }).length;
 
@@ -175,12 +183,17 @@ const UI = {
         display.score.textContent = scoreText;
       }
       if (display.meter) {
-        display.meter.setAttribute('aria-valuenow', scoreText === placeholderScore ? '0' : scoreText);
+        display.meter.setAttribute(
+          'aria-valuenow',
+          scoreText === placeholderScore ? '0' : scoreText
+        );
         // Score rings are now static CSS - no JavaScript manipulation needed
       }
 
       if (previousValue !== null && previousValue !== scoreText && scoreText !== placeholderScore) {
-        announcements.push(`${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${scoreText}`);
+        announcements.push(
+          `${domain.charAt(0).toUpperCase() + domain.slice(1)} score updated to ${scoreText}`
+        );
       }
     }
 
@@ -190,9 +203,11 @@ const UI = {
     // Show a non-blocking warning if today's logged activities look unrealistic
     try {
       const todayState = Store.getTodayEntry ? Store.getTodayEntry() : Store.state;
-      const activityCount = (typeof Scoring !== 'undefined' && typeof Scoring.calculateActivityCountForState === 'function')
-        ? Scoring.calculateActivityCountForState(todayState)
-        : 0;
+      const activityCount =
+        typeof Scoring !== 'undefined' &&
+        typeof Scoring.calculateActivityCountForState === 'function'
+          ? Scoring.calculateActivityCountForState(todayState)
+          : 0;
 
       this.renderActivityWarning(activityCount);
     } catch (e) {
@@ -314,18 +329,19 @@ const UI = {
 
   removeDevElements() {
     // Check if DEV_MODE exists globally or on window
-    const devMode = (typeof DEV_MODE !== 'undefined' && DEV_MODE) || 
-                    (typeof window.DEV_MODE !== 'undefined' && window.DEV_MODE);
-    
+    const devMode =
+      (typeof DEV_MODE !== 'undefined' && DEV_MODE) ||
+      (typeof window.DEV_MODE !== 'undefined' && window.DEV_MODE);
+
     if (devMode) return;
 
     const devElements = [
       this.elements.devPill,
       document.getElementById('dev-loader-toggle'),
-      this.elements.devToast
+      this.elements.devToast,
     ];
 
-    devElements.forEach(el => {
+    devElements.forEach((el) => {
       if (el && el.parentElement) {
         el.parentElement.removeChild(el);
       }
@@ -354,7 +370,13 @@ const UI = {
     }, ms);
   },
 
-  setBackupState({ statusText = '', ready, needsPermission = false, unsupported = false, busy = false } = {}) {
+  setBackupState({
+    statusText = '',
+    ready,
+    needsPermission = false,
+    unsupported = false,
+    busy = false,
+  } = {}) {
     // Backup UI removed - using simple download button instead
     // This method kept for compatibility with backup.js if it's still referenced
   },
@@ -365,7 +387,7 @@ const UI = {
     const options = Store.getSkillOptions();
     const selected = new Set(Array.isArray(Store.state.skill) ? Store.state.skill : []);
     container.innerHTML = '';
-    options.forEach(option => {
+    options.forEach((option) => {
       const chip = document.createElement('button');
       chip.className = 'skill-chip skill-chip--fitness'; // Add fitness class for red styling
       chip.type = 'button';
@@ -388,7 +410,7 @@ const UI = {
     const container = this.elements.home?.skillContainer;
     if (!container) return;
     const selectedSet = new Set(Array.isArray(selected) ? selected : []);
-    container.querySelectorAll('.skill-chip').forEach(chip => {
+    container.querySelectorAll('.skill-chip').forEach((chip) => {
       if (chip.classList.contains('skill-chip--add')) return;
       const option = chip.dataset.skillOption || '';
       const isActive = selectedSet.has(option);
@@ -399,7 +421,7 @@ const UI = {
 
   setToggleState(key, value) {
     const toggles = document.querySelectorAll(`[data-toggle-key="${key}"]`);
-    toggles.forEach(toggle => {
+    toggles.forEach((toggle) => {
       const isActive = Boolean(value);
       toggle.classList.toggle('is-active', isActive);
       toggle.setAttribute('aria-pressed', String(isActive));
@@ -440,7 +462,7 @@ const UI = {
     }
     const formatted = Number(hours).toFixed(1).replace(/\.0$/, '');
     status.textContent = `${formatted} hr window logged.`;
-    
+
     // Update practice states for sleep
     UI.updatePracticeState('wake', !!Store.state.wake);
     UI.updatePracticeState('rest', !!Store.state.rest);
@@ -473,7 +495,7 @@ const UI = {
       parts.push(`Skill: ${skills.join(', ')}`);
     }
     summary.textContent = parts.length ? parts.join(' · ') : 'No training logged yet.';
-    
+
     // Update practice states for fitness
     UI.updatePracticeState('run', runDistance > 0);
     UI.updatePracticeState('strength', strengthLevel > 0);
@@ -485,7 +507,7 @@ const UI = {
     if (!status) return;
     const { read_level, write_level } = Store.state;
     const parts = [];
-    
+
     if (read_level > 0) {
       const levels = ['', 'Leisure', 'Perspicacity', 'Erudition'];
       parts.push(`Reading: ${levels[read_level]}`);
@@ -494,21 +516,22 @@ const UI = {
       const levels = ['', 'Journal', 'Editorial', 'Treatise'];
       parts.push(`Writing: ${levels[write_level]}`);
     }
-    
+
     status.textContent = parts.length ? parts.join(' · ') : 'Nothing logged yet.';
-    
+
     // Update practice states for mind
     UI.updatePracticeState('reading', read_level > 0);
     UI.updatePracticeState('writing', write_level > 0);
   },
 
   updateMindTierButtons(type, selectedValue) {
-    const selector = type === 'reading' ? '[data-mind-tier="reading"]' : '[data-mind-tier="writing"]';
+    const selector =
+      type === 'reading' ? '[data-mind-tier="reading"]' : '[data-mind-tier="writing"]';
     const container = document.querySelector(selector);
     if (!container) return;
-    
+
     const buttons = container.querySelectorAll('.tier-btn');
-    buttons.forEach(btn => {
+    buttons.forEach((btn) => {
       const value = Number(btn.dataset.tierValue);
       const isSelected = value === selectedValue;
       btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
@@ -517,8 +540,10 @@ const UI = {
   },
 
   updateStrengthTierButtons(selectedValue) {
-    const buttons = document.querySelectorAll('.tiered-selection[data-fitness-tier="strength"] .tier-btn');
-    buttons.forEach(btn => {
+    const buttons = document.querySelectorAll(
+      '.tiered-selection[data-fitness-tier="strength"] .tier-btn'
+    );
+    buttons.forEach((btn) => {
       const value = Number(btn.dataset.tierValue);
       const isSelected = value === selectedValue && selectedValue > 0;
       btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
@@ -530,7 +555,7 @@ const UI = {
     const status = this.elements.home?.spiritStatus;
     if (!status) return;
     const descriptors = [];
-        const quadrantLabel = this.describeQuadrant(quadrant);
+    const quadrantLabel = this.describeQuadrant(quadrant);
     if (quadrant > 0 && quadrantLabel) {
       // If quadrant is selected, show the quadrant label
       descriptors.push(quadrantLabel);
@@ -539,7 +564,7 @@ const UI = {
       descriptors.push('Meditation logged');
     }
     status.textContent = descriptors.length ? descriptors.join(' · ') : 'No mood logged yet.';
-    
+
     // Update practice states for spirit
     UI.updatePracticeState('mindfulness', !!meditation);
     UI.updatePracticeState('mood', quadrant > 0);
@@ -565,8 +590,6 @@ const UI = {
     dot.style.setProperty('--mood-y', `${yPercent}%`);
   },
 
-
-
   toggleOverlay(domain, show = true) {
     const overlay = document.getElementById(`${domain}-overlay`);
     if (overlay) {
@@ -575,13 +598,15 @@ const UI = {
   },
 
   updateToggleButton(type, value, skipIfDefault = false) {
-    const group = document.querySelector(`.btn-group[data-type="${type}"], .quadrant-grid[data-type="${type}"]`);
+    const group = document.querySelector(
+      `.btn-group[data-type="${type}"], .quadrant-grid[data-type="${type}"]`
+    );
     if (!group) return;
 
     const isToggleGroup = group.dataset.toggle === 'true';
     const buttons = group.querySelectorAll('.btn, .quad-btn');
 
-    buttons.forEach(btn => {
+    buttons.forEach((btn) => {
       btn.classList.remove('active');
       btn.setAttribute('aria-pressed', 'false');
     });
@@ -650,15 +675,19 @@ const UI = {
    */
   updateDateDisplay() {
     try {
-      const el = document.getElementById('date-display') || (this.elements && this.elements.dateDisplay);
+      const el =
+        document.getElementById('date-display') || (this.elements && this.elements.dateDisplay);
       if (!el) return;
 
       // If viewing a historical date, show that
       if (Store.state.currentDate) {
         const dateObj = new Date(Store.state.currentDate + 'T12:00:00');
-        el.textContent = dateObj.toLocaleDateString('en-US', {
-          weekday: 'long', month: 'long', day: 'numeric'
-        }) + ' (History)';
+        el.textContent =
+          dateObj.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+          }) + ' (History)';
         return;
       }
 
@@ -666,8 +695,10 @@ const UI = {
       const today = Store.getToday();
       const dateObj = new Date(today + 'T12:00:00');
 
-      let dateText = dateObj.toLocaleDateString('en-US', {
-        weekday: 'long', month: 'long', day: 'numeric'
+      const dateText = dateObj.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
       });
 
       el.textContent = dateText;
@@ -682,10 +713,10 @@ const UI = {
    */
   updateQuarterProgress() {
     const { quarterProgress } = this.elements;
-    
+
     console.log('🔍 updateQuarterProgress called');
     console.log('quarterProgress elements:', quarterProgress);
-    
+
     // Check if we have at least the labels (progress bar fill is optional since it may be hidden)
     if (!quarterProgress || !quarterProgress.quarterLabel || !quarterProgress.weekLabel) {
       console.error('❌ Quarter/Week labels not found!', quarterProgress);
@@ -707,7 +738,12 @@ const UI = {
     // Calculate percentage for progress bar based on DAYS (more granular)
     const percentComplete = (dayOfYear / DAYS_IN_YEAR) * 100;
 
-    console.log('📊 Quarter/Week calculated:', { dayOfYear, currentWeek, currentQuarter, percentComplete });
+    console.log('📊 Quarter/Week calculated:', {
+      dayOfYear,
+      currentWeek,
+      currentQuarter,
+      percentComplete,
+    });
 
     // Update progress bar (moves by day) - only if it exists
     if (quarterProgress.fill) {
@@ -770,10 +806,17 @@ const UI = {
 
   renderGratitude(scores, needsBaseline = false, daysLogged = 0) {
     const {
-      topDomain, topScore, topDetail,
-      focusDomain, focusScore, focusDetail,
-      momentumDetail, sleepSummary, runSummary,
-      meditationSummary, progressBars
+      topDomain,
+      topScore,
+      topDetail,
+      focusDomain,
+      focusScore,
+      focusDetail,
+      momentumDetail,
+      sleepSummary,
+      runSummary,
+      meditationSummary,
+      progressBars,
     } = this.elements.gratitude;
 
     const gratitudeCards = this.elements.gratitudeCards || {};
@@ -786,7 +829,7 @@ const UI = {
         gratitudeCards.scoreboard.style.display = 'none';
       }
 
-      progressBars.forEach(bar => {
+      progressBars.forEach((bar) => {
         bar.style.display = 'none';
         bar.setAttribute('aria-valuenow', '0');
         const fill = bar.querySelector('.progress-fill');
@@ -805,7 +848,8 @@ const UI = {
 
       focusDomain.textContent = 'Keep logging';
       focusScore.textContent = '';
-      focusDetail.textContent = 'Once your baseline is ready, we will highlight the next focus area.';
+      focusDetail.textContent =
+        'Once your baseline is ready, we will highlight the next focus area.';
 
       momentumDetail.textContent = 'Weekly momentum unlocks after your first 7 days of entries.';
       sleepSummary.textContent = 'Track wake and rest times each day to unlock recovery insights.';
@@ -818,7 +862,7 @@ const UI = {
       gratitudeCards.scoreboard.style.display = '';
     }
 
-    progressBars.forEach(bar => {
+    progressBars.forEach((bar) => {
       bar.style.display = '';
       const domain = bar.dataset.progressDomain;
       if (domain in scores) {
@@ -837,7 +881,7 @@ const UI = {
       }
     });
 
-    const allScoresZero = Object.values(scores).every(value => Number(value) === 0);
+    const allScoresZero = Object.values(scores).every((value) => Number(value) === 0);
 
     if (allScoresZero) {
       topDomain.textContent = 'Log a win';
@@ -848,7 +892,8 @@ const UI = {
       focusScore.textContent = placeholderScore;
       focusDetail.textContent = 'Log sleep, movement or a reflection to surface your next focus.';
 
-      momentumDetail.textContent = 'Track a full day to unlock momentum stories and week-over-week comparisons.';
+      momentumDetail.textContent =
+        'Track a full day to unlock momentum stories and week-over-week comparisons.';
       sleepSummary.textContent = 'Enter rest and wake times to unlock recovery coaching.';
       runSummary.textContent = 'Record even a short walk to seed your fitness narrative.';
       meditationSummary.textContent = 'Take two minutes to breathe and log it to spark the streak.';
@@ -889,20 +934,20 @@ const UI = {
   calculateSleepHours() {
     const { wake } = Store.state;
     if (!wake) return null;
-    
+
     // Get today's date and yesterday's date
     const today = Store.getToday();
     const todayDate = new Date(today + 'T12:00:00');
     const yesterdayDate = new Date(todayDate);
     yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     const yesterday = yesterdayDate.toISOString().split('T')[0];
-    
+
     // Get yesterday's rest time from entries
     const yesterdayEntry = Store.state.entries[yesterday];
     const rest = yesterdayEntry?.rest;
-    
+
     if (!rest) return null;
-    
+
     const duration = Scoring.getSleepDurationMinutes(rest, wake);
     if (duration === null) return null;
     return Math.round((duration / 60) * 10) / 10;
@@ -918,7 +963,8 @@ const UI = {
   },
 
   computeWeekOverWeekChanges(domainLabels) {
-    const history = typeof Store.getHistory === 'function' ? Store.getHistory(14, { includeArchived: true }) : [];
+    const history =
+      typeof Store.getHistory === 'function' ? Store.getHistory(14, { includeArchived: true }) : [];
     if (history.length === 0) {
       return '';
     }
@@ -939,7 +985,7 @@ const UI = {
       return 'Log another week to unlock week-over-week comparisons.';
     }
 
-    const statements = Object.keys(domainLabels).map(domain => {
+    const statements = Object.keys(domainLabels).map((domain) => {
       const currentAvg = this.averageForDomain(recent, domain);
       const previousAvg = this.averageForDomain(previous, domain);
       let percentChange;
@@ -962,7 +1008,7 @@ const UI = {
       sleep: 'Sleep',
       fitness: 'Fitness',
       mind: 'Mind',
-      spirit: 'Spirit'
+      spirit: 'Spirit',
     };
 
     const entries = Object.entries(scores);
@@ -972,32 +1018,32 @@ const UI = {
     const narrative = {
       sleep: {
         high: 'Your routines are setting the tone for energised mornings.',
-        low: 'Try reinforcing your wind-down cues to unlock deeper rest.'
+        low: 'Try reinforcing your wind-down cues to unlock deeper rest.',
       },
       fitness: {
         high: 'Your training block is building real momentum—keep riding it.',
-        low: 'A fresh plan for progressive sessions could reignite this lane.'
+        low: 'A fresh plan for progressive sessions could reignite this lane.',
       },
       mind: {
         high: 'Curiosity is compounding—your inputs are sharpening thinking.',
-        low: 'Schedule protected time for reading or writing to refuel clarity.'
+        low: 'Schedule protected time for reading or writing to refuel clarity.',
       },
       spirit: {
-        high: 'You\'re staying grounded and connected to what matters most.',
-        low: 'Experiment with a micro-practice to recenter during transitions.'
-      }
+        high: "You're staying grounded and connected to what matters most.",
+        low: 'Experiment with a micro-practice to recenter during transitions.',
+      },
     };
 
     const topDomain = {
       label: domainLabels[top[0]],
       score: top[1],
-      detail: narrative[top[0]].high
+      detail: narrative[top[0]].high,
     };
 
     const focusDomain = {
       label: domainLabels[bottom[0]],
       score: bottom[1],
-      detail: narrative[bottom[0]].low
+      detail: narrative[bottom[0]].low,
     };
 
     const sleepHours = this.calculateSleepHours();
@@ -1006,22 +1052,24 @@ const UI = {
       : 'Log wake and rest windows to unlock personalised sleep feedback.';
 
     const runKm = Store.state.run;
-    const runSummary = runKm > 0
-      ? `Logged ${runKm} km. Consider a stride session or recovery run to stay balanced.`
-      : 'No distance logged yet—set a target run to spark momentum.';
+    const runSummary =
+      runKm > 0
+        ? `Logged ${runKm} km. Consider a stride session or recovery run to stay balanced.`
+        : 'No distance logged yet—set a target run to spark momentum.';
 
     const meditationSummary = Store.state.meditation
       ? 'Meditation checked in—carry that presence into high-leverage moments.'
       : 'A two-minute pause could reset your baseline before the next sprint.';
 
-    const averageScore = Math.round(entries.reduce((total, [, val]) => total + val, 0) / entries.length);
-    const momentumBase = averageScore >= 75
-      ? `Strong average (${averageScore}) across domains—build on what\'s working.`
-      : `Average sits at ${averageScore}. Choose one ritual to upgrade and lift the whole system.`;
+    const averageScore = Math.round(
+      entries.reduce((total, [, val]) => total + val, 0) / entries.length
+    );
+    const momentumBase =
+      averageScore >= 75
+        ? `Strong average (${averageScore}) across domains—build on what's working.`
+        : `Average sits at ${averageScore}. Choose one ritual to upgrade and lift the whole system.`;
     const changeNarrative = this.computeWeekOverWeekChanges(domainLabels).trim();
-    const momentum = changeNarrative
-      ? `${momentumBase} ${changeNarrative}`
-      : momentumBase;
+    const momentum = changeNarrative ? `${momentumBase} ${changeNarrative}` : momentumBase;
 
     return {
       topDomain,
@@ -1029,7 +1077,7 @@ const UI = {
       sleepSummary,
       runSummary,
       meditationSummary,
-      momentum
+      momentum,
     };
   },
 
@@ -1062,10 +1110,10 @@ const UI = {
     // Restore slider positions from Store
     const storedEnergy = Store.state.energy || 0;
     const storedMood = Store.state.mood || 0;
-    
+
     // Check if App is available (it might not be during initial load)
     const hasApp = typeof App !== 'undefined';
-    
+
     // Always use stored values if available, otherwise use quadrant preset
     let axes;
     if (storedEnergy !== 0 || storedMood !== 0) {
@@ -1077,7 +1125,7 @@ const UI = {
       axes = Scoring.getQuadrantPreset(Store.state.quadrant);
       if (hasApp) App.moodAxes = { ...axes };
     }
-    
+
     // Update App.moodAxes if App is available
     if (hasApp) {
       App.moodAxes = { ...axes };
@@ -1096,24 +1144,24 @@ const UI = {
 
   // === COLLAPSIBLE PRACTICE SECTIONS ===
   bindCollapsiblePractices() {
-    document.querySelectorAll('.practice-header').forEach(header => {
+    document.querySelectorAll('.practice-header').forEach((header) => {
       header.addEventListener('click', (event) => {
         event.stopPropagation();
         const practice = header.closest('.collapsible-practice');
         if (!practice) return;
-        
+
         const isExpanded = practice.classList.contains('is-expanded');
-        
+
         // Close other practices in the same card when opening this one (accordion behavior)
         if (!isExpanded) {
           const card = practice.closest('.action-card');
           if (card) {
-            card.querySelectorAll('.collapsible-practice.is-expanded').forEach(p => {
+            card.querySelectorAll('.collapsible-practice.is-expanded').forEach((p) => {
               if (p !== practice) p.classList.remove('is-expanded');
             });
           }
         }
-        
+
         // Toggle this practice
         practice.classList.toggle('is-expanded', !isExpanded);
       });
@@ -1151,7 +1199,7 @@ const UI = {
   updatePracticeState(practiceId, isLogged) {
     const practice = document.querySelector(`[data-practice="${practiceId}"]`);
     if (!practice) return;
-    
+
     practice.classList.toggle('is-logged', isLogged);
   },
 
@@ -1171,9 +1219,14 @@ const UI = {
 
     // Fitness practices
     UI.updatePracticeValue('run', state.run ? `${state.run}km` : '');
-    const strengthLevels = {1: 'Movement', 2: 'Session', 3: 'Training'};
-    UI.updatePracticeValue('strength', state.strength_level ? strengthLevels[state.strength_level] || `Level ${state.strength_level}` : '');
-    
+    const strengthLevels = { 1: 'Movement', 2: 'Session', 3: 'Training' };
+    UI.updatePracticeValue(
+      'strength',
+      state.strength_level
+        ? strengthLevels[state.strength_level] || `Level ${state.strength_level}`
+        : ''
+    );
+
     if (Array.isArray(state.skill) && state.skill.length > 0) {
       const first = state.skill[0];
       const extra = state.skill.length - 1;
@@ -1183,10 +1236,16 @@ const UI = {
     }
 
     // Mind practices
-    const readingLevels = {1: 'Leisure', 2: 'Perspicacity', 3: 'Erudition'};
-    UI.updatePracticeValue('reading', state.read_level ? readingLevels[state.read_level] || `Level ${state.read_level}` : '');
-    const writingLevels = {1: 'Journal', 2: 'Editorial', 3: 'Treatise'};
-    UI.updatePracticeValue('writing', state.write_level ? writingLevels[state.write_level] || `Level ${state.write_level}` : '');
+    const readingLevels = { 1: 'Leisure', 2: 'Perspicacity', 3: 'Erudition' };
+    UI.updatePracticeValue(
+      'reading',
+      state.read_level ? readingLevels[state.read_level] || `Level ${state.read_level}` : ''
+    );
+    const writingLevels = { 1: 'Journal', 2: 'Editorial', 3: 'Treatise' };
+    UI.updatePracticeValue(
+      'writing',
+      state.write_level ? writingLevels[state.write_level] || `Level ${state.write_level}` : ''
+    );
 
     // Spirit practices
     UI.updatePracticeValue('mindfulness', state.meditation ? 'Meditated' : '');
@@ -1196,14 +1255,12 @@ const UI = {
   updatePracticeValue(practiceId, value) {
     const practice = document.querySelector(`[data-practice="${practiceId}"]`);
     if (!practice) return;
-    
+
     const valueEl = practice.querySelector('.practice-value');
     if (valueEl) {
       valueEl.textContent = value;
     }
   },
-
-
 
   bindHomeActions() {
     const { inputs, home } = UI.elements;
@@ -1211,13 +1268,13 @@ const UI = {
     // === COLLAPSIBLE PRACTICE SECTIONS ===
     UI.bindCollapsiblePractices();
 
-    document.querySelectorAll('.log-current-btn').forEach(btn => {
+    document.querySelectorAll('.log-current-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const targetId = btn.dataset.target;
         if (!targetId) return;
         const input = document.getElementById(targetId);
         if (!input) return;
-        
+
         // Toggle between setting time and clearing
         if (input.value) {
           // Clear the value
@@ -1241,7 +1298,7 @@ const UI = {
           }
           UI.flashButton(btn);
         }
-        
+
         UI.updateTimeButton(targetId);
         UI.updateSleepStatus(UI.calculateSleepHours());
       });
@@ -1278,15 +1335,17 @@ const UI = {
       });
     }
 
-    document.querySelectorAll('.dropdown-toggle-btn').forEach(btn => {
+    document.querySelectorAll('.dropdown-toggle-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         const targetId = btn.dataset.target;
         if (!targetId) return;
         const dropdown = document.getElementById(targetId);
         if (!dropdown) return;
         const willOpen = dropdown.hidden;
-        document.querySelectorAll('.domain-dropdown').forEach(section => {
-          const sectionBtn = document.querySelector(`.dropdown-toggle-btn[data-target="${section.id}"]`);
+        document.querySelectorAll('.domain-dropdown').forEach((section) => {
+          const sectionBtn = document.querySelector(
+            `.dropdown-toggle-btn[data-target="${section.id}"]`
+          );
           if (section.id === targetId) {
             section.hidden = !willOpen;
             if (sectionBtn) {
@@ -1310,24 +1369,28 @@ const UI = {
         if (fitnessToggle) {
           const toggleType = fitnessToggle.dataset.fitnessToggle;
           const isActive = fitnessToggle.classList.contains('is-active');
-          
+
           // Close all fitness dropdowns first
-          home.fitnessCard.querySelectorAll('.fitness-dropdown').forEach(dd => dd.hidden = true);
-          home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach(btn => {
+          home.fitnessCard
+            .querySelectorAll('.fitness-dropdown')
+            .forEach((dd) => (dd.hidden = true));
+          home.fitnessCard.querySelectorAll('[data-fitness-toggle]').forEach((btn) => {
             btn.classList.remove('is-active');
             btn.setAttribute('aria-pressed', 'false');
           });
-          
+
           // If wasn't active, open the dropdown
           if (!isActive) {
             fitnessToggle.classList.add('is-active');
             fitnessToggle.setAttribute('aria-pressed', 'true');
-            const dropdown = home.fitnessCard.querySelector(`[data-fitness-dropdown="${toggleType}"]`);
+            const dropdown = home.fitnessCard.querySelector(
+              `[data-fitness-dropdown="${toggleType}"]`
+            );
             if (dropdown) dropdown.hidden = false;
           }
           return;
         }
-        
+
         // Handle run preset buttons
         const presetBtn = event.target.closest('.run-preset');
         if (presetBtn) {
@@ -1338,7 +1401,7 @@ const UI = {
           UI.updateFitnessSummary();
           return;
         }
-        
+
         // Handle run step buttons
         const stepBtn = event.target.closest('.run-step');
         if (stepBtn) {
@@ -1358,7 +1421,7 @@ const UI = {
         if (toggle) {
           const key = toggle.dataset.toggleKey;
           if (!(key in Store.state)) return;
-          const newValue = !Boolean(Store.state[key]);
+          const newValue = !Store.state[key];
           Store.update(key, newValue);
           UI.setToggleState(key, newValue);
           if (key === 'strength') {
@@ -1368,8 +1431,14 @@ const UI = {
             UI.updateMindStatus();
           }
           if (key === 'meditation') {
-            const energy = (typeof App !== 'undefined' && App.moodAxes) ? App.moodAxes.energy : Store.state.energy || 0;
-            const mood = (typeof App !== 'undefined' && App.moodAxes) ? App.moodAxes.mood : Store.state.mood || 0;
+            const energy =
+              typeof App !== 'undefined' && App.moodAxes
+                ? App.moodAxes.energy
+                : Store.state.energy || 0;
+            const mood =
+              typeof App !== 'undefined' && App.moodAxes
+                ? App.moodAxes.mood
+                : Store.state.mood || 0;
             UI.updateSpiritSummary(Store.state.quadrant, newValue, energy, mood);
           }
           return;
@@ -1408,7 +1477,7 @@ const UI = {
           const tierGroup = tierBtn.closest('.tiered-selection');
           const tierType = tierGroup?.dataset.mindTier; // 'reading' or 'writing'
           const fitnessTier = tierGroup?.dataset.fitnessTier; // 'strength'
-          
+
           if (tierType === 'reading') {
             const currentValue = Store.state.read_level || 0;
             const newValue = currentValue === tierValue ? 0 : tierValue; // Toggle off if same
@@ -1442,26 +1511,26 @@ const UI = {
         const rect = moodGrid.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
-        
+
         // Convert to percentage (0-100)
         const xPercent = (x / rect.width) * 100;
         const yPercent = (y / rect.height) * 100;
-        
+
         // Convert to mood/energy values (-100 to 100)
         // X axis: left = negative mood (-100), right = positive mood (100)
         const mood = (xPercent - 50) * 2;
         // Y axis: top = high energy (100), bottom = low energy (-100)
         const energy = (50 - yPercent) * 2;
-        
+
         // Clamp values
         const clampedMood = Math.max(-100, Math.min(100, Math.round(mood)));
         const clampedEnergy = Math.max(-100, Math.min(100, Math.round(energy)));
-        
+
         // Update App.moodAxes if App is available
         if (typeof App !== 'undefined') {
           App.moodAxes = { energy: clampedEnergy, mood: clampedMood };
         }
-        
+
         // Persist energy and mood to Store
         if (clampedEnergy !== Store.state.energy) {
           Store.update('energy', clampedEnergy);
@@ -1469,16 +1538,21 @@ const UI = {
         if (clampedMood !== Store.state.mood) {
           Store.update('mood', clampedMood);
         }
-        
+
         // Update quadrant if it changed
         const quadrant = Scoring.resolveQuadrant(clampedEnergy, clampedMood);
         if (quadrant !== Store.state.quadrant) {
           Store.update('quadrant', quadrant);
         }
-        
+
         // Update the dot position and summary
         UI.positionMoodDot(clampedEnergy, clampedMood);
-        UI.updateSpiritSummary(Store.state.quadrant, Store.state.meditation, clampedEnergy, clampedMood);
+        UI.updateSpiritSummary(
+          Store.state.quadrant,
+          Store.state.meditation,
+          clampedEnergy,
+          clampedMood
+        );
       });
     }
   },
@@ -1503,7 +1577,7 @@ const UI = {
   showPage(page) {
     if (!page) return;
 
-    UI.elements.pages.forEach(section => {
+    UI.elements.pages.forEach((section) => {
       section.classList.toggle('active', section.dataset.page === page);
     });
 
@@ -1521,19 +1595,14 @@ const UI = {
   },
 
   updateNavState(page) {
-    UI.elements.navButtons.forEach(btn => {
+    UI.elements.navButtons.forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.page === page);
     });
   },
 
   bindSettingsMenu() {
-    const {
-      menu,
-      openBtn,
-      closeBtn,
-      backdrop
-    } = UI.elements.settingsMenu;
-    
+    const { menu, openBtn, closeBtn, backdrop } = UI.elements.settingsMenu;
+
     if (!menu || !openBtn) return;
 
     // Open settings
@@ -1585,7 +1654,7 @@ const UI = {
     }
 
     Store.ensureEntries();
-    
+
     // Render history entries grouped by month and week
     const renderHistory = () => {
       const entries = Store.state.entries || {};
@@ -1593,7 +1662,7 @@ const UI = {
 
       // Group entries by month-year and then by week of year
       const groupedEntries = {};
-      allDates.forEach(dateKey => {
+      allDates.forEach((dateKey) => {
         const date = UI.parseDateKey(dateKey);
         const monthYear = `${date.toLocaleDateString('en-US', { month: 'long' })} - ${date.getFullYear()}`;
         const weekOfYear = getWeekOfYear(date);
@@ -1623,42 +1692,53 @@ const UI = {
             </div>
           `;
         } else {
-          list.innerHTML = Object.keys(groupedEntries).map(monthYear => {
-            const monthWeeks = groupedEntries[monthYear];
-            const weekKeys = Object.keys(monthWeeks).sort((a, b) => Number(b) - Number(a)); // Sort weeks descending
+          list.innerHTML = Object.keys(groupedEntries)
+            .map((monthYear) => {
+              const monthWeeks = groupedEntries[monthYear];
+              const weekKeys = Object.keys(monthWeeks).sort((a, b) => Number(b) - Number(a)); // Sort weeks descending
 
-            return `
+              return `
               <div class="history-month" data-month="${monthYear}">
                 <button class="history-month__header" aria-expanded="true">
                   <span class="history-month__title">${monthYear}</span>
                   <span class="history-month__toggle" aria-hidden="true">▼</span>
                 </button>
                 <div class="history-month__content">
-                  ${weekKeys.map(weekNum => {
-                    const weekDates = monthWeeks[weekNum].sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));
-                    const weekStart = UI.parseDateKey(weekDates[weekDates.length - 1]);
-                    const weekEnd = UI.parseDateKey(weekDates[0]);
-                    const weekRange = weekStart.toDateString() === weekEnd.toDateString()
-                      ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                      : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                  ${weekKeys
+                    .map((weekNum) => {
+                      const weekDates = monthWeeks[weekNum].sort(
+                        (a, b) => UI.parseDateKey(b) - UI.parseDateKey(a)
+                      );
+                      const weekStart = UI.parseDateKey(weekDates[weekDates.length - 1]);
+                      const weekEnd = UI.parseDateKey(weekDates[0]);
+                      const weekRange =
+                        weekStart.toDateString() === weekEnd.toDateString()
+                          ? weekStart.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })
+                          : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-                    return `
+                      return `
                       <div class="history-week">
                         <div class="history-week__header">Week ${weekNum} • ${weekRange}</div>
                         <div class="history-week__entries">
-                          ${weekDates.map(dateKey => {
-                            const entry = entries[dateKey];
-                            const scores = Scoring.calculateDomainScores(entry);
-                            const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+                          ${weekDates
+                            .map((dateKey) => {
+                              const entry = entries[dateKey];
+                              const scores = Scoring.calculateDomainScores(entry);
+                              const totalScore = Math.round(
+                                (scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4
+                              );
 
-                            const date = UI.parseDateKey(dateKey);
-                            const formattedDate = date.toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short',
-                              day: 'numeric'
-                            });
+                              const date = UI.parseDateKey(dateKey);
+                              const formattedDate = date.toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                              });
 
-                            return `
+                              return `
                               <div class="history-entry" data-date="${dateKey}">
                                 <div class="history-entry__header">
                                   <div class="history-entry__date">${formattedDate}</div>
@@ -1699,18 +1779,21 @@ const UI = {
                                 </div>
                               </div>
                             `;
-                          }).join('')}
+                            })
+                            .join('')}
                         </div>
                       </div>
                     `;
-                  }).join('')}
+                    })
+                    .join('')}
                 </div>
               </div>
             `;
-          }).join('');
+            })
+            .join('');
 
           // Add click handlers for month headers (collapsible)
-          list.querySelectorAll('.history-month__header').forEach(header => {
+          list.querySelectorAll('.history-month__header').forEach((header) => {
             header.addEventListener('click', () => {
               const monthEl = header.closest('.history-month');
               const content = monthEl.querySelector('.history-month__content');
@@ -1724,7 +1807,7 @@ const UI = {
           });
 
           // Add click handlers to entries
-          list.querySelectorAll('.history-entry').forEach(entryEl => {
+          list.querySelectorAll('.history-entry').forEach((entryEl) => {
             entryEl.addEventListener('click', () => {
               const dateKey = entryEl.dataset.date;
               UI.showHistoryEditForm(dateKey);
@@ -1740,7 +1823,7 @@ const UI = {
       const dayNum = d.getUTCDay() || 7;
       d.setUTCDate(d.getUTCDate() + 4 - dayNum);
       const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     };
 
     // Close handler
@@ -1787,7 +1870,11 @@ const UI = {
         if (deleteBtn) {
           e.stopPropagation();
           const dateKey = deleteBtn.dataset.date;
-          if (confirm(`Are you sure you want to delete the entry for ${UI.parseDateKey(dateKey).toLocaleDateString()}?`)) {
+          if (
+            confirm(
+              `Are you sure you want to delete the entry for ${UI.parseDateKey(dateKey).toLocaleDateString()}?`
+            )
+          ) {
             UI.deleteHistoryEntry(dateKey);
           }
         } else if (entryEl && !e.target.closest('.history-entry__delete')) {
@@ -1818,7 +1905,7 @@ const UI = {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
 
     // Populate form with current values
@@ -1832,7 +1919,7 @@ const UI = {
     // Fitness fields
     form.run.value = entry.run || '';
     form.strength_level.value = entry.strength_level || 0;
-    form.skill.value = Array.isArray(entry.skill) ? entry.skill.join(', ') : (entry.skill || '');
+    form.skill.value = Array.isArray(entry.skill) ? entry.skill.join(', ') : entry.skill || '';
 
     // Mind fields
     form.read_level.value = entry.read_level || 0;
@@ -1892,18 +1979,21 @@ const UI = {
       return;
     }
 
-    if (typeof Scoring !== 'undefined'
-      && typeof Scoring.calcSleep === 'function'
-      && typeof UI.renderScores === 'function') {
+    if (
+      typeof Scoring !== 'undefined' &&
+      typeof Scoring.calcSleep === 'function' &&
+      typeof UI.renderScores === 'function'
+    ) {
       const scores = {
         sleep: Scoring.calcSleep(Store.state, Store),
         fitness: Scoring.calcFitness(Store.state, Store),
         mind: Scoring.calcMind(Store.state, Store),
-        spirit: Scoring.calcSpirit(Store.state, Store)
+        spirit: Scoring.calcSpirit(Store.state, Store),
       };
-      const streaks = (typeof Analytics !== 'undefined' && typeof Analytics.calculateStreaks === 'function')
-        ? Analytics.calculateStreaks()
-        : {};
+      const streaks =
+        typeof Analytics !== 'undefined' && typeof Analytics.calculateStreaks === 'function'
+          ? Analytics.calculateStreaks()
+          : {};
       UI.renderScores(scores, streaks);
       if (typeof Analytics !== 'undefined' && typeof Analytics.renderWeeklyHeatmap === 'function') {
         Analytics.renderWeeklyHeatmap();
@@ -1947,13 +2037,19 @@ const UI = {
       rest: formData.get('rest') || '',
       run: parseNumber(formData.get('run')),
       strength_level: parseInt(formData.get('strength_level')) || 0,
-      skill: formData.get('skill') ? formData.get('skill').split(',').map(s => s.trim()).filter(s => s) : [],
+      skill: formData.get('skill')
+        ? formData
+            .get('skill')
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s)
+        : [],
       read_level: parseInt(formData.get('read_level')) || 0,
       write_level: parseInt(formData.get('write_level')) || 0,
       meditation: formData.get('meditation') === 'true',
       mood: clampSigned(parseNumber(formData.get('mood'))),
       energy: clampSigned(parseNumber(formData.get('energy'))),
-      quadrant: 0 // Will be recalculated
+      quadrant: 0, // Will be recalculated
     };
 
     // Update the entry in store
@@ -2011,17 +2107,17 @@ const UI = {
       const dayNum = d.getUTCDay() || 7;
       d.setUTCDate(d.getUTCDate() + 4 - dayNum);
       const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
     };
 
-      const { list, dateRange } = UI.elements.historyOverlay;
-      const entries = Store.state.entries || {};
+    const { list, dateRange } = UI.elements.historyOverlay;
+    const entries = Store.state.entries || {};
     if (window.DEV_MODE) {
       console.log('📊 Rendering history with entries:', Object.keys(entries));
     }
-    const allDates = Object.keys(entries).sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));    // Group entries by month-year and then by week of year
+    const allDates = Object.keys(entries).sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a)); // Group entries by month-year and then by week of year
     const groupedEntries = {};
-    allDates.forEach(dateKey => {
+    allDates.forEach((dateKey) => {
       const date = UI.parseDateKey(dateKey);
       const monthYear = `${date.toLocaleDateString('en-US', { month: 'long' })} - ${date.getFullYear()}`;
       const weekOfYear = getWeekOfYear(date);
@@ -2051,46 +2147,61 @@ const UI = {
           </div>
         `;
       } else {
-        list.innerHTML = Object.keys(groupedEntries).map(monthYear => {
-          const monthWeeks = groupedEntries[monthYear];
-          const weekKeys = Object.keys(monthWeeks).sort((a, b) => Number(b) - Number(a)); // Sort weeks descending
+        list.innerHTML = Object.keys(groupedEntries)
+          .map((monthYear) => {
+            const monthWeeks = groupedEntries[monthYear];
+            const weekKeys = Object.keys(monthWeeks).sort((a, b) => Number(b) - Number(a)); // Sort weeks descending
 
-          return `
+            return `
             <div class="history-month" data-month="${monthYear}">
               <button class="history-month__header" aria-expanded="true">
                 <span class="history-month__title">${monthYear}</span>
                 <span class="history-month__toggle" aria-hidden="true">▼</span>
               </button>
               <div class="history-month__content">
-                ${weekKeys.map(weekNum => {
-                  const weekDates = monthWeeks[weekNum].sort((a, b) => UI.parseDateKey(b) - UI.parseDateKey(a));
-                  const weekStart = UI.parseDateKey(weekDates[weekDates.length - 1]);
-                  const weekEnd = UI.parseDateKey(weekDates[0]);
-                  const weekRange = weekStart.toDateString() === weekEnd.toDateString()
-                    ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                    : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                ${weekKeys
+                  .map((weekNum) => {
+                    const weekDates = monthWeeks[weekNum].sort(
+                      (a, b) => UI.parseDateKey(b) - UI.parseDateKey(a)
+                    );
+                    const weekStart = UI.parseDateKey(weekDates[weekDates.length - 1]);
+                    const weekEnd = UI.parseDateKey(weekDates[0]);
+                    const weekRange =
+                      weekStart.toDateString() === weekEnd.toDateString()
+                        ? weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                        : `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-                  return `
+                    return `
                     <div class="history-week">
                       <div class="history-week__header">Week ${weekNum} • ${weekRange}</div>
                       <div class="history-week__entries">
-                        ${weekDates.map(dateKey => {
-                          const entry = entries[dateKey];
-                          const scores = Scoring.calculateDomainScores(entry);
-                          const totalScore = Math.round((scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4);
+                        ${weekDates
+                          .map((dateKey) => {
+                            const entry = entries[dateKey];
+                            const scores = Scoring.calculateDomainScores(entry);
+                            const totalScore = Math.round(
+                              (scores.sleep + scores.fitness + scores.mind + scores.spirit) / 4
+                            );
 
-                          const date = UI.parseDateKey(dateKey);
-                          const formattedDate = date.toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric'
-                          });
+                            const date = UI.parseDateKey(dateKey);
+                            const formattedDate = date.toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric',
+                            });
 
-                          if (window.DEV_MODE) {
-                            console.log('📅 Entry', dateKey, 'formatted as:', formattedDate, 'Date object:', date);
-                          }
+                            if (window.DEV_MODE) {
+                              console.log(
+                                '📅 Entry',
+                                dateKey,
+                                'formatted as:',
+                                formattedDate,
+                                'Date object:',
+                                date
+                              );
+                            }
 
-                          return `
+                            return `
                             <div class="history-entry" data-date="${dateKey}">
                               <div class="history-entry__header">
                                 <div class="history-entry__date">${formattedDate}</div>
@@ -2131,15 +2242,18 @@ const UI = {
                               </div>
                             </div>
                           `;
-                        }).join('')}
+                          })
+                          .join('')}
                       </div>
                     </div>
                   `;
-                }).join('')}
+                  })
+                  .join('')}
               </div>
             </div>
           `;
-        }).join('');
+          })
+          .join('');
       }
     }
   },
@@ -2182,7 +2296,7 @@ const UI = {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
-          day: 'numeric'
+          day: 'numeric',
         });
         datePicker.remove();
       }

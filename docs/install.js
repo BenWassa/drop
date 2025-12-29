@@ -29,7 +29,8 @@ const Install = {
     const settingsInstallBtn = UI.elements.settingsMenu.installBtn;
     if (!settingsInstallBtn) return;
 
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
     if (isStandalone) {
       settingsInstallBtn.hidden = true;
@@ -83,7 +84,7 @@ const Install = {
 
       this.deferredInstallPrompt = null;
     });
-  }
+  },
 };
 
 // Make Install available globally

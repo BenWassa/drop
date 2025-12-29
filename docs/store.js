@@ -1,7 +1,12 @@
 // === STORE MODULE ===
 // Data persistence and state management for the drop life tracker app
 
-import { firebaseSignInAnonymous, subscribeToAuthState, firestoreLoadState, firestoreSaveState } from './firebase.js';
+import {
+  firebaseSignInAnonymous,
+  subscribeToAuthState,
+  firestoreLoadState,
+  firestoreSaveState,
+} from './firebase.js';
 
 const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 const SAVE_DEBOUNCE_MS = 400;
@@ -13,7 +18,7 @@ const META_SETTINGS_KEYS = [
   'visionSleepFocus',
   'visionFitnessFocus',
   'visionMindFocus',
-  'visionSpiritFocus'
+  'visionSpiritFocus',
 ];
 
 const Store = {
@@ -24,22 +29,47 @@ const Store = {
   _remoteSaveTimer: null,
   userId: null,
   firebaseReady: false,
-  dailyKeys: ['wake', 'rest', 'run', 'strength', 'strength_level', 'skill', 'read_level', 'write_level', 'quadrant', 'meditation', 'energy', 'mood'],
+  dailyKeys: [
+    'wake',
+    'rest',
+    'run',
+    'strength',
+    'strength_level',
+    'skill',
+    'read_level',
+    'write_level',
+    'quadrant',
+    'meditation',
+    'energy',
+    'mood',
+  ],
   defaults: {
-    wake: '', rest: '', run: 0, strength: false, strength_level: 0, skill: [],
-    read_level: 0, write_level: 0, quadrant: 0, meditation: false,
-    energy: 0, mood: 0,
+    wake: '',
+    rest: '',
+    run: 0,
+    strength: false,
+    strength_level: 0,
+    skill: [],
+    read_level: 0,
+    write_level: 0,
+    quadrant: 0,
+    meditation: false,
+    energy: 0,
+    mood: 0,
     skillOptions: [],
-    visionTheme: '', visionSleepFocus: '', visionFitnessFocus: '',
-    visionMindFocus: '', visionSpiritFocus: '',
+    visionTheme: '',
+    visionSleepFocus: '',
+    visionFitnessFocus: '',
+    visionMindFocus: '',
+    visionSpiritFocus: '',
     lastEntryDate: '',
     actionTimestamps: {},
     entries: {},
     archivedEntries: {},
     meta: {
       _version: SCHEMA_VERSION,
-      _schemaDate: SCHEMA_DATE
-    }
+      _schemaDate: SCHEMA_DATE,
+    },
   },
 
   async init() {
@@ -90,16 +120,16 @@ const Store = {
     this.state = { ...this.cloneDefaults(), ...savedData };
     // console.log('📋 Initial state created with', Object.keys(this.state).length, 'keys');
     // console.log('📊 Daily values:', {
-      wake: this.state.wake,
-      rest: this.state.rest,
-      run: this.state.run,
-      strength: this.state.strength,
-      skill: this.state.skill,
-      read: this.state.read,
-      write: this.state.write,
-      meditation: this.state.meditation,
-      quadrant: this.state.quadrant
-    });
+    //   wake: this.state.wake,
+    //   rest: this.state.rest,
+    //   run: this.state.run,
+    //   strength: this.state.strength,
+    //   skill: this.state.skill,
+    //   read: this.state.read,
+    //   write: this.state.write,
+    //   meditation: this.state.meditation,
+    //   quadrant: this.state.quadrant
+    // });
   },
 
   saveLocalOnly() {
@@ -160,10 +190,18 @@ const Store = {
   },
 
   ensureEntries() {
-    if (!this.state.entries || typeof this.state.entries !== 'object' || Array.isArray(this.state.entries)) {
+    if (
+      !this.state.entries ||
+      typeof this.state.entries !== 'object' ||
+      Array.isArray(this.state.entries)
+    ) {
       this.state.entries = {};
     }
-    if (!this.state.archivedEntries || typeof this.state.archivedEntries !== 'object' || Array.isArray(this.state.archivedEntries)) {
+    if (
+      !this.state.archivedEntries ||
+      typeof this.state.archivedEntries !== 'object' ||
+      Array.isArray(this.state.archivedEntries)
+    ) {
       this.state.archivedEntries = {};
     }
   },
@@ -177,7 +215,7 @@ const Store = {
       ...defaultMeta,
       ...this.state.meta,
       _version: SCHEMA_VERSION,
-      _schemaDate: SCHEMA_DATE
+      _schemaDate: SCHEMA_DATE,
     };
   },
 
@@ -196,7 +234,7 @@ const Store = {
   },
 
   applyEntryToState(entry) {
-    this.dailyKeys.forEach(key => {
+    this.dailyKeys.forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(entry, key)) {
         const value = entry[key];
         this.state[key] = Array.isArray(value) ? [...value] : value;
@@ -204,7 +242,7 @@ const Store = {
         const defaultValue = this.defaults[key];
         this.state[key] = Array.isArray(defaultValue)
           ? [...defaultValue]
-          : (defaultValue && typeof defaultValue === 'object')
+          : defaultValue && typeof defaultValue === 'object'
             ? JSON.parse(JSON.stringify(defaultValue))
             : defaultValue;
       }
@@ -217,14 +255,14 @@ const Store = {
     }
 
     this.ensureEntries();
-    history.forEach(histEntry => {
+    history.forEach((histEntry) => {
       if (!histEntry || typeof histEntry !== 'object' || !histEntry.date) {
         return;
       }
       const existing = this.state.entries[histEntry.date] || {};
       this.state.entries[histEntry.date] = {
         ...existing,
-        scores: { ...(histEntry.scores || {}) }
+        scores: { ...(histEntry.scores || {}) },
       };
     });
   },
@@ -243,7 +281,7 @@ const Store = {
     if (!date || !entry) return;
     this.ensureEntries();
     const sanitized = {};
-    this.dailyKeys.forEach(key => {
+    this.dailyKeys.forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(entry, key)) {
         const value = entry[key];
         sanitized[key] = Array.isArray(value) ? [...value] : value;
@@ -260,10 +298,10 @@ const Store = {
 
   ensureSkillCollections() {
     const selections = this.sanitizeStringArray(this.state.skill);
-    let options = this.sanitizeStringArray(this.state.skillOptions);
-    const baseLower = new Set(BASE_SKILL_OPTIONS.map(opt => opt.toLowerCase()));
-    const optionLower = new Set(options.map(opt => opt.toLowerCase()));
-    selections.forEach(option => {
+    const options = this.sanitizeStringArray(this.state.skillOptions);
+    const baseLower = new Set(BASE_SKILL_OPTIONS.map((opt) => opt.toLowerCase()));
+    const optionLower = new Set(options.map((opt) => opt.toLowerCase()));
+    selections.forEach((option) => {
       const lower = option.toLowerCase();
       if (!baseLower.has(lower) && !optionLower.has(lower)) {
         options.push(option);
@@ -282,7 +320,7 @@ const Store = {
     if (this.state.write === true && this.state.write_level === undefined) {
       this.state.write_level = 2; // Default to "Editorial" if they were writing
     }
-    
+
     // Remove old boolean fields if they exist
     if (this.state.read !== undefined && typeof this.state.read === 'boolean') {
       delete this.state.read;
@@ -297,7 +335,7 @@ const Store = {
       return [];
     }
     const cleaned = value
-      .map(item => (typeof item === 'string' ? item : String(item ?? '')).trim())
+      .map((item) => (typeof item === 'string' ? item : String(item ?? '')).trim())
       .filter(Boolean);
     return Array.from(new Set(cleaned)).sort((a, b) => a.localeCompare(b));
   },
@@ -312,13 +350,11 @@ const Store = {
         return;
       }
       const cleaned = {};
-      this.dailyKeys.forEach(key => {
+      this.dailyKeys.forEach((key) => {
         if (Object.prototype.hasOwnProperty.call(entry, key)) {
           const value = entry[key];
           if (Array.isArray(value)) {
-            cleaned[key] = key === 'skill'
-              ? this.sanitizeStringArray(value)
-              : [...value];
+            cleaned[key] = key === 'skill' ? this.sanitizeStringArray(value) : [...value];
           } else if (value && typeof value === 'object') {
             cleaned[key] = JSON.parse(JSON.stringify(value));
           } else {
@@ -326,7 +362,11 @@ const Store = {
           }
         }
       });
-      if (entry.timestamps && typeof entry.timestamps === 'object' && !Array.isArray(entry.timestamps)) {
+      if (
+        entry.timestamps &&
+        typeof entry.timestamps === 'object' &&
+        !Array.isArray(entry.timestamps)
+      ) {
         cleaned.timestamps = { ...entry.timestamps };
       }
       if (entry.scores && typeof entry.scores === 'object' && !Array.isArray(entry.scores)) {
@@ -338,21 +378,26 @@ const Store = {
   },
 
   isSanitizedPayload(payload) {
-    return payload && typeof payload === 'object' && !Array.isArray(payload)
-      && typeof payload.entries === 'object'
-      && typeof payload.meta === 'object';
+    return (
+      payload &&
+      typeof payload === 'object' &&
+      !Array.isArray(payload) &&
+      typeof payload.entries === 'object' &&
+      typeof payload.meta === 'object'
+    );
   },
 
   extractSettings(settings = {}) {
     const sanitized = {};
-    META_SETTINGS_KEYS.forEach(key => {
+    META_SETTINGS_KEYS.forEach((key) => {
       if (!Object.prototype.hasOwnProperty.call(settings, key)) {
         return;
       }
       if (key === 'skillOptions') {
         sanitized[key] = this.sanitizeStringArray(settings[key]);
       } else {
-        sanitized[key] = typeof settings[key] === 'string' ? settings[key] : String(settings[key] ?? '');
+        sanitized[key] =
+          typeof settings[key] === 'string' ? settings[key] : String(settings[key] ?? '');
       }
     });
     return sanitized;
@@ -373,7 +418,7 @@ const Store = {
 
   collectSettings() {
     const settings = {};
-    META_SETTINGS_KEYS.forEach(key => {
+    META_SETTINGS_KEYS.forEach((key) => {
       const value = this.state[key];
       if (Array.isArray(value)) {
         settings[key] = [...value];
@@ -396,15 +441,15 @@ const Store = {
   },
 
   getSkillOptions() {
-    const baseOptions = BASE_SKILL_OPTIONS
-      .map(opt => (typeof opt === 'string' ? opt.trim() : ''))
-      .filter(Boolean);
-    const baseLower = baseOptions.map(opt => opt.toLowerCase());
+    const baseOptions = BASE_SKILL_OPTIONS.map((opt) =>
+      typeof opt === 'string' ? opt.trim() : ''
+    ).filter(Boolean);
+    const baseLower = baseOptions.map((opt) => opt.toLowerCase());
     const customOptions = Array.isArray(this.state.skillOptions)
       ? this.sanitizeStringArray(this.state.skillOptions)
       : [];
     const merged = [...baseOptions];
-    customOptions.forEach(option => {
+    customOptions.forEach((option) => {
       if (!baseLower.includes(option.toLowerCase())) {
         merged.push(option);
       }
@@ -431,12 +476,12 @@ const Store = {
     const normalized = String(option).trim();
     if (!normalized) return false;
     const lower = normalized.toLowerCase();
-    const baseLower = BASE_SKILL_OPTIONS.map(opt => opt.toLowerCase());
+    const baseLower = BASE_SKILL_OPTIONS.map((opt) => opt.toLowerCase());
     if (baseLower.includes(lower)) {
       return false;
     }
     const options = Array.isArray(this.state.skillOptions) ? [...this.state.skillOptions] : [];
-    if (options.some(opt => opt.toLowerCase() === lower)) {
+    if (options.some((opt) => opt.toLowerCase() === lower)) {
       return false;
     }
     options.push(normalized);
@@ -485,7 +530,7 @@ const Store = {
   },
 
   resetDailyData() {
-    this.dailyKeys.forEach(key => {
+    this.dailyKeys.forEach((key) => {
       if (key in this.defaults) {
         const defaultValue = this.defaults[key];
         if (Array.isArray(defaultValue)) {
@@ -561,10 +606,12 @@ const Store = {
 
   isQuotaError(error) {
     if (!error) return false;
-    return error.name === 'QuotaExceededError' ||
+    return (
+      error.name === 'QuotaExceededError' ||
       error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
       error.code === 22 ||
-      error.code === 1014;
+      error.code === 1014
+    );
   },
 
   handleQuotaExceeded() {
@@ -586,7 +633,7 @@ const Store = {
     const count = Math.min(limit, Math.max(1, Math.floor(dates.length * 0.1)));
     const toArchive = dates.slice(0, count);
 
-    toArchive.forEach(date => {
+    toArchive.forEach((date) => {
       const entry = this.state.entries[date];
       if (entry) {
         this.state.archivedEntries[date] = entry;
@@ -597,7 +644,7 @@ const Store = {
     this.state.meta = {
       ...this.state.meta,
       lastArchive: new Date().toISOString(),
-      archivedCount: (this.state.meta?.archivedCount || 0) + toArchive.length
+      archivedCount: (this.state.meta?.archivedCount || 0) + toArchive.length,
     };
 
     return toArchive.length;
@@ -616,7 +663,7 @@ const Store = {
       _schemaDate: SCHEMA_DATE,
       exportedAt: new Date().toISOString(),
       lastEntryDate: this.state.lastEntryDate || '',
-      settings: this.collectSettings()
+      settings: this.collectSettings(),
     };
 
     if (Object.keys(archivedEntries).length > 0) {
@@ -679,7 +726,7 @@ const Store = {
     const entry = { ...existing };
 
     // Save all daily keys to the entry
-    this.dailyKeys.forEach(key => {
+    this.dailyKeys.forEach((key) => {
       const value = this.state[key];
       entry[key] = Array.isArray(value) ? [...value] : value;
     });
@@ -694,7 +741,7 @@ const Store = {
     }
 
     // Only save if there's actual data (not all defaults)
-    const hasData = this.dailyKeys.some(key => {
+    const hasData = this.dailyKeys.some((key) => {
       const value = this.state[key];
       const defaultValue = this.defaults[key];
       if (Array.isArray(defaultValue)) {
@@ -765,7 +812,9 @@ const Store = {
 
       if (Array.isArray(defaultValue)) {
         if (!Array.isArray(value)) {
-          console.error(`❌ Import validation failed: "${key}" should be array, got ${typeof value}`);
+          console.error(
+            `❌ Import validation failed: "${key}" should be array, got ${typeof value}`
+          );
           return false;
         }
         continue;
@@ -773,7 +822,9 @@ const Store = {
 
       if (defaultType === 'boolean') {
         if (typeof value !== 'boolean') {
-          console.error(`❌ Import validation failed: "${key}" should be boolean, got ${typeof value}`);
+          console.error(
+            `❌ Import validation failed: "${key}" should be boolean, got ${typeof value}`
+          );
           return false;
         }
         continue;
@@ -781,7 +832,9 @@ const Store = {
 
       if (defaultType === 'number') {
         if (typeof value !== 'number' || !Number.isFinite(value)) {
-          console.error(`❌ Import validation failed: "${key}" should be finite number, got ${typeof value}`);
+          console.error(
+            `❌ Import validation failed: "${key}" should be finite number, got ${typeof value}`
+          );
           return false;
         }
         continue;
@@ -789,7 +842,9 @@ const Store = {
 
       if (defaultType === 'string') {
         if (typeof value !== 'string') {
-          console.error(`❌ Import validation failed: "${key}" should be string, got ${typeof value}`);
+          console.error(
+            `❌ Import validation failed: "${key}" should be string, got ${typeof value}`
+          );
           return false;
         }
         continue;
@@ -797,7 +852,9 @@ const Store = {
 
       if (defaultType === 'object') {
         if (!value || typeof value !== 'object' || Array.isArray(value)) {
-          console.error(`❌ Import validation failed: "${key}" should be object, got ${typeof value}`);
+          console.error(
+            `❌ Import validation failed: "${key}" should be object, got ${typeof value}`
+          );
           return false;
         }
 
@@ -833,8 +890,8 @@ const Store = {
       archivedEntries,
       meta: {
         ...defaults.meta,
-        ...this.state.meta  // Preserve current meta and settings
-      }
+        ...this.state.meta, // Preserve current meta and settings
+      },
     };
 
     this.applySettings(settings);
@@ -881,7 +938,7 @@ const Store = {
 
     mergedState.meta = {
       ...this.cloneDefaults().meta,
-      ...(mergedState.meta || {})
+      ...(mergedState.meta || {}),
     };
 
     this.state = mergedState;
@@ -916,7 +973,7 @@ const Store = {
     }, {});
 
     // Don't record history if all scores are zero (no real data entered)
-    const hasData = Object.values(safeScores).some(score => score > 0);
+    const hasData = Object.values(safeScores).some((score) => score > 0);
     if (!hasData) return;
 
     const entry = this.getEntry(today) || {};
@@ -935,15 +992,13 @@ const Store = {
     this.ensureEntries();
 
     const activeEntries = this.state.entries || {};
-    const archivedEntries = includeArchived ? (this.state.archivedEntries || {}) : {};
+    const archivedEntries = includeArchived ? this.state.archivedEntries || {} : {};
     const combined = { ...archivedEntries, ...activeEntries };
     const dates = Object.keys(combined).sort();
 
-    const limitedDates = typeof days === 'number' && days > 0
-      ? dates.slice(-days)
-      : dates;
+    const limitedDates = typeof days === 'number' && days > 0 ? dates.slice(-days) : dates;
 
-    return limitedDates.map(date => {
+    return limitedDates.map((date) => {
       const entry = combined[date] || {};
       const scores = this.normalizeScores(entry.scores || this.calculateScores(entry));
       return { date, scores };
@@ -983,232 +1038,6 @@ const Store = {
       App.updateScores();
     }
   },
-
-  cloneDefaults() {
-    return JSON.parse(JSON.stringify(this.defaults));
-  },
-
-  validateImport(payload) {
-    if (!payload || typeof payload !== 'object') {
-      console.error('Store.validateImport: Invalid payload type');
-      return false;
-    }
-
-    // Reject if meta is an array
-    if (Array.isArray(payload.meta)) {
-      console.error('Store.validateImport: meta cannot be an array');
-      return false;
-    }
-
-    // Reject if entries is an array
-    if (Array.isArray(payload.entries)) {
-      console.error('Store.validateImport: entries cannot be an array');
-      return false;
-    }
-
-    // Must have at least meta or entries
-    if (payload.meta === undefined && payload.entries === undefined) {
-      console.error('Store.validateImport: Payload must contain meta or entries');
-      return false;
-    }
-
-    console.log('✅ Store.validateImport: Payload is valid');
-    return true;
-  },
-
-  merge(payload) {
-    if (!payload || typeof payload !== 'object') {
-      console.error('Store.merge: Invalid payload');
-      return false;
-    }
-
-    try {
-      // Merge meta data
-      if (payload.meta && typeof payload.meta === 'object') {
-        if (payload.meta.lastEntryDate) {
-          this.state.lastEntryDate = payload.meta.lastEntryDate;
-        }
-        if (payload.meta.settings && typeof payload.meta.settings === 'object') {
-          // Merge allowed settings into state
-          Object.keys(payload.meta.settings).forEach(key => {
-            if (META_SETTINGS_KEYS.includes(key)) {
-              const value = payload.meta.settings[key];
-              if (Array.isArray(value)) {
-                this.state[key] = [...value];
-              } else {
-                this.state[key] = value;
-              }
-            }
-          });
-        }
-      }
-
-      // Merge entries
-      if (payload.entries && typeof payload.entries === 'object') {
-        this.ensureEntries();
-        Object.keys(payload.entries).forEach(date => {
-          const entry = payload.entries[date];
-          if (entry && typeof entry === 'object') {
-            this.setEntry(date, entry);
-          }
-        });
-      }
-
-      // Update daily state from the last entry date if available
-      if (this.state.lastEntryDate && this.getEntry(this.state.lastEntryDate)) {
-        this.applyEntryToState(this.getEntry(this.state.lastEntryDate));
-        const entry = this.getEntry(this.state.lastEntryDate);
-        this.state.actionTimestamps = { ...(entry.timestamps || {}) };
-      }
-
-      // Save to localStorage
-      this.save();
-
-      // Trigger score recalculation and UI updates after import
-      if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
-        App.updateScores();
-      }
-
-      console.log('✅ Store.merge: Data merged successfully');
-      return true;
-    } catch (error) {
-      console.error('❌ Store.merge: Failed to merge data', error);
-      return false;
-    }
-  },
-
-  handleExport() {
-    try {
-      const exportData = this.getSanitizedExport();
-      const data = JSON.stringify(exportData, null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const fileName = `drop-life-tracker-${timestamp}.json`;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-      if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-        UI.notify('Data exported');
-      }
-    } catch (error) {
-      console.error('Data export failed:', error);
-      if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-        UI.notify('Export failed');
-      }
-    }
-  },
-
-  handleImport(file) {
-    try {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          const raw = event.target?.result;
-          console.log('📥 Import: Reading file data...');
-          
-          const payload = JSON.parse(raw);
-          console.log('📥 Import: JSON parsed, validating...');
-
-          if (!this.validateImport(payload)) {
-            throw new Error('Import validation failed - check console for details');
-          }
-
-          console.log('📥 Import: Merging data...');
-          this.merge(payload);
-          
-          console.log('✅ Import: Data imported successfully');
-          if (typeof UI !== 'undefined') {
-            if (typeof UI.setVisionFields === 'function') {
-              UI.setVisionFields(this.state);
-            }
-            if (typeof UI.notify === 'function') {
-              UI.notify('Data imported successfully!', 3000);
-            }
-          }
-        } catch (error) {
-          console.error('❌ Data import failed:', error);
-          if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-            UI.notify(`Import failed: ${error.message}`, 4000);
-          }
-        }
-      };
-
-      reader.onerror = (error) => {
-        console.error('❌ File read error:', error);
-        if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-          UI.notify('Failed to read file', 3000);
-        }
-      };
-
-      reader.readAsText(file);
-    } catch (error) {
-      console.error('❌ Failed to read import file:', error);
-      if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-        UI.notify(`Import error: ${error.message}`, 4000);
-      }
-    }
-  },
-
-  clearAllData() {
-    console.log('🧹 Store.clearAllData: Clearing all data');
-    
-    // Reset state to defaults
-    this.state = { ...this.cloneDefaults() };
-    
-    // Clear localStorage
-    try {
-      localStorage.removeItem(this.DB_KEY);
-      console.log('🗑️ Store.clearAllData: localStorage cleared');
-    } catch (error) {
-      console.error('❌ Store.clearAllData: Failed to clear localStorage', error);
-    }
-    
-    // Reinitialize
-    this.ensureMeta();
-    this.ensureEntries();
-    this.ensureSkillCollections();
-    this.state.meta.settings = this.collectSettings();
-    
-    console.log('✅ Store.clearAllData: All data cleared and reset to defaults');
-    return true;
-  },
-
-  handleDataClear() {
-    console.log('handleDataClear called');
-    const confirmationMessage = 'This will remove all saved data, including history. This will reload the page. Do you want to continue?';
-    const confirmed = window.confirm(confirmationMessage);
-    console.log('User confirmed:', confirmed);
-
-    if (!confirmed) {
-      return false;
-    }
-
-    this.clearAllData();
-    if (typeof UI !== 'undefined') {
-      if (typeof UI.setVisionFields === 'function') {
-        UI.setVisionFields(this.state);
-      }
-      if (typeof UI.syncDailyUI === 'function') {
-        UI.syncDailyUI();
-      }
-      if (typeof UI.renderScores === 'function') {
-        const zeroScores = { sleep: 0, fitness: 0, mind: 0, spirit: 0 };
-        const streaks = typeof Analytics !== 'undefined' && typeof Analytics.calculateStreaks === 'function' 
-          ? Analytics.calculateStreaks() 
-          : {};
-        UI.renderScores(zeroScores, streaks);
-      }
-      if (typeof UI.notify === 'function') {
-        UI.notify('All data cleared');
-      }
-    }
-    return true;
-  }
 };
 
 // Make Store available globally
