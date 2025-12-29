@@ -10,8 +10,12 @@
  * Run manually when making intentional UI changes.
  */
 
-const { test, expect } = require('@playwright/test');
-const path = require('path');
+import { test, expect } from '@playwright/test';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Configuration
 const BASE_URL = process.env.BASE_URL || `file://${path.resolve(__dirname, '../../index.html')}`;
@@ -286,7 +290,6 @@ test.describe('Accessibility Visual Tests', () => {
 });
 
 // Helper to create screenshots directory if it doesn't exist
-const fs = require('fs');
 const screenshotsDir = path.join(__dirname, 'screenshots');
 if (!fs.existsSync(screenshotsDir)) {
   fs.mkdirSync(screenshotsDir, { recursive: true });
