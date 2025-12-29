@@ -1,5 +1,5 @@
 // Centralized app version for easy updates
-export const APP_VERSION = '4.0.0';
+export const APP_VERSION = '4.0.1';
 
 // Make available globally for non-module scripts (e.g., service worker)
 if (typeof window !== 'undefined') {
