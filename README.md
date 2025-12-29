@@ -2,6 +2,8 @@
 
 A minimalist Progressive Web App for tracking daily life domains: Sleep, Fitness, Mind, and Spirit. Built with vanilla JavaScript, drop helps you maintain mindful engagement with your personal growth through a philosophically-grounded scoring system that rewards consistency over perfection.
 
+**Now online-ready with Firebase persistence while remaining fully offline-capable.** Data syncs across devices via anonymous authentication, with local caching for uninterrupted use.
+
 ##  Quick Start
 
 Visit: **https://benwassa.github.io/drop/**
@@ -40,7 +42,7 @@ drop/
 │   ├── backup.js             # Manual backup utilities
 │   ├── install.js            # PWA install prompt handling
 │   ├── styles.css            # Styling & design tokens
-│   ├── manifest.json         # PWA manifest (v3.3.4)
+│   ├── manifest.json         # PWA manifest (v4.0.0)
 │   ├── sw.js                 # Service worker for offline support
 │   ├── package.json          # NPM configuration & test scripts
 │   ├── playwright.config.js  # E2E test configuration
@@ -654,6 +656,25 @@ All icons are optimized SVGs in `docs/icons/`:
 - Not a productivity tool (it's a wellness tracker)
 - Not a social network (it's personal and private)
 - Not a game (it's a reflective practice)
+
+##  Future Roadmap
+
+The vision for drop is evolving to embrace modern web development best practices while maintaining its core philosophy of mindful, personal growth tracking.
+
+### Planned Enhancements
+- **Build System**: Migrate to Node.js/NPM-based development with automated tooling
+- **Styling Framework**: Adopt Tailwind CSS for more maintainable and responsive design
+- **Enhanced Testing**: Expand automated test coverage with CI/CD pipelines
+- **Performance**: Implement code splitting and lazy loading for better load times
+- **Accessibility**: Further improvements for screen readers and keyboard navigation
+
+### Architectural Goals
+- **Modular Architecture**: Break down monolithic files into focused, reusable modules
+- **Type Safety**: Consider TypeScript for better developer experience and reliability
+- **Component System**: Move toward component-based UI architecture
+- **API Integration**: Potential for social features (optional, privacy-first)
+
+*These changes will be implemented thoughtfully to preserve drop's minimalist ethos and offline-first philosophy.*
 
 ##  Links & Resources
 
