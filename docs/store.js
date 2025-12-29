@@ -1,24 +1,7 @@
 // === STORE MODULE ===
 // Data persistence and state management for the drop life tracker app
 
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
-
-// Firebase config (move to env vars in production)
-const firebaseConfig = {
-  apiKey: "AIzaSyChB4LIztDi0EcvSodWlNw8664-YDjZsrM",
-  authDomain: "drop-d8ad2.firebaseapp.com",
-  projectId: "drop-d8ad2",
-  storageBucket: "drop-d8ad2.firebasestorage.app",
-  messagingSenderId: "632897597373",
-  appId: "1:632897597373:web:bd855b412cd4f075a2ecd4",
-  measurementId: "G-BYSBF51J6D"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { firebaseSignInAnonymous, subscribeToAuthState, firestoreLoadState, firestoreSaveState } from './firebase.js';
 
 const BASE_SKILL_OPTIONS = ['Wrestling', 'Volleyball', 'Mobility', 'Yoga', 'Plyometrics'];
 const SAVE_DEBOUNCE_MS = 400;
@@ -37,6 +20,8 @@ const Store = {
   DB_KEY: 'lifeTrackerData',
   state: {},
   saveTimer: null,
+  _uid: null,
+  _remoteSaveTimer: null,
   userId: null,
   firebaseReady: false,
   dailyKeys: ['wake', 'rest', 'run', 'strength', 'strength_level', 'skill', 'read_level', 'write_level', 'quadrant', 'meditation', 'energy', 'mood'],
@@ -57,12 +42,48 @@ const Store = {
     }
   },
 
-  init() {
+  async init() {
     console.log('🔧 Store.init called');
 
-    // Initialize Firebase auth
-    this.initFirebaseAuth();
+    this._uid = null;
 
+    try {
+      this._uid = await firebaseSignInAnonymous();
+      console.log('🔥 Signed in anonymously, UID:', this._uid);
+    } catch (e) {
+      console.warn('❌ Anonymous sign-in failed, staying offline-safe:', e.message);
+    }
+
+    let loadedState = null;
+
+    if (this._uid) {
+      try {
+        loadedState = await firestoreLoadState(this._uid);
+        console.log('☁️ Loaded state from Firestore');
+      } catch (e) {
+        console.warn('❌ Firestore load failed, falling back to local:', e.message);
+        loadedState = null;
+      }
+    }
+
+    if (loadedState) {
+      this.state = loadedState;
+      this.saveLocalOnly(); // write local cache immediately
+    } else {
+      this.loadFromLocalStorage(); // existing init path
+    }
+
+    this.applyMigrations(this.state);
+    this.ensureMeta();
+    this.ensureEntries();
+    this.ensureSkillCollections();
+    this.state.meta.settings = this.collectSettings();
+    this.migrateOldMindFields();
+    this.hydrateDailyState();
+    this.saveLocalOnly();
+  },
+
+  loadFromLocalStorage() {
     const savedData = JSON.parse(localStorage.getItem(this.DB_KEY) || '{}');
     console.log('💾 Loaded from localStorage:', Object.keys(savedData).length, 'keys');
 
@@ -79,14 +100,42 @@ const Store = {
       meditation: this.state.meditation,
       quadrant: this.state.quadrant
     });
-    
-    this.applyMigrations(savedData);
-    this.ensureMeta();
-    this.ensureEntries();
-    this.ensureSkillCollections();
-    this.state.meta.settings = this.collectSettings();
-    this.migrateOldMindFields();
-    this.hydrateDailyState();
+  },
+
+  saveLocalOnly() {
+    const payload = this.getPersistedState();
+    try {
+      localStorage.setItem(this.DB_KEY, JSON.stringify(payload));
+      console.log('💾 Saved to localStorage');
+    } catch (error) {
+      if (this.isQuotaError(error)) {
+        const recovered = this.handleQuotaExceeded();
+        if (recovered) {
+          this.saveLocalOnly();
+          return;
+        }
+        console.error('Quota exceeded and automatic recovery failed:', error);
+        if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
+          UI.notify('Storage is full. Please export and clear old data.', 5000);
+        }
+      } else {
+        console.error('LocalStorage save failed:', error);
+      }
+    }
+  },
+
+  scheduleRemoteSave() {
+    if (!this._uid) return;
+    clearTimeout(this._remoteSaveTimer);
+    this._remoteSaveTimer = setTimeout(async () => {
+      try {
+        await firestoreSaveState(this._uid, this.state);
+        console.log('☁️ Saved to Firestore');
+      } catch (e) {
+        console.warn('❌ Firestore save failed (silent):', e.message);
+      }
+    }, 800);
+  },
     this.flushSave();
   },
 
@@ -146,65 +195,6 @@ const Store = {
     }
 
     this.state.lastEntryDate = today;
-  },
-
-  initFirebaseAuth() {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        this.userId = user.uid;
-        this.firebaseReady = true;
-        console.log('🔥 Firebase auth ready, user ID:', this.userId);
-        this.syncWithFirestore();
-      } else {
-        console.log('🔥 No user signed in, signing in anonymously...');
-        signInAnonymously(auth).catch((error) => {
-          console.error('❌ Firebase anonymous sign-in failed:', error);
-        });
-      }
-    });
-  },
-
-  async syncWithFirestore() {
-    if (!this.userId) return;
-
-    try {
-      const docRef = doc(db, 'users', this.userId, 'data', 'state');
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const firestoreData = docSnap.data();
-        console.log('☁️ Loaded from Firestore:', Object.keys(firestoreData).length, 'keys');
-        // Merge Firestore data with local, preferring Firestore for conflicts
-        this.state = { ...this.cloneDefaults(), ...firestoreData };
-        // Re-run hydration after loading from Firestore
-        this.applyMigrations(this.state);
-        this.ensureMeta();
-        this.ensureEntries();
-        this.ensureSkillCollections();
-        this.state.meta.settings = this.collectSettings();
-        this.migrateOldMindFields();
-        this.hydrateDailyState();
-        console.log('📋 State updated from Firestore');
-      } else {
-        console.log('☁️ No Firestore data, will save local state');
-        this.saveToFirestore();
-      }
-    } catch (error) {
-      console.error('❌ Firestore sync failed:', error);
-      // Continue with localStorage
-    }
-  },
-
-  async saveToFirestore() {
-    if (!this.userId || !this.firebaseReady) return;
-
-    try {
-      const docRef = doc(db, 'users', this.userId, 'data', 'state');
-      await setDoc(docRef, this.state);
-      console.log('☁️ Saved to Firestore');
-    } catch (error) {
-      console.error('❌ Firestore save failed:', error);
-    }
   },
 
   applyEntryToState(entry) {
@@ -567,32 +557,12 @@ const Store = {
   },
 
   persistState() {
-    const payload = this.getPersistedState();
+    this.saveLocalOnly();
+    this.scheduleRemoteSave();
 
-    try {
-      localStorage.setItem(this.DB_KEY, JSON.stringify(payload));
-      
-      // Save to Firestore if ready
-      this.saveToFirestore();
-      
-      // Trigger automatic backup after state changes
-      if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.handleStoreSave === 'function') {
-        AutoBackup.handleStoreSave();
-      }
-    } catch (error) {
-      if (this.isQuotaError(error)) {
-        const recovered = this.handleQuotaExceeded();
-        if (recovered) {
-          this.persistState();
-          return;
-        }
-        console.error('Quota exceeded and automatic recovery failed:', error);
-        if (typeof UI !== 'undefined' && typeof UI.notify === 'function') {
-          UI.notify('Storage is full. Please export and clear old data.', 5000);
-        }
-      } else {
-        throw error;
-      }
+    // Trigger automatic backup after state changes
+    if (typeof AutoBackup !== 'undefined' && typeof AutoBackup.handleStoreSave === 'function') {
+      AutoBackup.handleStoreSave();
     }
   },
 

@@ -15,12 +15,15 @@ if (typeof window !== 'undefined') {
   };
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
   // === DEVELOPER MODE TOGGLE ===
   // Set to true to enable developer features (no loading overlay auto-hide, dev toast, etc.)
   const DEV_MODE = false;
   window.DEV_MODE = DEV_MODE; // Make accessible to other modules
+
+  // Initialize Store first (now async)
+  await Store.init();
 
   const App = {
     currentPage: 'home',
