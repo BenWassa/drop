@@ -25,5 +25,5 @@
     "prefer-const": "error",
     "no-var": "error"
   },
-  "ignorePatterns": ["node_modules/", "testing/", "*.min.js"]
+  "ignorePatterns": ["node_modules/", "test/", "*.min.js"]
 }
