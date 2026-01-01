@@ -1749,28 +1749,28 @@ const UI = {
                                 </div>
                                 <div class="history-entry__domains">
                                   <div class="history-domain">
-                                    <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                                    <img src="../public/icons/sleep.svg" alt="" class="history-domain__icon">
                                     <div class="history-domain__info">
                                       <div class="history-domain__name">Sleep</div>
                                       <div class="history-domain__score">${scores.sleep}</div>
                                     </div>
                                   </div>
                                   <div class="history-domain">
-                                    <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                                    <img src="../public/icons/fitness.svg" alt="" class="history-domain__icon">
                                     <div class="history-domain__info">
                                       <div class="history-domain__name">Fitness</div>
                                       <div class="history-domain__score">${scores.fitness}</div>
                                     </div>
                                   </div>
                                   <div class="history-domain">
-                                    <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                                    <img src="../public/icons/mind.svg" alt="" class="history-domain__icon">
                                     <div class="history-domain__info">
                                       <div class="history-domain__name">Mind</div>
                                       <div class="history-domain__score">${scores.mind}</div>
                                     </div>
                                   </div>
                                   <div class="history-domain">
-                                    <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                                    <img src="../public/icons/spirit.svg" alt="" class="history-domain__icon">
                                     <div class="history-domain__info">
                                       <div class="history-domain__name">Spirit</div>
                                       <div class="history-domain__score">${scores.spirit}</div>
@@ -2212,28 +2212,28 @@ const UI = {
                               </div>
                               <div class="history-entry__domains">
                                 <div class="history-domain">
-                                  <img src="icons/sleep.svg" alt="" class="history-domain__icon">
+                                  <img src="../public/icons/sleep.svg" alt="" class="history-domain__icon">
                                   <div class="history-domain__info">
                                     <div class="history-domain__name">Sleep</div>
                                     <div class="history-domain__score">${scores.sleep}</div>
                                   </div>
                                 </div>
                                 <div class="history-domain">
-                                  <img src="icons/fitness.svg" alt="" class="history-domain__icon">
+                                  <img src="../public/icons/fitness.svg" alt="" class="history-domain__icon">
                                   <div class="history-domain__info">
                                     <div class="history-domain__name">Fitness</div>
                                     <div class="history-domain__score">${scores.fitness}</div>
                                   </div>
                                 </div>
                                 <div class="history-domain">
-                                  <img src="icons/mind.svg" alt="" class="history-domain__icon">
+                                  <img src="../public/icons/mind.svg" alt="" class="history-domain__icon">
                                   <div class="history-domain__info">
                                     <div class="history-domain__name">Mind</div>
                                     <div class="history-domain__score">${scores.mind}</div>
                                   </div>
                                 </div>
                                 <div class="history-domain">
-                                  <img src="icons/spirit.svg" alt="" class="history-domain__icon">
+                                  <img src="../public/icons/spirit.svg" alt="" class="history-domain__icon">
                                   <div class="history-domain__info">
                                     <div class="history-domain__name">Spirit</div>
                                     <div class="history-domain__score">${scores.spirit}</div>

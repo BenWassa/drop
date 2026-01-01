@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     registerServiceWorker() {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker
-          .register('sw.js', { type: 'module' })
+          .register('../public/sw.js', { type: 'module' })
           .then((registration) => {
             console.log('Service Worker registered successfully:', registration);
 
@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     },
 
     loadAppVersion() {
-      fetch('manifest.json')
+      fetch('../public/manifest.json')
         .then((response) => response.json())
         .then((manifest) => {
           const versionElement = document.getElementById('app-version');
@@ -535,11 +535,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async checkCriticalResources() {
       const criticalImages = [
-        'icons/drop_rounded.png',
-        'icons/fitness.svg',
-        'icons/sleep.svg',
-        'icons/mind.svg',
-        'icons/spirit.svg',
+        '../public/icons/drop_rounded.png',
+        '../public/icons/fitness.svg',
+        '../public/icons/sleep.svg',
+        '../public/icons/mind.svg',
+        '../public/icons/spirit.svg',
       ];
 
       const checkImage = (src) => {

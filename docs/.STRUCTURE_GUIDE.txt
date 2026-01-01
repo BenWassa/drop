@@ -1,0 +1,107 @@
+┌─────────────────────────────────────────────────────────────────┐
+│              docs/ - REORGANIZED FOLDER STRUCTURE               │
+└─────────────────────────────────────────────────────────────────┘
+
+docs/
+│
+├── �� public/                         [DEPLOYED FILES - Static Assets]
+│   ├── index.html                     Main app entry point
+│   ├── styles.css                     All CSS styling  
+│   ├── manifest.json                  PWA manifest
+│   ├── sw.js                          Service worker
+│   ├── sample-data-for-drop.json      Sample data for testing
+│   └── 📂 icons/                      App icons & images (20+ icons)
+│
+├── 📂 src/                            [APP SOURCE CODE - JavaScript]
+│   ├── app.js                         Main app module
+│   ├── store.js                       Data persistence & state
+│   ├── firebase.js                    Firebase auth & Firestore
+│   ├── ui.js                          UI components & rendering
+│   ├── scoring.js                     Score calculation logic
+│   ├── analytics.js                   Analytics tracking
+│   ├── backup.js                      Backup functionality
+│   ├── install.js                     PWA install prompts
+│   ├── version.js                     Version management
+│   └── update-version.js              Updates manifest & package.json
+│
+├── 📂 test/                           [TESTING SUITE]
+│   ├── playwright.config.js           Playwright test config
+│   ├── README.md                      Testing guide
+│   ├── 📂 js/                         Test scripts
+│   │   ├── visual.test.js             Visual regression tests
+│   │   ├── dom.test.js                DOM unit tests
+│   │   ├── qunit-enhance.js           QUnit enhancements
+│   │   ├── generate-sample-data.js    Sample data generator
+│   │   └── score_tuning_lab.js        Scoring sandbox
+│   ├── 📂 pages/                      Test HTML pages
+│   │   ├── index.html                 QUnit test runner
+│   │   └── score_tuning_lab.html      Scoring lab
+│   ├── �� data/                       Test fixtures
+│   │   ├── sample-data-5days.json
+│   │   ├── sample-data-30days.json
+│   │   └── sample-data-1month.json
+│   └── 📂 test-results/               Test reports & screenshots
+│
+├── 📂 .docs/                          [DOCUMENTATION - Hidden]
+│   └── 📂 documentation/              Not served to users
+│       ├── FIREBASE-SETUP.md
+│       ├── SPRINTS.md
+│       └── SIDEBAR-DATA-AUDIT.md
+│
+├── 📂 node_modules/                   [DEPENDENCIES]
+│   └── (playwright, eslint, prettier, etc.)
+│
+├── 📂 playwright-report/              [TEST REPORTS]
+│   └── index.html
+│
+├── ✅ STRUCTURE.md                    Folder organization guide
+├── 📄 package.json                    Dependencies & scripts
+├── 📄 package-lock.json               Locked dependency versions
+├── ⚙️ .eslintrc.json                  Linting configuration
+├── ✨ .prettierrc.json                Code formatting config
+├── 🚫 .prettierignore                 Files to skip formatting
+└── 🔒 playwright-report/              Generated test reports
+
+═══════════════════════════════════════════════════════════════════
+
+KEY POINTS:
+
+📌 DEPLOYMENT:
+   - Copy public/ contents to web root
+   - Include src/ in same directory level
+   - EXCLUDE: test/, .docs/, node_modules/
+
+📌 IMPORT PATHS:
+   From public/index.html: "../src/app.js"
+   From src/app.js: "../public/icons/..."
+   From test/pages/: "../../src/app.js"
+
+📌 HOW PATHS WORK:
+   public/index.html (relative to root)
+   └─ ../src/app.js      ← Goes up one level then into src/
+   └─ ../public/icons/   ← Goes up one level then into public/
+
+📌 QUICK NAVIGATION:
+   App Code.............. src/
+   Static Assets......... public/
+   Tests................ test/
+   Documentation......... .docs/
+   Dev Config............ . (root - eslint, prettier, etc)
+
+═══════════════════════════════════════════════════════════════════
+
+BEFORE REORGANIZATION:
+   ❌ 9 app JS files in root mixed with assets
+   ❌ Testing deeply nested in testing/
+   ❌ Documentation mixed with deployed files
+
+AFTER REORGANIZATION:
+   ✅ Clear separation of concerns
+   ✅ Easy to understand what ships
+   ✅ Professional structure
+   ✅ Ready for scaling
+
+═══════════════════════════════════════════════════════════════════
+Last Updated: January 1, 2026
+Status: ✅ Complete & Deployed
+═══════════════════════════════════════════════════════════════════
