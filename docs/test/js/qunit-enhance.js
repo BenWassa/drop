@@ -119,8 +119,9 @@
 
       errorsPane.appendChild(item);
       if(!firstFailEl) firstFailEl = item;
-      errorsPane.style.display = 'block';
-      if (toggleBtn) toggleBtn.textContent = 'Hide failures';
+      // Don't auto-show errors pane - let user click button
+      // errorsPane.style.display = 'block';
+      // if (toggleBtn) toggleBtn.textContent = 'Hide failures';
     }
   });
 
