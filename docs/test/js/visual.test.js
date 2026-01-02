@@ -18,9 +18,13 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Configuration
-const BASE_URL = process.env.BASE_URL || `file://${path.resolve(__dirname, '../../index.html')}`;
+const BASE_URL = process.env.BASE_URL || `file://${path.resolve(__dirname, '../../public/index.html')}`;
 const VIEWPORT_WIDTH = 360;
 const VIEWPORT_HEIGHT = 800;
+
+// Load sample data for testing
+const sampleDataPath = path.resolve(__dirname, '../data/sample-data-5days.json');
+const sampleData = JSON.parse(fs.readFileSync(sampleDataPath, 'utf-8'));
 
 test.describe('Visual Regression Tests', () => {
   
@@ -31,10 +35,25 @@ test.describe('Visual Regression Tests', () => {
     // Navigate to app
     await page.goto(BASE_URL);
     
+    // Wait for Store to be initialized and inject sample data
+    await page.waitForFunction(() => window.DropApp?.testHooks?.merge, { timeout: 10000 });
+    
+    // Inject sample data into the app
+    await page.evaluate((data) => {
+      window.DropApp.testHooks.merge(data);
+    }, sampleData);
+    
+    // Wait for UI to update after data injection
+    await page.waitForTimeout(500);
+    
     // Wait for loading overlay to disappear (if present)
     const loadingOverlay = page.locator('#loading-overlay');
-    if (await loadingOverlay.isVisible()) {
-      await loadingOverlay.waitFor({ state: 'hidden', timeout: 10000 });
+    try {
+      if (await loadingOverlay.isVisible({ timeout: 1000 })) {
+        await loadingOverlay.waitFor({ state: 'hidden', timeout: 10000 });
+      }
+    } catch (e) {
+      // Loading overlay may not be present, continue
     }
     
     // Wait for fonts to load
