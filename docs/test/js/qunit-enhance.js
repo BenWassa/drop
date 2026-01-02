@@ -8,7 +8,7 @@
     return;
   }
 
-  let totalEl, passEl, failEl, errorsPane, toggleBtn, scrollFirstBtn, clearBtn;
+  let totalEl, passEl, failEl, errorsPane, toggleBtn, scrollFirstBtn, clearBtn, copyBtn;
   let firstFailEl = null;
   let testsTotal = 0, testsPassed = 0, testsFailed = 0;
 
@@ -19,6 +19,7 @@
     errorsPane = $('#qunit-errors');
     toggleBtn = $('#q-toggle-errors');
     scrollFirstBtn = $('#q-scroll-first');
+    copyBtn = $('#q-copy-errors');
     clearBtn = $('#q-clear');
 
     if (!totalEl || !passEl || !failEl) {
@@ -33,6 +34,30 @@
       } else {
         errorsPane.style.display = 'none';
         toggleBtn.textContent = 'Show failures';
+      }
+    });
+
+    copyBtn.addEventListener('click', function(){
+      // Extract all error text
+      const errors = [];
+      Array.from(errorsPane.querySelectorAll('.error-item')).forEach(item => {
+        const lines = [];
+        Array.from(item.children).forEach(el => {
+          lines.push(el.textContent);
+        });
+        errors.push(lines.join('\n'));
+      });
+      
+      const text = errors.join('\n\n');
+      
+      if (text) {
+        navigator.clipboard.writeText(text).then(() => {
+          const origText = copyBtn.textContent;
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = origText; }, 2000);
+        });
+      } else {
+        alert('No errors to copy');
       }
     });
 
