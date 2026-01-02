@@ -77,5 +77,20 @@
   
   <!-- Load test modules -->
   <script src="../js/dom.test.js"></script>
+
+  <!-- Capture test failures for headless runner -->
+  <script>
+    window.testFailures = [];
+    QUnit.testDone(function(details) {
+      if (details.failed > 0) {
+        window.testFailures.push({
+          module: details.module,
+          name: details.name,
+          message: details.assertions?.map(a => a.message).join('; ') || 'Test failed',
+          assertions: details.assertions || []
+        });
+      }
+    });
+  </script>
 </body>
 </html>

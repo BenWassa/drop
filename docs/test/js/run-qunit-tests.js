@@ -1,37 +1,62 @@
 #!/usr/bin/env node
 
 /**
- * Quick Test Runner for drop
- * For a personal app, keep it simple:
- * - Open test page in browser
- * - See instant feedback
+ * Simple Node.js test runner for drop
+ * Validates test file structure and reports
  */
 
-import { exec } from 'child_process';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const testPagePath = path.resolve(__dirname, '../pages/index.html');
 
 console.log(`
 ╔════════════════════════════════════════════╗
 ║   drop QUnit Test Suite                    ║
 ╚════════════════════════════════════════════╝
-
-📖 DOM Tests:
-   ✓ Score display & updates
-   ✓ Accessibility (ARIA, focus)
-   ✓ Overlays & page switching
-   ✓ Progress bars
-   ✓ Data persistence
-
-Opening test page in browser...
 `);
 
-// Open test page
-exec(`open "${testPagePath}"`, (err) => {
-  if (err) {
-    console.log(`📖 Open in your browser:\n   ${testPagePath}\n`);
+const testFile = path.resolve(__dirname, '../js/dom.test.js');
+
+try {
+  if (!fs.existsSync(testFile)) {
+    console.error(`❌ Test file not found: ${testFile}`);
+    process.exit(1);
   }
-});
+
+  const content = fs.readFileSync(testFile, 'utf-8');
+  
+  // Count test structure
+  const modules = (content.match(/QUnit\.module\(/g) || []).length;
+  const tests = (content.match(/QUnit\.test\(/g) || []).length;
+  const assertions = (content.match(/assert\./g) || []).length;
+
+  console.log(`📖 Loading tests...\n`);
+  
+  // Validate test file structure
+  const hasValidStructure = content.includes('QUnit.module') && 
+                           content.includes('QUnit.test') && 
+                           content.includes('assert.');
+
+  if (!hasValidStructure) {
+    console.error('❌ Test file has invalid structure');
+    process.exit(1);
+  }
+
+  // Print results
+  console.log(`📊 Test Suite:\n`);
+  console.log(`   Test Modules:  ${modules}`);
+  console.log(`   Test Cases:    ${tests}`);
+  console.log(`   Assertions:    ${assertions}\n`);
+  
+  console.log(`✅ Test suite is valid and ready to run!\n`);
+  console.log(`💡 To run tests in browser:`);
+  console.log(`   open test/pages/index.html\n`);
+
+  process.exit(0);
+
+} catch (error) {
+  console.error(`\n❌ Error: ${error.message}`);
+  process.exit(1);
+}
