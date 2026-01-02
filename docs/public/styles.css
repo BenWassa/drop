@@ -2944,6 +2944,39 @@ body {
   filter: brightness(0) invert(1);
 }
 
+.icon-database-export {
+  background-image: url('icons/database_export.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  filter: brightness(0) invert(1);
+}
+
+.icon-database-import {
+  background-image: url('icons/database_import.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  filter: brightness(0) invert(1);
+}
+
+.icon-database-delete {
+  background-image: url('icons/database_delete.svg');
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  filter: brightness(0) invert(1);
+}
+
 /* === HISTORY VIEW === */
 .history-controls {
   display: flex;

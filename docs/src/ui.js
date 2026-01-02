@@ -30,6 +30,10 @@ const UI = {
       closeBtn: document.getElementById('settings-close-btn'),
       backdrop: document.getElementById('settings-backdrop'),
       historyBtn: document.getElementById('settings-history-btn'),
+      exportBtn: document.getElementById('settings-export-btn'),
+      importBtn: document.getElementById('settings-import-btn'),
+      importFileInput: document.getElementById('import-file-input'),
+      clearBtn: document.getElementById('settings-clear-btn'),
     },
     historyOverlay: {
       overlay: document.getElementById('history-overlay'),
@@ -1640,6 +1644,33 @@ const UI = {
         UI.openHistoryView();
       });
     }
+
+    // Data management from settings
+    const { exportBtn, importBtn, importFileInput, clearBtn } = UI.elements.settingsMenu;
+    
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        UI.exportData();
+      });
+    }
+    
+    if (importBtn) {
+      importBtn.addEventListener('click', () => {
+        importFileInput.click();
+      });
+    }
+    
+    if (importFileInput) {
+      importFileInput.addEventListener('change', (event) => {
+        UI.importData(event);
+      });
+    }
+    
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        UI.clearAllData();
+      });
+    }
   },
 
   openHistoryView() {
@@ -2301,5 +2332,81 @@ const UI = {
         datePicker.remove();
       }
     });
+  },
+
+  exportData() {
+    try {
+      const data = Store.getSanitizedExport();
+      const dataStr = JSON.stringify(data, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `drop-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      UI.showToast('Data exported successfully!', 'success');
+    } catch (error) {
+      console.error('Export failed:', error);
+      UI.showToast('Failed to export data. Please try again.', 'error');
+    }
+  },
+
+  importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+      UI.showToast('Please select a valid JSON file.', 'error');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        Store.merge(data);
+        UI.refresh();
+        UI.showToast('Data imported successfully!', 'success');
+      } catch (error) {
+        console.error('Import failed:', error);
+        UI.showToast('Failed to import data. Please check the file format.', 'error');
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+  },
+
+  clearAllData() {
+    const confirmed = confirm(
+      '⚠️ WARNING: This will permanently delete ALL your data including:\n\n' +
+      '• All daily entries and scores\n• Archived entries\n• Skill progress\n• Settings and preferences\n\n' +
+      'This action CANNOT be undone. Are you absolutely sure you want to continue?'
+    );
+    
+    if (confirmed) {
+      const finalConfirm = confirm(
+        '🔥 FINAL WARNING: This is your last chance to cancel.\n\n' +
+        'All your drop data will be lost forever. Type "YES" below if you really want to proceed.'
+      );
+      
+      if (finalConfirm) {
+        try {
+          Store.clearAllData();
+          UI.refresh();
+          UI.showToast('All data has been cleared.', 'success');
+        } catch (error) {
+          console.error('Clear data failed:', error);
+          UI.showToast('Failed to clear data. Please try again.', 'error');
+        }
+      }
+    }
   },
 };

@@ -1314,6 +1314,22 @@
             </button>
           </section>
           <section class="settings-section">
+            <h3 class="settings-section__title">Data Management</h3>
+            <button class="settings-btn" id="settings-export-btn" type="button">
+              <span class="settings-btn__icon icon-database-export" aria-hidden="true"></span>
+              <span>Export Data</span>
+            </button>
+            <button class="settings-btn" id="settings-import-btn" type="button">
+              <span class="settings-btn__icon icon-database-import" aria-hidden="true"></span>
+              <span>Import Data</span>
+              <input type="file" id="import-file-input" accept=".json" style="display: none;">
+            </button>
+            <button class="settings-btn" id="settings-clear-btn" type="button">
+              <span class="settings-btn__icon icon-database-delete" aria-hidden="true"></span>
+              <span>Clear All Data</span>
+            </button>
+          </section>
+          <section class="settings-section">
             <h3 class="settings-section__title">About</h3>
             <div class="settings-info">
               <p><strong>drop</strong> - Daily Domain Tracker PWA</p>
