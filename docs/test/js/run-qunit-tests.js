@@ -17,22 +17,27 @@ console.log(`
 ╚════════════════════════════════════════════╝
 `);
 
-const testFile = path.resolve(__dirname, '../js/dom.test.js');
+  const testFile = path.resolve(__dirname, '../js/dom.test.js');
 
-try {
-  if (!fs.existsSync(testFile)) {
-    console.error(`❌ Test file not found: ${testFile}`);
-    process.exit(1);
-  }
+  try {
+    if (!fs.existsSync(testFile)) {
+      console.error(`❌ Test file not found: ${testFile}`);
+      process.exit(1);
+    }
 
-  const content = fs.readFileSync(testFile, 'utf-8');
-  
-  // Count test structure
-  const modules = (content.match(/QUnit\.module\(/g) || []).length;
-  const tests = (content.match(/QUnit\.test\(/g) || []).length;
-  const assertions = (content.match(/assert\./g) || []).length;
+    const content = fs.readFileSync(testFile, 'utf-8');
+    const scenarioFile = path.resolve(__dirname, '../js/data-scenarios.test.js');
+    const scenarioContent = fs.existsSync(scenarioFile) ? fs.readFileSync(scenarioFile, 'utf-8') : '';
+    
+    // Combine both test files for counting
+    const allContent = content + scenarioContent;
 
-  console.log(`📖 Loading tests...\n`);
+    // Count test structure from both files
+    const modules = (allContent.match(/QUnit\.module\(/g) || []).length;
+    const tests = (allContent.match(/QUnit\.test\(/g) || []).length;
+    const assertions = (allContent.match(/assert\./g) || []).length;
+
+    console.log(`📖 Loading tests...\n`);
   
   // Validate test file structure
   const hasValidStructure = content.includes('QUnit.module') && 
