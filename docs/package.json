@@ -5,11 +5,7 @@
   "description": "Daily domain tracker PWA - Sleep, Fitness, Mind, Spirit",
   "private": true,
   "scripts": {
-    "test": "echo 'Tests require running dev server. Run: npm run test:manual'",
-    "test:manual": "echo 'DOM tests: Open http://localhost:3000/docs/test/pages/index.html' && echo 'Visual tests: Start server with npm run dev, then run npm run test:visual'",
-    "test:visual": "echo 'Visual tests require running dev server first. Run: npm run dev' && playwright test --config test/playwright.config.js",
-    "test:visual:update": "playwright test --config test/playwright.config.js --update-snapshots",
-    "test:visual:ui": "playwright test --config test/playwright.config.js --ui",
+    "test": "node test/js/run-qunit-tests.js",
     "serve": "npx serve . -p 3000",
     "dev": "npx serve . -p 3000 -s",
     "version:sync": "node src/update-version.js",
