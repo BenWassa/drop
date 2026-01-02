@@ -3,6 +3,26 @@
   function $(sel, root=document) { return root.querySelector(sel) }
   function createEl(tag, cls, txt){ const el = document.createElement(tag); if(cls) el.className = cls; if(txt !== undefined) el.textContent = txt; return el }
 
+  function showToast(message, type = 'success') {
+    let toast = $('#toast');
+    if (!toast) {
+      toast = createEl('div', 'toast');
+      toast.id = 'toast';
+      document.body.appendChild(toast);
+    }
+    
+    toast.textContent = message;
+    toast.className = type === 'warning' ? 'warning' : '';
+    
+    // Clear any existing timeout
+    if (toast.timeoutId) clearTimeout(toast.timeoutId);
+    
+    // Auto-hide after 3 seconds
+    toast.timeoutId = setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
   if(!window.QUnit) {
     console.warn('QUnit not found - qunit-enhance.js requires QUnit to be loaded');
     return;
@@ -52,12 +72,10 @@
       
       if (text) {
         navigator.clipboard.writeText(text).then(() => {
-          const origText = copyBtn.textContent;
-          copyBtn.textContent = 'Copied!';
-          setTimeout(() => { copyBtn.textContent = origText; }, 2000);
+          showToast('Errors copied to clipboard!');
         });
       } else {
-        alert('No errors to copy');
+        showToast('No errors to copy', 'warning');
       }
     });
 
