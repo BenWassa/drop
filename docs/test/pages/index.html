@@ -71,14 +71,8 @@
   <!-- Enhancement script to improve test output visualization -->
   <script src="../js/qunit-enhance.js"></script>
 
-  <!-- Load app modules in order -->
-  <script src="../../src/store.js?v=2025-10-14"></script>
-  <script src="../../src/scoring.js?v=2025-10-14"></script>
-  <script src="../../src/ui.js?v=2025-10-14"></script>
-  <script src="../../src/backup.js?v=2025-10-14"></script>
-  <script src="../../src/install.js?v=2025-10-14"></script>
-  <script src="../../src/analytics.js?v=2025-10-14"></script>
-  <script src="../../src/app.js?v=2025-10-14"></script>
+  <!-- Load app modules via ES6 module -->
+  <script type="module" src="../js/test-app-loader.js?v=2025-10-14"></script>
   
   <!-- Load test modules -->
   <script src="../js/dom.test.js"></script>
