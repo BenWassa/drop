@@ -886,11 +886,15 @@ const Store = {
     const archivedEntries = this.sanitizeEntriesObject(payload.meta?.archivedEntries || {});
     const settings = payload.meta?.settings || {};
 
+    // Merge entries instead of replacing - preserve existing entries
+    const mergedEntries = { ...this.state.entries, ...sanitizedEntries };
+    const mergedArchivedEntries = { ...this.state.archivedEntries, ...archivedEntries };
+
     // Preserve current meta and settings, only merge entries
     this.state = {
       ...defaults,
-      entries: sanitizedEntries,
-      archivedEntries,
+      entries: mergedEntries,
+      archivedEntries: mergedArchivedEntries,
       meta: {
         ...defaults.meta,
         ...this.state.meta, // Preserve current meta and settings

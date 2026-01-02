@@ -2350,10 +2350,10 @@ const UI = {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      UI.showToast('Data exported successfully!', 'success');
+      UI.notify('Data exported successfully!', 3000);
     } catch (error) {
       console.error('Export failed:', error);
-      UI.showToast('Failed to export data. Please try again.', 'error');
+      UI.notify('Failed to export data. Please try again.', 3000);
     }
   },
 
@@ -2362,7 +2362,7 @@ const UI = {
     if (!file) return;
     
     if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
-      UI.showToast('Please select a valid JSON file.', 'error');
+      UI.notify('Please select a valid JSON file.', 3000);
       return;
     }
     
@@ -2371,11 +2371,17 @@ const UI = {
       try {
         const data = JSON.parse(e.target.result);
         Store.merge(data);
-        UI.refresh();
-        UI.showToast('Data imported successfully!', 'success');
+        // Refresh UI after import
+        if (typeof UI.syncDailyUI === 'function') {
+          UI.syncDailyUI();
+        }
+        if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
+          App.updateScores();
+        }
+        UI.notify('Data imported successfully!', 3000);
       } catch (error) {
         console.error('Import failed:', error);
-        UI.showToast('Failed to import data. Please check the file format.', 'error');
+        UI.notify('Failed to import data. Please check the file format.', 3000);
       }
     };
     reader.readAsText(file);
@@ -2400,11 +2406,17 @@ const UI = {
       if (finalConfirm) {
         try {
           Store.clearAllData();
-          UI.refresh();
-          UI.showToast('All data has been cleared.', 'success');
+          // Refresh UI after clearing
+          if (typeof UI.syncDailyUI === 'function') {
+            UI.syncDailyUI();
+          }
+          if (typeof App !== 'undefined' && typeof App.updateScores === 'function') {
+            App.updateScores();
+          }
+          UI.notify('All data has been cleared.', 3000);
         } catch (error) {
           console.error('Clear data failed:', error);
-          UI.showToast('Failed to clear data. Please try again.', 'error');
+          UI.notify('Failed to clear data. Please try again.', 3000);
         }
       }
     }
