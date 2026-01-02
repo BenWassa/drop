@@ -383,7 +383,9 @@ const Store = {
       typeof payload === 'object' &&
       !Array.isArray(payload) &&
       typeof payload.entries === 'object' &&
-      typeof payload.meta === 'object'
+      !Array.isArray(payload.entries) &&
+      typeof payload.meta === 'object' &&
+      !Array.isArray(payload.meta)
     );
   },
 
@@ -882,6 +884,7 @@ const Store = {
     const defaults = this.cloneDefaults();
     const sanitizedEntries = this.sanitizeEntriesObject(payload.entries);
     const archivedEntries = this.sanitizeEntriesObject(payload.meta?.archivedEntries || {});
+    const settings = payload.meta?.settings || {};
 
     // Preserve current meta and settings, only merge entries
     this.state = {
